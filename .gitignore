@@ -48,3 +48,4 @@ yarn-error.log*
 !.env.example
 /supabase/.temp/
 /supabase/.branches/
+/seed/out/

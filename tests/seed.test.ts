@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {buildSeed,parseCsv,seedSql,purgeSql,SEED_TAG} from '../seed/build';
+import {updateDemo} from '../app/platform/mutations';
+let n=0;const ok=(a:any,b:any)=>{assert.deepEqual(a,b);n++};
+const now='2026-10-28',d=buildSeed(now,parseCsv(fs.readFileSync('data/zeniel-branches-geo.csv','utf8')),parseCsv(fs.readFileSync('data/zeniel-stores-candidates-geo.csv','utf8')));
+const real=(x:{id:string})=>x.id.startsWith('zeniel-'),sites=new Set(d.sites.map(s=>s.id)),users=new Set(d.users.map(u=>u.id));
+ok([d.sites.filter(real).length,d.stores.filter(real).length],[7,54]);
+ok(d.stores.every(s=>sites.has(s.siteId)),true);ok([...d.sites,...d.stores].every(t=>t.managerIds.length>0&&t.managerIds.every(u=>users.has(u))),true);
+ok(d.stores.filter(real).every(s=>typeof s.lat==='number'&&typeof s.lng==='number'),true);
+ok(d.stores.find(s=>s.name==='탑텐 이마트 양재점')?.siteId,'zeniel-zn-hq');ok(d.stores.find(s=>s.name==='탑텐 신세계센텀점')?.siteId,'zeniel-zn-bs');
+ok(new Set([...d.sites,...d.stores].map(t=>t.code)).size,d.sites.length+d.stores.length);
+const sql=seedSql(d);ok(sql.includes(`"seed":"${SEED_TAG}"`),true);ok(purgeSql().split('\n').filter(l=>l.startsWith('delete')).length,8);
+const store=d.stores.find(real)!,admin={...d.users[0],role:'admin'};ok(updateDemo(d,'visit',{targetType:'store',siteId:store.siteId,storeId:store.id,visitorId:store.managerIds[0],plannedDate:null,time:'',purpose:'현장 정기점검',precheck:'',status:'completed',actualDate:now,actualTime:'',detail:'시드 매장 방문',notes:'',result:'특이사항 없음',cancelReason:'',requirementId:null,geo:{lat:store.lat,lng:store.lng,accuracy:5,at:now}},null,admin,now).item.geo.distance,0);
+console.log(`${n} seed assertions passed: real branches/stores, parent links, assignees, unique codes, tag and purge.`);
