@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useId,useRef,type ReactNode} from 'react';
 import {X,Inbox,Check,ChevronRight,type LucideIcon} from 'lucide-react';
-export function Badge({children}:{children:ReactNode}){const s=String(children);const color=/지연|초과|높음|위험/.test(s)?'red':/완료|정상|활성/.test(s)&&!s.includes('비활성')?'green':/보류|도래|없음|미확인/.test(s)?'amber':/예정|처리 중|진행/.test(s)?'blue':'gray';return <span className={'badge '+color}><i/>{children}</span>}
+export function Badge({children}:{children:ReactNode}){const s=String(children);const color=/지연|초과|높음|위험/.test(s)?'red':/완료|정상|활성/.test(s)&&!s.includes('비활성')?'green':/보류|도래|없음|미확인|미등록/.test(s)?'amber':/예정|처리 중|진행/.test(s)?'blue':'gray';return <span className={'badge '+color}><i/>{children}</span>}
 export function Avatar({name,index=0}:{name:string;index?:number}){return <span className={'avatar avatar-'+index%4}>{name.slice(0,1)}</span>}
 export function Empty({text='조회할 기록이 없습니다.',description='검색 조건을 변경하거나 새로운 기록을 등록해 주세요.',action}:{text?:string;description?:string;action?:ReactNode}){return <div className="empty"><span className="empty-icon"><Inbox size={25}/></span><b>{text}</b><p>{description}</p>{action}</div>}
 export function Drawer({title,sub,children,onClose,busy=false}:{title:string;sub:string;children:ReactNode;onClose:()=>void;busy?:boolean}){

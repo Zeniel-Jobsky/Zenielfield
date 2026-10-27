@@ -426,8 +426,8 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  .app-shell .page-heading {position:relative;display:block;margin-bottom:20px;gap:12px;align-items:flex-start}
  .app-shell .page-heading h1 {font-size:26px;line-height:1.3}
  .app-shell .page-heading p {font-size:12px;line-height:1.7;margin-top:10px;max-width:none}
- .app-shell .page-heading:has(.page-actions:not(:empty)) h1 {padding-right:118px}
- .app-shell .page-actions {position:absolute;top:0;right:0;padding:0}
+ .app-shell .page-actions {position:static;padding:0;flex-wrap:wrap;justify-content:flex-start}
+ .app-shell .page-actions:not(:empty) {margin-top:14px}
  .app-shell .page-actions .btn {min-height:40px;font-size:12px;padding:8px 12px;gap:4px}
  .app-shell .platform-demo-banner {padding:10px 0;margin-bottom:12px;align-items:center;gap:12px}
  .app-shell .platform-demo-banner>div {font-size:11px;align-items:flex-start;gap:8px}
@@ -436,7 +436,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  .app-shell .platform-demo-banner>button {flex-shrink:0;white-space:nowrap}
  .app-shell .mode-tag {font-size:9px}
  .app-shell .persona-bar {padding-bottom:16px;font-size:11px}
- .app-shell .persona-bar select {min-height:32px;font-size:12px}
+ .app-shell .persona-bar select {min-height:44px;font-size:16px}
  .app-shell .filterbar {margin-bottom:22px;border-radius:6px}
  .app-shell .filterbar-primary {padding:10px 12px;gap:8px}
  .app-shell .mobile-search {margin:0 12px 12px;background:white;border-color:var(--zf-control-border)}
@@ -547,4 +547,34 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  .app-shell .platform-demo-banner:has(.live-mode-actions)>div:first-child>span:nth-child(2) {display:none}
  .app-shell .platform-demo-banner .live-mode-actions {flex-shrink:0;align-items:center;gap:10px}
  .app-shell .live-mode-actions button {min-height:44px;white-space:nowrap}
+}
+
+/* Mobile navigation and query controls: keyboard focus and 44px touch targets. */
+.app-shell .mobile-sidebar-close {display:none}
+@media (max-width:760px) {
+ .app-shell .sidebar .mobile-sidebar-close {display:flex;position:absolute;top:10px;right:10px;width:44px;height:44px}
+ .app-shell .topbar .iconbtn,.app-shell .topbar .user-menu {min-width:44px;min-height:44px}
+ .app-shell .filterbar-primary {display:grid;grid-template-columns:minmax(0,1fr) 108px 44px;align-items:center}
+ .app-shell .mobile-filter-toggle {grid-column:1;grid-row:1;min-height:44px;justify-content:flex-start}
+ .app-shell .filterbar-period {display:contents}
+ .app-shell .filterbar-period>select {grid-column:2;grid-row:1;width:108px;max-width:none;min-height:44px;font-size:16px}
+ .app-shell .filterbar .reset-button {grid-column:3;grid-row:1;width:44px;min-width:44px;min-height:44px;padding:0;justify-content:center}
+ .app-shell .reset-button>span {display:none}
+ .app-shell .filter-selects {grid-column:1/-1;grid-row:3;min-width:0;gap:8px}
+ .app-shell .filterbar-open .filter-selects {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .app-shell .filter-selects select {min-height:44px;font-size:16px}
+ .app-shell .filterbar-open .date-range {grid-column:1/-1;grid-row:2;display:flex;width:100%;max-width:none;min-width:0;gap:6px;padding:0 8px;min-height:44px}
+ .app-shell .date-range input {width:0!important;min-width:0;flex:1;min-height:44px;font-size:16px;padding:0}
+ .app-shell .mobile-search {padding:0 12px}
+ .app-shell .mobile-search input {min-width:0;min-height:44px;font-size:16px}
+ .app-shell .filter-chips>button {min-height:44px}
+ .app-shell .platform-demo-banner>button {min-height:44px}
+ .app-shell .platform-demo-banner {flex-wrap:wrap}
+ .app-shell .platform-demo-banner>button {margin-left:auto}
+}
+
+@media (max-width:380px) {
+ .app-shell .filterbar-open .date-range {flex-direction:column;align-items:stretch;padding:0 8px}
+ .app-shell .date-range input {width:100%!important;flex:auto}
+ .app-shell .date-range>span {align-self:center;line-height:1}
 }
