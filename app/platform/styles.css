@@ -17,3 +17,46 @@
 .ai-result{display:grid;gap:8px;padding:12px 14px;border-radius:10px;background:#f7f3ff;border:1px solid #e4d9fb;font-size:13px;color:#3b2a6b}.ai-result>p:first-child{display:flex;gap:6px;align-items:center}.ai-tags{display:flex;flex-wrap:wrap;gap:6px}.ai-tags span{padding:2px 8px;border-radius:99px;background:#fff;border:1px solid #e4d9fb;font-size:11px}.ai-tags .u-높음{color:#b91c1c;border-color:#fca5a5;background:#fef2f2}.ai-tags .warn{color:#92400e;background:#fffbeb;border-color:#fcd34d}.ai-actions{display:grid;gap:6px}.ai-actions small{color:#8b7fb0}
 .ai-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#7c3aed;margin-right:5px;vertical-align:middle}.record-form [data-ai="1"]{border-color:#a78bfa!important;background:#faf7ff!important;box-shadow:inset 3px 0 0 #7c3aed}
 .btn.ai-entry{color:#5b21b6;border-color:#c4b5fd;background:#f5f0ff}
+
+.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.chart-grid>.panel{margin-bottom:12px}
+.chart-panel .panel-heading{border-bottom:0}
+.chart-body{padding:0 18px 16px}
+.chart-panel.folded .chart-fold svg{transform:rotate(-90deg)}
+.chart-legend{display:flex;flex-wrap:wrap;gap:12px;margin:8px 0 10px;font-size:11px;color:#6d7f9c}
+.chart-legend span{display:flex;align-items:center;gap:5px}
+.chart-legend i,.donut-list i{display:inline-block;width:9px;height:9px;border-radius:2px}
+.chart-empty{font-size:12px;color:#8a9ab3;padding:14px 0}
+.stack-bar{display:flex;height:14px;border-radius:4px;overflow:hidden;background:#eef2f8;flex:1;gap:1px}
+.stack-bar>*{border:0;padding:0;height:100%;cursor:pointer;display:block}
+.bar-rows{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:grid;grid-template-columns:110px 1fr 48px;align-items:center;gap:10px;font-size:12px}
+.bar-row>b{text-align:right;color:#1b3257}
+.bar-name{border:0;background:none;padding:0;text-align:left;font-size:12px;color:#33496e;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-name:hover{text-decoration:underline}
+.donut-wrap{display:flex;align-items:center;gap:22px}
+.donut{width:150px;flex:none}
+.donut circle{cursor:pointer}
+.donut-value{font-size:20px;font-weight:750;fill:#1b3257}
+.donut-label,.axis-text{font-size:9px;fill:#8a9ab3;color:#8a9ab3}
+.donut-list{list-style:none;margin:0;padding:0;flex:1;display:flex;flex-direction:column;gap:6px}
+.donut-list button{display:grid;grid-template-columns:14px 1fr auto 40px;align-items:center;width:100%;border:0;background:none;font-size:12px;color:#33496e;cursor:pointer;text-align:left}
+.donut-list small{text-align:right;color:#8a9ab3}
+.trend{width:100%;height:auto}
+.goal-line{stroke:#df626a;stroke-dasharray:4 3;stroke-width:1}
+.heatmap{display:grid;gap:3px;font-size:11px;align-items:center}
+.heat-line{display:contents}
+.heat-cell{display:flex;align-items:center;justify-content:center;height:24px;border-radius:3px;color:white;font-weight:700}
+.mini-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+.mini-week button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;border:1px solid #e7ecf4;border-radius:7px;background:white;cursor:pointer;color:#33496e}
+.mini-week button.today{border-color:#4f7fe6;background:#f0f6ff}
+.mini-week small{font-size:10px;color:#8a9ab3}
+.mini-week span{display:flex;gap:2px;min-height:6px;flex-wrap:wrap;justify-content:center}
+.mini-week i{width:6px;height:6px;border-radius:50%}
+.pair-bars{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;align-items:end;height:150px}
+.pair-bars>div{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.pair{display:flex;align-items:flex-end;gap:2px;flex:1;width:100%;justify-content:center}
+.pair span{width:40%;border-radius:3px 3px 0 0;min-height:1px}
+@media(max-width:1100px){.chart-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.donut-wrap{flex-direction:column}.bar-row{grid-template-columns:80px 1fr 40px}.chart-body{padding:0 14px 14px}}
+@media print{.chart-fold{display:none}.chart-grid{grid-template-columns:repeat(2,1fr)}}

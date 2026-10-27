@@ -7,3 +7,15 @@
 @media print{.brief-dashboard-split{display:block}.brief-preview-controls,.brief-search-tools,.brief-page-toolbar,.brief-expand-label{display:none}.brief-week-details[hidden]{display:block}.brief-week{break-inside:avoid}.brief-site-card{break-inside:avoid}.brief-week-heading{padding:15px}.brief-week-details{animation:none}}
 .brief-visit-purpose{display:block;font-size:10px;color:#879ebd;margin-top:6px}.brief-issue-policy{display:block;font-size:10px;color:#9cacc2;line-height:1.8;margin-top:10px}
 .dashboard-right>.briefing-preview .brief-preview-cards{grid-template-columns:1fr}.dashboard-right>.briefing-preview .brief-card-head{flex-wrap:nowrap}.dashboard-right>.briefing-preview .brief-site-card .brief-status{margin-left:0}
+
+.brief-trend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.brief-trend>p{grid-column:1/-1;margin:0;font-size:11px;color:#8a9ab3}
+.brief-trend-card{display:flex;flex-direction:column;gap:3px;padding:13px 15px;border:1px solid #e7ecf4;border-radius:10px;background:white;font-size:12px;color:#6d7f9c}
+.brief-trend-card b{font-size:22px;color:#1b3257}
+.brief-trend-card b small{font-size:11px;margin-left:3px}
+.brief-trend-card small.up{color:#25996f}
+.brief-trend-card small.down{color:#df626a}
+.brief-trend-card.issues small.up{color:#df626a}
+.brief-trend-card.issues small.down{color:#25996f}
+.brief-spark{width:100%;height:28px;color:#4f7fe6}
+@media(max-width:760px){.brief-trend{grid-template-columns:1fr}}
