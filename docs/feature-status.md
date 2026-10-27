@@ -53,6 +53,7 @@
 - 마이그레이션 관리: `supabase/schema.sql` 단일 파일, `supabase/migrations/` 없음. 원격 이력과 맞춘 migration 정리 필요.
 
 ### 중간
+- 대시보드 차트화: [대시보드 개선 계획](dashboard-plan.md) DB-1–DB-10, BR-1–BR-3.
 
 - 주기 변경 적용일 지정과 필요 회차 스냅샷: 현재는 방문이 있으면 주기 변경 불가.
 - 사진·첨부파일: Storage, 파일 검증, 권한, 보관정책.
@@ -77,4 +78,4 @@
 - [ ] 권한·보관정책 확정
 - [ ] Supabase access token(`sbp_`) 폐기 또는 보관 위치 결정
 
-관련 문서: [Supabase 설정·운영 인계](supabase-setup.md), [플랫폼 업무 구조](platform-integration.md), [주간 브리핑](weekly-briefing.md).
+관련 문서: [Supabase 설정·운영 인계](supabase-setup.md), [플랫폼 업무 구조](platform-integration.md), [주간 브리핑](weekly-briefing.md), [대시보드 개선 계획](dashboard-plan.md).
