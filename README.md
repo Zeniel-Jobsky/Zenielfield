@@ -18,10 +18,10 @@
 
 ## 개발 환경
 
-Node.js 22.13 이상, package.json에 지정된 pnpm 버전을 사용합니다.
+Node.js 22.13 이상만 설치되어 있으면 됩니다. 처음 받은 PC에서는 아래 명령 하나로 pnpm 설치, 패키지 설치, `.env` 생성까지 진행됩니다. 다시 실행해도 안전하며 기존 `.env`를 덮어쓰지 않습니다.
 
 ```bash
-pnpm install
+npm run setup
 pnpm dev
 ```
 
