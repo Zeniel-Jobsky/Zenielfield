@@ -1,0 +1,4 @@
+project_id = "zenifield"
+[functions.zenifield-gateway]
+# This function authenticates every request using the separate server-only gateway token.
+verify_jwt = false

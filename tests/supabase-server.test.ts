@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {forwardPlatform} from '../app/api/platform/server';
+let calls=0;let payload:any;const fn=async(_u:any,opts:any)=>{calls++;payload=JSON.parse(opts.body);assert.equal(opts.headers['x-zenifield-gateway'],'server-test-token');return Response.json({sites:[]})};
+const bindings={ZENIFIELD_SUPABASE_URL:'https://example.supabase.co',ZENIFIELD_GATEWAY_TOKEN:'server-test-token'};const headers={'oai-authenticated-user-id':'trusted-actor','oai-authenticated-user-email':'actor@example.test'};
+assert.equal((await forwardPlatform(new Request('https://app.test/api/platform'),bindings,fn as any)).status,401);assert.equal(calls,0);
+assert.equal((await forwardPlatform(new Request('https://app.test/api/platform',{method:'POST',headers:{...headers,origin:'https://foreign.test'},body:'{}'}),bindings,fn as any)).status,403);assert.equal(calls,0);
+assert.equal((await forwardPlatform(new Request('https://app.test/api/platform',{headers}),{},fn as any)).status,503);
+assert.equal((await forwardPlatform(new Request('https://app.test/api/platform',{headers}),bindings,fn as any)).status,200);assert.equal(payload.subject,'trusted-actor');assert.equal(payload.operation,'read');
+assert.equal((await forwardPlatform(new Request('https://app.test/api/platform',{method:'POST',headers:{...headers,origin:'https://app.test'},body:JSON.stringify({subject:'forged',email:'forged@example.test',operation:'bad',entity:'site',values:{name:'field'}})}),bindings,fn as any)).status,200);assert.equal(payload.subject,'trusted-actor');assert.equal(payload.email,'actor@example.test');assert.equal(payload.operation,'save');assert.equal(payload.values.name,'field');
+assert.equal((await forwardPlatform(new Request('https://app.test/api/platform',{headers}),bindings,(async()=>{throw Error('network')}) as any)).status,502);
+console.log('15 Supabase server assertions passed: identity, no token exposure, origin validation, forged identity rejection, configuration and errors.');

@@ -43,3 +43,8 @@ yarn-error.log*
 
 # OS metadata
 .DS_Store
+
+# Tracked template contains names/placeholders only.
+!.env.example
+/supabase/.temp/
+/supabase/.branches/

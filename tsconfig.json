@@ -48,6 +48,7 @@
     ".wrangler",
     ".sites-runtime",
     "outputs",
-    "work"
+    "work",
+    "supabase/functions"
   ]
 }

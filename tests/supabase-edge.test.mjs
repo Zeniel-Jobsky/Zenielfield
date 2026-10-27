@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {createHandler} from '../supabase/functions/zenifield-gateway/handler.mjs';
+const key='service-test-key',token='test-only-token';let calls=0,workspace={me:{id:'admin',role:'admin',team:'A',part:'1',active:1},users:[{id:'admin',role:'admin',team:'A',part:'1',active:1}],sites:[],stores:[],visits:[],actions:[],audit:[]};
+const handler=createHandler({url:'https://example.supabase.co',key,tokenHash:createHash('sha256').update(token).digest('hex'),fetcher:async(url,opts)=>{calls++;assert.equal(opts.headers.apikey,key);return Response.json(workspace)}});
+const request=(body={},auth=token)=>new Request('https://example.test',{method:'POST',headers:{'x-zenifield-gateway':auth},body:JSON.stringify({subject:'verified',email:'verified@example.test',operation:'read',...body})});
+assert.equal((await handler(request({},'bad'))).status,401);assert.equal(calls,0);
+assert.equal((await handler(new Request('https://example.test'))).status,405);
+assert.equal((await handler(request())).status,200);
+assert.equal((await handler(request({subject:''}))).status,401);
+assert.equal((await handler(request({operation:'save',entity:'site',values:{}}))).status,400);
+assert.equal((await handler(request({operation:'save',entity:'site',id:'foreign',version:1,values:{}}))).status,403);
+workspace.me.role='manager';assert.equal((await handler(request({operation:'save',entity:'user',values:{}}))).status,403);
+console.log('10 Supabase edge assertions passed: gateway authentication, read, validation, scope and role checks.');
