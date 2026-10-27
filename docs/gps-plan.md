@@ -31,3 +31,11 @@
 - 일괄: `node --env-file=.env scripts/geocode-stores.mjs 매장.csv` → `매장-geo.csv` (lat·lng·matched·status)
 - 입력 CSV 열 = `code,name,address`
 - 필요: `KAKAO_REST_API_KEY` (로컬 `.env`, Sites secret). 현재 미설정
+
+## 제니엘 지사 좌표 (2026-10-28)
+
+- 출처: zeniel.com 지점 안내 7곳 → `data/zeniel-branches.csv`
+- 변환: Kakao 주소 검색 7/7 일치 → `data/zeniel-branches-geo.csv`
+- 본사: 서울 서초구 효령로 402 (제니엘빌딩) · 37.488131, 127.027840
+- 데모: 지사 7곳 현장으로 추가 (리테일운영팀 1파트, 수동 관리 → 회차 분모 제외)
+- 운영 DB 미입력: 담당 팀·파트·담당자 결정 필요
