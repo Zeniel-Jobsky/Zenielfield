@@ -1,12 +1,11 @@
-/* DESIGN-cohere.md: editorial spacing, stone surfaces and a deep-green selection.
-   These tokens belong to navigation only; ZeniField's workspace keeps its palette. */
+/* Cohere navigation follows the shared bright surfaces and deep-green selection. */
 .app-shell .sidebar {
   --nav-ink: #17171c;
-  --nav-muted: #616161;
-  --nav-line: #dededc;
-  --nav-stone: #eeece7;
+  --nav-muted: var(--zf-text-secondary);
+  --nav-line: var(--zf-border);
+  --nav-stone: var(--zf-surface-muted);
   --nav-green: #003c33;
-  --nav-on-green: #edfce9;
+  --nav-on-green: var(--zf-on-action);
   --nav-coral: #ff7759;
   padding: 28px 16px 16px;
   background: #fff;
