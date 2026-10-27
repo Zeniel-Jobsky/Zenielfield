@@ -3,7 +3,12 @@ export type TargetType='site'|'store';
 export type Rule={period:'week'|'month'|'manual';count:number};
 export type FieldSite=Site&{division:string;region:string;managerIds:string[];rule:Rule};
 export type Store={id:string;siteId:string;code:string;name:string;address:string;region:string;managerIds:string[];status:string;startDate:string;rule:Rule;version:number};
-export type FieldVisit=Visit&{targetType:TargetType;storeId:string|null;requirementId:string|null;actualTime:string;notes:string};
+export const aiFields=['purpose','detail','notes','result'] as const;export type AiField=typeof aiFields[number];
+export const aiCategories=['인력','시설·안전','고객 요청','민원','운영'],aiUrgencies=['낮음','보통','높음'],aiConfidences=['low','medium','high'];
+// AI 간편 등록 기록: 원문(input)·AI 초안(draft)·사람이 고친 칸(edited)을 함께 보존. 직접 입력(entry='manual')에는 ai가 없음.
+export type AiEntry={input:{text:string;imageCount:number};draft:Record<AiField,string>;summary:string;category:string[];urgency:string;confidence:string;model:string;generatedAt:string;edited:AiField[]};
+export type FieldVisit=Visit&{targetType:TargetType;storeId:string|null;requirementId:string|null;actualTime:string;notes:string;entry?:'manual'|'ai';ai?:AiEntry};
+export const entryOf=(v:{entry?:string})=>v.entry==='ai'?'ai':'manual';
 export type FieldAction=Action&{targetType:TargetType;storeId:string|null;createdDate:string};
 export type PlatformData={users:User[];sites:FieldSite[];stores:Store[];visits:FieldVisit[];actions:FieldAction[];audit:Audit[]};
 export type Target={id:string;type:TargetType;siteId:string;storeId:string|null;name:string;siteName:string;team:string;part:string;division:string;region:string;address:string;managerIds:string[];rule:Rule;status:string;startDate:string};

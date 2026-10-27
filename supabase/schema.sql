@@ -32,8 +32,11 @@ create table public.zf_visits (
  check((target_type='site' and store_id is null) or(target_type='store' and store_id is not null)),
  check(coalesce(data->>'storeId','')=coalesce(store_id,'')), foreign key(store_id,site_id) references public.zf_stores(id,site_id),
  check(status<>'completed' or (data->>'actualDate' is not null and length(trim(data->>'detail'))>0)),
- check(status<>'planned' or data->>'plannedDate' is not null), check(status<>'cancelled' or length(trim(data->>'cancelReason'))>0)
+ check(status<>'planned' or data->>'plannedDate' is not null), check(status<>'cancelled' or length(trim(data->>'cancelReason'))>0),
+ entry text generated always as (coalesce(data->>'entry','manual')) stored check(entry in ('manual','ai')),
+ check((entry='ai')=(data ? 'ai')), check(entry<>'ai' or (status='completed' and jsonb_typeof(data->'ai'->'input')='object' and jsonb_typeof(data->'ai'->'draft')='object'))
 );
+create index zf_visits_entry_idx on public.zf_visits(entry);
 create index zf_visits_site_idx on public.zf_visits(site_id);
 create index zf_visits_store_idx on public.zf_visits(store_id,site_id);
 create index zf_visits_visitor_idx on public.zf_visits(visitor_id);

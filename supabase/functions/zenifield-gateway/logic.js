@@ -1,4 +1,9 @@
 // app/platform/model.ts
+var aiFields = ["purpose", "detail", "notes", "result"];
+var aiCategories = ["\uC778\uB825", "\uC2DC\uC124\xB7\uC548\uC804", "\uACE0\uAC1D \uC694\uCCAD", "\uBBFC\uC6D0", "\uC6B4\uC601"];
+var aiUrgencies = ["\uB0AE\uC74C", "\uBCF4\uD1B5", "\uB192\uC74C"];
+var aiConfidences = ["low", "medium", "high"];
+var entryOf = (v) => v.entry === "ai" ? "ai" : "manual";
 var dayShift = (day, n) => {
   const d = /* @__PURE__ */ new Date(day + "T12:00:00Z");
   d.setUTCDate(d.getUTCDate() + n);
@@ -42,6 +47,15 @@ function visibleTargets(targets, me) {
 }
 
 // app/platform/mutations.ts
+var str = (v, max) => typeof v === "string" ? v.slice(0, max) : "";
+function aiEntryOf(raw) {
+  if (!raw || typeof raw !== "object") throw Error("AI \uC785\uB825 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4. AI \uAC04\uD3B8 \uB4F1\uB85D\uC5D0\uC11C \uB2E4\uC2DC \uC791\uC131\uD574 \uC8FC\uC138\uC694.");
+  const text = str(raw.input?.text, 3e3), imageCount = Number(raw.input?.imageCount);
+  if (!Number.isInteger(imageCount) || imageCount < 0 || imageCount > 3) throw Error("AI \uC785\uB825 \uC0AC\uC9C4 \uC218\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
+  if (!text.trim() && !imageCount) throw Error("AI \uC785\uB825 \uC6D0\uBB38(\uBA54\uBAA8 \uB610\uB294 \uC0AC\uC9C4)\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.");
+  const draft = Object.fromEntries(aiFields.map((k) => [k, str(raw.draft?.[k], 3500)])), edited = Array.isArray(raw.edited) ? [...new Set(raw.edited)].filter((k) => aiFields.includes(k)) : [];
+  return { input: { text, imageCount }, draft, summary: str(raw.summary, 200), category: (Array.isArray(raw.category) ? raw.category : []).filter((c) => aiCategories.includes(c)), urgency: aiUrgencies.includes(raw.urgency) ? raw.urgency : "", confidence: aiConfidences.includes(raw.confidence) ? raw.confidence : "", model: str(raw.model, 80), generatedAt: str(raw.generatedAt, 40), edited };
+}
 function newId() {
   return typeof crypto.randomUUID === "function" ? crypto.randomUUID() : "demo-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
 }
@@ -95,6 +109,20 @@ function updateDemo(data, entity, values, record, actor, now) {
         if (req && item.status === "completed" && item.actualDate < req.windowStart) throw Error("\uD544\uC694 \uD68C\uCC28 \uC2DC\uC791\uC77C \uC774\uC804\uC758 \uBC29\uBB38\uC744 \uC5F0\uACB0\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.");
       }
       if (item.requirementId && next.visits.some((v) => v.id !== id && v.requirementId === item.requirementId && v.status !== "cancelled")) throw Error("\uC774 \uD544\uC694 \uD68C\uCC28\uC5D0\uB294 \uC774\uBBF8 \uACC4\uD68D \uB610\uB294 \uACB0\uACFC\uAC00 \uC5F0\uACB0\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4. \uAE30\uC874 \uC77C\uC815\uC744 \uC218\uC815\uD574 \uC8FC\uC138\uC694.");
+      const done = record?.status === "completed", entry = done ? entryOf(record) : entryOf(item);
+      if (done && entryOf(item) !== entry) throw Error("AI \uB4F1\uB85D\uACFC \uC9C1\uC811 \uC785\uB825 \uAE30\uB85D\uC740 \uC11C\uB85C \uBC14\uAFC0 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.");
+      delete item.extra;
+      delete item.aiAssisted;
+      delete item.aiFields;
+      if (entry === "ai") {
+        if (item.status !== "completed") throw Error("AI \uAC04\uD3B8 \uB4F1\uB85D\uC740 \uBC29\uBB38 \uACB0\uACFC\uB85C\uB9CC \uC800\uC7A5\uD569\uB2C8\uB2E4.");
+        item.entry = "ai";
+        item.ai = aiEntryOf(item.ai);
+        item.ai.edited = aiFields.filter((k) => (item[k] || "") !== item.ai.draft[k]);
+      } else {
+        item.entry = "manual";
+        delete item.ai;
+      }
       if (item.status !== "completed") {
         item.actualDate = null;
         item.actualTime = "";
@@ -118,6 +146,7 @@ function updateDemo(data, entity, values, record, actor, now) {
   return { data: next, item };
 }
 export {
+  aiEntryOf,
   newId,
   updateDemo
 };

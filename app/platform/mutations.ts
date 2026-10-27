@@ -1,5 +1,9 @@
 import type {User} from '../lib/model';
-import {type PlatformData,type TargetType,type Rule,targetsOf,targetOf,visibleTargets,requirements,dayShift} from './model';
+import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,aiFields,aiCategories,aiUrgencies,aiConfidences} from './model';
+const str=(v:unknown,max:number)=>typeof v==='string'?v.slice(0,max):'';
+export function aiEntryOf(raw:any):AiEntry{if(!raw||typeof raw!=='object')throw Error('AI 입력 기록이 없습니다. AI 간편 등록에서 다시 작성해 주세요.');const text=str(raw.input?.text,3000),imageCount=Number(raw.input?.imageCount);if(!Number.isInteger(imageCount)||imageCount<0||imageCount>3)throw Error('AI 입력 사진 수를 확인해 주세요.');if(!text.trim()&&!imageCount)throw Error('AI 입력 원문(메모 또는 사진)이 없습니다.');
+ const draft=Object.fromEntries(aiFields.map(k=>[k,str(raw.draft?.[k],3500)])) as AiEntry['draft'],edited=Array.isArray(raw.edited)?[...new Set(raw.edited)].filter((k):k is AiEntry['edited'][number]=>aiFields.includes(k as any)):[];
+ return{input:{text,imageCount},draft,summary:str(raw.summary,200),category:(Array.isArray(raw.category)?raw.category:[]).filter((c:unknown)=>aiCategories.includes(c as string)),urgency:aiUrgencies.includes(raw.urgency)?raw.urgency:'',confidence:aiConfidences.includes(raw.confidence)?raw.confidence:'',model:str(raw.model,80),generatedAt:str(raw.generatedAt,40),edited}}
 export function newId(){return typeof crypto.randomUUID==='function'?crypto.randomUUID():'demo-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)}
 export function updateDemo(data:PlatformData,entity:string,values:any,record:any,actor:User,now:string){
  const next=structuredClone(data),id=record?.id||newId();const manager=actor.role==='manager';if(actor.role==='director')throw Error('사업부장은 조회 전용입니다.');
@@ -36,6 +40,8 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
     if(req&&item.status==='completed'&&item.actualDate<req.windowStart)throw Error('필요 회차 시작일 이전의 방문을 연결할 수 없습니다.');
    }
    if(item.requirementId&&next.visits.some(v=>v.id!==id&&v.requirementId===item.requirementId&&v.status!=='cancelled'))throw Error('이 필요 회차에는 이미 계획 또는 결과가 연결되어 있습니다. 기존 일정을 수정해 주세요.');
+   const done=record?.status==='completed',entry=done?entryOf(record):entryOf(item);if(done&&entryOf(item)!==entry)throw Error('AI 등록과 직접 입력 기록은 서로 바꿀 수 없습니다.');delete item.extra;delete item.aiAssisted;delete item.aiFields;
+   if(entry==='ai'){if(item.status!=='completed')throw Error('AI 간편 등록은 방문 결과로만 저장합니다.');item.entry='ai';item.ai=aiEntryOf(item.ai);item.ai.edited=aiFields.filter(k=>(item[k]||'')!==item.ai.draft[k])}else{item.entry='manual';delete item.ai}
    if(item.status!=='completed'){item.actualDate=null;item.actualTime='';item.detail='';item.notes='';item.result=''}
    array=next.visits;
   }else{

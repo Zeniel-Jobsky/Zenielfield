@@ -7,7 +7,7 @@
 | 항목 | 결과 |
 | --- | --- |
 | `tsc --noEmit` | 오류 없음 |
-| `tests/run-platform.mjs` | 56개 통과 |
+| `tests/run-platform.mjs` | 63개 통과 |
 | `tests/run-briefing.mjs` | 32개 통과 |
 | `tests/run-supabase.mjs` | 서버 15개 + Edge 10개 통과 |
 | `tests/ui-metrics.mjs` | 9개 통과 |
@@ -53,6 +53,7 @@
 - 마이그레이션 관리: `supabase/schema.sql` 단일 파일, `supabase/migrations/` 없음. 원격 이력과 맞춘 migration 정리 필요.
 
 ### 중간
+- AI·직접 입력 분리: [스키마](ai-entry-schema.md) 구현, 원격 DB 이관 미적용.
 - 대시보드 차트화: [대시보드 개선 계획](dashboard-plan.md) DB-1–DB-10·BR-1·BR-2 완료, BR-3 남음.
 
 - 주기 변경 적용일 지정과 필요 회차 스냅샷: 현재는 방문이 있으면 주기 변경 불가.

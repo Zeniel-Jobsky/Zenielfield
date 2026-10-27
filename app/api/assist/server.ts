@@ -22,6 +22,6 @@ export async function assistVisit(req:Request,bindings:Record<string,unknown>,fe
   messages:[{role:'system',content:prompt(today)},{role:'user',content:[{type:'text',text:memo||'(메모 없음, 사진만 첨부)'},...images.map(url=>({type:'image_url',image_url:{url,detail:'low'}}))]}],
   response_format:{type:'json_schema',json_schema:{name:'visit_draft',strict:true,schema}}})});
   const data=await result.json() as {choices:{message:{content:string}}[]};if(!result.ok)return json({error:'AI 요약에 실패했습니다. 직접 입력해 주세요.'},502);
-  return json({draft:JSON.parse(data.choices[0].message.content),model});
+  return json({draft:JSON.parse(data.choices[0].message.content),model,generatedAt:new Date().toISOString()});
  }catch{return json({error:'AI 응답이 지연되었습니다. 직접 입력해 주세요.'},504)}
 }
