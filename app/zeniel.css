@@ -1,0 +1,218 @@
+/* ZeniField admin tokens. See docs/DESIGN-zenielfield.md. */
+:root {
+  --zf-brand-green: #009c64;
+  --zf-brand-black: #111111;
+  --zf-action: #007a4d;
+  --zf-action-hover: #00663f;
+  --zf-action-pressed: #005234;
+  --zf-selected: #e8f5ee;
+  --zf-canvas: #f5f6f8;
+  --zf-surface: #fff;
+  --zf-surface-muted: #f3f4f6;
+  --zf-text: #111111;
+  --zf-text-body: #4b5563;
+  --zf-text-secondary: #626b78;
+  --zf-text-muted: #6b7280;
+  --zf-border: #e7ebf0;
+  --zf-control-border: #d5dbe3;
+  --zf-control-border-hover: #aeb8c4;
+  --zf-control-icon: #7b8794;
+  --zf-focus: #1d4ed8;
+  --zf-danger: #b42318;
+  --zf-warning: #8a4b00;
+  --zf-success: #166534;
+  --blue: var(--zf-action);
+  --blue-hover: var(--zf-action-hover);
+  --blue-light: var(--zf-selected);
+  --ink: var(--zf-text);
+  --text: var(--zf-text-secondary);
+  --muted: var(--zf-text-muted);
+  --line: var(--zf-border);
+  --bg: var(--zf-canvas);
+  --green: var(--zf-success);
+  --red: var(--zf-danger);
+  --orange: var(--zf-warning);
+  --sidebar: 240px;
+  --shadow: none;
+}
+body {font-family:Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;letter-spacing:0;line-height:1.6}
+html {scroll-behavior:auto}
+:where(button,a,input,select,textarea,summary):focus-visible {outline:2px solid var(--zf-focus);outline-offset:2px}
+input:focus,select:focus,textarea:focus {outline:2px solid var(--zf-focus);outline-offset:2px;border-color:var(--zf-focus)!important}
+h1 {font-size:24px;font-weight:600;letter-spacing:0;line-height:1.4;color:var(--zf-text)}
+small {font-size:13px}
+.brand {gap:12px;color:var(--zf-text);margin:0 8px 24px;width:auto;min-height:40px}
+.zeniel-logo {width:auto;height:36px;object-fit:contain;flex-shrink:0}
+.brand .brand-label {font-size:16px;font-weight:600;letter-spacing:0;line-height:1.4}
+.brand .brand-label>span {display:none}
+.brand-compact {display:none;font-size:14px;font-weight:600;color:var(--zf-text)}
+.sidebar-collapsed {--sidebar:64px}
+.sidebar-collapsed .zeniel-logo {display:none}
+.sidebar-collapsed .brand-compact {display:block}
+.sidebar-collapsed .brand {margin-left:0;justify-content:center}
+.sidebar-brand {display:none}
+.topbar {height:64px;padding-inline:24px}
+.workspace-content {padding:24px 24px 0;min-width:0}
+.page-heading p {font-size:14px;color:var(--zf-text-secondary)}
+.page-eyebrow {display:none}
+.sidebar nav button {font-size:14px;white-space:normal;min-height:44px;color:var(--zf-text-secondary)}
+.sidebar nav button:hover {background:var(--zf-surface-muted);color:var(--zf-text)}
+.sidebar nav button.selected {background:var(--zf-selected);color:var(--zf-action);box-shadow:inset 3px 0 var(--zf-brand-green)}
+.sidebar nav button.selected em,.platform-filter-chip {background:var(--zf-selected);color:var(--zf-action)}
+.help-box {background:var(--zf-surface-muted);border-color:var(--zf-border)}
+.btn,.btn.small {min-height:40px;padding:8px 12px;font-size:14px;border-radius:6px;box-shadow:none}
+.btn.primary {background:var(--zf-action);border-color:var(--zf-action);color:white;box-shadow:none}
+.btn.primary:hover {background:var(--zf-action-hover);border-color:var(--zf-action-hover)}
+.btn.primary:active {background:var(--zf-action-pressed)}
+.iconbtn {min-width:36px;min-height:36px}
+.textbtn,.person.link {color:var(--zf-text)}
+.textbtn:hover,.person.link:hover {text-decoration:underline}
+.panel,.metric,.capacity-card {border-radius:8px;box-shadow:none;border-color:var(--zf-border)}
+.panel-heading h2 {font-size:16px;font-weight:600;color:var(--zf-text)}
+.panel-heading p,.metric>p,.capacity-card div>span {font-size:13px;color:var(--zf-text-muted);white-space:normal}
+.metric-value,.capacity-card b {font-size:28px!important;font-weight:600!important;letter-spacing:0!important;color:var(--zf-text);font-variant-numeric:tabular-nums}
+.metric-top,.capacity-card p {font-size:14px!important;color:var(--zf-text-secondary)}
+.metric-icon,.capacity-icon {background:var(--zf-surface-muted);color:var(--zf-text-secondary);border-radius:6px}
+.badge {font-size:13px;border-radius:4px}
+.badge.green {background:#edf7ee;color:#166534}
+.badge.red {background:#fef3f2;color:#b42318}
+.badge.amber {background:#fff7e6;color:#8a4b00}
+.badge.blue {background:#eff6ff;color:#1d4ed8}
+.badge.gray {background:var(--zf-surface-muted);color:var(--zf-text-secondary)}
+.green-text {color:var(--zf-success)}
+.red-text {color:var(--zf-danger)}
+.table-scroll {overflow-x:auto}
+table {font-size:14px;font-variant-numeric:tabular-nums}
+table th {font-size:14px;font-weight:500;background:var(--zf-surface-muted);color:var(--zf-text-secondary);min-height:40px}
+table td {font-size:14px;color:var(--zf-text-body);height:44px}
+table th,table td {padding:10px 12px;line-height:1.6}
+table tbody tr:hover {background:var(--zf-surface-muted)}
+.field>span {font-size:14px;color:var(--zf-text-secondary);font-weight:500}
+.field input,.field select,.field textarea,.filterbar select,.record-type-bar select,.global-search,.date-range,.sort-select,.platform-persona select {border:1px solid var(--zf-control-border);border-radius:6px;color:var(--zf-text-secondary)}
+.field input,.field select,.filterbar select,.record-type-bar select,.sort-select {min-height:40px;font-size:14px}
+.field textarea {font-size:14px;line-height:1.6}
+.global-search input {font-size:14px;color:var(--zf-text)}
+input::placeholder,textarea::placeholder {color:var(--zf-text-muted)}
+.date-range input {font-size:14px;width:132px!important}
+.platform-filters .date-range {min-width:285px}
+.form-error {color:var(--zf-danger);background:#fef3f2;padding:12px;border:1px solid var(--zf-danger);border-radius:6px}
+.form-footer {background:var(--zf-surface);border-top:1px solid var(--zf-border)}
+.notice {font-size:14px;line-height:1.6}
+.skip-link {position:fixed;top:-100px;left:16px;z-index:100;background:white;color:var(--zf-text);padding:12px 16px;border:2px solid var(--zf-focus)}
+.skip-link:focus {top:8px}
+@media (max-width:1279px) {.visit-metric-grid {grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:767px) {
+ .workspace-content {padding:20px 16px 0}
+ .topbar {padding-inline:16px}
+ .brand {margin-bottom:20px}
+ .sidebar-collapsed .zeniel-logo {display:block}
+ .sidebar-collapsed .brand-compact {display:none}
+ .sidebar-collapsed .brand-label {display:block}
+ .visit-metric-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+ .btn,.btn.small,.iconbtn {min-height:44px}
+ .iconbtn {min-width:44px}
+ .field input,.field select,.field textarea {font-size:16px;min-height:44px}
+ .platform-filters .date-range {min-width:0;width:100%}
+ .date-range input {width:calc(50% - 12px)!important;flex:1}
+ .mobile-record dl {grid-template-columns:1fr}
+ .mobile-record dt,.mobile-record dd,.mobile-record small,.mobile-record p {font-size:13px}
+ .calendar.month .calendar-date b {font-size:13px}
+ .calendar.month .calendar-event {overflow:hidden}
+ .calendar.month .calendar-event b {font-size:12px}
+}
+@media (prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Cohere reference: neutral editorial surfaces, restrained brand accents. */
+.organization b,.organization-icon,.header-context>b,.user-menu b,
+.capacity-card p,.capacity-card b,.metric-top,.metric-definition b,
+.panel-tools,.hierarchy-name,.nested-store-heading,.operating-user b,
+.mobile-record-title>div>b,.mobile-record-title>b,.row-main>b,
+.drawer-head h2,.form-section {
+ color:var(--zf-text);
+}
+.mode-banner,.mode-banner.operating,.mode-banner>button,.mode-tag,
+.mode-banner small,.mode-banner>div,.platform-persona,.help-box>span,
+.help-box button,.help-box p,.organization div>span,.capacity-card div>span,
+.metric-definition,.metric-definition>svg,.panel-heading p,
+.table-footnote,.mobile-record small,.mobile-record p {
+ color:var(--zf-text-muted);
+}
+.mode-banner,.mode-banner.operating {background:var(--zf-surface);border-color:var(--zf-border)}
+.mode-tag,.operating .mode-tag {background:var(--zf-surface-muted);border-color:var(--zf-border);color:var(--zf-text-secondary)}
+.capacity-icon,.metric-icon,.site-icon,.org-symbol,.organization-icon {color:var(--zf-text-secondary);background:var(--zf-surface-muted);box-shadow:none}
+.metric.blue .metric-value {color:var(--zf-text)}
+.metric.green .metric-value {color:var(--zf-success)}
+.metric.red .metric-value {color:var(--zf-danger)}
+.metric.orange .metric-value {color:var(--zf-warning)}
+.target-tabs>button,.target-tabs>button>span,.tabs>button,.tabs>button>span {color:var(--zf-text-secondary)}
+.target-tabs>button>span,.tabs>button>span {background:var(--zf-surface-muted)}
+.target-tabs>button.active,.tabs>button.active {color:var(--zf-action);border-color:var(--zf-brand-green)}
+.sidebar nav button>svg {color:var(--zf-text-muted)}
+.sidebar nav button.selected>svg {color:var(--zf-action)}
+.btn:hover {color:var(--zf-text);background:var(--zf-surface-muted);border-color:var(--zf-control-border-hover)}
+.btn.primary:hover {color:white;background:var(--zf-action-hover);border-color:var(--zf-action-hover)}
+.sidebar nav button.selected em {background:transparent;color:var(--zf-action)}
+.platform-filter-chip {background:var(--zf-surface-muted);border-color:var(--zf-border);color:var(--zf-text-secondary)}
+.panel,.capacity-card,.metric {background:var(--zf-surface)}
+.brandmark {box-shadow:none;background:transparent;color:var(--zf-text);font-style:normal}
+.zeniel-company {font-size:14px;font-weight:500;color:var(--zf-text-secondary);padding-right:12px;border-right:1px solid var(--zf-border)}
+.sidebar-collapsed .zeniel-company {display:none}
+.drawer-body {display:contents}
+@media(max-width:767px){.sidebar-collapsed .zeniel-company {display:block}}
+
+/* Native select arrows: match the vertical inset with a 12px end inset.
+   Keep room for the icon so long labels never run underneath it. */
+select:not([multiple]):not([size]):not([data-slot="native-select"]),
+select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237b8794' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  background-size:16px 16px;
+  padding-block:8px;
+  padding-inline:12px 40px;
+}
+.filterbar .filterbar-period>select,
+.platform-app .filterbar-period>select {
+  flex-basis:108px;
+  min-width:108px;
+  max-width:none;
+  width:108px;
+}
+.pagination select {max-width:none;min-height:40px}
+@media (forced-colors:active) {
+  select:not([multiple]):not([size]):not([data-slot="native-select"]),
+  select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
+    appearance:auto;
+    background-image:none;
+    padding-inline-end:12px;
+  }
+}
+
+/* Quiet supporting UI, with contrast reserved for information hierarchy. */
+.field>span,.form-hint,.record-type-bar select,.date-range input,
+.platform-persona select,.persona-bar select,.global-search input {
+  color:var(--zf-text-secondary);
+}
+.btn:not(.primary) {border-color:var(--zf-control-border);color:var(--zf-text-secondary)}
+.btn:not(.primary):hover {border-color:var(--zf-control-border-hover);color:var(--zf-text)}
+:is(.topbar,.sidebar,.organization,.help-box,.filterbar,.mode-banner,
+ .record-type-bar,.tabs,.target-tabs,.panel-heading,.form-footer,.drawer-head,
+ .mobile-record,.platform-filter-chip,.pagination,table th,table td) {
+  border-color:var(--zf-border);
+}
+:is(.field,.filterbar,.record-type-bar,.persona-bar,.brief-search-tools,
+ .brief-preview-controls,.pagination) select,
+.field input,.field textarea,.date-range,.global-search {
+  border-color:var(--zf-control-border);
+}
+:is(.field,.filterbar,.record-type-bar,.persona-bar,.brief-search-tools,
+ .brief-preview-controls,.pagination) select:hover:not(:disabled),
+.field input:hover:not(:disabled),.field textarea:hover:not(:disabled),
+.date-range:hover,.global-search:hover {border-color:var(--zf-control-border-hover)}
+.field input,.field textarea {color:var(--zf-text-body)}
+.sidebar nav button:not(.selected),.tabs>button:not(.active),
+.target-tabs>button:not(.active) {color:var(--zf-text-secondary)}
+/* Selection and error boundaries must stay visible above the quiet base. */
+.target-tabs>button.active,.tabs>button.active {border-color:var(--zf-brand-green)}
+.form-error {border-color:var(--zf-danger)}

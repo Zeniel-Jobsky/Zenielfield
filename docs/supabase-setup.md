@@ -69,7 +69,7 @@
 - `zf_users`의 활성 등록 이메일과 검증된 Auth 이메일을 대조합니다. 기존에 연결된 Sites 주체를 유지하고, 신규 테스트 계정은 `supabase:<Auth UUID>`를 사용합니다. 비활성 계정은 다음 API 요청부터 거부됩니다.
 - Cloudflare 전용 서버 토큰은 기존 Sites 토큰과 분리했습니다. Worker secret `ZENIFIELD_GATEWAY_TOKEN`과 Edge secret `ZENIFIELD_CLOUDFLARE_TOKEN_HASH`는 같은 쌍이어야 합니다. 토큰 교체 시 양쪽을 함께 갱신합니다.
 - Auth 리디렉션 허용 목록에는 정확한 Cloudflare `/auth/callback`만 추가했습니다. 기존 항목과 이메일 템플릿은 유지했습니다. 기본 메일 발송 제한이 있으므로 실제 수신은 사용자 계정으로 확인해야 합니다.
-- `node tests/run-cloudflare-supabase.mjs`: 33개 인증/쿠키/PKCE/CSRF 검사.
+- `node tests/run-cloudflare-supabase.mjs`: 41개 인증/쿠키/PKCE/CSRF 및 AI 경로 인증 검사.
 - Cloudflare 실제 HTTP 17개 검증: 저장·재조회, 현장/매장 분리, 충돌, 매니저 권한, 세션 갱신/로그아웃, 직접 DB 접근 차단. 폐기용 DB/Auth 계정과 업무 기록은 검증 후 정리했습니다.
 
 원래 Sites 인증을 개인 Cloudflare에서 그대로 신뢰하는 방식은 사용하지 않습니다. Cloudflare에서는 기존 D1 API를 차단하고 Supabase 운영만 제공합니다. 새 계정은 설정에서 업무 프로필을 등록한 뒤 이메일 링크로 로그인합니다. 이메일 발송 자격/SMTP 구성은 Supabase 프로젝트의 설정을 따릅니다.

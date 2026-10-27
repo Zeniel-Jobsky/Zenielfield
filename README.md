@@ -53,7 +53,7 @@ corepack pnpm run deploy:cloudflare
 
 로그인에는 Supabase 기본 메일 발송 제한이 적용됩니다. 이메일 템플릿은 변경하지 않았고, Cloudflare 콜백 주소만 기존 리디렉션 허용 목록에 추가했습니다. 여러 사용자에게 발송하려면 프로젝트의 메일 발송 자격과 SMTP 설정을 확인하세요.
 
-검증: `node tests/run-cloudflare-supabase.mjs` (33개 인증/세션 검사). `scripts/test-cloudflare-live.mjs`는 관리용 환경변수가 있는 체크아웃에서만 실행하며, 고유한 폐기용 DB/Auth 계정으로 저장·재조회·권한·세션을 검사하고 정확한 검수 자료만 정리합니다. 실제 사용자의 이메일 수신과 브라우저 로그인은 사용자가 확인합니다.
+검증: `node tests/run-cloudflare-supabase.mjs` (41개 인증/세션 검사). `scripts/test-cloudflare-live.mjs`는 관리용 환경변수가 있는 체크아웃에서만 실행하며, 고유한 폐기용 DB/Auth 계정으로 저장·재조회·권한·세션을 검사하고 정확한 검수 자료만 정리합니다. 실제 사용자의 이메일 수신과 브라우저 로그인은 사용자가 확인합니다.
 
 Edge 변경 시 `supabase functions deploy zenifield-cloudflare --project-ref <ref> --use-api`로 별도 배포해야 합니다. 공용 업무 검증을 변경하면 기존 `scripts/bundle-supabase.mjs` 실행 후 두 Edge Function을 함께 배포합니다. `supabase/schema.sql` 재실행이나 기존 데이터 초기화는 하지 않습니다.
 
@@ -104,3 +104,9 @@ node tests/ui-metrics.mjs
 방문 이력이 있는 대상의 주기는 과거 통계 보존을 위해 잠깁니다. 향후 적용일 지정 주기 이관과 회차 스냅샷, 기존 D1 자료 이관, 첨부파일, 알림, 그룹웨어, XLSX 전용 양식은 후속 개발입니다. 운영 권한과 보관정책은 실제 사용에 맞게 확정해야 합니다.
 
 의존 라이브러리와 제3자 자산의 라이선스는 각 패키지 및 저장소 내 LICENSE 파일을 따릅니다.
+
+## 현재 통합 소스 기준
+
+`Zeniel-Jobsky/Zenielfield`의 main `d394460`을 클론해 현재 작업 폴더의 기준으로 가져왔습니다. 최신 AI 입력·음성 입력·사이드바 스크롤 개선에 기존 화면·입력 보호 개선과 Cloudflare/Supabase 연결을 통합했습니다. 작업 브랜치는 `work/upstream-cloudflare-supabase`, 이전 로컬 소스 백업은 `backup/pre-upstream-import`입니다. `.env`는 로컬에 보존하며 배포용 비밀값은 Cloudflare/Supabase의 기존 secret 설정을 사용합니다.
+
+Cloudflare의 `/api/assist`는 Supabase에서 검증한 등록 사용자 세션으로만 호출합니다. AI는 입력 초안만 반환하며 저장은 기존 입력 검토·저장 흐름을 따릅니다. 서버의 `OPENAI_API_KEY`/`OPENAI_MODEL` 설정이 필요합니다. 실제 AI 호출 없이 모의 응답으로 인증 경계를 검증했습니다. 사용자의 실제 Supabase 이메일 로그인 성공은 확인했습니다.

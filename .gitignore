@@ -48,3 +48,7 @@ yarn-error.log*
 !.env.example
 /supabase/.temp/
 /supabase/.branches/
+
+# Local hosting state and retained environment archive
+/.vercel/
+/env.zip

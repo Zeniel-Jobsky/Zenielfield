@@ -43,4 +43,15 @@ r=await worker(wr('/auth/callback?code=test'),env,proxy);equal(r.status,302);equ
 r=await worker(wr('/auth/callback?code=test',{headers:{cookie:'__Host-zf-verifier=verifier'}}),env,proxy);equal(r.status,302);equal(r.headers.get('location'),'https://app.example/?mode=supabase');equal(envelope.operation,'exchange-code');equal(envelope.codeVerifier,'verifier');equal(r.headers.get('set-cookie').includes('__Host-zf-access=secret-access'),true);
 r=await worker(wr('/api/auth/logout',{method:'POST',headers:{origin:'https://app.example',cookie:'__Host-zf-access=valid'}}),env,proxy);equal(r.headers.get('set-cookie').includes('Max-Age=0'),true);
 r=await worker(wr('/api/auth/logout',{method:'POST',headers:{origin:'https://app.example',cookie:'__Host-zf-access=valid'}}),env,async()=>{throw Error('network')});equal(r.headers.get('set-cookie').includes('Max-Age=0'),true);
+equal((await worker(wr('/api/assist',{method:'POST',headers:{origin:'https://app.example','oai-authenticated-user-id':'forged'},body:'{}'}),env)).status,401);
+let aiCalls=0;
+const aiProxy=async(url,init)=>{
+ aiCalls++;
+ if(url.includes('/functions/v1/')){equal(JSON.parse(init.body).operation,'session');return Response.json({ok:true,me:actor});}
+ equal(url,'https://api.openai.com/v1/chat/completions');equal(init.headers.Authorization,'Bearer sk-test-only');
+ return Response.json({choices:[{message:{content:JSON.stringify({detail:'verified draft'})}}]});
+};
+r=await worker(wr('/api/assist',{method:'POST',headers:{origin:'https://app.example',cookie:'__Host-zf-access=valid','oai-authenticated-user-id':'forged'},body:JSON.stringify({text:'검증용 메모',images:['data:image/jpeg;base64,'+'a'.repeat(70000)]})}),{...env,OPENAI_API_KEY:'sk-test-only'},aiProxy);
+equal(r.status,200);equal((await r.json()).draft.detail,'verified draft');equal(aiCalls,2);
+r=await worker(wr('/api/assist',{method:'POST',headers:{origin:'https://app.example',cookie:'__Host-zf-access=valid'},body:'{}'}),env,async()=>Response.json({error:'disabled account'},{status:403}));equal(r.status,403);
 console.log(assertions+' Cloudflare/Supabase auth assertions passed: server token, verified identity, allowlist, refresh, PKCE, CSRF, secure cookies and no browser token exposure.');
