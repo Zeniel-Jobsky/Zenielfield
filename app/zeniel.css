@@ -1,23 +1,23 @@
 /* ZeniField admin tokens. See docs/DESIGN-zenielfield.md. */
 :root {
-  --zf-brand-green: #009c64;
-  --zf-brand-black: #111111;
-  --zf-action: #007a4d;
-  --zf-action-hover: #00663f;
-  --zf-action-pressed: #005234;
-  --zf-selected: #e8f5ee;
-  --zf-canvas: #f5f6f8;
+  --zf-brand-green: #003c33;
+  --zf-brand-black: #17171c;
+  --zf-action: #003c33;
+  --zf-action-hover: #075447;
+  --zf-action-pressed: #002c25;
+  --zf-selected: #edf4ee;
+  --zf-canvas: #ffffff;
   --zf-surface: #fff;
-  --zf-surface-muted: #f3f4f6;
-  --zf-text: #111111;
-  --zf-text-body: #4b5563;
-  --zf-text-secondary: #626b78;
-  --zf-text-muted: #6b7280;
-  --zf-border: #e7ebf0;
-  --zf-control-border: #d5dbe3;
-  --zf-control-border-hover: #aeb8c4;
-  --zf-control-icon: #7b8794;
-  --zf-focus: #1d4ed8;
+  --zf-surface-muted: #f4f3ef;
+  --zf-text: #17171c;
+  --zf-text-body: #3f4241;
+  --zf-text-secondary: #616161;
+  --zf-text-muted: #686a65;
+  --zf-border: #e3e3dd;
+  --zf-control-border: #d8d9d2;
+  --zf-control-border-hover: #a5aaa0;
+  --zf-control-icon: #71776e;
+  --zf-focus: #4c6ee6;
   --zf-danger: #b42318;
   --zf-warning: #8a4b00;
   --zf-success: #166534;
@@ -39,7 +39,7 @@ body {font-family:Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic N
 html {scroll-behavior:auto}
 :where(button,a,input,select,textarea,summary):focus-visible {outline:2px solid var(--zf-focus);outline-offset:2px}
 input:focus,select:focus,textarea:focus {outline:2px solid var(--zf-focus);outline-offset:2px;border-color:var(--zf-focus)!important}
-h1 {font-size:24px;font-weight:600;letter-spacing:0;line-height:1.4;color:var(--zf-text)}
+h1 {font-size:30px;font-weight:400;letter-spacing:-.8px;line-height:1.3;color:var(--zf-text)}
 small {font-size:13px}
 .brand {gap:12px;color:var(--zf-text);margin:0 8px 24px;width:auto;min-height:40px}
 .zeniel-logo {width:auto;height:36px;object-fit:contain;flex-shrink:0}
@@ -70,7 +70,7 @@ small {font-size:13px}
 .panel,.metric,.capacity-card {border-radius:8px;box-shadow:none;border-color:var(--zf-border)}
 .panel-heading h2 {font-size:16px;font-weight:600;color:var(--zf-text)}
 .panel-heading p,.metric>p,.capacity-card div>span {font-size:13px;color:var(--zf-text-muted);white-space:normal}
-.metric-value,.capacity-card b {font-size:28px!important;font-weight:600!important;letter-spacing:0!important;color:var(--zf-text);font-variant-numeric:tabular-nums}
+.metric-value,.capacity-card b {font-size:32px!important;font-weight:400!important;letter-spacing:-.8px!important;color:var(--zf-text);font-variant-numeric:tabular-nums}
 .metric-top,.capacity-card p {font-size:14px!important;color:var(--zf-text-secondary)}
 .metric-icon,.capacity-icon {background:var(--zf-surface-muted);color:var(--zf-text-secondary);border-radius:6px}
 .badge {font-size:13px;border-radius:4px}
@@ -216,3 +216,321 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 /* Selection and error boundaries must stay visible above the quiet base. */
 .target-tabs>button.active,.tabs>button.active {border-color:var(--zf-brand-green)}
 .form-error {border-color:var(--zf-danger)}
+
+
+/* Cohere editorial utility: one type scale, open sections and quiet data rows. */
+@font-face {font-family:'Space Grotesk';src:url('/fonts/space-grotesk-regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+.app-shell {background:var(--zf-canvas)}
+.app-shell .topbar {height:64px;padding-inline:32px;background:var(--zf-canvas);border-bottom:1px solid var(--zf-border)}
+.app-shell .header-context {gap:10px;font-size:12px}
+.app-shell .header-context>b {font-size:12px;font-weight:500}
+.app-shell .global-search {background:transparent;border:0;border-bottom:1px solid var(--zf-control-border);border-radius:0;padding:8px 0;width:240px}
+.app-shell .global-search input {font-size:12px}
+.app-shell .header-actions {gap:18px}
+.app-shell .avatar {background:var(--zf-surface-muted);color:var(--zf-text-secondary);font-weight:400}
+.app-shell .user-menu b {font-size:12px;font-weight:500}
+.app-shell .user-menu small {font-size:11px}
+.app-shell .header-divider {display:none}
+.app-shell .workspace-content {max-width:1600px;padding:34px 32px 0}
+.app-shell .page-heading {align-items:center;margin-bottom:24px;gap:24px}
+.app-shell .page-heading h1 {font-size:30px;font-weight:400;line-height:1.3;letter-spacing:-.8px}
+.app-shell .page-heading p {margin-top:8px;font-size:13px;line-height:1.7;color:var(--zf-text-secondary)}
+.btn,.btn.small {font-size:13px;font-weight:500;min-height:40px;border-radius:6px;padding:9px 14px;box-shadow:none}
+.btn.primary {border-radius:99px;padding-inline:18px}
+.btn>svg,.btn.small>svg {width:15px;height:15px;stroke-width:1.6}
+.app-shell .platform-demo-banner {padding:11px 0;margin-bottom:14px;background:transparent;border:0;border-block:1px solid var(--zf-border);border-radius:0;gap:18px}
+.app-shell .platform-demo-banner>div {font-size:12px;gap:12px}
+.app-shell .platform-demo-banner small {font-size:12px;color:var(--zf-text-muted)}
+.app-shell .platform-demo-banner button {font-size:12px;color:var(--zf-action)}
+.app-shell .mode-tag,.app-shell .operating .mode-tag {border:0;border-radius:0;background:transparent;padding:0;color:var(--zf-action);font-size:11px;font-weight:500;letter-spacing:.03em;white-space:nowrap}
+.app-shell .persona-bar {padding:0 0 18px;font-size:12px;gap:8px}
+.app-shell .persona-bar>svg {display:none}
+.app-shell .persona-bar select {font-size:12px;min-height:32px;padding-block:5px}
+.app-shell .persona-bar small {font-size:12px}
+.app-shell .filterbar {display:flow-root;background:var(--zf-surface-muted);border:0;border-radius:8px;box-shadow:none;margin-bottom:28px}
+.app-shell .filterbar-primary {padding:14px 16px;gap:10px}
+.app-shell .filterbar-label {font-size:12px;color:var(--zf-text-secondary)}
+.app-shell .filterbar-label>svg {display:none}
+.app-shell .filterbar select,.app-shell .date-range {background-color:var(--zf-canvas);border-color:var(--zf-control-border);font-size:12px;min-height:36px}
+.app-shell .date-range input {font-size:12px;width:120px!important}
+.app-shell .reset-button {font-size:12px;min-height:36px}
+.app-shell .filter-chips {border-top:1px solid var(--zf-border);font-size:12px}
+.app-shell .filter-chips .platform-filter-chip {background:white;border:1px solid var(--zf-control-border);font-size:12px;border-radius:4px}
+.app-shell .capacity-grid {gap:0;border-block:1px solid var(--zf-border);background:transparent;margin:0 0 30px}
+.app-shell .capacity-card {position:relative;display:block;text-align:left;border:0;border-right:1px solid var(--zf-border);border-radius:0;padding:21px 24px;background:transparent;box-shadow:none}
+.app-shell .capacity-card:first-child {padding-left:0}
+.app-shell .capacity-card:last-child {border-right:0}
+.app-shell .capacity-card:hover {background:#003c3305}
+.app-shell .capacity-card .capacity-icon {display:none}
+.app-shell .capacity-card p {font-size:12px!important;font-weight:400;color:var(--zf-text-secondary)}
+.app-shell .capacity-card b {display:block;margin:5px 0;font-family:'Space Grotesk',Arial,sans-serif;font-size:36px!important;font-weight:400!important;line-height:1.25}
+.app-shell .capacity-card b small {font-family:inherit;font-size:12px;font-weight:400;letter-spacing:0;margin-left:6px;color:var(--zf-text-secondary)}
+.app-shell .capacity-card div>span {font-size:12px;line-height:1.6}
+.app-shell .capacity-card>svg {position:absolute;right:18px;top:23px;width:13px;height:13px;color:var(--zf-text-muted)}
+.app-shell .visit-metric-grid {gap:0;background:white}
+.app-shell .metric {min-width:0;border:0;border-bottom:1px solid var(--zf-border);border-radius:0;box-shadow:none;background:transparent;padding:19px 16px;text-align:left}
+.app-shell .metric:hover {background:#003c3305;box-shadow:none;transform:none}
+.app-shell .metric-top {font-size:12px!important;font-weight:400}
+.app-shell .metric-icon {display:none}
+.app-shell .metric-value {margin-block:8px;font-family:'Space Grotesk',Arial,sans-serif;font-size:32px!important;font-weight:400!important;line-height:1.2}
+.app-shell .metric-value small {font-size:12px;font-weight:400;letter-spacing:0;color:var(--zf-text-muted);margin-left:5px}
+.app-shell .metric-value>svg {width:12px;height:12px;opacity:.5}
+.app-shell .metric>p {font-size:12px;line-height:1.7}
+.app-shell .visit-metric-grid .metric:last-child {background:var(--zf-surface-muted)}
+.app-shell .visit-metric-grid .metric:last-child .metric-value {color:var(--zf-action)}
+.app-shell .metric-definition {font-size:12px;line-height:1.8;color:var(--zf-text-muted);padding:14px 0 8px}
+.app-shell .target-tabs {gap:24px;border-bottom:1px solid var(--zf-border);margin-bottom:0}
+.app-shell .target-tabs>button {padding:13px 0;font-size:12px;gap:8px;font-weight:400;border-width:1px}
+.app-shell .target-tabs>button.active {font-weight:500;color:var(--zf-action)}
+.app-shell .target-tabs>button>svg {width:15px;height:15px}
+.app-shell .target-tabs>button>span {background:transparent;font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;padding:0}
+.app-shell .target-tabs-note {font-size:11px}
+.app-shell .brief-dashboard-split {gap:32px;grid-template-columns:minmax(0,3fr) minmax(320px,2fr);margin-bottom:32px}
+.app-shell .panel {background:white;border:0;border-top:1px solid var(--zf-border);border-radius:0;box-shadow:none;margin-bottom:30px}
+.app-shell .panel-heading {padding:20px 0 18px;gap:16px}
+.app-shell .panel-heading h2 {font-size:17px;font-weight:500;letter-spacing:-.3px;line-height:1.4}
+.app-shell .panel-heading p {font-size:12px;line-height:1.7;margin-top:5px}
+.app-shell .count {background:transparent;padding:0;margin-left:10px;font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;font-weight:400;color:var(--zf-text-muted)}
+.app-shell .panel-tools {gap:12px;font-size:12px}
+.app-shell .panel-tools .textbtn {font-size:12px}
+.app-shell .panel-tools .btn {font-size:12px;min-height:34px;padding-block:6px}
+.app-shell .briefing-preview {border-top:1px solid var(--zf-action);margin-bottom:0}
+.app-shell .briefing-preview .panel-heading {padding-bottom:16px}
+.app-shell .brief-preview-controls {padding:0 0 12px;gap:12px}
+.app-shell .brief-week-switch,.app-shell .segmented {border:0;background:var(--zf-surface-muted);border-radius:5px;padding:3px}
+.app-shell .brief-week-switch button,.app-shell .segmented button {font-size:12px;min-height:30px;border-radius:3px;padding:5px 10px}
+.app-shell .brief-week-switch button.active,.app-shell .segmented button.active {color:var(--zf-action);background:white;box-shadow:none}
+.app-shell .brief-preview-controls select {min-height:34px;font-size:12px;background-color:white}
+.app-shell .brief-period {padding:4px 0 7px;font-size:12px;gap:8px}
+.app-shell .brief-period small {font-size:11px}
+.app-shell .brief-source {font-size:11px;line-height:1.8}
+.app-shell .briefing-preview>.brief-source {padding:0 0 12px}
+.app-shell .brief-preview-cards {padding:0;gap:0}
+.app-shell .brief-site-card {padding:17px 0;border:0;border-top:1px solid var(--zf-border);border-radius:0;background:white}
+.app-shell .brief-site-card:hover {background:#003c3305;border-color:var(--zf-border)}
+.app-shell .brief-site-icon {display:none}
+.app-shell .brief-card-head {gap:10px}
+.app-shell .brief-card-head>b {font-size:13px;font-weight:500;color:var(--zf-text)}
+.app-shell .brief-status {font-size:11px;font-weight:500;border-radius:3px;padding:2px 5px}
+.app-shell .brief-site-card>p {font-size:13px;line-height:1.8;color:var(--zf-text-secondary);margin:9px 0 12px}
+.app-shell .brief-card-counts {font-size:12px;color:var(--zf-text-muted)}
+.app-shell .brief-card-bottom {padding-top:10px;margin-top:10px;border-top:0}
+.app-shell .brief-card-bottom small,.app-shell .brief-card-bottom>span {font-size:11px}
+.app-shell .brief-preview-footer {padding:13px 0;background:white;border-top:1px solid var(--zf-border);font-size:11px}
+.app-shell .brief-preview-footer>span,.app-shell .brief-preview-footer button {font-size:11px}
+.app-shell .brief-open-issues {background:var(--zf-surface-muted);border:0;border-radius:0;padding:12px 14px;font-size:12px;margin-top:10px}
+.app-shell table {font-size:13px}
+.app-shell table th {font-size:12px;font-weight:400;letter-spacing:.02em;color:var(--zf-text-secondary);background:var(--zf-surface-muted);padding:12px 14px;border-bottom:1px solid var(--zf-border)}
+.app-shell table td {font-size:13px;padding:16px 14px;height:56px;border-bottom:1px solid var(--zf-border);color:var(--zf-text-body)}
+.app-shell table td b {font-weight:500}
+.app-shell table td small {font-size:12px;line-height:1.7;color:var(--zf-text-muted)}
+.app-shell table tbody tr:hover {background:#003c3305}
+.app-shell .table-footnote {background:transparent;border:0;font-size:12px;line-height:1.8;padding:14px 0;color:var(--zf-text-muted)}
+.app-shell .namecell b,.app-shell .row-main>b,.app-shell .person>b {font-size:13px;font-weight:500;color:var(--zf-text)}
+.app-shell .badge {font-size:11px;font-weight:400;border-radius:3px;gap:5px;padding:3px 6px;line-height:1.5}
+.app-shell .badge.blue {background:#f0f2ef;color:#4b5c51}
+.app-shell .badge.green {background:#edf4ee;color:#285840}
+.app-shell .badge.gray {background:var(--zf-surface-muted);color:var(--zf-text-secondary)}
+.app-shell .hierarchy-note {background:transparent;padding:0 0 16px;font-size:12px;line-height:1.7;border-top:0;border-bottom:1px solid var(--zf-border);flex-wrap:wrap}
+.app-shell .hierarchy-name>span,.app-shell .org-symbol,.app-shell .site-icon {border-radius:5px;background:var(--zf-surface-muted);color:var(--zf-text-secondary)}
+.app-shell .progress-track {height:3px;border-radius:0;background:#eeece7}
+.app-shell .progress-track>div {border-radius:0;background:var(--zf-action)}
+.app-shell .progress-wrap>b {font-family:'Space Grotesk',Arial,sans-serif;font-weight:400;color:var(--zf-text)}
+.app-shell .record-type-bar {padding:0 0 14px;background:transparent;border:0;font-size:12px;gap:12px}
+.app-shell .record-type-bar select {font-size:12px;min-height:36px;background-color:white}
+.app-shell .record-type-bar .textbtn {font-size:12px}
+.app-shell .tabs {padding:0;border-bottom:1px solid var(--zf-border);gap:24px}
+.app-shell .tabs>button {font-size:12px;font-weight:400;padding:12px 0;border-bottom-width:1px;white-space:nowrap}
+.app-shell .tabs>button.active {font-weight:500;color:var(--zf-action)}
+.app-shell .calendar {padding:20px 0}
+.app-shell .calendar h3 {font-size:17px;font-weight:400}
+.app-shell .calendar-date {font-family:'Space Grotesk',Arial,sans-serif;font-size:12px}
+.app-shell .calendar-event {border-radius:3px;font-size:11px;box-shadow:none}
+.app-shell .calendar-event b,.app-shell .calendar-event small {font-size:11px;line-height:1.5}
+.app-shell .calendar-event.completed {background:#f0f5ef;border-left-color:#7d9d82;color:#285840}
+.app-shell .calendar-event.planned {background:#f1f3ef;border-left-color:#849487;color:#465c4b}
+.app-shell .calendar-event.cancelled {background:#f4f3ef;border-left-color:#c7c7bf;color:#73776e}
+.app-shell .issue-kpis {gap:0;border-top:1px solid var(--zf-border);margin-bottom:30px}
+.app-shell .issue-kpis .metric {border-right:1px solid var(--zf-border)}
+.app-shell .issue-kpis .metric:last-child {border-right:0}
+.app-shell .empty {min-height:200px;padding:32px 18px;color:var(--zf-text-secondary)}
+.app-shell .empty-icon {width:28px;height:28px;background:transparent;border-radius:0;color:#92978c;margin-bottom:12px}
+.app-shell .empty-icon svg {width:22px;height:22px}
+.app-shell .empty>b {font-size:14px;font-weight:400;color:var(--zf-text)}
+.app-shell .empty>p {font-size:12px;line-height:1.8;max-width:280px;margin-inline:auto}
+.app-shell .pagination {padding:16px 0;font-size:12px;border:0}
+.app-shell .pagination button {min-width:32px;min-height:32px;border-radius:4px;font-size:12px}
+.app-shell .settings-blocks {padding:0 0 20px;gap:24px 36px}
+.app-shell .settings-blocks h3,.app-shell .implementation-grid h3 {font-size:14px;font-weight:500;color:var(--zf-text)}
+.app-shell .settings-blocks p,.app-shell .implementation-grid p {font-size:12px;line-height:1.9;max-width:52ch;color:var(--zf-text-secondary)}
+.app-shell .settings-icon {width:30px;height:30px;background:transparent;color:var(--zf-action)}
+.app-shell .implementation-grid {padding-inline:0}
+.app-shell .workspace-footer {margin-top:24px;padding:22px 0;font-size:11px;border-top:1px solid var(--zf-border)}
+.app-shell .workspace-footer b {font-weight:500}
+.app-shell .drawer {border-radius:0;box-shadow:none;background:white}
+.app-shell .drawer::backdrop {background:rgb(23 23 28 / .28);backdrop-filter:none}
+.app-shell .mobile-scrim {background:rgb(23 23 28 / .28);backdrop-filter:none}
+.app-shell .drawer-head {padding:25px 28px;border-bottom:1px solid var(--zf-border)}
+.app-shell .drawer-head h2 {font-size:23px;font-weight:400;letter-spacing:-.5px}
+.app-shell .drawer-head>div>span {font-size:12px;color:var(--zf-text-muted)}
+.app-shell .form-section {font-size:12px;font-weight:500;padding-top:24px;letter-spacing:.03em;color:var(--zf-action)}
+.app-shell .field>span {font-size:13px;font-weight:500;color:var(--zf-text-body)}
+.app-shell .field input,.app-shell .field select,.app-shell .field textarea {font-size:13px;border-radius:5px;background:white;line-height:1.7}
+.app-shell .field input,.app-shell .field select {min-height:42px}
+.app-shell .form-hint,.app-shell .privacy-note {font-size:12px;line-height:1.8;color:var(--zf-text-muted)}
+.app-shell .form-footer {padding:18px 28px;background:white;border-top:1px solid var(--zf-border)}
+.app-shell .input-mode button {border-width:1px;border-color:var(--zf-control-border);border-radius:6px;font-size:13px}
+.app-shell .input-mode button.active,.app-shell .input-mode button.ai.active {border-color:#a6bca5;background:#edf4ee;color:var(--zf-action)}
+.app-shell .input-mode button small {font-size:11px;color:var(--zf-text-muted)}
+.app-shell .btn.ai-entry {color:var(--zf-action);background:transparent;border-color:var(--zf-control-border)}
+.app-shell .ai-composer {border:1px solid var(--zf-control-border);border-radius:12px;background:var(--zf-surface-muted);box-shadow:none;padding:14px}
+.app-shell .ai-composer:focus-within {border-color:var(--zf-action);outline:1px solid var(--zf-action);box-shadow:none}
+.app-shell .ai-send {background:var(--zf-action)}
+.app-shell .ai-result {background:var(--zf-surface-muted);border-color:var(--zf-border);border-radius:6px;color:var(--zf-text-body);font-size:12px}
+.app-shell .ai-tags span {background:white;border-color:var(--zf-control-border);color:var(--zf-text-secondary)}
+.app-shell .ai-dot {background:var(--zf-action)}
+.app-shell .record-form [data-ai="1"] {border-color:#a6bca5!important;background:#f5f8f3!important;box-shadow:inset 2px 0 0 var(--zf-action)}
+.supabase-entry {background:var(--zf-surface-muted)}
+.supabase-entry>.panel {background:white;border:1px solid var(--zf-border);border-radius:16px;box-shadow:none;padding:40px;max-width:500px}
+.supabase-entry h1 {font-size:24px;font-weight:400;letter-spacing:-.5px;color:var(--zf-text)}
+.supabase-entry p {font-size:13px;line-height:1.8;color:var(--zf-text-secondary)}
+.supabase-entry .entry-icon {width:48px;height:48px;background:var(--zf-surface-muted);color:var(--zf-action);border-radius:12px}
+.supabase-entry .notice {font-size:12px;background:var(--zf-surface-muted);border-color:var(--zf-border);color:var(--zf-text-secondary)}
+.supabase-entry .email-login label {font-size:12px;color:var(--zf-text-body)}
+.supabase-entry .email-login input {border-color:var(--zf-control-border);border-radius:5px;font-size:14px}
+.supabase-entry .email-login .btn {border-radius:99px}
+@media (max-width:1150px) {
+ .app-shell .workspace-content {padding-inline:24px}
+ .app-shell .topbar {padding-inline:24px}
+ .app-shell .brief-dashboard-split {grid-template-columns:minmax(0,3fr) minmax(290px,2fr);gap:24px}
+}
+@media (max-width:960px) {
+ .app-shell .brief-dashboard-split {grid-template-columns:1fr}
+ .app-shell .brief-preview-cards {grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+ .app-shell .brief-site-card {padding-top:16px}
+ .app-shell .brief-card-head {flex-wrap:wrap}
+ .app-shell .brief-site-card .brief-status {margin-left:0}
+}
+@media (max-width:760px) {
+ .app-shell .topbar {height:58px;padding-inline:16px}
+ .app-shell .workspace-content {padding:25px 20px 0}
+ .app-shell .page-heading {position:relative;display:block;margin-bottom:20px;gap:12px;align-items:flex-start}
+ .app-shell .page-heading h1 {font-size:26px;line-height:1.3}
+ .app-shell .page-heading p {font-size:12px;line-height:1.7;margin-top:10px;max-width:none}
+ .app-shell .page-heading:has(.page-actions:not(:empty)) h1 {padding-right:118px}
+ .app-shell .page-actions {position:absolute;top:0;right:0;padding:0}
+ .app-shell .page-actions .btn {min-height:40px;font-size:12px;padding:8px 12px;gap:4px}
+ .app-shell .platform-demo-banner {padding:10px 0;margin-bottom:12px;align-items:center;gap:12px}
+ .app-shell .platform-demo-banner>div {font-size:11px;align-items:flex-start;gap:8px}
+ .app-shell .platform-demo-banner small {display:none}
+ .app-shell .platform-demo-banner button {font-size:11px}
+ .app-shell .platform-demo-banner>button {flex-shrink:0;white-space:nowrap}
+ .app-shell .mode-tag {font-size:9px}
+ .app-shell .persona-bar {padding-bottom:16px;font-size:11px}
+ .app-shell .persona-bar select {min-height:32px;font-size:12px}
+ .app-shell .filterbar {margin-bottom:22px;border-radius:6px}
+ .app-shell .filterbar-primary {padding:10px 12px;gap:8px}
+ .app-shell .mobile-search {margin:0 12px 12px;background:white;border-color:var(--zf-control-border)}
+ .app-shell .mobile-search input {font-size:13px}
+ .app-shell .capacity-grid {gap:0;margin-bottom:24px}
+ .app-shell .capacity-card,.app-shell .capacity-card:first-child {padding:15px 12px}
+ .app-shell .capacity-card:first-child {padding-left:0}
+ .app-shell .capacity-card p {font-size:11px!important;white-space:nowrap}
+ .app-shell .capacity-card b {font-size:30px!important;margin:8px 0 0}
+ .app-shell .capacity-card b small {font-size:11px;margin-left:3px}
+ .app-shell .capacity-card div>span {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .app-shell .capacity-card>svg {display:none}
+ .app-shell .target-tabs {gap:20px}
+ .app-shell .target-tabs>button {font-size:12px;padding-block:12px}
+ .app-shell .metric {padding:16px 10px}
+ .app-shell .metric-top {font-size:12px!important}
+ .app-shell .metric-value {font-size:30px!important}
+ .app-shell .metric>p {font-size:11px}
+ .app-shell .metric-definition {font-size:11px;line-height:1.8;padding-top:12px}
+ .app-shell .brief-dashboard-split {gap:26px;margin-bottom:28px}
+ .app-shell .brief-preview-cards {grid-template-columns:1fr;gap:0}
+ .app-shell .brief-card-head {flex-wrap:nowrap}
+ .app-shell .brief-card-head>b {font-size:13px}
+ .app-shell .brief-card-head .brief-status {font-size:11px}
+ .app-shell .panel-heading {padding:18px 0;align-items:flex-start;gap:12px}
+ .app-shell .panel-heading h2 {font-size:16px}
+ .app-shell .panel-tools {gap:8px;flex-wrap:wrap;justify-content:flex-end}
+ .app-shell .panel-tools .btn {font-size:12px;min-height:36px}
+ .app-shell .panel {margin-bottom:26px}
+ .app-shell .tabs {gap:20px;overflow-x:auto;scrollbar-width:thin;padding-bottom:1px}
+ .app-shell .tabs>button {font-size:12px;min-height:44px;flex-shrink:0}
+ .app-shell .record-type-bar {gap:10px;flex-wrap:wrap}
+ .app-shell .record-type-bar select {font-size:12px;min-height:40px}
+ .app-shell .record-type-bar .textbtn {font-size:11px}
+ .app-shell .calendar {padding:16px 0}
+ .app-shell .calendar.month .calendar-event b,.app-shell .calendar.month .calendar-event small {font-size:11px}
+ .app-shell .mobile-record {background:white;border:0;border-bottom:1px solid var(--zf-border);border-radius:0;padding:18px 0;margin:0}
+ .app-shell .mobile-cards {padding-inline:0}
+ .app-shell .mobile-record-title>b,.app-shell .mobile-record-title>div>b,.app-shell .mobile-record .link {font-size:14px;font-weight:500;color:var(--zf-text)}
+ .app-shell .mobile-record dl {gap:8px;margin-top:12px}
+ .app-shell .mobile-record dt,.app-shell .mobile-record dd {font-size:12px}
+ .app-shell .mobile-record>p,.app-shell .mobile-record small {font-size:12px;line-height:1.8}
+ .app-shell .mobile-record .badge {font-size:11px}
+ .app-shell .issue-kpis {grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
+ .app-shell .issue-kpis .metric:nth-child(2) {border-right:0}
+ .app-shell .settings-blocks {grid-template-columns:1fr;gap:24px}
+ .app-shell .implementation-grid {padding-inline:0}
+ .app-shell .mobile-bottom-nav {background:white;border-top:1px solid var(--zf-border);box-shadow:none}
+ .app-shell .mobile-bottom-nav>button {color:var(--zf-text-secondary);font-size:11px}
+ .app-shell .mobile-bottom-nav>button.active {color:var(--zf-action)}
+ .app-shell .mobile-register>span {background:var(--zf-action);box-shadow:none;border-radius:12px;width:42px;height:42px;margin-top:0}
+ .app-shell .drawer-head {padding:20px}
+ .app-shell .drawer-head h2 {font-size:22px}
+ .app-shell .field input,.app-shell .field select,.app-shell .field textarea {font-size:16px;min-height:44px}
+ .app-shell .form-footer {padding:16px 20px}
+ .app-shell .empty {min-height:180px}
+ .app-shell .workspace-footer {font-size:11px;line-height:1.8;flex-wrap:wrap;gap:6px}
+ .supabase-entry>.panel {padding:28px 22px;border-radius:12px}
+}
+
+@media (min-width:1280px) {
+ .app-shell .filterbar-primary {display:grid;grid-template-columns:minmax(0,1fr) 310px 32px;align-items:start;gap:16px}
+ .app-shell .filter-selects {grid-column:1;grid-row:1;grid-template-columns:repeat(3,minmax(0,1fr));min-width:0;gap:8px}
+ .app-shell .filter-selects:has(select:nth-child(7)) {grid-template-columns:repeat(4,minmax(0,1fr))}
+ .app-shell .filterbar-period {grid-column:2;grid-row:1;display:grid;grid-template-columns:1fr;gap:8px;min-width:0;max-width:none;flex:none;margin:0;align-self:start}
+ .app-shell .filterbar-period>select {width:132px;max-width:132px;min-width:0;min-height:36px;padding-block:6px}
+ .app-shell .date-range {width:310px;min-width:0;min-height:36px;justify-content:center;gap:8px}
+ .app-shell .reset-button {grid-column:3;grid-row:1;min-width:32px;width:32px;padding-inline:0;align-self:end}
+ .app-shell .reset-button>span {display:none}
+}
+@media (max-width:760px) {
+ .app-shell .btn,.app-shell .btn.small,.app-shell .page-actions .btn,.app-shell .panel-tools .btn {min-height:44px}
+ .app-shell .brief-week-switch button,.app-shell .segmented button {min-height:44px}
+}
+
+.app-shell details.metric-definition,.app-shell details.brief-policy {display:block;font-size:12px;line-height:1.8;color:var(--zf-text-secondary)}
+.app-shell details.metric-definition>summary,.app-shell details.brief-policy>summary {width:fit-content;cursor:pointer;font-size:12px;color:var(--zf-text-secondary);padding:5px 0}
+.app-shell details.metric-definition>summary::marker,.app-shell details.brief-policy>summary::marker {color:var(--zf-action)}
+.app-shell details.metric-definition>div,.app-shell details.brief-policy>div {display:flex;gap:8px;align-items:flex-start;max-width:92ch;padding-top:8px;line-height:1.9}
+.app-shell details.metric-definition>div>svg,.app-shell details.brief-policy>div>svg {margin-top:4px;flex-shrink:0}
+.app-shell .ai-composer textarea {min-height:52px;line-height:1.7}
+.app-shell .brief-search-tools {padding-inline:0;gap:12px}
+.app-shell .brief-search-tools label>span {font-size:12px;font-weight:400}
+.app-shell .brief-search-tools :is(input,select) {font-size:12px;min-height:40px;background-color:white;border-color:var(--zf-control-border);border-radius:5px}
+.app-shell .brief-page-toolbar {padding-inline:0}
+.app-shell .brief-selection-summary {padding:12px 16px;background:var(--zf-surface-muted);border:0;font-size:12px}
+.app-shell .brief-week-heading {padding:20px 0;background:white}
+.app-shell .brief-week-symbol {width:28px;height:28px;background:transparent;color:var(--zf-action);border-radius:0}
+.app-shell .brief-week-heading h2 {font-size:18px;font-weight:400;color:var(--zf-text)}
+.app-shell .brief-week-heading h2 small {font-size:12px}
+.app-shell .brief-week-heading p {font-size:12px}
+.app-shell .brief-week-summary {padding-left:41px;font-size:12px}
+.app-shell .brief-week-summary ul {font-size:13px;line-height:1.9;color:var(--zf-text-body)}
+.app-shell .brief-week-details {padding:22px 0;border-top:1px solid var(--zf-border)}
+.app-shell .brief-timeline>li>button {border:0;border-bottom:1px solid var(--zf-border);border-radius:0;background:white;padding:15px 0}
+.app-shell .brief-timeline>li>button:hover {background:#003c3305}
+.app-shell .brief-timeline p {font-size:13px;line-height:1.9;color:var(--zf-text-body)}
+.app-shell .brief-target-type {background:var(--zf-surface-muted);font-size:11px}
+@media(max-width:760px) {
+ .app-shell details.metric-definition>summary,.app-shell details.brief-policy>summary {min-height:44px;display:list-item;align-content:center;font-size:11px}
+ .app-shell details.metric-definition>div,.app-shell details.brief-policy>div {font-size:12px}
+ .app-shell .brief-search-tools :is(input,select) {font-size:16px;min-height:44px}
+ .app-shell .brief-week-heading h2 {font-size:17px}
+ .app-shell .brief-week-summary {padding-left:38px}
+ .app-shell .brief-selection-summary {font-size:11px;line-height:1.8}
+}
