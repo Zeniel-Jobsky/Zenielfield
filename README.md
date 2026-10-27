@@ -33,6 +33,21 @@ pnpm build
 
 ## Supabase 연결
 
+### 개인 Cloudflare 계정의 테스트용 데모 배포
+
+GitHub main `12cbc0e`의 Vinext/Vite/Cloudflare Workers 구성을 유지한 별도 배포입니다. `wrangler.cloudflare.json`은 `ugen.kwon@gmail.com` 계정의 `zenifield` Worker와 새 `zenifield-test` D1 바인딩을 지정합니다. 기존 `.openai/hosting.json`의 Sites 프로젝트 식별자와 원래 D1 자료는 변경하지 않습니다. 새 D1에는 기존 스키마만 적용했으며 운영 자료는 이관하지 않았습니다.
+
+```bash
+corepack pnpm exec wrangler whoami
+corepack pnpm run deploy:cloudflare
+```
+
+공유 주소: https://zenifield.ugen-kwon.workers.dev
+
+결제 등록 없이 데모만 배포하도록 선택했으므로 Cloudflare Access는 활성화하지 않습니다. 이 배포는 `ZENIFIELD_AUTH_PROVIDER=cloudflare-demo`를 사용하고 `/api/*` 및 Sites 인증 경로를 503으로 차단합니다. 데모 변경은 브라우저 메모리에만 유지됩니다. Supabase 비밀키는 업로드하지 않습니다. 기존 Sites 배포는 기존 인증과 운영 API 경로를 유지합니다. 실제 운영을 연결하려면 별도 인증 검증 어댑터와 기존 계정의 로그인 주체 연결을 먼저 준비해야 합니다.
+
+`node tests/run-cloudflare-auth.mjs`로 데모의 운영 API 차단과 위조 인증 헤더 제거를 검증할 수 있습니다.
+
 [Supabase 설정·운영 인계](docs/supabase-setup.md)를 먼저 확인하세요.
 
 - 서버 환경변수: `ZENIFIELD_SUPABASE_URL`, `ZENIFIELD_GATEWAY_TOKEN`. `.env.example`에는 이름과 가짜 자리표시자만 있습니다.
