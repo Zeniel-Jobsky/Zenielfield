@@ -1,0 +1,6 @@
+#!/bin/sh
+# Reject Co-Authored-By trailers; commits are authored by the committer only.
+if grep -qiE '^[[:space:]]*co-authored-by:' "$1"; then
+  echo "commit-msg: Co-Authored-By 줄은 허용되지 않습니다. 메시지에서 지우고 다시 커밋하세요." >&2
+  exit 1
+fi
