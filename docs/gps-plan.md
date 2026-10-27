@@ -22,3 +22,12 @@
 - 운영 현장·매장 좌표 입력 (현재 없음 → 자동 선택 안 됨)
 - 주소 → 좌표 변환(지오코딩) 미구현
 - 방문 위치 보관정책·동의 문구 확정
+
+## 매장 검색 · 주소 좌표 (2026-10-28)
+
+- 공개 매장 목록 없음 → 내부 자료(CSV) 기준 생산
+- 화면: 현장·매장 등록 "매장명 또는 주소로 검색" → 선택 시 주소·위도·경도 채움
+- API: `GET /api/geo?q=` (로그인 필요), Kakao Local 주소 검색 → 결과 없으면 키워드 검색, 5건
+- 일괄: `node --env-file=.env scripts/geocode-stores.mjs 매장.csv` → `매장-geo.csv` (lat·lng·matched·status)
+- 입력 CSV 열 = `code,name,address`
+- 필요: `KAKAO_REST_API_KEY` (로컬 `.env`, Sites secret). 현재 미설정

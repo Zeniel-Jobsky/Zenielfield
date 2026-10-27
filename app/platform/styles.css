@@ -76,3 +76,4 @@
 .ai-stats button b{color:#1b3257}
 .ai-stats button.active{border-color:#7a5bd6;background:#f6f2ff}
 .ai-source{white-space:pre-wrap;font-size:12px;color:#5d708f}
+.geo-search{flex:1;min-width:180px;padding:8px 10px;border:1px solid #dfe6f0;border-radius:7px;font-size:13px}
