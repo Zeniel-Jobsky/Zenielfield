@@ -58,3 +58,18 @@
 - 원격 Edge HTTP를 통한 14개 단계 검증: 사용자/현장/매장/계획/결과/연결 조치 저장·완료·재조회, 비동기 충돌, 권한 및 토큰 검사. 검수용 자료는 정리함.
 - Supabase Security Advisors: lint 없음 확인.
 - 실제 사용자의 브라우저 로그인은 사용자가 직접 수행해야 함. 로그인 이메일과 사전 등록 프로필이 일치해야 한다.
+
+## 개인 Cloudflare 테스트 호스팅 추가 (2026-10-27)
+
+기존 Sites의 로그인과 게이트웨이를 보존하며 개인 Cloudflare Worker에 별도 인증 어댑터를 추가했습니다. 사용자가 승인한 `ugen.kwon@gmail.com` 테스트 관리자만 새로 등록했습니다. 기존 관리자, 테이블, RPC, RLS, D1 자료는 초기화하지 않았습니다.
+
+- 주소: https://zenifield.ugen-kwon.workers.dev/?mode=supabase
+- 흐름: 브라우저 → HttpOnly 세션을 처리하는 Cloudflare Worker → 전용 서버 토큰 + Supabase Auth `/user` 검증 Edge (`zenifield-cloudflare`) → 기존 업무 검증/RPC → PostgreSQL.
+- 로그인은 이메일 링크 + PKCE. 이메일 링크는 요청한 브라우저에서 엽니다. Worker에는 게이트웨이 토큰만 있고 관리자 키는 Edge에만 있습니다. 일반 클라이언트는 테이블/RPC를 직접 호출하지 않습니다.
+- `zf_users`의 활성 등록 이메일과 검증된 Auth 이메일을 대조합니다. 기존에 연결된 Sites 주체를 유지하고, 신규 테스트 계정은 `supabase:<Auth UUID>`를 사용합니다. 비활성 계정은 다음 API 요청부터 거부됩니다.
+- Cloudflare 전용 서버 토큰은 기존 Sites 토큰과 분리했습니다. Worker secret `ZENIFIELD_GATEWAY_TOKEN`과 Edge secret `ZENIFIELD_CLOUDFLARE_TOKEN_HASH`는 같은 쌍이어야 합니다. 토큰 교체 시 양쪽을 함께 갱신합니다.
+- Auth 리디렉션 허용 목록에는 정확한 Cloudflare `/auth/callback`만 추가했습니다. 기존 항목과 이메일 템플릿은 유지했습니다. 기본 메일 발송 제한이 있으므로 실제 수신은 사용자 계정으로 확인해야 합니다.
+- `node tests/run-cloudflare-supabase.mjs`: 33개 인증/쿠키/PKCE/CSRF 검사.
+- Cloudflare 실제 HTTP 17개 검증: 저장·재조회, 현장/매장 분리, 충돌, 매니저 권한, 세션 갱신/로그아웃, 직접 DB 접근 차단. 폐기용 DB/Auth 계정과 업무 기록은 검증 후 정리했습니다.
+
+원래 Sites 인증을 개인 Cloudflare에서 그대로 신뢰하는 방식은 사용하지 않습니다. Cloudflare에서는 기존 D1 API를 차단하고 Supabase 운영만 제공합니다. 새 계정은 설정에서 업무 프로필을 등록한 뒤 이메일 링크로 로그인합니다. 이메일 발송 자격/SMTP 구성은 Supabase 프로젝트의 설정을 따릅니다.

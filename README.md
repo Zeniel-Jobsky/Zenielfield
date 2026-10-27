@@ -33,7 +33,7 @@ pnpm build
 
 ## Supabase 연결
 
-### 개인 Cloudflare 계정의 테스트용 데모 배포
+### 개인 Cloudflare 계정의 Supabase 테스트 배포
 
 GitHub main `12cbc0e`의 Vinext/Vite/Cloudflare Workers 구성을 유지한 별도 배포입니다. `wrangler.cloudflare.json`은 `ugen.kwon@gmail.com` 계정의 `zenifield` Worker와 새 `zenifield-test` D1 바인딩을 지정합니다. 기존 `.openai/hosting.json`의 Sites 프로젝트 식별자와 원래 D1 자료는 변경하지 않습니다. 새 D1에는 기존 스키마만 적용했으며 운영 자료는 이관하지 않았습니다.
 
@@ -42,11 +42,20 @@ corepack pnpm exec wrangler whoami
 corepack pnpm run deploy:cloudflare
 ```
 
-공유 주소: https://zenifield.ugen-kwon.workers.dev
+실제 DB 테스트: https://zenifield.ugen-kwon.workers.dev/?mode=supabase
 
-결제 등록 없이 데모만 배포하도록 선택했으므로 Cloudflare Access는 활성화하지 않습니다. 이 배포는 `ZENIFIELD_AUTH_PROVIDER=cloudflare-demo`를 사용하고 `/api/*` 및 Sites 인증 경로를 503으로 차단합니다. 데모 변경은 브라우저 메모리에만 유지됩니다. Supabase 비밀키는 업로드하지 않습니다. 기존 Sites 배포는 기존 인증과 운영 API 경로를 유지합니다. 실제 운영을 연결하려면 별도 인증 검증 어댑터와 기존 계정의 로그인 주체 연결을 먼저 준비해야 합니다.
+- Cloudflare Access 결제 등록 없이 Supabase Auth 이메일 링크로 로그인합니다. 사전 등록한 활성 `zf_users` 계정만 사용할 수 있습니다. 승인된 테스트 관리자 이메일은 `ugen.kwon@gmail.com`입니다.
+- 이메일 링크는 요청한 브라우저에서 열어야 합니다. PKCE 검증자를 HttpOnly 쿠키에 저장하고 서버에서 코드를 교환합니다. 로그인 토큰은 브라우저 JavaScript나 응답 JSON에 전달하지 않습니다.
+- `ZENIFIELD_AUTH_PROVIDER=supabase-email`일 때 Worker가 운영 API를 `zenifield-cloudflare` Edge Function으로 중계합니다. Edge는 별도 서버 토큰과 Auth `/user` 응답을 검증하고, 등록 이메일·활성 상태를 확인한 뒤 기존 업무 검증 및 RPC를 재사용합니다. 클라이언트가 보낸 Sites 신원 헤더는 신뢰하지 않습니다.
+- Worker의 `ZENIFIELD_SUPABASE_URL`, `ZENIFIELD_GATEWAY_TOKEN`은 secret으로 저장합니다. 해당 전용 토큰의 SHA-256 값만 Edge secret `ZENIFIELD_CLOUDFLARE_TOKEN_HASH`에 저장합니다. Supabase 관리자 키는 Edge 환경에만 있습니다. 기존 Sites 게이트웨이 토큰과 별개입니다.
+- 기존 Sites 배포는 ChatGPT 인증과 원래 `zenifield-gateway`를 유지합니다. 기존 관리자의 로그인 주체는 덮어쓰지 않습니다. Cloudflare 신규 테스트 계정은 별도 `supabase:<Auth UUID>` 주체를 사용합니다.
+- 데모 데이터는 계속 메모리에서만 처리하며 운영 DB로 자동 복사하지 않습니다. Cloudflare의 기존 D1 운영 API는 Sites 인증을 제공하지 않으므로 차단합니다.
 
-`node tests/run-cloudflare-auth.mjs`로 데모의 운영 API 차단과 위조 인증 헤더 제거를 검증할 수 있습니다.
+로그인에는 Supabase 기본 메일 발송 제한이 적용됩니다. 이메일 템플릿은 변경하지 않았고, Cloudflare 콜백 주소만 기존 리디렉션 허용 목록에 추가했습니다. 여러 사용자에게 발송하려면 프로젝트의 메일 발송 자격과 SMTP 설정을 확인하세요.
+
+검증: `node tests/run-cloudflare-supabase.mjs` (33개 인증/세션 검사). `scripts/test-cloudflare-live.mjs`는 관리용 환경변수가 있는 체크아웃에서만 실행하며, 고유한 폐기용 DB/Auth 계정으로 저장·재조회·권한·세션을 검사하고 정확한 검수 자료만 정리합니다. 실제 사용자의 이메일 수신과 브라우저 로그인은 사용자가 확인합니다.
+
+Edge 변경 시 `supabase functions deploy zenifield-cloudflare --project-ref <ref> --use-api`로 별도 배포해야 합니다. 공용 업무 검증을 변경하면 기존 `scripts/bundle-supabase.mjs` 실행 후 두 Edge Function을 함께 배포합니다. `supabase/schema.sql` 재실행이나 기존 데이터 초기화는 하지 않습니다.
 
 [Supabase 설정·운영 인계](docs/supabase-setup.md)를 먼저 확인하세요.
 
