@@ -534,3 +534,8 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  .app-shell .brief-week-summary {padding-left:38px}
  .app-shell .brief-selection-summary {font-size:11px;line-height:1.8}
 }
+@media (max-width:760px) {
+ .app-shell .platform-demo-banner:has(.live-mode-actions)>div:first-child>span:nth-child(2) {display:none}
+ .app-shell .platform-demo-banner .live-mode-actions {flex-shrink:0;align-items:center;gap:10px}
+ .app-shell .live-mode-actions button {min-height:44px;white-space:nowrap}
+}
