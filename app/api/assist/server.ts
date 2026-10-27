@@ -11,7 +11,7 @@ export async function assistVisit(req:Request,bindings:Record<string,unknown>,fe
  const json=(value:unknown,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store'}});
  if(!req.headers.get('oai-authenticated-user-id'))return json({error:'로그인 후 이용할 수 있습니다.'},401);
  if(req.headers.get('origin')!==new URL(req.url).origin)return json({error:'요청 출처를 확인하세요.'},403);
- const key=String(bindings.OPENAI_API_KEY||process.env.OPENAI_API_KEY||''),model=String(bindings.OPENAI_MODEL||process.env.OPENAI_MODEL||'gpt-4.1-mini');
+ const key=String(bindings.OPENAI_API_KEY||process.env.OPENAI_API_KEY||''),model=String(bindings.OPENAI_MODEL||process.env.OPENAI_MODEL||'gpt-6-luna');
  if(!key.startsWith('sk-'))return json({error:'AI 연결 설정이 필요합니다.'},503);
  const text=await req.text();if(text.length>6_000_000)return json({error:'사진 크기를 줄여주세요.'},413);
  let body:{text?:unknown;images?:unknown};try{body=JSON.parse(text)}catch{return json({error:'입력 형식을 확인하세요.'},400)}
