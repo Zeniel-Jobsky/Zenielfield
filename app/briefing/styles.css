@@ -29,3 +29,7 @@
 .brief-timeline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 @media(max-width:1100px){.brief-site-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brief-timeline{grid-template-columns:1fr}}
 @media(max-width:760px){.brief-site-grid{grid-template-columns:1fr}}
+/* search below summary: slim toolbar */
+.briefing-page>.brief-search-panel{padding:10px 14px;margin-bottom:10px}
+.briefing-page>.brief-search-panel .panel-heading{display:none}
+.briefing-page .brief-policy{font-size:10px;padding:6px 10px;margin-bottom:10px}
