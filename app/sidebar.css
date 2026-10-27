@@ -1,0 +1,174 @@
+/* DESIGN-cohere.md: editorial spacing, stone surfaces and a deep-green selection.
+   These tokens belong to navigation only; ZeniField's workspace keeps its palette. */
+.app-shell .sidebar {
+  --nav-ink: #17171c;
+  --nav-muted: #616161;
+  --nav-line: #dededc;
+  --nav-stone: #eeece7;
+  --nav-green: #003c33;
+  --nav-on-green: #edfce9;
+  --nav-coral: #ff7759;
+  padding: 28px 16px 16px;
+  background: #fff;
+  border-right: 1px solid var(--nav-line);
+  scrollbar-width: thin;
+  scrollbar-color: #c7d5c1 transparent;
+}
+.app-shell .sidebar .brand {
+  flex-shrink: 0;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 14px 26px;
+  min-height: 52px;
+}
+.app-shell .sidebar .zeniel-company {
+  padding: 0;
+  border: 0;
+  color: var(--nav-muted);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .06em;
+  line-height: 1.4;
+}
+.app-shell .sidebar .brand-label {
+  color: var(--nav-ink);
+  font-size: 23px;
+  font-weight: 500;
+  letter-spacing: -.8px;
+  line-height: 1.2;
+}
+.app-shell .sidebar .organization {
+  flex-shrink: 0;
+  gap: 10px;
+  margin: 0 0 27px;
+  padding: 13px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--nav-stone);
+}
+.app-shell .sidebar .organization-icon {
+  padding: 0;
+  background: transparent;
+  color: var(--nav-green);
+}
+.app-shell .sidebar .organization b {
+  color: var(--nav-ink);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: normal;
+  line-height: 1.6;
+}
+.app-shell .sidebar .organization div > span {
+  margin-top: 2px;
+  color: var(--nav-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.app-shell .sidebar .nav-section-label {
+  flex-shrink: 0;
+  margin: 0 14px 11px;
+  padding: 0;
+  color: var(--nav-muted);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: .08em;
+}
+.app-shell .sidebar nav {flex-shrink: 0;gap: 4px}
+.app-shell .sidebar nav button {
+  position: relative;
+  gap: 11px;
+  min-height: 46px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  color: var(--nav-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.6;
+  box-shadow: none;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+.app-shell .sidebar nav button > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--nav-muted);
+  stroke-width: 1.6;
+}
+.app-shell .sidebar nav button:hover {
+  color: var(--nav-green);
+  background: var(--nav-stone);
+}
+.app-shell .sidebar nav button:hover > svg {color: var(--nav-green)}
+.app-shell .sidebar nav button.selected {
+  padding-right: 30px;
+  color: var(--nav-on-green);
+  background: var(--nav-green);
+  font-weight: 500;
+  box-shadow: none;
+}
+.app-shell .sidebar nav button.selected:hover {background: #074c41}
+.app-shell .sidebar nav button.selected > svg {color: var(--nav-on-green)}
+.app-shell .sidebar nav button.selected::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: calc(50% - 3px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--nav-coral);
+}
+.app-shell .sidebar nav em {
+  min-width: 23px;
+  padding: 1px 6px;
+  border-radius: 20px;
+  color: var(--nav-muted);
+  background: var(--nav-stone);
+  font-size: 10px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.app-shell .sidebar nav button.selected em {
+  color: var(--nav-on-green);
+  background: #ffffff1f;
+}
+.app-shell .sidebar .sidebar-bottom {flex-shrink: 0;padding-top: 30px}
+.app-shell .sidebar .sidebar-brand {display: none}
+.app-shell .sidebar .help-box {
+  margin: 0 10px 16px;
+  padding: 17px 0 0;
+  border: 0;
+  border-top: 1px solid var(--nav-line);
+  border-radius: 0;
+  background: transparent;
+}
+.app-shell .sidebar .help-box > span {gap: 7px;color: var(--nav-green)}
+.app-shell .sidebar .help-box b {font-size: 11px;font-weight: 500}
+.app-shell .sidebar .help-box p {margin: 8px 0 11px;color: var(--nav-muted);font-size: 11px;line-height: 1.8}
+.app-shell .sidebar .help-box button {min-height: 32px;color: var(--nav-green);font-size: 11px}
+.app-shell .sidebar .help-box button:hover {text-decoration: underline;text-underline-offset: 4px}
+.app-shell .sidebar .collapse-btn {gap: 10px;min-height: 44px;padding: 10px 14px;border-radius: 8px;color: var(--nav-muted);font-size: 11px}
+.app-shell .sidebar .collapse-btn:hover {background: var(--nav-stone);color: var(--nav-green)}
+.app-shell .sidebar :is(button,a):focus-visible {outline: 2px solid #4c6ee6;outline-offset: 3px}
+
+@media (min-width: 761px) {
+  .app-shell.sidebar-collapsed {--sidebar: 76px}
+  .app-shell.sidebar-collapsed .sidebar {padding-inline: 12px}
+  .app-shell.sidebar-collapsed .sidebar .brand {align-items: center;justify-content: center;margin: 0 0 18px;min-height: 52px}
+  .app-shell.sidebar-collapsed .sidebar .brand-compact {font-size: 15px;font-weight: 500;letter-spacing: -.5px;color: var(--nav-green)}
+  .app-shell.sidebar-collapsed .sidebar nav {margin-top: 0}
+  .app-shell.sidebar-collapsed .sidebar nav button {justify-content: center;min-width: 44px;min-height: 46px;padding: 11px}
+  .app-shell.sidebar-collapsed .sidebar nav button.selected::after {width: 4px;height: 4px;right: 5px;top: 7px}
+  .app-shell.sidebar-collapsed .sidebar .collapse-btn {padding: 11px;justify-content: center}
+}
+@media (max-width: 760px) {
+  .app-shell .sidebar {width: 252px;max-width: calc(100vw - 44px);padding-top: 24px}
+  .app-shell .sidebar .brand {margin-bottom: 22px}
+  .app-shell .sidebar nav button {min-height: 48px;font-size: 14px}
+  .app-shell.sidebar-collapsed .sidebar nav button > span {display: inline}
+  .app-shell.sidebar-collapsed .sidebar nav em {display: inline-block}
+  .app-shell .sidebar .help-box button {min-height: 44px}
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .sidebar nav button {transition: none}
+}
