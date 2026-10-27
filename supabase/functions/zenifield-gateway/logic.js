@@ -11,9 +11,9 @@ var dayShift = (day, n) => {
 };
 var targetOf = (v) => v.targetType === "store" ? v.storeId || "missing-store" : v.siteId;
 function targetsOf(data) {
-  return [...data.sites.map((s) => ({ id: s.id, type: "site", siteId: s.id, storeId: null, name: s.name, siteName: s.name, team: s.team, part: s.part, division: s.division, region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate })), ...data.stores.map((s) => {
+  return [...data.sites.map((s) => ({ id: s.id, type: "site", siteId: s.id, storeId: null, name: s.name, siteName: s.name, team: s.team, part: s.part, division: s.division, region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null })), ...data.stores.map((s) => {
     const p = data.sites.find((p2) => p2.id === s.siteId);
-    return { id: s.id, type: "store", siteId: s.siteId, storeId: s.id, name: s.name, siteName: p?.name || "\uBBF8\uC5F0\uACB0 \uD604\uC7A5", team: p?.team || "", part: p?.part || "", division: p?.division || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate };
+    return { id: s.id, type: "store", siteId: s.siteId, storeId: s.id, name: s.name, siteName: p?.name || "\uBBF8\uC5F0\uACB0 \uD604\uC7A5", team: p?.team || "", part: p?.part || "", division: p?.division || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null };
   })];
 }
 function requirements(targets, start, end) {
@@ -45,6 +45,11 @@ function visibleTargets(targets, me) {
   if (me.role === "partlead") return targets.filter((t) => t.team === me.team && t.part === me.part);
   return targets.filter((t) => t.managerIds.includes(me.id));
 }
+var validGeo = (g) => !!g && typeof g.lat === "number" && typeof g.lng === "number" && Number.isFinite(g.lat) && Number.isFinite(g.lng) && Math.abs(g.lat) <= 90 && Math.abs(g.lng) <= 180;
+function distanceM(a, b) {
+  const r = Math.PI / 180, x = Math.sin((b.lat - a.lat) * r / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin((b.lng - a.lng) * r / 2) ** 2;
+  return Math.round(12742e3 * Math.asin(Math.sqrt(x)));
+}
 
 // app/platform/mutations.ts
 var str = (v, max) => typeof v === "string" ? v.slice(0, max) : "";
@@ -73,6 +78,15 @@ function updateDemo(data, entity, values, record, actor, now) {
     if (manager) throw Error("\uD604\uC7A5\xB7\uB9E4\uC7A5 \uB4F1\uB85D \uBC0F \uB2F4\uB2F9\uC790 \uBC30\uC815\uC740 \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC785\uB2C8\uB2E4.");
     if (!item.name?.trim() || !item.code?.trim() || !item.address?.trim()) throw Error("\uC774\uB984, \uCF54\uB4DC, \uC8FC\uC18C\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
     if (record && !can(record.id)) throw Error("\uB2F4\uB2F9 \uC870\uC9C1 \uBC94\uC704 \uBC16\uC758 \uB300\uC0C1\uC785\uB2C8\uB2E4.");
+    if (item.lat == null && item.lng == null || item.lat === "" && item.lng === "") {
+      item.lat = null;
+      item.lng = null;
+    } else {
+      const g = { lat: Number(item.lat), lng: Number(item.lng) };
+      if (!validGeo(g)) throw Error("\uC704\uB3C4\xB7\uACBD\uB3C4\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
+      item.lat = g.lat;
+      item.lng = g.lng;
+    }
     const parent = entity === "store" ? data.sites.find((s) => s.id === item.siteId) : null;
     if (entity === "store" && (!parent || !can(parent.id))) throw Error("\uC18C\uC18D \uD604\uC7A5\uC744 \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
     const team = parent?.team || item.team, part = parent?.part || item.part;
@@ -122,6 +136,12 @@ function updateDemo(data, entity, values, record, actor, now) {
       } else {
         item.entry = "manual";
         delete item.ai;
+      }
+      if (item.geo == null) delete item.geo;
+      else {
+        const g = item.geo, acc = Number(item.geo.accuracy);
+        if (!validGeo(g) || !Number.isFinite(acc) || acc < 0) throw Error("GPS \uC704\uCE58 \uAE30\uB85D\uC744 \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
+        item.geo = { lat: g.lat, lng: g.lng, accuracy: Math.round(acc), at: typeof item.geo.at === "string" ? item.geo.at.slice(0, 40) : "", distance: target.lat !== null && target.lng !== null ? distanceM(g, { lat: target.lat, lng: target.lng }) : null };
       }
       if (item.status !== "completed") {
         item.actualDate = null;

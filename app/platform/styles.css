@@ -60,3 +60,19 @@
 @media(max-width:1100px){.chart-grid{grid-template-columns:1fr}}
 @media(max-width:760px){.donut-wrap{flex-direction:column}.bar-row{grid-template-columns:80px 1fr 40px}.chart-body{padding:0 14px 14px}}
 @media print{.chart-fold{display:none}.chart-grid{grid-template-columns:repeat(2,1fr)}}
+.geo-pick{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:#6d7f9c}
+.geo-status{display:flex;align-items:center;gap:4px}
+.geo-near{display:flex;flex-direction:column;gap:5px;width:100%}
+.geo-near button{display:flex;justify-content:space-between;padding:8px 10px;border:1px solid #e7ecf4;border-radius:7px;background:white;font-size:12px;color:#33496e;cursor:pointer}
+.geo-line{display:block;color:#8a9ab3}
+.ai-line{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center}
+.ai-line small{width:100%;color:#6d7f9c}
+.ai-badge{padding:1px 6px;border-radius:4px;background:#f1ecff;color:#7a5bd6;font-size:10px;font-weight:700}
+.ai-cat{padding:1px 6px;border-radius:4px;background:#f0f4fa;color:#5d708f;font-size:10px}
+.ai-line .urgency{font-size:10px;padding:1px 6px;border-radius:4px}
+.ai-line .u-높음{background:#fff1f1;color:#df626a;font-weight:700}
+.ai-stats{display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 12px}
+.ai-stats button{display:flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid #e7ecf4;border-radius:8px;background:white;font-size:12px;color:#5d708f;cursor:pointer}
+.ai-stats button b{color:#1b3257}
+.ai-stats button.active{border-color:#7a5bd6;background:#f6f2ff}
+.ai-source{white-space:pre-wrap;font-size:12px;color:#5d708f}

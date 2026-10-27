@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import {aggregate,requirements,targetsOf,visibleTargets,lastTargetVisit,targetOf,weeklyTrend,weekOf,agingBuckets,type Target,type FieldVisit,type PlatformData} from '../app/platform/model';
+import {aggregate,requirements,targetsOf,visibleTargets,lastTargetVisit,targetOf,weeklyTrend,weekOf,agingBuckets,nearestTargets,distanceM,type Target,type FieldVisit,type PlatformData} from '../app/platform/model';
 import {platformDemo} from '../app/platform/demo';
 import {updateDemo} from '../app/platform/mutations';
 const now='2026-10-26',start='2026-10-01',end='2026-10-31';let assertions=0;const equal=(a:any,b:any)=>{assert.deepEqual(a,b);assertions++};const throws=(f:()=>any)=>{assert.throws(f);assertions++};
-const site:Target={id:'head',type:'site',siteId:'head',storeId:null,name:'가상 본사',siteName:'가상 본사',team:'T',part:'P',division:'D',region:'서울',address:'가상',managerIds:['m1','m2'],rule:{period:'month',count:2},status:'운영 중',startDate:'2026-09-01'};
+const site:Target={id:'head',type:'site',siteId:'head',storeId:null,name:'가상 본사',siteName:'가상 본사',team:'T',part:'P',division:'D',region:'서울',address:'가상',managerIds:['m1','m2'],rule:{period:'month',count:2},status:'운영 중',startDate:'2026-09-01',lat:null,lng:null};
 const shop:Target={...site,id:'shop',type:'store',storeId:'shop',name:'가상 매장'};const shop2:Target={...shop,id:'shop2',storeId:'shop2'};
 const user={id:'m1',name:'가상 담당1',email:'m1@example.test',role:'manager',team:'T',part:'P',active:1},user2={...user,id:'m2',name:'가상 담당2',email:'m2@example.test'};
 const visit=(id:string,t:Target,more:any={}):FieldVisit=>({id,targetType:t.type,siteId:t.siteId,storeId:t.storeId,visitorId:'m1',plannedDate:'2026-10-05',time:'10:00',purpose:'현장 정기점검',precheck:'',actualDate:'2026-10-05',actualTime:'10:00',result:'특이사항 없음',detail:'가상 직접 방문',notes:'',status:'completed',cancelReason:'',requirementId:null,version:1,...more});
@@ -40,4 +40,8 @@ equal(agingBuckets([{state:'미처리',dueDate:'2026-10-20'},{state:'처리 중'
  const auto=updateDemo(demo,'visit',{...base,entry:'ai',ai,detail:'사람이 고친 활동'},null,boss,now);equal([auto.item.entry,auto.item.ai.edited,auto.item.ai.category],['ai',['detail'],['운영']]);
  throws(()=>updateDemo(demo,'visit',{...base,entry:'ai',ai:{...ai,input:{text:' ',imageCount:0}}},null,boss,now));throws(()=>updateDemo(demo,'visit',{...base,entry:'ai'},null,boss,now));throws(()=>updateDemo(demo,'visit',{...base,entry:'ai',ai,status:'planned',plannedDate:now},null,boss,now));
  throws(()=>updateDemo(auto.data,'visit',{...auto.item,entry:'manual'},auto.item,boss,now));throws(()=>updateDemo(demo,'visit',{...manual,entry:'ai',ai},manual,boss,now))}
+{const demo=platformDemo(now),boss={...demo.users[0],role:'admin'},t=targetsOf(demo).find(t=>t.type==='store')!;equal(typeof t.lat,'number');equal(nearestTargets([t],{lat:t.lat!,lng:t.lng!})[0].distance,0);equal(distanceM({lat:37.5665,lng:126.978},{lat:37.5665,lng:126.988})>800,true);
+ const site=demo.sites[0];throws(()=>updateDemo(demo,'site',{...site,lat:200,lng:1},site,boss,now));equal(updateDemo(demo,'site',{...site,lat:'',lng:''},site,boss,now).item.lat,null);
+ const v={targetType:'store',siteId:t.siteId,storeId:t.storeId,visitorId:t.managerIds[0],plannedDate:null,time:'',purpose:'현장 정기점검',precheck:'',status:'completed',actualDate:now,actualTime:'',detail:'GPS 방문',notes:'',result:'특이사항 없음',cancelReason:'',requirementId:null};
+ const g=updateDemo(demo,'visit',{...v,geo:{lat:t.lat!,lng:t.lng!,accuracy:12.4,at:now,distance:999}},null,boss,now).item.geo;equal([g.distance,g.accuracy],[0,12]);throws(()=>updateDemo(demo,'visit',{...v,geo:{lat:'x',lng:1,accuracy:1}},null,boss,now))}
 console.log(`${assertions} platform assertions passed: independent targets, occurrence math, cancellation, no auto-completion, joint assignments, immutable history and linked action flow.`);

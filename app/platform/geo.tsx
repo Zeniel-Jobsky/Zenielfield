@@ -1,0 +1,17 @@
+'use client';
+import {useState} from 'react';
+import {LocateFixed,Loader2,MapPin} from 'lucide-react';
+import {type Target,type VisitGeo,autoPickMeters,nearestTargets,distanceM} from './model';
+// GPS로 가장 가까운 현장·매장을 고른다. 300m 안이면 자동 선택, 아니면 가까운 3곳을 보여 준다. 위치는 방문 기록에만 남긴다.
+const meters=(d:number)=>d<1000?`${d}m`:`${(d/1000).toFixed(1)}km`;
+export function locate():Promise<VisitGeo>{return new Promise((resolve,reject)=>{if(!window.isSecureContext)return reject(Error('위치 확인은 https 주소에서만 됩니다.'));if(!navigator.geolocation)return reject(Error('이 기기는 위치 확인을 지원하지 않습니다.'));navigator.geolocation.getCurrentPosition(p=>resolve({lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),accuracy:Math.round(p.coords.accuracy),at:new Date().toISOString(),distance:null}),e=>reject(Error(e.code===1?'위치 권한이 거부되었습니다. 브라우저 사이트 설정에서 위치를 허용해 주세요.':'현재 위치를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.')),{enableHighAccuracy:true,timeout:15000,maximumAge:30000})})}
+export function GeoPick({targets,target,onPick,onGeo}:{targets:Target[];target?:Target;onPick?:(t:Target)=>void;onGeo:(g:VisitGeo)=>void}){
+ const [busy,setBusy]=useState(false),[error,setError]=useState(''),[geo,setGeo]=useState<VisitGeo|null>(null),[near,setNear]=useState<ReturnType<typeof nearestTargets>>([]);
+ async function run(){setBusy(true);setError('');try{const g=await locate(),list=nearestTargets(targets,g);setGeo(g);onGeo(g);setNear(list);if(onPick&&list[0]&&list[0].distance<=autoPickMeters)onPick(list[0].target);else if(onPick&&!list.length)setError('좌표가 등록된 현장·매장이 없습니다. 직접 선택해 주세요.')}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
+ const gap=geo&&target?.lat!=null&&target?.lng!=null?distanceM(geo,{lat:target.lat,lng:target.lng}):null;
+ return <div className="geo-pick wide"><button type="button" className="btn small" onClick={run} disabled={busy}>{busy?<Loader2 size={15} className="spin"/>:<LocateFixed size={15}/>}{onPick?'GPS로 지점 자동 선택':'현재 위치 기록'}</button>
+  {geo&&<span className="geo-status"><MapPin size={13}/>위치 기록됨 · 정확도 ±{meters(geo.accuracy)}{gap!==null&&<> · 선택 지점까지 <b className={gap>autoPickMeters?'red-text':''}>{meters(gap)}</b></>}</span>}
+  {onPick&&geo&&near.length>0&&near[0].distance>autoPickMeters&&<div className="geo-near"><small>{autoPickMeters}m 안에 지점이 없습니다. 가까운 곳을 고르세요.</small>{near.map(n=><button type="button" key={n.target.id} onClick={()=>onPick(n.target)}>{n.target.type==='store'?n.target.siteName+' · ':''}{n.target.name}<b>{meters(n.distance)}</b></button>)}</div>}
+  {error&&<p className="form-error" role="alert">{error}</p>}
+ </div>}
+export function GeoFill({lat,lng}:{lat?:number|null;lng?:number|null}){const [v,setV]=useState({lat:lat??'',lng:lng??''}),[error,setError]=useState(''),[busy,setBusy]=useState(false);return <><label className="field"><span>위도</span><input name="lat" inputMode="decimal" value={v.lat} onChange={e=>setV({...v,lat:e.target.value})} placeholder="37.566500"/></label><label className="field"><span>경도</span><input name="lng" inputMode="decimal" value={v.lng} onChange={e=>setV({...v,lng:e.target.value})} placeholder="126.978000"/></label><div className="geo-pick wide"><button type="button" className="btn small" disabled={busy} onClick={async()=>{setBusy(true);setError('');try{const g=await locate();setV({lat:g.lat,lng:g.lng})}catch(e){setError((e as Error).message)}finally{setBusy(false)}}}><LocateFixed size={15}/>현재 위치로 좌표 입력</button><small>좌표가 있어야 방문 등록 때 GPS로 자동 선택됩니다.</small>{error&&<p className="form-error" role="alert">{error}</p>}</div></>}

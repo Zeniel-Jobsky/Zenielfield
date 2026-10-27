@@ -6,23 +6,27 @@ import {purposes} from '../lib/model';
 import {type TargetType,type AiEntry,type AiField,aiFields,targetOf,typeName} from './model';
 import type {Context} from './context';
 import {AiComposer,type AiDraft} from './ai-assist';
+import {GeoPick} from './geo';
+import type {VisitGeo,Target} from './model';
 // AI 간편 등록 전용 화면: 대상 선택 → 말·글·사진 → AI 초안 검토 → 저장. 직접 입력 칸은 두지 않는다.
 const labels:Record<AiField,string>={purpose:'방문 목적',detail:'주요 활동 내용',notes:'특이사항',result:'후속 조치 필요 여부'};
 export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;error:string;onSave:(entity:string,values:any,record?:any)=>void;onClose:()=>void}){
  const r=modal.record,saved:AiEntry|undefined=r?.entry==='ai'?r.ai:undefined,locked=!!r||!!modal.requirementId;
  const [type,setType]=useState<TargetType>(r?.targetType||modal.targetType||c.type),[site,setSite]=useState(r?.siteId||modal.siteId||c.siteId||''),[store,setStore]=useState(r?.storeId||modal.storeId||c.storeId||'');
  const [ai,setAi]=useState<AiEntry|null>(saved||null),[values,setValues]=useState<Record<AiField,string>>(()=>Object.fromEntries(aiFields.map(k=>[k,r?.[k]||''])) as Record<AiField,string>),[actions,setActions]=useState<AiDraft['actions']>([]),[picked,setPicked]=useState<boolean[]>([]);
+ const [geo,setGeo]=useState<VisitGeo|null>(null),pick=(t:Target)=>{setType(t.type);setSite(t.siteId);setStore(t.storeId||'')};
  const [actualDate,setActualDate]=useState(r?.actualDate||c.now),[actualTime,setActualTime]=useState(r?.actualTime||'');
  const target=c.targets.find(t=>t.id===(type==='store'?store:site)),owners=(target?.managerIds||[]).filter(id=>c.me.role!=='manager'||id===c.me.id),[visitor,setVisitor]=useState(r?.visitorId||c.me.id),owner=r?.visitorId||(owners.includes(visitor)?visitor:owners[0]||'');
  const parents=c.data.sites.filter(s=>c.targets.some(t=>t.siteId===s.id)),stores=c.data.stores.filter(s=>s.siteId===site&&c.targets.some(t=>t.id===s.id));
  const plans=c.data.visits.filter(v=>v.status==='planned'&&c.targets.some(t=>t.id===targetOf(v))&&(c.me.role!=='manager'||v.visitorId===c.me.id)).sort((a,b)=>(a.plannedDate||'').localeCompare(b.plannedDate||'')).slice(0,200);
  const canEdit=c.editable&&(c.me.role!=='manager'||!r||r.visitorId===c.me.id),ready=!!ai&&!!target&&!!owner&&!!values.detail.trim();
  function draft(d:AiDraft,meta:{text:string;imageCount:number;model:string;generatedAt:string}){const v={purpose:purposes.includes(d.purpose)?d.purpose:purposes[0],detail:d.detail,notes:d.notes,result:d.result==='후속 조치 필요'?'후속 조치 필요':'특이사항 없음'};setValues(v);setActions(d.actions);setPicked(d.actions.map(()=>true));setAi({input:{text:meta.text,imageCount:meta.imageCount},draft:v,summary:d.extra.summary,category:d.extra.category,urgency:d.extra.urgency,confidence:d.confidence,model:meta.model,generatedAt:meta.generatedAt,edited:[]})}
- function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!ready||!ai)return;onSave('visit',{...(r||{}),entry:'ai',ai,...values,targetType:type,siteId:site,storeId:type==='store'?store:null,visitorId:owner,status:'completed',plannedDate:r?.plannedDate||null,time:r?.time||'',precheck:r?.precheck||'',actualDate,actualTime,cancelReason:'',requirementId:r?.requirementId||modal.requirementId||null,aiActions:values.result==='후속 조치 필요'?actions.filter((_,i)=>picked[i]):[]},r)}
+ function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!ready||!ai)return;onSave('visit',{...(r||{}),entry:'ai',ai,...values,targetType:type,siteId:site,storeId:type==='store'?store:null,visitorId:owner,status:'completed',plannedDate:r?.plannedDate||null,time:r?.time||'',precheck:r?.precheck||'',actualDate,actualTime,geo:geo||r?.geo||null,cancelReason:'',requirementId:r?.requirementId||modal.requirementId||null,aiActions:values.result==='후속 조치 필요'?actions.filter((_,i)=>picked[i]):[]},r)}
  const edited=(k:AiField)=>!!ai&&values[k]!==ai.draft[k];
  return <form className="record-form ai-form" onSubmit={submit}><div className="form-scroll"><div className="notice slim ai-notice"><Sparkles size={16}/><span>AI 간편 등록 · {c.demo===false?'저장하면 실제 Supabase 운영 데이터에 반영됩니다.':'데모 데이터 전용입니다.'}</span></div>
  <fieldset className="form-grid" disabled={!canEdit||c.saving}>
  <div className="form-section first wide"><span>01</span>방문 대상</div>
+ <GeoPick targets={c.targets} target={target} onPick={locked?undefined:pick} onGeo={setGeo}/>
  {!r&&!modal.requirementId&&plans.length>0&&<Field label="등록된 방문계획 연결 · 선택" wide><select defaultValue="" onChange={e=>{const v=c.data.visits.find(v=>v.id===e.target.value);if(v)c.open('visit',v,{result:true,ai:true})}}><option value="">계획 외 방문</option>{plans.map(v=><option key={v.id} value={v.id}>{v.plannedDate} · {typeName(v.targetType)} · {c.label(v)}</option>)}</select></Field>}
  <div className="target-type-switch wide" role="group" aria-label="방문 대상 유형"><button type="button" className={type==='site'?'active':''} disabled={locked} onClick={()=>{setType('site');setStore('')}}><MapPin size={16}/>현장 방문</button><button type="button" className={type==='store'?'active':''} disabled={locked} onClick={()=>setType('store')}><ClipboardCheck size={16}/>매장 방문</button></div>
  <Field label={type==='site'?'방문 현장 *':'상위 현장 *'} wide><select required value={site} disabled={locked} onChange={e=>{setSite(e.target.value);setStore('')}}><option value="">현장 선택</option>{parents.map(s=><option key={s.id} value={s.id}>{s.name} · {s.client}</option>)}</select></Field>

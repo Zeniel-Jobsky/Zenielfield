@@ -1,5 +1,5 @@
 import type {User} from '../lib/model';
-import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,aiFields,aiCategories,aiUrgencies,aiConfidences} from './model';
+import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,validGeo,distanceM,aiFields,aiCategories,aiUrgencies,aiConfidences} from './model';
 const str=(v:unknown,max:number)=>typeof v==='string'?v.slice(0,max):'';
 export function aiEntryOf(raw:any):AiEntry{if(!raw||typeof raw!=='object')throw Error('AI 입력 기록이 없습니다. AI 간편 등록에서 다시 작성해 주세요.');const text=str(raw.input?.text,3000),imageCount=Number(raw.input?.imageCount);if(!Number.isInteger(imageCount)||imageCount<0||imageCount>3)throw Error('AI 입력 사진 수를 확인해 주세요.');if(!text.trim()&&!imageCount)throw Error('AI 입력 원문(메모 또는 사진)이 없습니다.');
  const draft=Object.fromEntries(aiFields.map(k=>[k,str(raw.draft?.[k],3500)])) as AiEntry['draft'],edited=Array.isArray(raw.edited)?[...new Set(raw.edited)].filter((k):k is AiEntry['edited'][number]=>aiFields.includes(k as any)):[];
@@ -13,6 +13,7 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
  if(entity==='site'||entity==='store'){
   if(manager)throw Error('현장·매장 등록 및 담당자 배정은 관리자 권한입니다.');if(!item.name?.trim()||!item.code?.trim()||!item.address?.trim())throw Error('이름, 코드, 주소를 입력해 주세요.');
   if(record&&!can(record.id))throw Error('담당 조직 범위 밖의 대상입니다.');
+  if(item.lat==null&&item.lng==null||item.lat===''&&item.lng===''){item.lat=null;item.lng=null}else{const g={lat:Number(item.lat),lng:Number(item.lng)};if(!validGeo(g))throw Error('위도·경도를 확인해 주세요.');item.lat=g.lat;item.lng=g.lng}
   const parent=entity==='store'?data.sites.find(s=>s.id===item.siteId):null;if(entity==='store'&&(!parent||!can(parent.id)))throw Error('소속 현장을 확인해 주세요.');
   const team=parent?.team||item.team,part=parent?.part||item.part;if(entity==='site'&&record&&(team!==record.team||part!==record.part)&&data.stores.some(s=>s.siteId===record.id))throw Error('산하 매장이 있는 현장의 조직 변경은 별도 이관 절차가 필요합니다.');if(actor.role==='lead'&&team!==actor.team||actor.role==='partlead'&&(team!==actor.team||part!==actor.part))throw Error('소속 조직 범위에서만 등록할 수 있습니다.');
   if(!item.managerIds?.length||item.managerIds.some((u:string)=>!data.users.some(x=>x.id===u&&x.active&&x.team===team&&x.part===part)))throw Error('대상과 같은 팀·파트의 담당자를 1명 이상 선택해 주세요.');
@@ -42,6 +43,7 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
    if(item.requirementId&&next.visits.some(v=>v.id!==id&&v.requirementId===item.requirementId&&v.status!=='cancelled'))throw Error('이 필요 회차에는 이미 계획 또는 결과가 연결되어 있습니다. 기존 일정을 수정해 주세요.');
    const done=record?.status==='completed',entry=done?entryOf(record):entryOf(item);if(done&&entryOf(item)!==entry)throw Error('AI 등록과 직접 입력 기록은 서로 바꿀 수 없습니다.');delete item.extra;delete item.aiAssisted;delete item.aiFields;
    if(entry==='ai'){if(item.status!=='completed')throw Error('AI 간편 등록은 방문 결과로만 저장합니다.');item.entry='ai';item.ai=aiEntryOf(item.ai);item.ai.edited=aiFields.filter(k=>(item[k]||'')!==item.ai.draft[k])}else{item.entry='manual';delete item.ai}
+   if(item.geo==null)delete item.geo;else{const g=item.geo as {lat:number;lng:number},acc=Number(item.geo.accuracy);if(!validGeo(g)||!Number.isFinite(acc)||acc<0)throw Error('GPS 위치 기록을 확인해 주세요.');item.geo={lat:g.lat,lng:g.lng,accuracy:Math.round(acc),at:typeof item.geo.at==='string'?item.geo.at.slice(0,40):'',distance:target.lat!==null&&target.lng!==null?distanceM(g,{lat:target.lat,lng:target.lng}):null}}
    if(item.status!=='completed'){item.actualDate=null;item.actualTime='';item.detail='';item.notes='';item.result=''}
    array=next.visits;
   }else{
