@@ -8,12 +8,12 @@ export function locate():Promise<VisitGeo>{return new Promise((resolve,reject)=>
 export function GeoPick({targets,target,onPick,onGeo,auto=false}:{targets:Target[];target?:Target;onPick?:(t:Target)=>void;onGeo:(g:VisitGeo)=>void;auto?:boolean}){
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[geo,setGeo]=useState<VisitGeo|null>(null),[near,setNear]=useState<ReturnType<typeof nearestTargets>>([]);
  async function run(){setBusy(true);setError('');try{const g=await locate(),list=nearestTargets(targets,g);setGeo(g);onGeo(g);setNear(list);if(onPick&&list[0]&&list[0].distance<=autoPickMeters)onPick(list[0].target);else if(onPick&&!list.length)setError('좌표가 등록된 현장·매장이 없습니다. 직접 선택해 주세요.')}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
- useEffect(()=>{if(auto&&typeof window!=='undefined'&&window.isSecureContext)run()},[]);
+ useEffect(()=>{if(auto)run()},[]);
  const gap=geo&&target?.lat!=null&&target?.lng!=null?distanceM(geo,{lat:target.lat,lng:target.lng}):null;
  return <div className="geo-pick wide"><button type="button" className="btn small" onClick={run} disabled={busy}>{busy?<Loader2 size={15} className="spin"/>:<LocateFixed size={15}/>}{onPick?'GPS로 지점 자동 선택':'현재 위치 기록'}</button>
   {geo&&<span className="geo-status"><MapPin size={13}/>위치 기록됨 · 정확도 ±{meters(geo.accuracy)}{gap!==null&&<> · 선택 지점까지 <b className={gap>autoPickMeters?'red-text':''}>{meters(gap)}</b></>}</span>}
-  {onPick&&geo&&near.length>0&&near[0].distance>autoPickMeters&&<details className="geo-near"><summary>{autoPickMeters}m 안에 등록된 지점이 없습니다 · 가까운 {near.length}곳 보기</summary>{near.map(n=><button type="button" key={n.target.id} onClick={()=>onPick(n.target)}>{n.target.type==='store'?n.target.siteName+' · ':''}{n.target.name}<b>{meters(n.distance)}</b></button>)}</details>}
-  {error&&<small className="geo-status muted">{error} 직접 선택해 주세요.</small>}
+  {onPick&&geo&&near.length>0&&near[0].distance>autoPickMeters&&<details className="geo-near" open><summary>{autoPickMeters}m 안에 등록된 지점이 없습니다 · 가까운 {near.length}곳 보기</summary>{near.map(n=><button type="button" key={n.target.id} onClick={()=>onPick(n.target)}>{n.target.type==='store'?n.target.siteName+' · ':''}{n.target.name}<b>{meters(n.distance)}</b></button>)}</details>}
+  {error&&<p className="geo-error wide">{error} 직접 선택해 주세요.</p>}
  </div>}
 type Place={name:string;address:string;roadAddress:string;category:string;lat:number;lng:number};
 export function GeoFill({lat,lng}:{lat?:number|null;lng?:number|null}){

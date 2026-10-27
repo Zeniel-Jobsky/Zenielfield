@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import {Plus,Mic,Square,ArrowUp,X,Loader2} from 'lucide-react';
+import {Plus,Mic,Square,ArrowUp,X,Loader2,Camera} from 'lucide-react';
 // ChatGPT-style composer: type, speak or attach photos, then send once; the draft fills the form directly. Nothing is saved here.
 export type AiDraft={detail:string;result:string;purpose:string;notes:string;extra:{summary:string;category:string[];urgency:string};actions:{type:string;content:string;dueDate:string}[];confidence:string};
 const shrink=(file:File)=>new Promise<string>((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const k=Math.min(1,1280/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d')!.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',0.8))};img.onerror=()=>reject(Error('이미지를 읽지 못했습니다.'));img.src=url});
@@ -28,7 +28,7 @@ export function AiComposer({onDraft,mode='result'}:{onDraft:(draft:AiDraft,meta:
    {images.length>0&&<div className="ai-images">{images.map((src,i)=><span key={i}><img src={src} alt={`첨부 ${i+1}`}/><button type="button" aria-label="사진 삭제" onClick={()=>setImages(images.filter((_,j)=>j!==i))}><X size={12}/></button></span>)}</div>}
    <textarea ref={box} rows={1} maxLength={3000} value={listening&&interim?(text?text+' ':'')+interim:text} readOnly={listening} onChange={e=>setText(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(ready)send()}}} placeholder={listening?'듣고 있어요… 말을 마치면 ■ 를 누르세요':mode==='plan'?'예: 다음주 화요일 오후 2시 이마트 양재점 정기점검':'방문 내용을 말하거나 적어 주세요. 사진도 함께 올릴 수 있어요.'}/>
    <div className="ai-bar">
-    <label className={'ai-icon'+(images.length>=3?' disabled':'')} aria-label="사진 추가" title="사진 추가 (최대 3장)"><Plus size={18}/><input hidden type="file" accept="image/*" multiple disabled={images.length>=3} onChange={e=>{addImages(e.target.files);e.target.value=''}}/></label>
+    <label className={'ai-icon'+(images.length>=3?' disabled':'')} aria-label="카메라로 촬영" title="카메라로 촬영 (최대 3장)"><Camera size={18}/><input hidden type="file" accept="image/*" capture="environment" disabled={images.length>=3} onChange={e=>{addImages(e.target.files);e.target.value=''}}/></label><label className={'ai-icon'+(images.length>=3?' disabled':'')} aria-label="앨범에서 사진 추가" title="앨범에서 사진 추가 (최대 3장)"><Plus size={18}/><input hidden type="file" accept="image/*" multiple disabled={images.length>=3} onChange={e=>{addImages(e.target.files);e.target.value=''}}/></label>
     <span className="ai-bar-hint">{busy?'AI가 정리하는 중…':listening?'음성 인식 중':'Enter 전송 · Shift+Enter 줄바꿈'}</span>
     <button type="button" className={'ai-icon'+(listening?' rec':'')} aria-label={listening?'음성 입력 끝':'음성 입력'} onClick={toggleVoice} disabled={busy}>{listening?<Square size={14} fill="currentColor"/>:<Mic size={18}/>}</button>
     <button type="button" className="ai-send" aria-label="AI로 작성" onClick={send} disabled={!ready}>{busy?<Loader2 size={18} className="spin"/>:<ArrowUp size={18}/>}</button>
