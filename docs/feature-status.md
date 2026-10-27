@@ -56,6 +56,8 @@
 - AI·직접 입력 분리: [스키마](ai-entry-schema.md) 구현, 목록 AI 표시·필터 완료. 원격 DB 이관·Edge 재배포 대기.
 - GPS 지점 자동 선택: [GPS](gps-plan.md) 구현. 매장 검색·주소 좌표 변환 구현, Kakao 키 설정 필요.
 - 데모 주입 파이프라인: [문서](seed-pipeline.md) 구현, 운영 적재 대기.
+- 방문 등록 기본 AI 입력·권한 요청: [문서](ai-input-default.md) 구현.
+- 대시보드·브리핑·필터 2차 개편: [대시보드 계획](dashboard-plan.md).
 - 대시보드 차트화: [대시보드 개선 계획](dashboard-plan.md) DB-1–DB-10·BR-1·BR-2 완료, BR-3 남음.
 
 - 주기 변경 적용일 지정과 필요 회차 스냅샷: 현재는 방문이 있으면 주기 변경 불가.
