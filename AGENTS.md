@@ -63,3 +63,20 @@
 - 기능 단위 계획은 `docs/<주제>-plan.md`, 전체 현황은 `docs/feature-status.md`를 갱신한다.
 - 디자인 기준의 변경은 `docs/DESIGN-zenielfield.md`에 반영한다.
 - 담당자 업무 배정은 개발 이슈와 별개다. `work/`(git 제외)에만 기록하고 커밋하지 않는다. 담당자가 정해져 있다는 이유로 개발 이슈를 빼지 않는다.
+
+## 운영 반영 절차
+
+운영 DB·Edge 함수·인증은 여러 사람이 함께 쓰는 공용 자원이다. 아래를 지킨다.
+
+- **순서:** DB 이관(`supabase/migrations/*.sql`) 적용 → 검증 로직 번들(`node scripts/bundle-supabase.mjs`) → Edge 함수 재배포(`zenifield-gateway`, `zenifield-cloudflare`) → 화면 배포. 이관 없이 Edge를 먼저 배포하지 않는다.
+- **사전 검증:** 이관은 운영과 같은 옛 스키마에 먼저 적용해 본다(PGlite 등 로컬 PostgreSQL). `supabase/schema.sql`은 빈 프로젝트 설치용이므로 운영에 다시 실행하지 않는다.
+- **승인:** 운영 DB 변경, Edge 배포, 로그인 계정·비밀번호 발급은 사용자 승인 후에만 한다. 에이전트는 계정 접근 권한을 스스로 만들지 않는다. 발급은 시스템 관리자 화면 또는 `scripts/set-password.mjs`(서버 토큰 보유자)로 한다.
+- **기록:** 운영에 반영한 이관·배포·적재는 날짜와 함께 `docs/feature-status.md`(또는 해당 `docs/*.md`)에 남긴다.
+
+## 데이터·인증 기준
+
+- **로그인:** 첫 화면은 로그인이다. 회사 계정(등록 이메일 + 비밀번호, Supabase Auth)이 기본이고 `ZENIFIELD_AUTH_PROVIDER=supabase-email`로 켠다. 비우면 Sites(ChatGPT) 로그인이다. 등록(`zf_users`)에 없는 이메일은 로그인할 수 없다. 데모는 로그인 화면의 "로그인 없이 체험하기" 또는 `?mode=demo`로 들어가며 저장 내용이 DB에 남지 않는다.
+- **계정은 공용:** 계정·비밀번호는 같은 Supabase 프로젝트를 쓰는 모든 서버(로컬·Sites·Cloudflare)에서 공유된다. 비밀번호 원문을 대화·문서·커밋에 남기지 않는다.
+- **조회 범위:** 로그인 직후 전체 데이터를 받지 않는다. 선택 기간 + 추이용 앞 8주 + 앞으로 6주와 미완료 후속 조치만 받고, 기간이 넓어지면 그 범위만 추가로 받는다. 저장 검증은 서버에서 전체 기준으로 한다.
+- **데이터 묶음:** 시드·적재 데이터는 출처 표시(`data.seed`, 이후 데이터 묶음 ID)를 붙인다. 출처 없는 기존 데이터(방문 1만 건 `…-extra-01~05`)는 지우지 않고 별도 묶음으로 보존한다. 엑셀 원본이 데모 데이터의 기준이다.
+- **PC별 설정:** 공유 설정 파일(`vite.config.ts`, `next.config.ts`)에 개인 주소·인증서를 넣지 않는다. 개인 설정은 git 제외 `vite.config.local.mjs`(예시: `vite.config.local.example.mjs`)에 둔다. `.env`는 공유하지 않는다.
