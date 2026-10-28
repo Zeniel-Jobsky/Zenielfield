@@ -6,7 +6,6 @@
   --nav-stone: var(--zf-surface-muted);
   --nav-green: #003c33;
   --nav-on-green: var(--zf-on-action);
-  --nav-coral: #ff7759;
   padding: 28px 16px 16px;
   background: #fff;
   border-right: 1px solid var(--nav-line);
@@ -100,7 +99,6 @@
 }
 .app-shell .sidebar nav button:hover > svg {color: var(--nav-green)}
 .app-shell .sidebar nav button.selected {
-  padding-right: 30px;
   color: var(--nav-on-green);
   background: var(--nav-green);
   font-weight: 500;
@@ -108,16 +106,7 @@
 }
 .app-shell .sidebar nav button.selected:hover {background: #003c33}
 .app-shell .sidebar nav button.selected > svg {color: var(--nav-on-green)}
-.app-shell .sidebar nav button.selected::after {
-  content: '';
-  position: absolute;
-  right: 14px;
-  top: calc(50% - 3px);
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--nav-coral);
-}
+/* 현재 메뉴는 딥그린 채움만으로 표시한다. 점 표식은 알림 배지와 헷갈려 쓰지 않는다(2026-10-28). */
 .app-shell .sidebar nav em {
   min-width: 23px;
   padding: 1px 6px;
