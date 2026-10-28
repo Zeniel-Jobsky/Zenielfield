@@ -26,7 +26,7 @@ step('패키지 설치');
 run('pnpm install');
 
 step('git 훅 연결');
-if (existsSync('.git')) { run('git config core.hooksPath .githooks'); console.log('  .githooks 사용 (commit-msg: Co-Authored-By 차단)'); }
+if (existsSync('.git')) { run('git config core.hooksPath .githooks'); console.log('  .githooks 사용 (commit-msg: Co-Authored-By 차단, pre-commit: 디자인 지침 점검)'); }
 
 step('.env 확인');
 if (!existsSync('.env')) {

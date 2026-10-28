@@ -1,0 +1,4 @@
+#!/bin/sh
+# 디자인 지침 점검: 화면·스타일 변경 시 지침·룰 동반 갱신과 지침 밖 색을 경고한다(DESIGN_STRICT=1이면 차단).
+command -v node >/dev/null 2>&1 || exit 0
+node scripts/check-design.mjs || exit 1
