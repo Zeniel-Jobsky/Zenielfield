@@ -201,3 +201,108 @@
 @media(max-width:1100px){.decision-strip{grid-template-columns:repeat(2,1fr)}.dash-grid-12>div{grid-column:span 12}.dash-grid-12>div.span-3,.dash-grid-12>div.span-5{grid-column:span 6}}
 @media(max-width:760px){.decision-strip{grid-template-columns:1fr 1fr;gap:8px}.decision-kpi b{font-size:22px}.dash-grid-12>div{grid-column:span 12!important}.dash-grid-12>div>.panel{min-height:0}.risk-head,.risk-row{grid-template-columns:minmax(70px,1fr) 1.6fr 1fr 1fr 40px;gap:6px}.hbar{grid-template-columns:76px 1fr 50px}}
 .geo-error{width:100%;margin:0;padding:8px 10px;border-radius:7px;background:#fff6ea;color:#b9772d;font-size:12px}
+/* ===== mobile pass: same information density as desktop, less chrome ===== */
+@media(max-width:760px){
+ .page-eyebrow{display:none}
+ .page-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+ .page-heading h1{font-size:22px;margin:0}
+ .page-heading p{display:none}
+ .page-actions .btn.primary{padding:9px 12px;font-size:13px;white-space:nowrap}
+ .platform-demo-banner{padding:7px 10px;margin-bottom:8px;font-size:11px}
+ .platform-demo-banner>div{gap:6px}
+ .platform-demo-banner small,.platform-demo-banner .live-mode-actions{display:none}
+ .platform-demo-banner>button{padding:4px 8px;font-size:11px}
+ .persona-bar{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:11px}
+ .persona-bar select{height:32px;font-size:12px;flex:1;min-width:0}
+ .persona-note{display:none}
+ .filterbar{margin-bottom:10px}
+ .target-tabs{gap:6px;margin-bottom:8px}
+ .target-tabs button{padding:8px 10px;font-size:12px}
+ .target-tabs-note{display:none}
+ /* KPI strip: 2 columns, compact */
+ .decision-strip{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+ .decision-kpi{padding:10px 12px;gap:2px}
+ .decision-kpi-top{font-size:11px}
+ .decision-kpi b{font-size:22px}
+ .decision-kpi-note{font-size:10px;line-height:1.3}
+ .kpi-delta{font-size:10px}
+ /* charts: one column, open, compact */
+ .dash-grid-12{grid-template-columns:1fr;gap:8px;margin-bottom:8px}
+ .dash-grid-12>div{grid-column:span 1!important}
+ .dash-grid-12>div>.panel{min-height:0;height:auto;margin-bottom:0}
+ .dash-grid-12 .chart-grid{gap:8px}
+ .chart-panel .panel-heading{padding:10px 14px 2px}
+ .chart-panel .panel-heading h2{font-size:14px}
+ .chart-panel .panel-heading p{font-size:10px}
+ .chart-body{padding:0 12px 12px}
+ .chart-fold{display:none}
+ .risk-table{font-size:11px}
+ .risk-head,.risk-row{grid-template-columns:minmax(60px,1fr) 1.5fr 1fr 1fr 34px;gap:5px}
+ .risk-head span:last-child,.risk-row .risk-num{text-align:right}
+ .hbar{grid-template-columns:70px 1fr 48px;font-size:11px}
+ .vbar-list{height:130px}
+ .vbar small{font-size:9px}
+ .heatmap{font-size:9px}
+ .heat-cell{height:16px}
+ .trend.combo{max-height:150px}
+ .dash-row{gap:8px;margin-bottom:8px}
+ /* briefing preview + metric tiles */
+ .dash-brief{margin-bottom:8px}
+ .brief-trend{margin-bottom:8px}
+ .visit-metric-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:8px}
+ .metric{padding:9px 10px}
+ .metric-top span:first-child{font-size:10px}
+ .metric-icon{display:none}
+ .metric-value{font-size:20px;margin:3px 0 2px}
+ .metric-value small{font-size:10px}
+ .metric>small,.metric-note{font-size:9px}
+ .capacity-grid{gap:6px;margin-bottom:8px}
+ .capacity-card{padding:10px 12px}
+ .capacity-card b{font-size:20px}
+ /* record cards (현황 목록): tighter */
+ .mobile-record{padding:10px 12px;margin-bottom:8px}
+ .mobile-record-title{margin-bottom:2px}
+ .mobile-record p,.mobile-record dl{margin:2px 0;font-size:12px}
+ .visit-mobile-info{gap:10px;font-size:12px;margin:2px 0}
+ .mobile-record .row-buttons{margin-top:6px;gap:6px}
+ .mobile-record .btn.small{padding:6px 10px;font-size:12px}
+ .ai-stats{gap:6px;padding:0 12px 8px}
+ .ai-stats button{padding:5px 9px;font-size:11px;gap:5px}
+ .panel-heading{padding:12px 14px 6px}
+ .panel-heading h2{font-size:15px}
+ .panel-heading p{font-size:11px}
+ /* registration sheet: full-screen, compact sections */
+ .drawer{height:100dvh;max-height:100dvh}
+ .drawer-head{padding:12px 14px}
+ .drawer-head h2{font-size:18px}
+ .form-scroll{padding:10px 14px}
+ .form-section{margin:12px 0 6px;font-size:13px}
+ .form-section.first{margin-top:6px}
+ .ai-notice{padding:8px 10px;font-size:11px;margin-bottom:8px}
+ .permission-card{padding:10px 12px}
+ .permission-card ul{grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0 6px}
+ .permission-card li{flex-direction:column;align-items:flex-start;gap:2px;padding:6px 8px;font-size:11px}
+ .permission-card li small{display:none}
+ .permission-card li em{margin-left:0}
+ .permission-card p{font-size:10px}
+ .ai-composer textarea{font-size:15px}
+ .form-footer{padding:10px 14px;gap:8px}
+ .form-footer .btn{flex:1;justify-content:center}
+}
+@media(max-width:760px){
+ .page-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;margin-bottom:8px}
+ .page-heading>div:first-child{min-width:0}
+ .page-heading h1{font-size:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .page-actions{display:flex;gap:6px}
+ .page-actions .btn{padding:8px 10px;font-size:12px}
+ .page-actions .btn svg{width:14px;height:14px}
+ .platform-demo-banner{flex-wrap:nowrap;align-items:center}
+ .platform-demo-banner>div{min-width:0;flex:1}
+ .platform-demo-banner>div>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .platform-demo-banner>button{flex:none;white-space:nowrap}
+ .persona-bar{flex-wrap:wrap;padding-bottom:8px}
+ .persona-bar>span{flex:0 0 100%;font-size:11px}
+ .persona-bar select{flex:1 1 140px;min-width:140px}
+ .risk-head small{display:none}
+ .risk-head span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}

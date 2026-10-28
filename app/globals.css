@@ -14,3 +14,13 @@
 @media(min-width:761px){.schedule-panel .calendar.month .calendar-event small{display:block;font-size:13px}.schedule-panel .calendar.month .calendar-day{min-height:145px}.schedule-panel .calendar.month .calendar-event>b{font-size:13px}.schedule-panel .calendar.month .calendar-event>span{font-size:13px}.schedule-panel .calendar.month .calendar-event{padding:7px 8px}.schedule-panel .calendar.month .calendar-event>span>i{font-size:13px}}
 @media(max-width:760px){.calendar.month .calendar-date{height:36px}}
 @media(max-width:760px){.sidebar{visibility:hidden}.sidebar.mobile-open{visibility:visible}}
+/* PC: 스크롤바는 마우스를 올리거나 포커스가 들어갔을 때만 보인다 */
+@media(hover:hover) and (pointer:fine){
+ *{scrollbar-width:thin;scrollbar-color:transparent transparent}
+ *:hover,*:focus,*:focus-within{scrollbar-color:#c3cddb transparent}
+ *::-webkit-scrollbar{width:8px;height:8px}
+ *::-webkit-scrollbar-track{background:transparent}
+ *::-webkit-scrollbar-thumb{background:transparent;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+ *:hover::-webkit-scrollbar-thumb,*:focus::-webkit-scrollbar-thumb,*:focus-within::-webkit-scrollbar-thumb{background-color:#c3cddb}
+ *::-webkit-scrollbar-thumb:hover{background-color:#9fadc2}
+}
