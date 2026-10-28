@@ -113,7 +113,8 @@ jobs:
       - name: zenifield Worker 배포
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: pnpm exec wrangler deploy --config dist/server/wrangler.json --message "GitHub Actions $GITHUB_SHA"
+        # Worker 전용 토큰을 지원하는 CLI만 별도 사용해 앱의 기존 빌드 의존성을 유지한다.
+        run: pnpm dlx wrangler@4.151.0 deploy --config dist/server/wrangler.json --message "GitHub Actions $GITHUB_SHA"
       - name: 공개 URL 응답 확인
         run: curl --fail --silent --show-error --retry 3 --retry-delay 5 --output /dev/null 'https://zenifield.ugen-kwon.workers.dev/?mode=demo'
       - name: 배포 기록

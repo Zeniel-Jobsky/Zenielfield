@@ -115,3 +115,4 @@
 - 자동 배포는 같은 `supabase-deploy` 워크플로를 확장했다. UI 변경만 있는 푸시는 DB·Edge를 건너뛰고, 백엔드 변경은 해당 단계가 성공해야 Worker를 배포한다. 검사 실패·취소·수동 `dry_run`에서는 화면을 배포하지 않는다.
 - CI는 `NO_BUMP=1`로 커밋된 버전을 빌드한다. Worker 버전 메시지와 Actions 요약에 소스 커밋·배포 주소를 남기므로 이후 자동 배포 이력은 [Actions 실행 기록](https://github.com/Zeniel-Jobsky/Zenielfield/actions/workflows/supabase-deploy.yml)에서 확인한다.
 - 사용자가 승인한 `zenifield` 전용 `Individual Workers Editor` 토큰을 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN` secret으로 등록했다. 토큰과 `.env` 원문은 소스·문서·산출물에 포함하지 않는다.
+- 첫 자동 실행 `40641160666`은 검증·빌드가 성공했으나 기존 Wrangler 4.92.0이 계정 전체 subdomain을 조회해 권한 오류가 발생했다. 배포 단계만 Worker별 조회를 지원하는 `wrangler@4.151.0`으로 고정했다. 앱 빌드 의존성과 토큰의 Worker 전용 권한 범위는 유지한다.

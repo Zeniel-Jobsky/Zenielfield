@@ -77,6 +77,8 @@ Edge 변경 시 `supabase functions deploy zenifield-cloudflare --project-ref <r
 
 자동 배포에는 저장소 Actions secret `CLOUDFLARE_API_TOKEN`(Worker 전용)과 기존 `SUPABASE_ACCESS_TOKEN`·`SUPABASE_PROJECT_REF`가 필요합니다. 실행 결과는 [GitHub Actions](https://github.com/Zeniel-Jobsky/Zenielfield/actions/workflows/supabase-deploy.yml)에서 확인합니다. 수동 실행의 `dry_run`은 이관 목록만 확인하고 배포하지 않습니다. CI는 `NO_BUMP=1`로 Git에 커밋된 버전을 그대로 빌드합니다. 런타임 비밀값은 Cloudflare의 기존 secret을 사용하며 `.env`는 Git이나 CI 산출물에 올리지 않습니다.
 
+CI의 배포 단계는 Worker 전용 토큰을 지원하는 `wrangler@4.151.0`을 별도로 실행합니다. 앱 빌드와 로컬 개발의 기존 Wrangler 의존성은 유지합니다. 기존 4.92.0은 계정 전체의 subdomain 조회를 요구해 Worker 전용 토큰 배포가 실패합니다.
+
 ## 소스 구조
 
 - `app/platform/`: 통합 플랫폼, 실제 운영/데모 전환 및 사용자 관리
