@@ -394,3 +394,6 @@
 .ai-brief-meta{margin:0;font-size:11px;color:#65726b}
 @media(max-width:1023px){.ai-brief-grid{grid-template-columns:1fr 1fr}.ai-brief-grid>div:first-child{grid-column:1/-1}}
 @media(max-width:760px){.ai-brief-grid{grid-template-columns:1fr}.ai-brief-tools{width:100%;justify-content:space-between}.ai-brief-tools .btn{min-height:44px}}
+
+.ai-brief-more{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;font-size:12px}
+@media(max-width:760px){.ai-brief-more{min-height:44px}}

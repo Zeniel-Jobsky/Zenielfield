@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {Sparkles,Loader2,ChevronRight,RefreshCw} from 'lucide-react';
+import {Sparkles,Loader2,ChevronRight,RefreshCw,ChevronDown,ChevronUp} from 'lucide-react';
 import type {Context} from './context';
 import {PanelTitle} from '../ui';
 import {aggregate,dayShift,lastTargetVisit,targetOf,targetStatus,typeName,weeklyTrend} from './model';
@@ -70,7 +70,7 @@ type Cached={key:string;result:AiBriefResult;model:string;generatedAt:string};
 const readCache=(id:string):Cached|null=>{try{return JSON.parse(localStorage.getItem(CACHE_KEY+':'+id)||'null')}catch{return null}};
 const writeCache=(id:string,v:Cached)=>{try{localStorage.setItem(CACHE_KEY+':'+id,JSON.stringify(v))}catch{}};
 export function AiBrief({c}:{c:Context}){
- const [factors,setFactors]=useState<BriefFactors>(defaultFactors),[busy,setBusy]=useState(false),[error,setError]=useState(''),[out,setOut]=useState<Cached|null>(null),[ready,setReady]=useState(false);
+ const [factors,setFactors]=useState<BriefFactors>(defaultFactors),[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[out,setOut]=useState<Cached|null>(null),[ready,setReady]=useState(false);
  useEffect(()=>{setFactors(loadFactors());setOut(readCache(c.me.id));setReady(true)},[c.me.id]);
  const digest=useMemo(()=>buildDigest(c,factors),[c.scope,c.visits,c.actions,c.start,c.end,c.now,c.type,c.team,c.part,c.manager,c.siteId,c.storeId,c.metrics,factors]);
  const key=useMemo(()=>digestKey(digest),[digest]);
@@ -90,11 +90,13 @@ export function AiBrief({c}:{c:Context}){
    {r&&<div className={'ai-brief-out'+(stale?' stale':'')} aria-live="polite">
     <p className="ai-brief-head">{r.headline}</p>
     {r.flow&&<section><h3>흐름</h3><p>{r.flow}</p></section>}
-    <div className="ai-brief-grid">
+    {/* 기본은 현황·흐름까지. 챙길 곳·현상·판단은 자세히 보기로 펼친다. */}
+    <button type="button" className="textbtn ai-brief-more" aria-expanded={open} onClick={()=>setOpen(!open)}>{open?<><ChevronUp size={14}/>접기</>:<><ChevronDown size={14}/>자세히 보기 · 먼저 챙길 곳 {r.focus.length}곳 · 판단 {r.judgment.length}건</>}</button>
+    {open&&<div className="ai-brief-grid">
      <section><h3>먼저 챙길 곳</h3><ol>{r.focus.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}>{a.name}<ChevronRight size={12}/></button><span>{a.reason}</span></li>)}{!r.focus.length&&<li><span>특별히 두드러진 곳이 없습니다.</span></li>}</ol></section>
      <section><h3>무슨 일이 벌어지고 있나</h3><p>{r.story||'두드러진 현상이 없습니다.'}</p></section>
      <section><h3>판단</h3><ul className="ai-brief-decide">{r.judgment.map((p,i)=><li key={i}>{p}</li>)}{!r.judgment.length&&<li>지금은 유지하면 됩니다.</li>}</ul>{r.watch.length>0&&<><h3>다음 주 볼 것</h3><ul>{r.watch.map((p,i)=><li key={i}>{p}</li>)}</ul></>}</section>
-    </div>
+    </div>}
     <p className="ai-brief-meta">{out!.model} · {new Date(out!.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} 작성{stale&&' · 조건이 바뀌어 다시 쓰는 중'}{r.confidence==='low'&&' · 확신 낮음'}</p>
    </div>}
   </div>
