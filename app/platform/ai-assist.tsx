@@ -38,7 +38,16 @@ export function AiComposer({onDraft,mode='result',demo=false}:{onDraft:(draft:Ai
   if(!window.isSecureContext){setError('음성 입력은 https 주소에서만 됩니다. 휴대폰 키보드의 마이크를 사용하세요.');return}
   const Api=speechApi();if(!Api){setError('이 브라우저는 음성 입력을 지원하지 않습니다. Chrome이나 휴대폰 키보드의 마이크를 사용하세요.');return}
   const r=new Api();r.lang='ko-KR';r.continuous=true;r.interimResults=true;
-  r.onresult=e=>{let done='',live='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)done+=t;else live+=t}if(done.trim())setText(t=>(t.trim()?t.trim()+' ':'')+done.trim());setInterim(live)};
+  // 결과를 이어 붙이지 않고 매번 전체 결과 목록으로 다시 만든다. 브라우저(특히 안드로이드 Chrome)가 이미 확정된 결과를 다시 보내거나,
+  // 새 확정 결과에 앞 문장을 포함해 보내면 이어 붙이기 방식에서는 같은 말이 반복된다. 앞 결과를 포함하는 결과는 앞 결과를 대신한다.
+  const base=text.trim();
+  r.onresult=e=>{const finals:string[]=[];let live='';
+   for(let i=0;i<e.results.length;i++){const t=e.results[i][0].transcript.trim();if(!t)continue;
+    if(!e.results[i].isFinal){live=t;continue}
+    const last=finals[finals.length-1];
+    if(last&&t.startsWith(last))finals[finals.length-1]=t;else if(last&&last.endsWith(t))continue;else finals.push(t)}
+   const spoken=finals.join(' ');setText((base?base+' ':'')+spoken);
+   setInterim(live&&!spoken.endsWith(live)?live:'')};
   r.onerror=e=>setError(e.error==='not-allowed'||e.error==='service-not-allowed'?'마이크가 허용되지 않았습니다. 브라우저 사이트 설정에서 마이크를 허용하고, 아이폰은 설정 → Siri에서 받아쓰기를 켜 주세요.':e.error==='no-speech'?'음성이 들리지 않았습니다. 다시 눌러 말해 주세요.':'음성 인식이 중단되었습니다 ('+e.error+').');
   r.onend=()=>{setListening(false);setInterim('')};rec.current=r;setError('');r.start();setListening(true)}
  async function addImages(files:FileList|null){if(!files)return;try{const next=await Promise.all([...files].slice(0,3-images.length).map(shrink));setImages([...images,...next])}catch(e){setError((e as Error).message)}}
