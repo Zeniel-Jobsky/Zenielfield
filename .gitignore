@@ -1,5 +1,6 @@
 # Dependencies
 /node_modules/
+/node_modules.broken-*/
 /.pnp
 .pnp.*
 # Keep authored Yarn tooling if the project adopts Yarn.

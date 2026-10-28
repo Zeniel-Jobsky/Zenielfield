@@ -25,6 +25,10 @@ npm run setup
 pnpm dev
 ```
 
+의존성 저장소는 프로젝트 안의 `.sites-runtime/pnpm-store`에 만들어지므로(`pnpm-workspace.yaml`) 첫 설치에 시간이 오래 걸릴 수 있습니다. 다른 OS에서 설치한 `node_modules`를 복사해 쓰면 esbuild·workerd 등 실행 파일이 맞지 않아 테스트가 실패하므로, 새 PC에서는 `node_modules`를 지우고 다시 설치하세요.
+
+**exFAT 드라이브 주의**: exFAT는 심볼릭 링크를 지원하지 않아 기본 설치가 `EISDIR`로 실패합니다. 이 경우 `pnpm install --node-linker=hoisted`로 설치하세요(약 1시간 소요). NTFS 드라이브나 리눅스·맥에서는 필요 없습니다.
+
 휴대용 개발 프로필은 포트 5173을 사용합니다. ChatGPT Sites 관리 환경에서는 전용 미리보기/빌드 도구를 사용합니다. 새 PC에서의 설치·실행은 아직 별도 검증하지 않았습니다.
 
 ```bash
@@ -84,7 +88,13 @@ Edge 변경 시 `supabase functions deploy zenifield-cloudflare --project-ref <r
 ## 검증
 
 ```bash
-pnpm exec tsc --noEmit
+pnpm typecheck   # tsc --noEmit
+pnpm test        # 아래 6개를 순서대로 실행
+```
+
+개별 실행:
+
+```bash
 node tests/run-platform.mjs
 node tests/run-briefing.mjs
 node tests/run-supabase.mjs
@@ -92,9 +102,20 @@ node tests/logic.mjs
 node tests/ui-metrics.mjs
 ```
 
-기존 113개 + 서버/Edge 25개 검증. 전용 Supabase에서 18개 DB 불변조건(rollback)과 실제 Edge HTTP를 통한 저장·재조회 등 14단계도 검증했습니다. 실제 사용자의 브라우저 로그인은 사용자가 직접 수행해야 합니다.
+PR과 `main` 푸시마다 GitHub Actions(`.github/workflows/verify.yml`)가 같은 검증을 실행합니다.
+
+2026-10-28 Windows(Node 22, pnpm 11.25)에서 `pnpm typecheck` 통과, `pnpm test` 192개 단언 통과(플랫폼 52, 브리핑 32, 진단 54, Supabase 서버 15·Edge 10, 로직 20, UI 지표 9). 전용 Supabase에서 18개 DB 불변조건(rollback)과 실제 Edge HTTP를 통한 저장·재조회 등 14단계도 검증했습니다. 실제 사용자의 브라우저 로그인은 사용자가 직접 수행해야 합니다.
 
 `tests/supabase.sql`은 폐기 가능한 검수 자료를 생성하고 전부 rollback합니다. 기존 D1 API 검증은 격리된 테스트 런타임에서 `CLOUDFLARE_CF_FETCH_ENABLED=false node tests/api-flow.mjs`로 실행합니다. 테스트를 기존 운영 DB에 적용하지 마세요.
+
+## 개발 절차
+
+[저장소 기반 개발 계획 v2](docs/repo-dev-plan-v2.md)를 따릅니다. 새 기획을 받으면 코드보다 먼저 `docs/plans/NNN-<기능>.md`에 요구사항 추적표와 확정 필요 결정을 쓰고, 원문은 `docs/specs/`에 보관합니다.
+
+- `main`에는 `pnpm typecheck`와 `pnpm test`가 통과한 상태만 둡니다.
+- 작업은 `feat/NNN-<기능>`, `fix/…`, `chore/…` 브랜치에서 하고 작업 패키지 단위로 커밋합니다.
+- 기준 상태는 태그 `baseline-2026-10-27`입니다.
+- DB 변경은 승인 후 `supabase/migrations/`의 추가 마이그레이션으로만 합니다.
 
 ## 업무 및 후속 개발 명세
 
