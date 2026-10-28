@@ -61,6 +61,7 @@
 - 방문·일지 워크플로 재설계: [문서](visit-workflow.md) 구현(계획 자동 연결·일시 기본 지금·제안 조치 일괄 등록·홈 "지금 여기서").
 - 대시보드·브리핑·필터 2차 개편: [대시보드 계획](dashboard-plan.md).
 - 기입력 결과 AI 정리(`aiEdits`)·AI 현황 요약·푸터 빌드 표기: 구현(2026-10-28). [워크플로](visit-workflow.md), [스키마](ai-entry-schema.md), [대시보드](dashboard-plan.md). 이관·Edge 운영 반영은 아래 Actions 실행에서 완료.
+- 권한별 시험 계정 발급(2026-10-28, 사용자 요청): `scripts/provision-accounts.mjs`로 zeniel.co.kr 11개 — zf.admin, zf.director, zf.lead1~3, zf.partlead1·3·5, 잡매니저 zf.jm001·jm018·jm021(가상 담당자 jm-001·018·021의 이메일만 변경해 배정 유지). 관리자 jobsky 이름으로 등록(감사 기록), 비밀번호는 무작위·`work/accounts.local.csv`(git 제외)에만 저장. 역할별 로그인·조회 범위 확인: 관리자·사업부장 107현장, 팀장 55, 파트장 32, 잡매니저 24. 주의: 시드 재적재 시 jm-001·018·021 이메일이 example.test로 되돌아갈 수 있음 → 재적재 후 이 스크립트 다시 실행.
 - 속도 개선(2026-10-28): 메뉴 전환 주 스레드 작업(개발 서버) 대시보드 498→61–121ms, 브리핑 506→247ms, 후속 조치 686→308ms. 원인 = 대상마다 전체 방문 재검색(`lastTargetVisit`·`targetStatus`), 브리핑 모델의 사이트별 방문 재중복제거, 매 렌더 브리핑 데이터 재생성. 운영 빌드에서는 대부분 메뉴 50ms 미만. 로그인 화면에서 개발용 계정 이름이 잠깐 보이던 문제 수정, 로그인·메뉴 로딩 게이지 추가.
 - 운영 반영(2026-10-28 14:35, Actions supabase-deploy #40638708419 성공): 이관 기준선 2개(visit_entry, domains) 기록 + 적용 2개(read_window, ai_edits), logic.js 번들, Edge zenifield-gateway·zenifield-cloudflare 재배포.
 - 운영 자동 파이프라인: `.github/workflows/supabase-deploy.yml` + `scripts/migrate.mjs`(활성). `main` 검증 → 필요한 이관·Edge → Cloudflare Worker 순서로 연결. 저장소 secret은 기존 Supabase 2개와 Worker 전용 `CLOUDFLARE_API_TOKEN`. [설치 문서](supabase-setup.md).

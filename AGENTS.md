@@ -92,6 +92,7 @@
 ## 데이터·인증 기준
 
 - **로그인:** 첫 화면은 로그인이다. 회사 계정(등록 이메일 + 비밀번호, Supabase Auth)이 기본이고 `ZENIFIELD_AUTH_PROVIDER=supabase-email`로 켠다. 비우면 Sites(ChatGPT) 로그인이다. 등록(`zf_users`)에 없는 이메일은 로그인할 수 없다. 데모는 로그인 화면의 "로그인 없이 체험하기" 또는 `?mode=demo`로 들어가며 저장 내용이 DB에 남지 않는다.
+- **시험 계정:** 권한별 시험 계정은 `node --env-file=.env scripts/provision-accounts.mjs`(사용자 승인 후)로 만든다. zeniel.co.kr `zf.*` 주소, 비밀번호는 `work/accounts.local.csv`(git 제외)에만. `--dry-run`으로 먼저 확인.
 - **계정은 공용:** 계정·비밀번호는 같은 Supabase 프로젝트를 쓰는 모든 서버(로컬·Sites·Cloudflare)에서 공유된다. 비밀번호 원문을 대화·문서·커밋에 남기지 않는다.
 - **조회 범위:** 로그인 직후 전체 데이터를 받지 않는다. 선택 기간 + 추이용 앞 8주 + 앞으로 6주와 미완료 후속 조치만 받고, 기간이 넓어지면 그 범위만 추가로 받는다. 저장 검증은 서버에서 전체 기준으로 한다.
 - **AI 기록:** 방문 결과의 AI 흔적은 세 가지다. `entry='ai'`+`ai`(AI 간편 등록), `aiEdits[]`(기입력을 AI로 정리해 반영한 칸: before/proposed/applied/모델/시각/반영자, 서버가 계산·보관, 클라이언트 값 무시), 대시보드 AI 현황 요약은 저장하지 않는다. AI에는 집계 숫자·메모 본문만 보내고 개인정보는 보내지 않는다.
