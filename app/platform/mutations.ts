@@ -1,5 +1,5 @@
 import type {User} from '../lib/model';
-import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,validGeo,distanceM,aiFields,aiCategories,aiUrgencies,aiConfidences} from './model';
+import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,validGeo,distanceM,managesDomain,domainName,aiFields,aiCategories,aiUrgencies,aiConfidences} from './model';
 const str=(v:unknown,max:number)=>typeof v==='string'?v.slice(0,max):'';
 export function aiEntryOf(raw:any):AiEntry{if(!raw||typeof raw!=='object')throw Error('AI 입력 기록이 없습니다. AI 간편 등록에서 다시 작성해 주세요.');const text=str(raw.input?.text,3000),imageCount=Number(raw.input?.imageCount);if(!Number.isInteger(imageCount)||imageCount<0||imageCount>3)throw Error('AI 입력 사진 수를 확인해 주세요.');if(!text.trim()&&!imageCount)throw Error('AI 입력 원문(메모 또는 사진)이 없습니다.');
  const draft=Object.fromEntries(aiFields.map(k=>[k,str(raw.draft?.[k],3500)])) as AiEntry['draft'],edited=Array.isArray(raw.edited)?[...new Set(raw.edited)].filter((k):k is AiEntry['edited'][number]=>aiFields.includes(k as any)):[];
@@ -10,12 +10,21 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
  const validateDate=(s:string)=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!isNaN(Date.parse(s+'T12:00:00Z'))&&new Date(s+'T12:00:00Z').toISOString().slice(0,10)===s;
  const targets=targetsOf(data);const allowed=visibleTargets(targets,actor);const can=(targetId:string)=>allowed.some(t=>t.id===targetId);
  let item:any={...values,id,version:(record?.version||0)+1};let array:any[];
- if(entity==='site'||entity==='store'){
+ if(entity==='domain'){
+  if(actor.role!=='admin')throw Error('관리 도메인 등록은 시스템 관리자 권한입니다.');const code=String(item.code||'').trim().toUpperCase(),name=String(item.name||'').trim();if(!/^[A-Z0-9_-]{2,20}$/.test(code)||!name)throw Error('도메인 코드(영문·숫자 2–20자)와 이름을 입력해 주세요.');
+  if(next.domains.some(d=>d.id!==id&&d.code===code))throw Error('이미 사용 중인 도메인 코드입니다.');item={id,code,name,active:Number(item.active??1)?1:0,version:item.version};array=next.domains;
+ }else if(entity==='user'){
+  if(actor.role!=='admin')throw Error('사용자 등록은 시스템 관리자 권한입니다.');if(!item.name?.trim()||!/^[^@\s]+@[^@\s]+$/.test(item.email||'')||!item.team?.trim()||!item.part?.trim())throw Error('이름, 이메일, 팀, 파트를 입력해 주세요.');
+  const domains=[...new Set((Array.isArray(item.domains)?item.domains:[]).filter((d:unknown):d is string=>typeof d==='string'))];if(domains.some(d=>!next.domains.some(x=>x.id===d&&x.active)))throw Error('활성 관리 도메인만 지정할 수 있습니다.');
+  if(record?.id===actor.id&&(item.role!=='admin'||Number(item.active)!==1))throw Error('본인의 관리자 권한은 해제할 수 없습니다.');
+  item={id,email:String(item.email).trim().toLowerCase(),name:item.name.trim(),role:item.role,team:item.team.trim(),part:item.part.trim(),active:Number(item.active)?1:0,domains,version:item.version};array=next.users;
+ }else if(entity==='site'||entity==='store'){
   if(manager)throw Error('현장·매장 등록 및 담당자 배정은 관리자 권한입니다.');if(!item.name?.trim()||!item.code?.trim()||!item.address?.trim())throw Error('이름, 코드, 주소를 입력해 주세요.');
   if(record&&!can(record.id))throw Error('담당 조직 범위 밖의 대상입니다.');
   if(item.lat==null&&item.lng==null||item.lat===''&&item.lng===''){item.lat=null;item.lng=null}else{const g={lat:Number(item.lat),lng:Number(item.lng)};if(!validGeo(g))throw Error('위도·경도를 확인해 주세요.');item.lat=g.lat;item.lng=g.lng}
   const parent=entity==='store'?data.sites.find(s=>s.id===item.siteId):null;if(entity==='store'&&(!parent||!can(parent.id)))throw Error('소속 현장을 확인해 주세요.');
-  const team=parent?.team||item.team,part=parent?.part||item.part;if(entity==='site'&&record&&(team!==record.team||part!==record.part)&&data.stores.some(s=>s.siteId===record.id))throw Error('산하 매장이 있는 현장의 조직 변경은 별도 이관 절차가 필요합니다.');if(actor.role==='lead'&&team!==actor.team||actor.role==='partlead'&&(team!==actor.team||part!==actor.part))throw Error('소속 조직 범위에서만 등록할 수 있습니다.');
+  const domain=entity==='store'?parent!.domain||'':String(item.domain||record?.domain||'');if(entity==='site'){if(!domain||!next.domains.some(d=>d.id===domain&&d.active))throw Error('활성 관리 도메인을 선택해 주세요.');if(!managesDomain(actor,domain))throw Error('본인이 관리하는 도메인에만 등록할 수 있습니다.');if(record&&record.domain&&record.domain!==domain&&data.stores.some(s=>s.siteId===record.id))throw Error('산하 매장이 있는 현장의 도메인 변경은 별도 이관 절차가 필요합니다.')}item.domain=domain||undefined;item.division=domainName(next,domain)||item.division||'';
+  const team=parent?.team||item.team,part=parent?.part||item.part;for(const uid of (item.managerIds||[]) as string[]){const u=data.users.find(x=>x.id===uid);if(u&&domain&&(u.domains||[]).length&&!u.domains!.includes(domain))throw Error(`${u.name}은(는) 이 도메인을 관리하지 않습니다.`)}if(entity==='site'&&record&&(team!==record.team||part!==record.part)&&data.stores.some(s=>s.siteId===record.id))throw Error('산하 매장이 있는 현장의 조직 변경은 별도 이관 절차가 필요합니다.');if(actor.role==='lead'&&team!==actor.team||actor.role==='partlead'&&(team!==actor.team||part!==actor.part))throw Error('소속 조직 범위에서만 등록할 수 있습니다.');
   if(!item.managerIds?.length||item.managerIds.some((u:string)=>!data.users.some(x=>x.id===u&&x.active&&x.team===team&&x.part===part)))throw Error('대상과 같은 팀·파트의 담당자를 1명 이상 선택해 주세요.');
   if(!['week','month','manual'].includes(item.rule?.period)||!Number.isInteger(item.rule?.count)||item.rule.count<1||item.rule.count>8||(item.rule.period==='week'&&item.rule.count>7))throw Error('주간 1~7회, 월간 1~8회 범위의 방문 회차를 입력해 주세요.');
   array=entity==='site'?next.sites:next.stores;if(array.some(t=>t.code===item.code&&t.id!==id))throw Error('이미 사용 중인 코드입니다.');

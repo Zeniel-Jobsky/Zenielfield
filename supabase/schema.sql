@@ -1,13 +1,20 @@
 -- Fresh ZeniField project only. No existing D1 or ZeniManager data is changed.
+create table public.zf_domains (
+ id text primary key, code text not null unique, name text not null,
+ active integer not null default 1 check(active in (0,1)), version integer not null,
+ data jsonb not null check(data->>'id'=id and data->>'code'=code and data->>'name'=name and (data->>'active')::integer=active and (data->>'version')::integer=version)
+);
 create table public.zf_users (
  id text primary key, subject text unique, email text not null unique check(email=lower(email)),
  name text not null, role text not null check(role in ('admin','director','lead','partlead','manager')),
- team text not null, part text not null, active integer not null default 1 check(active in (0,1)), version integer not null default 1
+ team text not null, part text not null, active integer not null default 1 check(active in (0,1)), version integer not null default 1,
+ domains text[] not null default '{}'
 );
 create table public.zf_sites (
- id text primary key, code text not null unique, team text not null, part text not null, version integer not null,
- data jsonb not null check(data->>'id'=id and (data->>'version')::integer=version and data->>'team'=team and data->>'part'=part and data->>'code'=code)
+ id text primary key, code text not null unique, team text not null, part text not null, version integer not null, domain text references public.zf_domains(id),
+ data jsonb not null check(data->>'id'=id and (data->>'version')::integer=version and data->>'team'=team and data->>'part'=part and data->>'code'=code and coalesce(data->>'domain','')=coalesce(domain,''))
 );
+create index zf_sites_domain_idx on public.zf_sites(domain);
 create table public.zf_stores (
  id text primary key, site_id text not null references public.zf_sites(id), code text not null unique, version integer not null,
  data jsonb not null check(data->>'id'=id and data->>'siteId'=site_id and data->>'code'=code and (data->>'version')::integer=version), unique(id,site_id)
@@ -66,7 +73,7 @@ create index zf_audit_entity_idx on public.zf_audit(entity,entity_id,created_at)
 -- No browser/Data API role receives direct record access. The authenticated
 -- Sites server calls a separately authenticated Edge Function; only its built-in
 -- service credential can execute these RPCs. Business authorization is enforced below.
-do $$ declare t text; begin foreach t in array array['zf_users','zf_sites','zf_stores','zf_assignments','zf_visits','zf_actions','zf_policy_versions','zf_audit'] loop
+do $$ declare t text; begin foreach t in array array['zf_domains','zf_users','zf_sites','zf_stores','zf_assignments','zf_visits','zf_actions','zf_policy_versions','zf_audit'] loop
  execute format('alter table public.%I enable row level security',t);
  execute format('revoke all on public.%I from public,anon,authenticated',t);
  execute format('grant select,insert,update on public.%I to service_role',t);
@@ -75,7 +82,7 @@ create function public.zf_can_target(actor public.zf_users,typ text,target text)
 language sql stable security invoker set search_path='' as $$
  select actor.active=1 and exists(select 1 from public.zf_sites s left join public.zf_stores st on st.site_id=s.id and typ='store' and st.id=target
  where ((typ='site' and s.id=target) or (typ='store' and st.id=target)) and
- (actor.role in ('admin','director') or actor.team=s.team and (actor.role='lead' or actor.part=s.part and
+ (actor.role in ('admin','director') or (cardinality(actor.domains)=0 or s.domain=any(actor.domains)) and actor.team=s.team and (actor.role='lead' or actor.part=s.part and
  (actor.role='partlead' or exists(select 1 from public.zf_assignments a where a.user_id=actor.id and a.end_date is null and a.target_type=typ and a.site_id=s.id and coalesce(a.store_id,a.site_id)=target)))))
 $$;
 create function public.zf_read(p_subject text,p_email text) returns jsonb language plpgsql security invoker set search_path='' as $$
@@ -86,7 +93,7 @@ declare actor public.zf_users; result jsonb; begin
   update public.zf_users set subject=p_subject where subject is null and email=lower(trim(p_email)) and active=1 returning * into actor;
  end if;
  if actor.id is null then raise exception 'DENIED'; end if;
- select jsonb_build_object('me',to_jsonb(actor)-'subject','users',coalesce((select jsonb_agg(case when actor.role='admin' or u.id=actor.id then to_jsonb(u)-'subject' else (to_jsonb(u)-'subject')||jsonb_build_object('email','') end) from public.zf_users u where actor.role in ('admin','director') or u.team=actor.team and(actor.role='lead' or u.part=actor.part)), '[]'::jsonb),
+ select jsonb_build_object('me',to_jsonb(actor)-'subject','domains',coalesce((select jsonb_agg(d.data order by d.name) from public.zf_domains d),'[]'::jsonb),'users',coalesce((select jsonb_agg(case when actor.role='admin' or u.id=actor.id then to_jsonb(u)-'subject' else (to_jsonb(u)-'subject')||jsonb_build_object('email','') end) from public.zf_users u where actor.role in ('admin','director') or u.team=actor.team and(actor.role='lead' or u.part=actor.part)), '[]'::jsonb),
  'sites',coalesce((select jsonb_agg(s.data) from public.zf_sites s where public.zf_can_target(actor,'site',s.id) or exists(select 1 from public.zf_stores st where st.site_id=s.id and public.zf_can_target(actor,'store',st.id))), '[]'::jsonb),
  'stores',coalesce((select jsonb_agg(st.data) from public.zf_stores st where public.zf_can_target(actor,'store',st.id)), '[]'::jsonb),
  'visits',coalesce((select jsonb_agg(v.data) from public.zf_visits v where public.zf_can_target(actor,v.target_type,coalesce(v.store_id,v.site_id))), '[]'::jsonb),
@@ -101,16 +108,24 @@ declare actor public.zf_users; old jsonb; target text; typ text; sid text; stid 
  select * into actor from public.zf_users where subject=p_subject and active=1;
  if actor.id is null then raise exception 'DENIED'; end if;
  if actor.role='director' then raise exception 'SCOPE'; end if;
- if p_entity not in ('user','site','store','visit','action') or p_item->>'id' is null then raise exception 'INVALID'; end if;
+ if p_entity not in ('domain','user','site','store','visit','action') or p_item->>'id' is null then raise exception 'INVALID'; end if;
  if length(p_item::text)>32000 then raise exception 'TOO_LARGE'; end if;
- if p_entity='user' then
+ if p_entity='domain' then
   if actor.role<>'admin' then raise exception 'SCOPE'; end if;
+  select data into old from public.zf_domains where id=p_item->>'id' for update;
+  if old is not null and (p_expected is null or (old->>'version')::integer<>p_expected) or old is null and p_expected is not null then raise exception 'CONFLICT'; end if;
+  nextversion=coalesce((old->>'version')::integer,0)+1; p_item=p_item||jsonb_build_object('version',nextversion,'active',coalesce((p_item->>'active')::integer,1));
+  insert into public.zf_domains(id,code,name,active,version,data) values(p_item->>'id',p_item->>'code',p_item->>'name',(p_item->>'active')::integer,nextversion,p_item)
+  on conflict(id) do update set code=excluded.code,name=excluded.name,active=excluded.active,version=excluded.version,data=excluded.data;
+ elsif p_entity='user' then
+  if actor.role<>'admin' then raise exception 'SCOPE'; end if;
+  if exists(select 1 from jsonb_array_elements_text(coalesce(p_item->'domains','[]'::jsonb)) d where not exists(select 1 from public.zf_domains z where z.id=d and z.active=1)) then raise exception 'DOMAIN'; end if;
   select to_jsonb(u) into old from public.zf_users u where id=p_item->>'id' for update;
   if old is not null and (p_expected is null or (old->>'version')::integer<>p_expected) then raise exception 'CONFLICT'; end if;
   if p_item->>'id'=actor.id and (p_item->>'role'<>'admin' or (p_item->>'active')::integer<>1) then raise exception 'SELF_ADMIN'; end if;
   nextversion=coalesce((old->>'version')::integer,0)+1;
-  insert into public.zf_users(id,email,name,role,team,part,active,version) values(p_item->>'id',lower(trim(p_item->>'email')),p_item->>'name',p_item->>'role',p_item->>'team',p_item->>'part',(p_item->>'active')::integer,nextversion)
-  on conflict(id) do update set email=excluded.email,name=excluded.name,role=excluded.role,team=excluded.team,part=excluded.part,active=excluded.active,version=excluded.version;
+  insert into public.zf_users(id,email,name,role,team,part,active,version,domains) values(p_item->>'id',lower(trim(p_item->>'email')),p_item->>'name',p_item->>'role',p_item->>'team',p_item->>'part',(p_item->>'active')::integer,nextversion,coalesce(array(select jsonb_array_elements_text(p_item->'domains')),'{}'))
+  on conflict(id) do update set email=excluded.email,name=excluded.name,role=excluded.role,team=excluded.team,part=excluded.part,active=excluded.active,version=excluded.version,domains=excluded.domains;
   -- Existing subjects and historical record owners are retained.
   select to_jsonb(u)-'subject' into p_item from public.zf_users u where id=p_item->>'id';
  else
@@ -135,12 +150,18 @@ declare actor public.zf_users; old jsonb; target text; typ text; sid text; stid 
    rule=p_item->'rule';
    if rule->>'period' not in ('week','month','manual') or (rule->>'count')::integer<1 or (rule->>'count')::integer>(case when rule->>'period'='week' then 7 else 8 end) then raise exception 'RULE'; end if;
    if old is not null and old->'rule'<>rule and exists(select 1 from public.zf_visits v where v.target_type=typ and coalesce(v.store_id,v.site_id)=target) then raise exception 'POLICY_LOCKED'; end if;
+   if p_entity='site' then
+    if coalesce(p_item->>'domain','')='' or not exists(select 1 from public.zf_domains d where d.id=p_item->>'domain' and d.active=1) then raise exception 'DOMAIN'; end if;
+    if actor.role not in ('admin','director') and not (p_item->>'domain'=any(actor.domains)) then raise exception 'DOMAIN'; end if;
+    if old is not null and coalesce(old->>'domain','')<>'' and old->>'domain'<>p_item->>'domain' and exists(select 1 from public.zf_stores where site_id=sid) then raise exception 'ORG_TRANSFER'; end if;
+   else p_item=p_item||jsonb_build_object('domain',targetdata->>'domain'); end if;
+   p_item=p_item||jsonb_build_object('division',coalesce((select d.name from public.zf_domains d where d.id=p_item->>'domain'),p_item->>'division',''));
    if jsonb_array_length(p_item->'managerIds')<1 then raise exception 'ASSIGNEE'; end if;
    for uid in select jsonb_array_elements_text(p_item->'managerIds') loop
-    if not exists(select 1 from public.zf_users u where u.id=uid and u.active=1 and u.team=targetdata->>'team' and u.part=targetdata->>'part') then raise exception 'ASSIGNEE'; end if;
+    if not exists(select 1 from public.zf_users u where u.id=uid and u.active=1 and u.team=targetdata->>'team' and u.part=targetdata->>'part' and (cardinality(u.domains)=0 or coalesce(p_item->>'domain','')='' or p_item->>'domain'=any(u.domains))) then raise exception 'ASSIGNEE'; end if;
    end loop;
    p_item=p_item||jsonb_build_object('startDate',coalesce(old->>'startDate',stamp::text));
-   if p_entity='site' then insert into public.zf_sites values(target,p_item->>'code',p_item->>'team',p_item->>'part',nextversion,p_item) on conflict(id) do update set code=excluded.code,team=excluded.team,part=excluded.part,version=excluded.version,data=excluded.data;
+   if p_entity='site' then insert into public.zf_sites(id,code,team,part,version,domain,data) values(target,p_item->>'code',p_item->>'team',p_item->>'part',nextversion,nullif(p_item->>'domain',''),p_item) on conflict(id) do update set code=excluded.code,team=excluded.team,part=excluded.part,version=excluded.version,domain=excluded.domain,data=excluded.data;
    else
     if old is not null and old->>'siteId'<>sid then raise exception 'IMMUTABLE_TARGET'; end if;
     insert into public.zf_stores values(target,sid,p_item->>'code',nextversion,p_item) on conflict(id) do update set code=excluded.code,version=excluded.version,data=excluded.data;
@@ -177,4 +198,4 @@ revoke all on function public.zf_read(text,text) from public,anon,authenticated;
 revoke all on function public.zf_write(text,text,text,jsonb,integer) from public,anon,authenticated;
 grant execute on function public.zf_can_target(public.zf_users,text,text),public.zf_read(text,text),public.zf_write(text,text,text,jsonb,integer) to service_role;
 -- Explicit defense in depth if a later change accidentally grants Data API roles.
-do $$ declare t text; begin foreach t in array array['zf_users','zf_sites','zf_stores','zf_assignments','zf_visits','zf_actions','zf_policy_versions','zf_audit'] loop execute format('create policy zf_server_only on public.%I as restrictive for all to anon,authenticated using (false) with check (false)',t); end loop; end; $$;
+do $$ declare t text; begin foreach t in array array['zf_domains','zf_users','zf_sites','zf_stores','zf_assignments','zf_visits','zf_actions','zf_policy_versions','zf_audit'] loop execute format('create policy zf_server_only on public.%I as restrictive for all to anon,authenticated using (false) with check (false)',t); end loop; end; $$;

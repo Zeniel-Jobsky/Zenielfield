@@ -4,6 +4,8 @@ var aiCategories = ["\uC778\uB825", "\uC2DC\uC124\xB7\uC548\uC804", "\uACE0\uAC1
 var aiUrgencies = ["\uB0AE\uC74C", "\uBCF4\uD1B5", "\uB192\uC74C"];
 var aiConfidences = ["low", "medium", "high"];
 var entryOf = (v) => v.entry === "ai" ? "ai" : "manual";
+var managesDomain = (me, domain) => ["admin", "director"].includes(me.role) || !!domain && (me.domains || []).includes(domain);
+var domainName = (data, id) => data.domains.find((d) => d.id === id)?.name || "";
 var dayShift = (day, n) => {
   const d = /* @__PURE__ */ new Date(day + "T12:00:00Z");
   d.setUTCDate(d.getUTCDate() + n);
@@ -11,9 +13,9 @@ var dayShift = (day, n) => {
 };
 var targetOf = (v) => v.targetType === "store" ? v.storeId || "missing-store" : v.siteId;
 function targetsOf(data) {
-  return [...data.sites.map((s) => ({ id: s.id, type: "site", siteId: s.id, storeId: null, name: s.name, siteName: s.name, team: s.team, part: s.part, division: s.division, region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null })), ...data.stores.map((s) => {
+  return [...data.sites.map((s) => ({ id: s.id, type: "site", siteId: s.id, storeId: null, name: s.name, siteName: s.name, team: s.team, part: s.part, division: s.division, domain: s.domain || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null })), ...data.stores.map((s) => {
     const p = data.sites.find((p2) => p2.id === s.siteId);
-    return { id: s.id, type: "store", siteId: s.siteId, storeId: s.id, name: s.name, siteName: p?.name || "\uBBF8\uC5F0\uACB0 \uD604\uC7A5", team: p?.team || "", part: p?.part || "", division: p?.division || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null };
+    return { id: s.id, type: "store", siteId: s.siteId, storeId: s.id, name: s.name, siteName: p?.name || "\uBBF8\uC5F0\uACB0 \uD604\uC7A5", team: p?.team || "", part: p?.part || "", division: p?.division || "", domain: p?.domain || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null };
   })];
 }
 function requirements(targets, start, end) {
@@ -41,9 +43,10 @@ function requirements(targets, start, end) {
 }
 function visibleTargets(targets, me) {
   if (["admin", "director"].includes(me.role)) return targets;
-  if (me.role === "lead") return targets.filter((t) => t.team === me.team);
-  if (me.role === "partlead") return targets.filter((t) => t.team === me.team && t.part === me.part);
-  return targets.filter((t) => t.managerIds.includes(me.id));
+  const inDomain = (t) => !(me.domains || []).length || (me.domains || []).includes(t.domain);
+  if (me.role === "lead") return targets.filter((t) => t.team === me.team && inDomain(t));
+  if (me.role === "partlead") return targets.filter((t) => t.team === me.team && t.part === me.part && inDomain(t));
+  return targets.filter((t) => t.managerIds.includes(me.id) && inDomain(t));
 }
 var validGeo = (g) => !!g && typeof g.lat === "number" && typeof g.lng === "number" && Number.isFinite(g.lat) && Number.isFinite(g.lng) && Math.abs(g.lat) <= 90 && Math.abs(g.lng) <= 180;
 function distanceM(a, b) {
@@ -74,7 +77,22 @@ function updateDemo(data, entity, values, record, actor, now) {
   const can = (targetId) => allowed.some((t) => t.id === targetId);
   let item = { ...values, id, version: (record?.version || 0) + 1 };
   let array;
-  if (entity === "site" || entity === "store") {
+  if (entity === "domain") {
+    if (actor.role !== "admin") throw Error("\uAD00\uB9AC \uB3C4\uBA54\uC778 \uB4F1\uB85D\uC740 \uC2DC\uC2A4\uD15C \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC785\uB2C8\uB2E4.");
+    const code = String(item.code || "").trim().toUpperCase(), name = String(item.name || "").trim();
+    if (!/^[A-Z0-9_-]{2,20}$/.test(code) || !name) throw Error("\uB3C4\uBA54\uC778 \uCF54\uB4DC(\uC601\uBB38\xB7\uC22B\uC790 2\u201320\uC790)\uC640 \uC774\uB984\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
+    if (next.domains.some((d) => d.id !== id && d.code === code)) throw Error("\uC774\uBBF8 \uC0AC\uC6A9 \uC911\uC778 \uB3C4\uBA54\uC778 \uCF54\uB4DC\uC785\uB2C8\uB2E4.");
+    item = { id, code, name, active: Number(item.active ?? 1) ? 1 : 0, version: item.version };
+    array = next.domains;
+  } else if (entity === "user") {
+    if (actor.role !== "admin") throw Error("\uC0AC\uC6A9\uC790 \uB4F1\uB85D\uC740 \uC2DC\uC2A4\uD15C \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC785\uB2C8\uB2E4.");
+    if (!item.name?.trim() || !/^[^@\s]+@[^@\s]+$/.test(item.email || "") || !item.team?.trim() || !item.part?.trim()) throw Error("\uC774\uB984, \uC774\uBA54\uC77C, \uD300, \uD30C\uD2B8\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
+    const domains = [...new Set((Array.isArray(item.domains) ? item.domains : []).filter((d) => typeof d === "string"))];
+    if (domains.some((d) => !next.domains.some((x) => x.id === d && x.active))) throw Error("\uD65C\uC131 \uAD00\uB9AC \uB3C4\uBA54\uC778\uB9CC \uC9C0\uC815\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
+    if (record?.id === actor.id && (item.role !== "admin" || Number(item.active) !== 1)) throw Error("\uBCF8\uC778\uC758 \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC740 \uD574\uC81C\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.");
+    item = { id, email: String(item.email).trim().toLowerCase(), name: item.name.trim(), role: item.role, team: item.team.trim(), part: item.part.trim(), active: Number(item.active) ? 1 : 0, domains, version: item.version };
+    array = next.users;
+  } else if (entity === "site" || entity === "store") {
     if (manager) throw Error("\uD604\uC7A5\xB7\uB9E4\uC7A5 \uB4F1\uB85D \uBC0F \uB2F4\uB2F9\uC790 \uBC30\uC815\uC740 \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC785\uB2C8\uB2E4.");
     if (!item.name?.trim() || !item.code?.trim() || !item.address?.trim()) throw Error("\uC774\uB984, \uCF54\uB4DC, \uC8FC\uC18C\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
     if (record && !can(record.id)) throw Error("\uB2F4\uB2F9 \uC870\uC9C1 \uBC94\uC704 \uBC16\uC758 \uB300\uC0C1\uC785\uB2C8\uB2E4.");
@@ -89,7 +107,19 @@ function updateDemo(data, entity, values, record, actor, now) {
     }
     const parent = entity === "store" ? data.sites.find((s) => s.id === item.siteId) : null;
     if (entity === "store" && (!parent || !can(parent.id))) throw Error("\uC18C\uC18D \uD604\uC7A5\uC744 \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
+    const domain = entity === "store" ? parent.domain || "" : String(item.domain || record?.domain || "");
+    if (entity === "site") {
+      if (!domain || !next.domains.some((d) => d.id === domain && d.active)) throw Error("\uD65C\uC131 \uAD00\uB9AC \uB3C4\uBA54\uC778\uC744 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.");
+      if (!managesDomain(actor, domain)) throw Error("\uBCF8\uC778\uC774 \uAD00\uB9AC\uD558\uB294 \uB3C4\uBA54\uC778\uC5D0\uB9CC \uB4F1\uB85D\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
+      if (record && record.domain && record.domain !== domain && data.stores.some((s) => s.siteId === record.id)) throw Error("\uC0B0\uD558 \uB9E4\uC7A5\uC774 \uC788\uB294 \uD604\uC7A5\uC758 \uB3C4\uBA54\uC778 \uBCC0\uACBD\uC740 \uBCC4\uB3C4 \uC774\uAD00 \uC808\uCC28\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4.");
+    }
+    item.domain = domain || void 0;
+    item.division = domainName(next, domain) || item.division || "";
     const team = parent?.team || item.team, part = parent?.part || item.part;
+    for (const uid of item.managerIds || []) {
+      const u = data.users.find((x) => x.id === uid);
+      if (u && domain && (u.domains || []).length && !u.domains.includes(domain)) throw Error(`${u.name}\uC740(\uB294) \uC774 \uB3C4\uBA54\uC778\uC744 \uAD00\uB9AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.`);
+    }
     if (entity === "site" && record && (team !== record.team || part !== record.part) && data.stores.some((s) => s.siteId === record.id)) throw Error("\uC0B0\uD558 \uB9E4\uC7A5\uC774 \uC788\uB294 \uD604\uC7A5\uC758 \uC870\uC9C1 \uBCC0\uACBD\uC740 \uBCC4\uB3C4 \uC774\uAD00 \uC808\uCC28\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4.");
     if (actor.role === "lead" && team !== actor.team || actor.role === "partlead" && (team !== actor.team || part !== actor.part)) throw Error("\uC18C\uC18D \uC870\uC9C1 \uBC94\uC704\uC5D0\uC11C\uB9CC \uB4F1\uB85D\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
     if (!item.managerIds?.length || item.managerIds.some((u) => !data.users.some((x) => x.id === u && x.active && x.team === team && x.part === part))) throw Error("\uB300\uC0C1\uACFC \uAC19\uC740 \uD300\xB7\uD30C\uD2B8\uC758 \uB2F4\uB2F9\uC790\uB97C 1\uBA85 \uC774\uC0C1 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.");

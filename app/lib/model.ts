@@ -1,5 +1,5 @@
-export type User={id:string;subject?:string|null;email:string;name:string;role:string;team:string;part:string;active:number};
-export type Site={id:string;code:string;name:string;client:string;team:string;part:string;address:string;cycle:string;priority:string;status:string;startDate:string;version:number};
+export type User={id:string;subject?:string|null;email:string;name:string;role:string;team:string;part:string;active:number;domains?:string[]};
+export type Site={id:string;code:string;name:string;client:string;domain?:string;team:string;part:string;address:string;cycle:string;priority:string;status:string;startDate:string;version:number};
 export type Assignment={id:string;siteId:string;userId:string;startDate:string;endDate:string|null};
 export type Visit={id:string;siteId:string;visitorId:string;plannedDate:string|null;time:string;purpose:string;precheck:string;actualDate:string|null;result:string;detail:string;status:string;cancelReason:string;version:number};
 export type Action={id:string;siteId:string;visitId:string|null;type:string;content:string;ownerId:string;dueDate:string;state:string;completedDate:string|null;version:number};

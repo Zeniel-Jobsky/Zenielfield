@@ -37,3 +37,8 @@
 
 - `tests/run-seed.mjs`: 지사·매장 수, 상위 현장 연결, 담당자, 코드 중복, 태그·purge, GPS 거리
 - PGlite에 `schema.sql` 적용 후 seed → 재적재 → purge → `zf_read` 조회 확인 (수동, 저장소 미포함)
+
+## 2026-10-28 갱신
+
+- `zf_domains` 적재 추가, 사용자 `domains`, 현장 `domain` 컬럼 포함
+- PGlite 검증: 도메인 3 · 현장 107 전부 도메인 지정 · 사용자 30 전부 도메인 보유

@@ -9,7 +9,7 @@ const coords=(r:Record<string,string>)=>{const lat=Number(r.lat),lng=Number(r.ln
 // 지사 = 현장(고객사 제니엘), 매장 후보 = 가장 가까운 지사 현장의 산하 매장. 담당은 리테일운영팀 1파트.
 export function buildSeed(now:string,branches:Csv,stores:Csv):PlatformData{
  const data=platformDemo(now),team='리테일운영팀',part='1파트',owners=data.users.filter(u=>u.team===team&&u.part===part).map(u=>u.id),begin=data.sites[0].startDate;
- const sites:FieldSite[]=branches.map(r=>({id:'zeniel-'+r.code.toLowerCase(),code:r.code,name:r.name,client:'제니엘',division:'유통사업부',team,part,address:r.address,region:r.address.split(' ')[0],managerIds:owners,rule:{period:'manual',count:1},cycle:'manual',priority:'보통',status:'운영 중',startDate:begin,version:1,...coords(r)} as FieldSite));
+ const dom=data.domains[0];const sites:FieldSite[]=branches.map(r=>({id:'zeniel-'+r.code.toLowerCase(),code:r.code,name:r.name,client:'제니엘',division:dom.name,domain:dom.id,team,part,address:r.address,region:r.address.split(' ')[0],managerIds:owners,rule:{period:'manual',count:1},cycle:'manual',priority:'보통',status:'운영 중',startDate:begin,version:1,...coords(r)} as FieldSite));
  const shops:Store[]=stores.map((r,i)=>{const at=coords(r),parent=[...sites].sort((a,b)=>distanceM(at,a as any)-distanceM(at,b as any))[0];return{id:'zeniel-'+r.code.toLowerCase(),siteId:parent.id,code:r.code,name:r.name,address:r.address,region:r.address.split(' ')[0],managerIds:[owners[i%owners.length]],rule:{period:'month',count:1},status:'운영 중',startDate:begin,version:1,...at}});
  return{...data,sites:[...data.sites,...sites],stores:[...data.stores,...shops]};
 }
@@ -25,10 +25,12 @@ delete from public.zf_policy_versions where target_id like 'demo-%' or target_id
 delete from public.zf_stores where data->>'seed'='${SEED_TAG}';
 delete from public.zf_sites where data->>'seed'='${SEED_TAG}';
 delete from public.zf_audit where actor_id like 'demo-%';
-delete from public.zf_users where id like 'demo-%';`;
+delete from public.zf_users where id like 'demo-%';
+delete from public.zf_domains where data->>'seed'='${SEED_TAG}';`;
 export function seedSql(d:PlatformData){return [
- chunk('zf_users','id,email,name,role,team,part,active,version',d.users.map(u=>`(${[u.id,u.email,u.name,u.role,u.team,u.part,u.active,1].map(lit).join(',')})`)),
- chunk('zf_sites','id,code,team,part,version,data',d.sites.map(s=>`(${[s.id,s.code,s.team,s.part,s.version].map(lit).join(',')},${js(tagged(s))})`)),
+ chunk('zf_domains','id,code,name,active,version,data',d.domains.map(x=>`(${[x.id,x.code,x.name,x.active,x.version].map(lit).join(',')},${js(tagged(x))})`)),
+ chunk('zf_users','id,email,name,role,team,part,active,version,domains',d.users.map(u=>`(${[u.id,u.email,u.name,u.role,u.team,u.part,u.active,1].map(lit).join(',')},array[${(u.domains||[]).map(lit).join(',')}]::text[])`)),
+ chunk('zf_sites','id,code,team,part,version,domain,data',d.sites.map(s=>`(${[s.id,s.code,s.team,s.part,s.version,s.domain||null].map(lit).join(',')},${js(tagged(s))})`)),
  chunk('zf_stores','id,site_id,code,version,data',d.stores.map(s=>`(${[s.id,s.siteId,s.code,s.version].map(lit).join(',')},${js(tagged(s))})`)),
  chunk('zf_assignments','target_type,site_id,store_id,user_id,start_date',[...d.sites.flatMap(s=>s.managerIds.map(u=>`('site',${lit(s.id)},null,${lit(u)},${lit(s.startDate)})`)),...d.stores.flatMap(s=>s.managerIds.map(u=>`('store',${lit(s.siteId)},${lit(s.id)},${lit(u)},${lit(s.startDate)})`))]),
  chunk('zf_policy_versions','target_type,target_id,rule',[...d.sites.map(s=>`('site',${lit(s.id)},${js(s.rule)})`),...d.stores.map(s=>`('store',${lit(s.id)},${js(s.rule)})`)]),
