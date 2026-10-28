@@ -13,7 +13,9 @@ export const REPEAT_DAYS=90;
 const days=(a:string,b:string)=>Math.round((Date.parse(b+'T12:00:00Z')-Date.parse(a+'T12:00:00Z'))/86400000);
 const within=(d:string|null,a:string,b:string)=>!!d&&d>=a&&d<=b;
 const unique=<T extends {id:string}>(rows:T[])=>[...new Map(rows.map(r=>[r.id,r])).values()];
-export function normalize(input:DxInput){const ids=new Set(input.targets.map(t=>t.id));return{targets:unique(input.targets),issues:unique(input.issues).filter(a=>ids.has(a.targetId)),visits:unique(input.visits).filter(v=>ids.has(v.targetId))}}
+// 같은 입력은 한 번만 정규화한다(진단·주차 진단·상세가 같은 입력으로 여러 번 부른다).
+const normalized=new WeakMap<DxInput,{targets:DxInput['targets'];issues:DxInput['issues'];visits:DxInput['visits']}>();
+export function normalize(input:DxInput){const hit=normalized.get(input);if(hit)return hit;const ids=new Set(input.targets.map(t=>t.id));const out={targets:unique(input.targets),issues:unique(input.issues).filter(a=>ids.has(a.targetId)),visits:unique(input.visits).filter(v=>ids.has(v.targetId))};normalized.set(input,out);return out}
 export function flagIssues(issues:DxIssue[],owners:Set<string>,now:string):DxIssueRow[]{
  const groups=new Map<string,DxIssue[]>();for(const a of issues){const key=a.targetId+'|'+a.type;groups.set(key,[...(groups.get(key)||[]),a])}
  return issues.map(a=>{const open=a.state!=='완료',peers=groups.get(a.targetId+'|'+a.type)!.filter(b=>b.id!==a.id);

@@ -438,3 +438,12 @@
 
 .ai-brief-out .rich,.ai-brief-out .rich b,.ai-brief-out .rich em{display:inline}
 .ai-brief-grid li>span.rich{display:inline}
+
+/* 메뉴·필터 전환 중 상단 진행 막대 + 본문 살짝 흐리게 */
+.route-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:80;pointer-events:none;opacity:0;transition:opacity .15s}
+.route-progress.on{opacity:1}
+.route-progress i{display:block;height:100%;width:40%;background:#003c33;transform:translateX(-100%)}
+.route-progress.on i{animation:route-slide 1s ease-in-out infinite}
+@keyframes route-slide{to{transform:translateX(260%)}}
+.workspace-content.is-pending{opacity:.6;transition:opacity .12s .08s}
+@media(prefers-reduced-motion:reduce){.route-progress.on i{animation:none;width:100%;transform:none;opacity:.5}.workspace-content.is-pending{transition:none}}
