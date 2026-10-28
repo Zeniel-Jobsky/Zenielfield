@@ -25,6 +25,8 @@ else{
  const applied=new Map();
  if(!dry)await query(ledger);
  try{for(const row of await query('select name,checksum from public.zf_schema_migrations'))applied.set(row.name,row.checksum)}catch(e){if(!dry)throw e;console.log('이력 표(zf_schema_migrations)가 아직 없습니다. 첫 실행 때 만들어집니다.')}
+ // 첫 실행(이력 표가 비어 있음)에는 APPLIED_BASELINE 에 적힌 파일을 실행하지 않고 적용됨으로 기록한다. 손으로 적용한 이관을 다시 돌리지 않기 위해서다.
+ if(!applied.size){try{for(const line of readFileSync(resolve(dir,'APPLIED_BASELINE'),'utf8').split(/\r?\n/)){const f=line.trim();if(f&&!f.startsWith('#')&&files.includes(f)&&!mark.includes(f))mark.push(f)}}catch{}}
  for(const f of mark){
   if(!files.includes(f)){console.error(`없는 파일: ${f}`);process.exitCode=1;continue}
   if(applied.has(f))continue;
