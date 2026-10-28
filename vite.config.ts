@@ -55,6 +55,26 @@ function buildInfo() {
   return { version, commit, at };
 }
 
+// /version.json: 지금 서버가 내보내는 버전. 화면은 이 값을 주기적으로 읽어 자기 빌드와 다르면 "새 버전" 알림을 띄운다.
+// 빌드: 클라이언트 산출물에 파일로 넣는다. 개발 서버: 요청마다 현재 HEAD 기준으로 계산한다(pull 뒤 재시작 필요 여부 확인용).
+function versionFile(build: ReturnType<typeof buildInfo>) {
+  return {
+    name: "zf-version-file",
+    configureServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: { setHeader: (k: string, v: string) => void; end: (s: string) => void }, next: () => void) => void) => void } }) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url?.split("?")[0] !== "/version.json") return next();
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader("Cache-Control", "no-store");
+        res.end(JSON.stringify({ ...buildInfo(), dev: true }));
+      });
+    },
+    generateBundle(this: { environment?: { name?: string }; emitFile: (f: { type: "asset"; fileName: string; source: string }) => void }) {
+      if (this.environment && this.environment.name !== "client") return;
+      this.emitFile({ type: "asset", fileName: "version.json", source: JSON.stringify({ ...build, dev: false }) });
+    },
+  };
+}
+
 export default defineConfig(async ({ command }) => {
   configureToolEnvironment(process.cwd());
   const build = buildInfo();
@@ -80,6 +100,7 @@ export default defineConfig(async ({ command }) => {
       ...(local.server ?? {}),
     },
     plugins: [
+      versionFile(build),
       vinext(),
       sites({ mockAuth: !managedLinux }),
       connectorPreview(),

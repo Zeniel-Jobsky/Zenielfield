@@ -61,3 +61,4 @@ yarn-error.log*
 /.dev-server.pid
 /.dev-server.log
 /.preview.log
+/.build.log

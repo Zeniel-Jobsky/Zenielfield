@@ -447,3 +447,10 @@
 @keyframes route-slide{to{transform:translateX(260%)}}
 .workspace-content.is-pending{opacity:.6;transition:opacity .12s .08s}
 @media(prefers-reduced-motion:reduce){.route-progress.on i{animation:none;width:100%;transform:none;opacity:.5}.workspace-content.is-pending{transition:none}}
+
+/* 새 버전 알림: 화면 아래 가운데 띠, 흰 바탕·구분선(그림자 없음) */
+.update-notice{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:calc(100% - 32px);padding:10px 12px 10px 16px;background:#ffffff;border:1px solid #cfd9d3;border-top:3px solid #003c33;border-radius:8px;font-size:13px;color:#36443e}
+.update-notice b{color:#17171c;font-weight:600;margin-right:6px}
+.update-notice small{color:#65726b;font-size:12px;margin-left:6px}
+.update-notice code{font-size:12px}
+@media(max-width:760px){.update-notice{bottom:84px;left:16px;right:16px;transform:none;max-width:none}.update-notice .btn{min-height:44px}}
