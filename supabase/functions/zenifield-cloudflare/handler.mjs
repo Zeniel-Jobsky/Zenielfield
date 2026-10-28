@@ -1,6 +1,8 @@
 import {createHandler} from '../zenifield-gateway/handler.mjs';
 
+// tokenHash: one hash or a list (Cloudflare Worker token, Sites server token). Both are server-only secrets.
 export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
+ const hashes=(Array.isArray(tokenHash)?tokenHash:[tokenHash]).filter(Boolean);
  const reply=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
  const serviceHeaders={apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'};
  const call=(path,init={})=>fetcher(url+path,{...init,headers:{...serviceHeaders,...init.headers},signal:AbortSignal.timeout(15000)});
@@ -20,7 +22,7 @@ export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
   if(request.method!=='POST')return reply({error:'지원하지 않는 요청입니다.'},405);
   const token=request.headers.get('x-zenifield-gateway')||'';
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token)))).map(x=>x.toString(16).padStart(2,'0')).join('');
-  if(!tokenHash||digest!==tokenHash)return reply({error:'인증되지 않은 서버 요청입니다.'},401);
+  if(!hashes.includes(digest))return reply({error:'인증되지 않은 서버 요청입니다.'},401);
   try {
    const text=await request.text();if(text.length>65536)return reply({error:'입력 크기를 줄여주세요.'},413);
    const body=JSON.parse(text);
@@ -34,7 +36,31 @@ export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
     if(!r.ok)return reply({error:r.status===429?'잠시 후 로그인 링크를 다시 요청해 주세요.':'인증 메일을 보내지 못했습니다. 이메일 발송 설정을 확인해 주세요.'},r.status===429?429:502);
     return reply({ok:true});
    }
+   const validPassword=p=>typeof p==='string'&&p.length>=8&&p.length<=72;
+   // Sets an Auth password for a registered, active zf_users email. Creates the Auth user when missing.
+   async function setPassword(email,password) {
+    if(!await profile(email))return reply({error:'등록된 활성 사용자가 아닙니다.'},404);
+    const created=await call('/auth/v1/admin/users',{method:'POST',body:JSON.stringify({email,password,email_confirm:true})});
+    if(created.ok)return reply({ok:true,created:true});
+    for(let page=1;page<=20;page++){const r=await call('/auth/v1/admin/users?per_page=200&page='+page);if(!r.ok)break;const list=(await r.json()).users||[];const hit=list.find(u=>(u.email||'').toLowerCase()===email);
+     if(hit){const u=await call('/auth/v1/admin/users/'+hit.id,{method:'PUT',body:JSON.stringify({password,email_confirm:true})});return u.ok?reply({ok:true,created:false}):reply({error:'비밀번호를 설정하지 못했습니다.'},502)}if(list.length<200)break}
+    return reply({error:'인증 계정을 만들지 못했습니다.'},502);
+   }
+   // Operator path: only callers holding the server token reach it; the Worker never forwards this operation.
+   if(body.operation==='operator-set-password') {
+    const email=typeof body.email==='string'?body.email.trim().toLowerCase():'';
+    if(!/^\S+@\S+\.\S+$/.test(email)||!validPassword(body.password))return reply({error:'이메일과 8자 이상 비밀번호를 확인하세요.'},400);
+    return await setPassword(email,body.password);
+   }
    let session=null,accessToken=typeof body.accessToken==='string'?body.accessToken:'';
+   if(body.operation==='password-login') {
+    const email=typeof body.email==='string'?body.email.trim().toLowerCase():'';
+    if(!/^\S+@\S+\.\S+$/.test(email)||!validPassword(body.password))return reply({error:'이메일과 비밀번호를 확인하세요.'},400);
+    if(!await profile(email))return reply({error:'이메일 또는 비밀번호가 올바르지 않습니다.'},401);
+    const r=await call('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password:body.password})});
+    if(!r.ok)return reply({error:r.status===429?'잠시 후 다시 시도해 주세요.':'이메일 또는 비밀번호가 올바르지 않습니다.'},r.status===429?429:401);
+    session=await r.json();accessToken=session.access_token;
+   }
    if(body.operation==='exchange-code') {
     if(typeof body.authCode!=='string'||typeof body.codeVerifier!=='string'||body.authCode.length>200||body.codeVerifier.length>200)return reply({error:'로그인 링크를 확인하세요.'},400);
     const r=await call('/auth/v1/token?grant_type=pkce',{method:'POST',body:JSON.stringify({auth_code:body.authCode,code_verifier:body.codeVerifier})});
@@ -56,7 +82,13 @@ export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
     await call('/auth/v1/logout?scope=local',{method:'POST',headers:{Authorization:'Bearer '+accessToken}});
     return reply({ok:true});
    }
-   if(body.operation==='exchange-code'||body.operation==='session') {
+   if(body.operation==='set-password') {
+    if(actor.role!=='admin')return reply({error:'시스템 관리자만 비밀번호를 설정할 수 있습니다.'},403);
+    const email=typeof body.targetEmail==='string'?body.targetEmail.trim().toLowerCase():'';
+    if(!/^\S+@\S+\.\S+$/.test(email)||!validPassword(body.password))return reply({error:'이메일과 8자 이상 비밀번호를 확인하세요.'},400);
+    return await setPassword(email,body.password);
+   }
+   if(body.operation==='exchange-code'||body.operation==='session'||body.operation==='password-login') {
     return reply({ok:true,me:{id:actor.id,email:actor.email,name:actor.name,role:actor.role},...(session?{session}:{} )});
    }
    if(!['read','save'].includes(body.operation))return reply({error:'지원하지 않는 요청입니다.'},400);

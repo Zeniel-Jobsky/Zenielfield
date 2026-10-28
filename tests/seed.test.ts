@@ -13,10 +13,10 @@ ok(new Set([...d.sites,...d.stores].map(t=>t.code)).size,d.sites.length+d.stores
 const sql=seedSql(d);ok(sql.includes(`"seed":"${SEED_TAG}"`),true);ok(purgeSql().split('\n').filter(l=>l.startsWith('delete')).length,9);
 const store=d.stores.find(real)!,admin={...d.users[0],role:'admin'};ok(updateDemo(d,'visit',{targetType:'store',siteId:store.siteId,storeId:store.id,visitorId:store.managerIds[0],plannedDate:null,time:'',purpose:'현장 정기점검',precheck:'',status:'completed',actualDate:now,actualTime:'',detail:'시드 매장 방문',notes:'',result:'특이사항 없음',cancelReason:'',requirementId:null,geo:{lat:store.lat,lng:store.lng,accuracy:5,at:now}},null,admin,now).item.geo.distance,0);
 {const base=JSON.parse(fs.readFileSync('data/hrbiz-demo.json','utf8'));base.audit=[];const h=buildSeed(now,parseCsv(fs.readFileSync('data/zeniel-branches-geo.csv','utf8')),parseCsv(fs.readFileSync('data/zeniel-stores-candidates-geo.csv','utf8')),base);
- ok([base.users.length,base.sites.length,base.stores.length,base.visits.length,base.actions.length],[30,100,500,1800,972]);ok([h.sites.length,h.stores.length],[107,554]);
+ ok([base.users.length,base.sites.length,base.stores.length,base.visits.length,base.actions.length],[41,100,500,1800,972]);ok([h.sites.length,h.stores.length],[107,554]);
  const sites=new Set(h.sites.map(s=>s.id)),stores=new Set(h.stores.map(s=>s.id)),users=new Set(h.users.map(u=>u.id)),visits=new Set(h.visits.map(v=>v.id));
  ok(h.visits.every(v=>sites.has(v.siteId)&&users.has(v.visitorId)&&(v.targetType==='site'?v.storeId===null:stores.has(v.storeId!))&&v.status==='completed'&&!!v.actualDate),true);
  ok(h.actions.every(a=>sites.has(a.siteId)&&users.has(a.ownerId)&&(!a.visitId||visits.has(a.visitId))&&['조치 예정','처리 중','보류','완료'].includes(a.state)&&/^\d{4}-\d{2}-\d{2}$/.test(a.dueDate)),true);
- ok(h.actions.filter(a=>a.state==='완료').every(a=>!!a.completedDate),true);ok(h.users.every(u=>u.domains?.length===1),true);ok(h.sites.every(s=>!!s.domain&&s.managerIds.length>0),true);
+ ok(h.actions.filter(a=>a.state==='완료').every(a=>!!a.completedDate),true);ok(h.users.filter(u=>!['admin','director'].includes(u.role)).every(u=>u.domains?.length===1),true);ok(h.users.filter(u=>u.email.endsWith('@example.test')&&u.role!=='manager').length,11);ok(h.sites.every(s=>!!s.domain&&s.managerIds.length>0),true);
  ok(new Set(h.stores.map(s=>s.rule.period)).size>1,true);ok(h.stores.filter(s=>typeof s.lat==='number').length>=25,true)}
 console.log(`${n} seed assertions passed: real branches/stores, parent links, assignees, unique codes, tag and purge.`);

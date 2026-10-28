@@ -9,7 +9,12 @@ const localUserId = "local_seedy";
 const localEmail = "seedy@sites.test";
 const localFullName = "Seedy";
 const localCookieName = "__sites_local_auth";
-const localHosts = new Set(["localhost", "127.0.0.1", "::1"]);
+const localHosts = new Set(["localhost", "127.0.0.1", "::1", ...(process.env.DEV_HOST ? [process.env.DEV_HOST] : [])]);
+// ZeniField: seeded test accounts (@example.test) can sign in locally as themselves. Real emails never.
+const testAccount = /^[a-z0-9._-]{1,60}@example\.test$/;
+const encodeAs = (email: string) => Buffer.from(email).toString("base64url");
+const decodeAs = (value: string) => { try { const email = Buffer.from(value, "base64url").toString(); return testAccount.test(email) ? email : null; } catch { return null; } };
+const isTailnet = (address: string) => { const m = address.replace(/^::ffff:/, "").match(/^100\.(\d+)\./); return !!m && +m[1] >= 64 && +m[1] <= 127; };
 const localAddresses = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
 const authPaths = new Set([
   "/signin-with-chatgpt",
@@ -72,7 +77,7 @@ export function sites({ mockAuth = true } = {}): Plugin {
           .toLowerCase();
         if (
           !localHosts.has(hostname) ||
-          !localAddresses.has(request.socket.remoteAddress ?? "") ||
+          !(localAddresses.has(request.socket.remoteAddress ?? "") || (!!process.env.DEV_HOST && hostname === process.env.DEV_HOST && isTailnet(request.socket.remoteAddress ?? ""))) ||
           url.origin !== authority.origin
         ) {
           if (authPaths.has(url.pathname)) respond(response, 403);
@@ -105,7 +110,13 @@ export function sites({ mockAuth = true } = {}): Plugin {
         const signIn = url.pathname === "/signin-with-chatgpt";
         const signOut = url.pathname === "/signout-with-chatgpt";
         if (!signIn && !signOut) {
-          if (signInCookies.length === 1 && signInCookies[0] === "1") {
+          const as = signInCookies.length === 1 && signInCookies[0] !== "1" ? decodeAs(signInCookies[0]) : null;
+          if (as) {
+            setHeader(request, "oai-authenticated-user-id", "local_" + as.split("@")[0]);
+            setHeader(request, "oai-authenticated-user-email", as);
+            setHeader(request, "oai-authenticated-user-full-name", encodeURIComponent(as.split("@")[0]));
+            setHeader(request, "oai-authenticated-user-full-name-encoding", "percent-encoded-utf-8");
+          } else if (signInCookies.length === 1 && signInCookies[0] === "1") {
             setHeader(request, "oai-authenticated-user-id", localUserId);
             setHeader(request, "oai-authenticated-user-email", localEmail);
             setHeader(
@@ -163,7 +174,7 @@ export function sites({ mockAuth = true } = {}): Plugin {
         );
         response.setHeader(
           "Set-Cookie",
-          `${localCookieName}=${signIn ? "1" : ""}; Path=/; ${
+          `${localCookieName}=${signIn ? (url.searchParams.get("as") && testAccount.test(url.searchParams.get("as")!) ? encodeAs(url.searchParams.get("as")!) : "1") : ""}; Path=/; ${
             signOut ? "Max-Age=0; " : ""
           }HttpOnly; SameSite=Lax${secure ? "; Secure" : ""}`,
         );

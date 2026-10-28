@@ -86,3 +86,14 @@
 - [ ] Supabase access token(`sbp_`) 폐기 또는 보관 위치 결정
 
 관련 문서: [Supabase 설정·운영 인계](supabase-setup.md), [플랫폼 업무 구조](platform-integration.md), [주간 브리핑](weekly-briefing.md), [대시보드 개선 계획](dashboard-plan.md).
+
+## 회사 계정 로그인 (2026-10-28)
+
+- 앱 첫 화면 = 로그인. 로그인 후 실제 DB로 동작, 데모는 앱 안 전환 또는 `?mode=demo`
+- 방식: 등록 이메일 + 비밀번호 (Supabase Auth). 비밀번호 없으면 이메일 링크
+- 전환: `ZENIFIELD_AUTH_PROVIDER=supabase-email` (로컬 `.env`, Cloudflare vars). 비우면 기존 Sites(ChatGPT) 로그인
+- 계정 발급: 설정 → "로그인 비밀번호 발급·재설정"(시스템 관리자) 또는 `node --env-file=.env scripts/set-password.mjs <email> <비밀번호>`(서버 토큰 보유자)
+- 등록(zf_users)에 없는 이메일은 비밀번호가 있어도 로그인 불가
+- Edge `zenifield-cloudflare` 재배포: Sites 서버 토큰도 허용(로컬·Sites 서버가 같은 로그인 경로 사용)
+- 로컬 개발 전용: `@example.test` 시드 계정 역할별 로그인 버튼 (ChatGPT 모드에서만 표시)
+- 방문 1만 건(`…-extra-01~05`, 출처 표시 없음): 기존 데이터. 묶음(dataset)으로 보존 예정, 시드 `apply` 전 처리 필요

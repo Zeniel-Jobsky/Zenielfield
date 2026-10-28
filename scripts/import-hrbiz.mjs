@@ -14,6 +14,11 @@ const domains=[{id:'dom-hr',code:'HR',name:'인재사업',active:1,version:1},{i
 const domainOfTeam=team=>/^SE/.test(team)?'dom-se':'dom-hr';
 const U=sheet('잡매니저_30명'),S=sheet('현장_100개'),T=sheet('매장_500개'),V=sheet('방문기록_DB'),A=sheet('후속조치_DB');
 const users=U.map(u=>({id:idOf('jm',u['잡매니저ID']),name:String(u['잡매니저명(가명)']||u['잡매니저명']).trim(),email:`${String(u['잡매니저ID']).toLowerCase()}@example.test`,role:'manager',team:u['팀'],part:u['파트'],active:/재직/.test(u['상태'])||!u['상태']?1:0,domains:[domainOfTeam(u['팀'])]}));
+// 역할별 테스트 계정: 관리자·사업부장·팀장(팀별)·파트장(파트별). 로컬 개발 로그인(@example.test) 전용.
+const teams=[...new Set(U.map(u=>u['팀']))],parts=[...new Set(U.map(u=>u['파트']))];
+users.push({id:'demo-admin',name:'HR-biz 관리자',email:'admin@example.test',role:'admin',team:'HR-biz 사업부',part:'운영지원',active:1,domains:[]},{id:'demo-director',name:'HR-biz 사업부장',email:'director@example.test',role:'director',team:'HR-biz 사업부',part:'사업부',active:1,domains:[]},
+ ...teams.map((t,i)=>({id:'demo-lead-'+(i+1),name:t+' 팀장',email:`lead${i+1}@example.test`,role:'lead',team:t,part:parts.find(p=>p.startsWith(t))||'A파트',active:1,domains:[domainOfTeam(t)]})),
+ ...parts.map((p,i)=>{const t=U.find(u=>u['파트']===p)['팀'];return{id:'demo-partlead-'+(i+1),name:p+' 파트장',email:`partlead${i+1}@example.test`,role:'partlead',team:t,part:p,active:1,domains:[domainOfTeam(t)]}}));
 const uid=Object.fromEntries(U.map(u=>[u['잡매니저ID'],idOf('jm',u['잡매니저ID'])]));
 const visitDates=V.map(v=>day(v['방문일'])).filter(Boolean).sort(),startDate=visitDates[0]||'2026-01-01';
 const sites=S.map(s=>({id:idOf('site',s['현장ID']),code:s['현장ID'],name:s['현장명'],client:s['고객사(가상)']||s['고객사']||'',division:'HR-biz 사업부',domain:domainOfTeam(s['담당팀']),team:s['담당팀'],part:s['담당파트'],address:`${s['운영권역']} · ${s['대표 방문지역']}`,region:String(s['대표 방문지역']).replace(/권$/,''),managerIds:[uid[s['담당자ID']]].filter(Boolean),rule:rule(s['현장 방문주기']),cycle:String(s['현장 방문주기']),priority:'보통',status:s['운영상태']||'운영 중',startDate,version:1,lat:null,lng:null,source:s['데이터구분']}));

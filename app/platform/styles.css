@@ -306,3 +306,14 @@
  .risk-head small{display:none}
  .risk-head span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
+.dev-login{display:flex;flex-direction:column;gap:8px;margin:14px 0;padding:14px;border:1px dashed #c3cddb;border-radius:10px;text-align:left}
+.dev-login small{color:#6d7f9c;font-size:11px}
+.dev-login>div{display:flex;flex-wrap:wrap;gap:6px}
+.password-setter{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid #eef2f8;font-size:12px}
+.password-setter select,.password-setter input{height:32px;font-size:12px;min-width:160px}
+.password-setter small{width:100%;color:#5d708f}
+.email-login{display:flex;flex-direction:column;gap:8px;text-align:left}
+.email-login .textbtn{align-self:flex-start;font-size:12px}
+.login-screen .panel{max-width:420px;text-align:left}
+.login-screen h1{font-size:24px;margin:0 0 4px}
+.login-screen .panel>p{margin:0 0 16px;color:#6d7f9c;font-size:13px}
