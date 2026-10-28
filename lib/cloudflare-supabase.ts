@@ -1,5 +1,6 @@
 import {assistVisit} from '../app/api/assist/server';
-type Bindings={ZENIFIELD_SUPABASE_URL?:string;ZENIFIELD_GATEWAY_TOKEN?:string;OPENAI_API_KEY?:string;OPENAI_MODEL?:string};
+import {geoSearch} from '../app/api/geo/server';
+type Bindings={ZENIFIELD_SUPABASE_URL?:string;ZENIFIELD_GATEWAY_TOKEN?:string;OPENAI_API_KEY?:string;OPENAI_MODEL?:string;KAKAO_REST_API_KEY?:string};
 const ACCESS='__Host-zf-access',REFRESH='__Host-zf-refresh';
 const VERIFIER='__Host-zf-verifier';
 const base64url=(bytes:Uint8Array)=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -17,10 +18,10 @@ export async function handleCloudflareSupabase(request:Request,env:Bindings,fetc
  if(path==='/api/auth/config')return response({provider:'supabase-email'});
  if(path==='/signin-with-chatgpt'||path==='/callback')return Response.redirect(url.origin+'/?mode=supabase',302);
  if(path==='/signout-with-chatgpt')return response({error:'화면의 로그아웃 버튼을 이용해 주세요.'},405);
- const callback=path==='/auth/callback',auth=path.startsWith('/api/auth/')||callback,platform=path==='/api/platform',assist=path==='/api/assist';
- if(!auth&&!platform&&!assist){if(path.startsWith('/api/'))return response({error:'기존 D1 운영은 Sites 인증 환경에서 이용해 주세요.'},503);return null;}
+ const callback=path==='/auth/callback',auth=path.startsWith('/api/auth/')||callback,platform=path==='/api/platform',assist=path==='/api/assist',geo=path==='/api/geo';
+ if(!auth&&!platform&&!assist&&!geo){if(path.startsWith('/api/'))return response({error:'기존 D1 운영은 Sites 인증 환경에서 이용해 주세요.'},503);return null;}
  const operations:Record<string,string>={'/api/auth/request-link':'request-link','/auth/callback':'exchange-code','/api/auth/logout':'logout','/api/auth/session':'session'};
- const operation=assist?'session':platform?(request.method==='POST'?'save':'read'):operations[path];
+ const operation=(assist||geo)?'session':platform?(request.method==='POST'?'save':'read'):operations[path];
  if(!operation)return response({error:'지원하지 않는 요청입니다.'},404);
  const expected=assist?'POST':['read','session','exchange-code'].includes(operation)?'GET':'POST';
  if(request.method!==expected)return response({error:'지원하지 않는 요청입니다.'},405);
@@ -40,13 +41,14 @@ export async function handleCloudflareSupabase(request:Request,env:Bindings,fetc
   if(r.ok)setSession(headers,data.session);
   if(r.ok&&verifier)headers.append('Set-Cookie',`${VERIFIER}=${verifier}; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=Lax`);
   if(operation==='logout'||r.status===401||r.status===403)clearSession(headers);
-  if(assist&&r.ok){
+  if((assist||geo)&&r.ok){
    if(!data.me?.id)return response({error:'등록된 사용자만 이용할 수 있습니다.'},403);
    const trusted=new Headers(request.headers);
    for(const name of [...trusted.keys()])if(name.startsWith('oai-authenticated-user-'))trusted.delete(name);
    trusted.set('oai-authenticated-user-id',data.me.id);
    trusted.set('oai-authenticated-user-email',data.me.email);
-   const draft=await assistVisit(new Request(request,{headers:trusted}),env,fetcher);
+   const authorized=new Request(request,{headers:trusted});
+   const draft=await (geo?geoSearch(authorized,env,fetcher):assistVisit(authorized,env,fetcher));
    const merged=new Headers(headers);
    for(const [name,value] of draft.headers)merged.set(name,value);
    return new Response(draft.body,{status:draft.status,headers:merged});

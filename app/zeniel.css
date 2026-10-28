@@ -560,7 +560,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  .app-shell .filterbar-period>select {grid-column:2;grid-row:1;width:108px;max-width:none;min-height:44px;font-size:16px}
  .app-shell .filterbar .reset-button {grid-column:3;grid-row:1;width:44px;min-width:44px;min-height:44px;padding:0;justify-content:center}
  .app-shell .reset-button>span {display:none}
- .app-shell .filter-selects {grid-column:1/-1;grid-row:3;min-width:0;gap:8px}
+ .app-shell .filter-selects {display:none;grid-column:1/-1;grid-row:3;min-width:0;gap:8px}
  .app-shell .filterbar-open .filter-selects {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
  .app-shell .filter-selects select {min-height:44px;font-size:16px}
  .app-shell .filterbar-open .date-range {grid-column:1/-1;grid-row:2;display:flex;width:100%;max-width:none;min-width:0;gap:6px;padding:0 8px;min-height:44px}

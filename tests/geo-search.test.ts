@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {geoSearch,searchPlaces} from '../app/api/geo/server';
+let n=0;const ok=(a:any,b:any)=>{assert.deepEqual(a,b);n++};
+const fake=(docs:Record<string,any[]>):typeof fetch=>(async(url:string)=>Response.json({documents:docs[url.includes('/address.json')?'address':'keyword']}))as any;
+ok(await searchPlaces('서울 성동구 뚝섬로 379','k',fake({address:[{address_name:'서울 성동구 성수동2가 333-16',road_address:{address_name:'서울 성동구 뚝섬로 379'},x:'127.0559',y:'37.5446'}],keyword:[]})),[{name:'서울 성동구 성수동2가 333-16',address:'서울 성동구 성수동2가 333-16',roadAddress:'서울 성동구 뚝섬로 379',category:'',lat:37.5446,lng:127.0559}]);
+ok((await searchPlaces('이마트 성수점','k',fake({address:[],keyword:[{place_name:'이마트 성수점',address_name:'서울 성동구 성수동2가 333-16',road_address_name:'서울 성동구 뚝섬로 379',category_name:'가정,생활 > 대형마트',x:'127.0559',y:'37.5446'}]})))[0].name,'이마트 성수점');
+const req=(q:string,auth=true)=>new Request('https://x.test/api/geo?q='+encodeURIComponent(q),{headers:auth?{'oai-authenticated-user-id':'u'}:{}});
+ok((await geoSearch(req('a b',false),{KAKAO_REST_API_KEY:'k'})).status,401);ok((await geoSearch(req('ab'),{})).status,503);ok((await geoSearch(req('a'),{KAKAO_REST_API_KEY:'k'})).status,400);
+ok((await geoSearch(req('성수'),{KAKAO_REST_API_KEY:'k'},(async()=>new Response('',{status:500}))as any)).status,502);
+console.log(`${n} geo search assertions passed: address-first lookup, keyword fallback, auth, config and input checks.`);

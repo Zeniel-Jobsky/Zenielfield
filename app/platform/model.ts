@@ -1,12 +1,20 @@
 import type {Site,User,Visit,Action,Audit} from '../lib/model';
 export type TargetType='site'|'store';
 export type Rule={period:'week'|'month'|'manual';count:number};
-export type FieldSite=Site&{division:string;region:string;managerIds:string[];rule:Rule};
-export type Store={id:string;siteId:string;code:string;name:string;address:string;region:string;managerIds:string[];status:string;startDate:string;rule:Rule;version:number};
-export type FieldVisit=Visit&{targetType:TargetType;storeId:string|null;requirementId:string|null;actualTime:string;notes:string};
+export type Geo={lat:number;lng:number};
+export type FieldSite=Site&{division:string;region:string;managerIds:string[];rule:Rule;lat?:number|null;lng?:number|null};
+export type Store={id:string;siteId:string;code:string;name:string;address:string;region:string;managerIds:string[];status:string;startDate:string;rule:Rule;version:number;lat?:number|null;lng?:number|null};
+export const aiFields=['purpose','detail','notes','result'] as const;export type AiField=typeof aiFields[number];
+export const aiCategories=['인력','시설·안전','고객 요청','민원','운영'],aiUrgencies=['낮음','보통','높음'],aiConfidences=['low','medium','high'];
+// AI 간편 등록 기록: 원문(input)·AI 초안(draft)·사람이 고친 칸(edited)을 함께 보존. 직접 입력(entry='manual')에는 ai가 없음.
+export type AiEntry={input:{text:string;imageCount:number};draft:Record<AiField,string>;summary:string;category:string[];urgency:string;confidence:string;model:string;generatedAt:string;edited:AiField[]};
+export type FieldVisit=Visit&{targetType:TargetType;storeId:string|null;requirementId:string|null;actualTime:string;notes:string;entry?:'manual'|'ai';ai?:AiEntry;geo?:VisitGeo};
+// 방문 시점 GPS 기록: 측정 좌표·정확도와 대상 지점까지 거리(서버 재계산).
+export type VisitGeo=Geo&{accuracy:number;at:string;distance:number|null};
+export const entryOf=(v:{entry?:string})=>v.entry==='ai'?'ai':'manual';
 export type FieldAction=Action&{targetType:TargetType;storeId:string|null;createdDate:string};
 export type PlatformData={users:User[];sites:FieldSite[];stores:Store[];visits:FieldVisit[];actions:FieldAction[];audit:Audit[]};
-export type Target={id:string;type:TargetType;siteId:string;storeId:string|null;name:string;siteName:string;team:string;part:string;division:string;region:string;address:string;managerIds:string[];rule:Rule;status:string;startDate:string};
+export type Target={id:string;type:TargetType;siteId:string;storeId:string|null;name:string;siteName:string;team:string;part:string;division:string;region:string;address:string;managerIds:string[];rule:Rule;status:string;startDate:string;lat:number|null;lng:number|null};
 export type Requirement={id:string;targetId:string;targetType:TargetType;siteId:string;storeId:string|null;windowStart:string;windowEnd:string;dueDate:string;ordinal:number};
 export type Occurrence=Requirement&{state:'completed'|'planned'|'delayed'|'unplanned';visitId:string|null;overdue:boolean};
 export type Metrics={slots:Occurrence[];required:number;completed:number;planned:number;delayed:number;unplanned:number;targets:number;rate:number|null;completedTargets:number;extraCompleted:number;manualTargets:number};
@@ -15,7 +23,7 @@ export const ruleName=(rule:Rule)=>rule.period==='manual'?'수동 관리':`${rul
 export const dayShift=(day:string,n:number)=>{const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
 export const between=(d:string|null,a:string,b:string)=>!!d&&d>=a&&d<=b;
 export const targetOf=(v:{siteId:string;targetType:TargetType;storeId:string|null})=>v.targetType==='store'?v.storeId||'missing-store':v.siteId;
-export function targetsOf(data:PlatformData):Target[]{return [...data.sites.map(s=>({id:s.id,type:'site' as const,siteId:s.id,storeId:null,name:s.name,siteName:s.name,team:s.team,part:s.part,division:s.division,region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,status:s.status,startDate:s.startDate})),...data.stores.map(s=>{const p=data.sites.find(p=>p.id===s.siteId)!;return{id:s.id,type:'store' as const,siteId:s.siteId,storeId:s.id,name:s.name,siteName:p?.name||'미연결 현장',team:p?.team||'',part:p?.part||'',division:p?.division||'',region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,status:s.status,startDate:s.startDate}})]}
+export function targetsOf(data:PlatformData):Target[]{return [...data.sites.map(s=>({id:s.id,type:'site' as const,siteId:s.id,storeId:null,name:s.name,siteName:s.name,team:s.team,part:s.part,division:s.division,region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,status:s.status,startDate:s.startDate,lat:s.lat??null,lng:s.lng??null})),...data.stores.map(s=>{const p=data.sites.find(p=>p.id===s.siteId)!;return{id:s.id,type:'store' as const,siteId:s.siteId,storeId:s.id,name:s.name,siteName:p?.name||'미연결 현장',team:p?.team||'',part:p?.part||'',division:p?.division||'',region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,status:s.status,startDate:s.startDate,lat:s.lat??null,lng:s.lng??null}})]}
 export function requirements(targets:Target[],start:string,end:string):Requirement[]{
  if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||start>end)return [];
  const out:Requirement[]=[];
@@ -45,3 +53,11 @@ export function aggregate(targets:Target[],visits:FieldVisit[],start:string,end:
 export function lastTargetVisit(targetId:string,visits:FieldVisit[]){return visits.filter(v=>targetOf(v)===targetId&&v.status==='completed'&&v.actualDate).map(v=>v.actualDate!).sort().at(-1)||null}
 export function targetStatus(t:Target,visits:FieldVisit[],metrics:Metrics){if(t.status!=='운영 중')return t.status;const slots=metrics.slots.filter(s=>s.targetId===t.id);if(slots.some(s=>s.state==='delayed'))return '방문 지연';if(slots.some(s=>s.state==='unplanned'))return '계획 미등록';if(slots.some(s=>s.state==='planned'))return '방문 예정';if(slots.length&&slots.every(s=>s.state==='completed'))return '방문 완료';if(!lastTargetVisit(t.id,visits))return '이력 미확인';return '정상 관리'}
 export function visibleTargets(targets:Target[],me:User){if(['admin','director'].includes(me.role))return targets;if(me.role==='lead')return targets.filter(t=>t.team===me.team);if(me.role==='partlead')return targets.filter(t=>t.team===me.team&&t.part===me.part);return targets.filter(t=>t.managerIds.includes(me.id))}
+export type WeekRow={start:string;required:number;completed:number;planned:number;delayed:number;unplanned:number;rate:number|null};
+export const weekOf=(day:string)=>dayShift(day,-((new Date(day+'T12:00:00Z').getUTCDay()+6)%7));
+export function weeklyTrend(targets:Target[],visits:FieldVisit[],end:string,now:string,weeks=8):{rows:WeekRow[];slots:Occurrence[]}{const first=dayShift(weekOf(end),-7*(weeks-1)),m=aggregate(targets,visits,first,dayShift(weekOf(end),6),now);return{slots:m.slots,rows:Array.from({length:weeks},(_,i)=>{const a=dayShift(first,i*7),b=dayShift(a,6),s=m.slots.filter(x=>between(x.dueDate,a,b)),n=(k:Occurrence['state'])=>s.filter(x=>x.state===k).length;return{start:a,required:s.length,completed:n('completed'),planned:n('planned'),delayed:n('delayed'),unplanned:n('unplanned'),rate:s.length?Math.round(n('completed')/s.length*100):null}})}}
+export function agingBuckets(actions:FieldAction[],now:string){const late=actions.filter(a=>a.state!=='완료'&&!!a.dueDate&&a.dueDate<now).map(a=>Math.round((+new Date(now)-+new Date(a.dueDate))/86400000));return [{label:'0–7일',value:late.filter(d=>d<=7).length},{label:'8–30일',value:late.filter(d=>d>7&&d<=30).length},{label:'30일 초과',value:late.filter(d=>d>30).length}]}
+export const validGeo=(g:any):g is Geo=>!!g&&typeof g.lat==='number'&&typeof g.lng==='number'&&Number.isFinite(g.lat)&&Number.isFinite(g.lng)&&Math.abs(g.lat)<=90&&Math.abs(g.lng)<=180;
+export function distanceM(a:Geo,b:Geo){const r=Math.PI/180,x=Math.sin((b.lat-a.lat)*r/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin((b.lng-a.lng)*r/2)**2;return Math.round(12742000*Math.asin(Math.sqrt(x)))}
+export const autoPickMeters=300;
+export function nearestTargets(targets:Target[],at:Geo,limit=3){return targets.flatMap(t=>t.status==='운영 중'&&t.lat!==null&&t.lng!==null?[{target:t,distance:distanceM(at,{lat:t.lat,lng:t.lng})}]:[]).sort((a,b)=>a.distance-b.distance).slice(0,limit)}

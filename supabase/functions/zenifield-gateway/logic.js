@@ -1,4 +1,9 @@
 // app/platform/model.ts
+var aiFields = ["purpose", "detail", "notes", "result"];
+var aiCategories = ["\uC778\uB825", "\uC2DC\uC124\xB7\uC548\uC804", "\uACE0\uAC1D \uC694\uCCAD", "\uBBFC\uC6D0", "\uC6B4\uC601"];
+var aiUrgencies = ["\uB0AE\uC74C", "\uBCF4\uD1B5", "\uB192\uC74C"];
+var aiConfidences = ["low", "medium", "high"];
+var entryOf = (v) => v.entry === "ai" ? "ai" : "manual";
 var dayShift = (day, n) => {
   const d = /* @__PURE__ */ new Date(day + "T12:00:00Z");
   d.setUTCDate(d.getUTCDate() + n);
@@ -6,9 +11,9 @@ var dayShift = (day, n) => {
 };
 var targetOf = (v) => v.targetType === "store" ? v.storeId || "missing-store" : v.siteId;
 function targetsOf(data) {
-  return [...data.sites.map((s) => ({ id: s.id, type: "site", siteId: s.id, storeId: null, name: s.name, siteName: s.name, team: s.team, part: s.part, division: s.division, region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate })), ...data.stores.map((s) => {
+  return [...data.sites.map((s) => ({ id: s.id, type: "site", siteId: s.id, storeId: null, name: s.name, siteName: s.name, team: s.team, part: s.part, division: s.division, region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null })), ...data.stores.map((s) => {
     const p = data.sites.find((p2) => p2.id === s.siteId);
-    return { id: s.id, type: "store", siteId: s.siteId, storeId: s.id, name: s.name, siteName: p?.name || "\uBBF8\uC5F0\uACB0 \uD604\uC7A5", team: p?.team || "", part: p?.part || "", division: p?.division || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate };
+    return { id: s.id, type: "store", siteId: s.siteId, storeId: s.id, name: s.name, siteName: p?.name || "\uBBF8\uC5F0\uACB0 \uD604\uC7A5", team: p?.team || "", part: p?.part || "", division: p?.division || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null };
   })];
 }
 function requirements(targets, start, end) {
@@ -40,8 +45,22 @@ function visibleTargets(targets, me) {
   if (me.role === "partlead") return targets.filter((t) => t.team === me.team && t.part === me.part);
   return targets.filter((t) => t.managerIds.includes(me.id));
 }
+var validGeo = (g) => !!g && typeof g.lat === "number" && typeof g.lng === "number" && Number.isFinite(g.lat) && Number.isFinite(g.lng) && Math.abs(g.lat) <= 90 && Math.abs(g.lng) <= 180;
+function distanceM(a, b) {
+  const r = Math.PI / 180, x = Math.sin((b.lat - a.lat) * r / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin((b.lng - a.lng) * r / 2) ** 2;
+  return Math.round(12742e3 * Math.asin(Math.sqrt(x)));
+}
 
 // app/platform/mutations.ts
+var str = (v, max) => typeof v === "string" ? v.slice(0, max) : "";
+function aiEntryOf(raw) {
+  if (!raw || typeof raw !== "object") throw Error("AI \uC785\uB825 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4. AI \uAC04\uD3B8 \uB4F1\uB85D\uC5D0\uC11C \uB2E4\uC2DC \uC791\uC131\uD574 \uC8FC\uC138\uC694.");
+  const text = str(raw.input?.text, 3e3), imageCount = Number(raw.input?.imageCount);
+  if (!Number.isInteger(imageCount) || imageCount < 0 || imageCount > 3) throw Error("AI \uC785\uB825 \uC0AC\uC9C4 \uC218\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
+  if (!text.trim() && !imageCount) throw Error("AI \uC785\uB825 \uC6D0\uBB38(\uBA54\uBAA8 \uB610\uB294 \uC0AC\uC9C4)\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.");
+  const draft = Object.fromEntries(aiFields.map((k) => [k, str(raw.draft?.[k], 3500)])), edited = Array.isArray(raw.edited) ? [...new Set(raw.edited)].filter((k) => aiFields.includes(k)) : [];
+  return { input: { text, imageCount }, draft, summary: str(raw.summary, 200), category: (Array.isArray(raw.category) ? raw.category : []).filter((c) => aiCategories.includes(c)), urgency: aiUrgencies.includes(raw.urgency) ? raw.urgency : "", confidence: aiConfidences.includes(raw.confidence) ? raw.confidence : "", model: str(raw.model, 80), generatedAt: str(raw.generatedAt, 40), edited };
+}
 function newId() {
   return typeof crypto.randomUUID === "function" ? crypto.randomUUID() : "demo-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
 }
@@ -59,6 +78,15 @@ function updateDemo(data, entity, values, record, actor, now) {
     if (manager) throw Error("\uD604\uC7A5\xB7\uB9E4\uC7A5 \uB4F1\uB85D \uBC0F \uB2F4\uB2F9\uC790 \uBC30\uC815\uC740 \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC785\uB2C8\uB2E4.");
     if (!item.name?.trim() || !item.code?.trim() || !item.address?.trim()) throw Error("\uC774\uB984, \uCF54\uB4DC, \uC8FC\uC18C\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
     if (record && !can(record.id)) throw Error("\uB2F4\uB2F9 \uC870\uC9C1 \uBC94\uC704 \uBC16\uC758 \uB300\uC0C1\uC785\uB2C8\uB2E4.");
+    if (item.lat == null && item.lng == null || item.lat === "" && item.lng === "") {
+      item.lat = null;
+      item.lng = null;
+    } else {
+      const g = { lat: Number(item.lat), lng: Number(item.lng) };
+      if (!validGeo(g)) throw Error("\uC704\uB3C4\xB7\uACBD\uB3C4\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
+      item.lat = g.lat;
+      item.lng = g.lng;
+    }
     const parent = entity === "store" ? data.sites.find((s) => s.id === item.siteId) : null;
     if (entity === "store" && (!parent || !can(parent.id))) throw Error("\uC18C\uC18D \uD604\uC7A5\uC744 \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
     const team = parent?.team || item.team, part = parent?.part || item.part;
@@ -95,6 +123,26 @@ function updateDemo(data, entity, values, record, actor, now) {
         if (req && item.status === "completed" && item.actualDate < req.windowStart) throw Error("\uD544\uC694 \uD68C\uCC28 \uC2DC\uC791\uC77C \uC774\uC804\uC758 \uBC29\uBB38\uC744 \uC5F0\uACB0\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.");
       }
       if (item.requirementId && next.visits.some((v) => v.id !== id && v.requirementId === item.requirementId && v.status !== "cancelled")) throw Error("\uC774 \uD544\uC694 \uD68C\uCC28\uC5D0\uB294 \uC774\uBBF8 \uACC4\uD68D \uB610\uB294 \uACB0\uACFC\uAC00 \uC5F0\uACB0\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4. \uAE30\uC874 \uC77C\uC815\uC744 \uC218\uC815\uD574 \uC8FC\uC138\uC694.");
+      const done = record?.status === "completed", entry = done ? entryOf(record) : entryOf(item);
+      if (done && entryOf(item) !== entry) throw Error("AI \uB4F1\uB85D\uACFC \uC9C1\uC811 \uC785\uB825 \uAE30\uB85D\uC740 \uC11C\uB85C \uBC14\uAFC0 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.");
+      delete item.extra;
+      delete item.aiAssisted;
+      delete item.aiFields;
+      if (entry === "ai") {
+        if (item.status !== "completed") throw Error("AI \uAC04\uD3B8 \uB4F1\uB85D\uC740 \uBC29\uBB38 \uACB0\uACFC\uB85C\uB9CC \uC800\uC7A5\uD569\uB2C8\uB2E4.");
+        item.entry = "ai";
+        item.ai = aiEntryOf(item.ai);
+        item.ai.edited = aiFields.filter((k) => (item[k] || "") !== item.ai.draft[k]);
+      } else {
+        item.entry = "manual";
+        delete item.ai;
+      }
+      if (item.geo == null) delete item.geo;
+      else {
+        const g = item.geo, acc = Number(item.geo.accuracy);
+        if (!validGeo(g) || !Number.isFinite(acc) || acc < 0) throw Error("GPS \uC704\uCE58 \uAE30\uB85D\uC744 \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
+        item.geo = { lat: g.lat, lng: g.lng, accuracy: Math.round(acc), at: typeof item.geo.at === "string" ? item.geo.at.slice(0, 40) : "", distance: target.lat !== null && target.lng !== null ? distanceM(g, { lat: target.lat, lng: target.lng }) : null };
+      }
       if (item.status !== "completed") {
         item.actualDate = null;
         item.actualTime = "";
@@ -118,6 +166,7 @@ function updateDemo(data, entity, values, record, actor, now) {
   return { data: next, item };
 }
 export {
+  aiEntryOf,
   newId,
   updateDemo
 };

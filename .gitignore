@@ -52,3 +52,4 @@ yarn-error.log*
 # Local hosting state and retained environment archive
 /.vercel/
 /env.zip
+/seed/out/

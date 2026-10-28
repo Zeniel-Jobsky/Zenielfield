@@ -54,4 +54,19 @@ const aiProxy=async(url,init)=>{
 r=await worker(wr('/api/assist',{method:'POST',headers:{origin:'https://app.example',cookie:'__Host-zf-access=valid','oai-authenticated-user-id':'forged'},body:JSON.stringify({text:'검증용 메모',images:['data:image/jpeg;base64,'+'a'.repeat(70000)]})}),{...env,OPENAI_API_KEY:'sk-test-only'},aiProxy);
 equal(r.status,200);equal((await r.json()).draft.detail,'verified draft');equal(aiCalls,2);
 r=await worker(wr('/api/assist',{method:'POST',headers:{origin:'https://app.example',cookie:'__Host-zf-access=valid'},body:'{}'}),env,async()=>Response.json({error:'disabled account'},{status:403}));equal(r.status,403);
+// New upstream geo requests use the same verified Cloudflare session boundary.
+equal((await worker(wr('/api/geo?q=서울',{headers:{'oai-authenticated-user-id':'forged'}}),env)).status,401);
+equal((await worker(wr('/api/geo?q=서울',{method:'POST'}),env)).status,405);
+let geoCalls=0;
+const geoProxy=async(url,init)=>{
+ geoCalls++;
+ if(url.includes('/functions/v1/')){equal(JSON.parse(init.body).operation,'session');return Response.json({ok:true,me:actor,session:{access_token:'secret-access',refresh_token:'secret-refresh',expires_in:3600}});}
+ equal(new URL(url).hostname,'dapi.kakao.com');equal(init.headers.Authorization,'KakaoAK kakao-test-only');
+ return Response.json({documents:[{address_name:'서울 테스트 주소',x:'127.0',y:'37.5'}]});
+};
+r=await worker(wr('/api/geo?q=서울',{headers:{cookie:'__Host-zf-access=valid','oai-authenticated-user-id':'forged'}}),{...env,KAKAO_REST_API_KEY:'kakao-test-only'},geoProxy);
+equal(r.status,200);const geoBody=await r.text();equal(JSON.parse(geoBody).places[0].lat,37.5);equal(geoBody.includes('secret-access'),false);equal(r.headers.get('set-cookie').includes('HttpOnly; Secure; SameSite=Lax'),true);equal(geoCalls,2);
+geoCalls=0;
+r=await worker(wr('/api/geo?q=서울',{headers:{cookie:'__Host-zf-access=valid'}}),env,async()=>{geoCalls++;return Response.json({error:'disabled account'},{status:403})});equal(r.status,403);equal(geoCalls,1);
+r=await worker(wr('/api/geo?q=서울',{headers:{cookie:'__Host-zf-access=valid'}}),{...env,KAKAO_REST_API_KEY:'kakao-test-only'},async()=>Response.json({ok:true}));equal(r.status,403);
 console.log(assertions+' Cloudflare/Supabase auth assertions passed: server token, verified identity, allowlist, refresh, PKCE, CSRF, secure cookies and no browser token exposure.');
