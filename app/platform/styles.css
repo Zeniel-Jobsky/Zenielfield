@@ -341,3 +341,6 @@
 .trend .axis-text{font-size:7.8px}
 .trend .axis-text.strong{font-size:7.8px}
 @media(max-width:760px){.trend .axis-text,.trend .axis-text.strong{font-size:13px}}
+.link-hint{gap:6px 10px}
+.link-hint>span{color:#65726b}
+.link-hint .textbtn,.notice .textbtn{display:inline-flex;align-items:center;gap:4px;margin-left:auto}
