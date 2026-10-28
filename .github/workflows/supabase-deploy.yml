@@ -12,6 +12,7 @@ on:
         default: false
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: supabase-deploy
   cancel-in-progress: false
@@ -29,15 +30,22 @@ jobs:
         id: changes
         env:
           EVENT_NAME: ${{ github.event_name }}
-          BEFORE_SHA: ${{ github.event.before }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          if [ "$EVENT_NAME" != "push" ] || ! git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
+          if [ "$EVENT_NAME" != "push" ]; then
             echo 'backend_changed=true' >> "$GITHUB_OUTPUT"
-          elif git diff --quiet "$BEFORE_SHA" HEAD -- supabase/ app/platform/mutations.ts app/platform/model.ts scripts/migrate.mjs scripts/bundle-supabase.mjs; then
-            echo 'backend_changed=false' >> "$GITHUB_OUTPUT"
           else
-            echo 'backend_changed=true' >> "$GITHUB_OUTPUT"
+            # 실패하거나 대기 중 취소된 푸시의 백엔드 변경도 다음 배포에 포함한다.
+            BASE_SHA="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/supabase-deploy.yml/runs?branch=main&event=push&status=success&per_page=1" --jq '.workflow_runs[0].head_sha // ""')"
+            echo "Last successful production revision: ${BASE_SHA:-none}"
+            if ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+              echo 'backend_changed=true' >> "$GITHUB_OUTPUT"
+            elif git diff --quiet "$BASE_SHA" HEAD -- supabase/ app/platform/mutations.ts app/platform/model.ts scripts/migrate.mjs scripts/bundle-supabase.mjs; then
+              echo 'backend_changed=false' >> "$GITHUB_OUTPUT"
+            else
+              echo 'backend_changed=true' >> "$GITHUB_OUTPUT"
+            fi
           fi
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -110,11 +118,13 @@ jobs:
           NO_BUMP: '1'
           ZENIFIELD_DEPLOY_TARGET: cloudflare
         run: pnpm build
+      - name: 배포 CLI 호환 설정 생성
+        run: node scripts/prepare-cloudflare-deploy.mjs
       - name: zenifield Worker 배포
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         # Worker 전용 토큰을 지원하는 CLI만 별도 사용해 앱의 기존 빌드 의존성을 유지한다.
-        run: pnpm dlx wrangler@4.151.0 deploy --config dist/server/wrangler.json --message "GitHub Actions $GITHUB_SHA"
+        run: pnpm dlx wrangler@4.151.0 deploy --config dist/server/wrangler.ci.json --message "GitHub Actions $GITHUB_SHA"
       - name: 공개 URL 응답 확인
         run: curl --fail --silent --show-error --retry 3 --retry-delay 5 --output /dev/null 'https://zenifield.ugen-kwon.workers.dev/?mode=demo'
       - name: 배포 기록

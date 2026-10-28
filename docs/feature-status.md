@@ -116,3 +116,4 @@
 - CI는 `NO_BUMP=1`로 커밋된 버전을 빌드한다. Worker 버전 메시지와 Actions 요약에 소스 커밋·배포 주소를 남기므로 이후 자동 배포 이력은 [Actions 실행 기록](https://github.com/Zeniel-Jobsky/Zenielfield/actions/workflows/supabase-deploy.yml)에서 확인한다.
 - 사용자가 승인한 `zenifield` 전용 `Individual Workers Editor` 토큰을 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN` secret으로 등록했다. 토큰과 `.env` 원문은 소스·문서·산출물에 포함하지 않는다.
 - 첫 자동 실행 `40641160666`은 검증·빌드가 성공했으나 기존 Wrangler 4.92.0이 계정 전체 subdomain을 조회해 권한 오류가 발생했다. 배포 단계만 Worker별 조회를 지원하는 `wrangler@4.151.0`으로 고정했다. 앱 빌드 의존성과 토큰의 Worker 전용 권한 범위는 유지한다.
+- 후속 실행 `40641515777`에서 폐기된 `legacy_env` 설정 오류를 확인해 `prepare-cloudflare-deploy.mjs`로 동일 의미의 호환 설정을 생성하도록 보완했다. 백엔드 변경 비교는 마지막 성공한 main 푸시 기준으로 하여 실패·취소된 중간 변경과 수동 dry_run을 잘못된 배포 기준으로 삼지 않는다.
