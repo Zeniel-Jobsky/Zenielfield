@@ -158,8 +158,7 @@
 @media(min-width:1101px){.filterbar .filterbar-primary{display:flex;flex-wrap:nowrap;align-items:center}.filterbar .filterbar-period{grid-row:auto;grid-column:auto;margin-left:0;flex:0 0 auto;flex-wrap:nowrap}}
 /* decision dashboard */
 .decision-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}
-.decision-kpi{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border:1px solid #f1f6f3;border-left-width:4px;border-radius:10px;background:white;text-align:left;cursor:pointer;color:#65726b}
-.decision-kpi.ok{border-left-color:#003c33}.decision-kpi.late{border-left-color:#b42318}.decision-kpi.miss{border-left-color:#8a4b00}
+.decision-kpi{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border:1px solid #f1f6f3;border-radius:10px;background:white;text-align:left;cursor:pointer;color:#65726b}
 .decision-kpi-top{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#59645f}
 .decision-kpi b{font-size:28px;line-height:1.2;color:#36443e;letter-spacing:-.5px}
 .decision-kpi.late b{color:#b42318}.decision-kpi.miss b{color:#8a4b00}
@@ -299,7 +298,7 @@
  .platform-demo-banner{flex-wrap:nowrap;align-items:center}
  .platform-demo-banner>div{min-width:0;flex:1}
  .platform-demo-banner>div>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
- .platform-demo-banner>button{flex:none;white-space:nowrap}
+ .app-shell.platform-app .platform-demo-banner>button{flex:none;white-space:normal}
  .persona-bar{flex-wrap:wrap;padding-bottom:8px}
  .persona-bar>span{flex:0 0 100%;font-size:11px}
  .persona-bar select{flex:1 1 140px;min-width:140px}
@@ -321,6 +320,7 @@
 .login-screen .demo-note{margin:6px 0 0;font-size:11px;color:#65726b;text-align:center}
 
 /* ===== design guide conformance (2026-10-28): KPI emphasis, type floor ===== */
+.platform-app .target-tabs + .decision-strip{margin-top:16px}
 .decision-kpi{border:0;border-top:1px solid var(--zf-border,#e3e9e6);border-radius:0;background:#ffffff;box-shadow:none}
 .decision-kpi.primary{background:#003c33;border-top-color:#003c33;color:#d3e9df}
 .decision-kpi.primary .decision-kpi-top,.decision-kpi.primary b{color:#ffffff}
@@ -330,6 +330,7 @@
 .kpi-delta{font-size:12px}
 .axis-text,.chart-legend,.hbar,.risk-head,.vbar small,.donut-label{font-size:12px}
 @media(max-width:760px){
+ .platform-app .target-tabs + .decision-strip{margin-top:12px}
  .page-heading h1{font-size:26px}
  .decision-kpi b{font-size:30px}
  .decision-kpi-top,.decision-kpi-note,.kpi-delta,.chart-panel .panel-heading p,.risk-table,.hbar,.vbar small,.heatmap,.ai-stats button,.mobile-record p,.mobile-record dl,.visit-mobile-info,.metric-top span:first-child,.metric>small,.metric-note,.permission-card li,.permission-card p,.ai-notice,.platform-demo-banner{font-size:12px}
