@@ -11,7 +11,7 @@
   background: #fff;
   border-right: 1px solid var(--nav-line);
   scrollbar-width: thin;
-  scrollbar-color: #c7d5c1 transparent;
+  scrollbar-color: #cfd9d3 transparent;
 }
 .app-shell .sidebar .brand {
   flex-shrink: 0;
@@ -70,7 +70,7 @@
   margin: 0 14px 11px;
   padding: 0;
   color: var(--nav-muted);
-  font-size: 10px;
+  font-size:11px;
   font-weight: 400;
   letter-spacing: .08em;
 }
@@ -106,7 +106,7 @@
   font-weight: 500;
   box-shadow: none;
 }
-.app-shell .sidebar nav button.selected:hover {background: #074c41}
+.app-shell .sidebar nav button.selected:hover {background: #003c33}
 .app-shell .sidebar nav button.selected > svg {color: var(--nav-on-green)}
 .app-shell .sidebar nav button.selected::after {
   content: '';
@@ -124,7 +124,7 @@
   border-radius: 20px;
   color: var(--nav-muted);
   background: var(--nav-stone);
-  font-size: 10px;
+  font-size:11px;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }

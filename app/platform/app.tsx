@@ -13,7 +13,7 @@ import {platformDemo} from './demo';
 import {aggregate,targetsOf,visibleTargets,targetOf,typeName,ruleName,between,type TargetType,type PlatformData,type FieldVisit,lastTargetVisit,dayShift} from './model';
 import {updateDemo} from './mutations';
 import {AiStats,CapacityCards,TypeTabs,VisitMetrics,OrganizationSummary,Exceptions,RequirementList,Hierarchy,VisitRecords,ActionRecords,TargetDetail,ManagerHome} from './views';
-import {StatusDonut,TrendChart,TeamBars,DelayHeatmap,ManagerWeek,ActionCharts,TypeWeekly} from './charts';
+import {TrendChart,TeamBars,DelayHeatmap,ManagerWeek,ActionCharts,TypeWeekly} from './charts';
 import {PlatformForm} from './form';
 import {AiVisitForm} from './ai-form';
 import {AiPlanForm} from './ai-plan';
