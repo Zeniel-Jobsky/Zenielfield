@@ -92,7 +92,7 @@ export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
     return reply({ok:true,me:{id:actor.id,email:actor.email,name:actor.name,role:actor.role},...(session?{session}:{} )});
    }
    if(!['read','save'].includes(body.operation))return reply({error:'지원하지 않는 요청입니다.'},400);
-   const result=await originals.get(digest)(new Request(request.url,{method:'POST',headers:{'x-zenifield-gateway':token,'Content-Type':'application/json'},body:JSON.stringify({operation:body.operation,entity:body.entity,id:body.id,version:body.version,values:body.values,subject,email:actor.email})}));
+   const result=await originals.get(digest)(new Request(request.url,{method:'POST',headers:{'x-zenifield-gateway':token,'Content-Type':'application/json'},body:JSON.stringify({operation:body.operation,entity:body.entity,id:body.id,version:body.version,values:body.values,from:body.from,to:body.to,subject,email:actor.email})}));
    return reply({payload:await result.json(),...(session?{session}:{})},result.status);
   } catch {
    return reply({error:'요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'},502);

@@ -6,7 +6,7 @@ export async function forwardPlatform(req:Request,bindings:Record<string,unknown
  const url=String(bindings.ZENIFIELD_SUPABASE_URL||process.env.ZENIFIELD_SUPABASE_URL||''),token=String(bindings.ZENIFIELD_GATEWAY_TOKEN||process.env.ZENIFIELD_GATEWAY_TOKEN||'');
  if(!/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(url)||!token)return json({error:'Supabase 연결 설정이 필요합니다.'},503);
  try{let body:Record<string,unknown>={};if(req.method==='POST'){const text=await req.text();if(text.length>65536)return json({error:'입력 크기를 줄여주세요.'},413);body=JSON.parse(text);}
- const result=await fetcher(url+'/functions/v1/zenifield-gateway',{method:'POST',headers:{'Content-Type':'application/json','x-zenifield-gateway':token},body:JSON.stringify({entity:body.entity,id:body.id,version:body.version,values:body.values,operation:req.method==='POST'?'save':'read',subject,email}),signal:AbortSignal.timeout(20000)});
+ const result=await fetcher(url+'/functions/v1/zenifield-gateway',{method:'POST',headers:{'Content-Type':'application/json','x-zenifield-gateway':token},body:JSON.stringify({entity:body.entity,id:body.id,version:body.version,values:body.values,from:new URL(req.url).searchParams.get('from')||undefined,to:new URL(req.url).searchParams.get('to')||undefined,operation:req.method==='POST'?'save':'read',subject,email}),signal:AbortSignal.timeout(20000)});
  const data=await result.json();return json(data,result.status);
  }catch{return json({error:'Supabase에 연결하지 못했습니다. 잠시 후 다시 시도하세요.'},502)}
 }

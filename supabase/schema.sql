@@ -85,7 +85,7 @@ language sql stable security invoker set search_path='' as $$
  (actor.role in ('admin','director') or (cardinality(actor.domains)=0 or s.domain=any(actor.domains)) and actor.team=s.team and (actor.role='lead' or actor.part=s.part and
  (actor.role='partlead' or exists(select 1 from public.zf_assignments a where a.user_id=actor.id and a.end_date is null and a.target_type=typ and a.site_id=s.id and coalesce(a.store_id,a.site_id)=target)))))
 $$;
-create function public.zf_read(p_subject text,p_email text) returns jsonb language plpgsql security invoker set search_path='' as $$
+create function public.zf_read(p_subject text,p_email text,p_from date default null,p_to date default null) returns jsonb language plpgsql security invoker set search_path='' as $$
 declare actor public.zf_users; result jsonb; begin
  if length(p_subject)<1 or p_subject is null or p_email is null then raise exception 'AUTH'; end if;
  select * into actor from public.zf_users where subject=p_subject and active=1;
@@ -96,11 +96,11 @@ declare actor public.zf_users; result jsonb; begin
  select jsonb_build_object('me',to_jsonb(actor)-'subject','domains',coalesce((select jsonb_agg(d.data order by d.name) from public.zf_domains d),'[]'::jsonb),'users',coalesce((select jsonb_agg(case when actor.role='admin' or u.id=actor.id then to_jsonb(u)-'subject' else (to_jsonb(u)-'subject')||jsonb_build_object('email','') end) from public.zf_users u where actor.role in ('admin','director') or u.team=actor.team and(actor.role='lead' or u.part=actor.part)), '[]'::jsonb),
  'sites',coalesce((select jsonb_agg(s.data) from public.zf_sites s where public.zf_can_target(actor,'site',s.id) or exists(select 1 from public.zf_stores st where st.site_id=s.id and public.zf_can_target(actor,'store',st.id))), '[]'::jsonb),
  'stores',coalesce((select jsonb_agg(st.data) from public.zf_stores st where public.zf_can_target(actor,'store',st.id)), '[]'::jsonb),
- 'visits',coalesce((select jsonb_agg(v.data) from public.zf_visits v where public.zf_can_target(actor,v.target_type,coalesce(v.store_id,v.site_id))), '[]'::jsonb),
- 'actions',coalesce((select jsonb_agg(a.data) from public.zf_actions a where public.zf_can_target(actor,a.target_type,coalesce(a.store_id,a.site_id))), '[]'::jsonb),
+ 'visits',coalesce((select jsonb_agg(v.data) from public.zf_visits v where (p_from is null or coalesce(v.data->>'actualDate',v.data->>'plannedDate')::date between p_from and p_to) and public.zf_can_target(actor,v.target_type,coalesce(v.store_id,v.site_id))), '[]'::jsonb),
+ 'actions',coalesce((select jsonb_agg(a.data) from public.zf_actions a where (p_from is null or a.state<>'완료' or coalesce(a.data->>'completedDate',a.data->>'createdDate',a.data->>'dueDate')::date between p_from and p_to) and public.zf_can_target(actor,a.target_type,coalesce(a.store_id,a.site_id))), '[]'::jsonb),
  'audit',coalesce((select jsonb_agg(x.row) from (select jsonb_build_object('id',a.id,'actorId',a.actor_id,'entity',a.entity,'entityId',a.entity_id,'before',case when a.before_json is null then null else a.before_json::text end,'after',a.after_json::text,'createdAt',a.created_at) as row from public.zf_audit a where actor.role='admin' or a.actor_id=actor.id order by a.created_at desc limit 300) x), '[]'::jsonb)) into result;
  return result; end; $$;
-create function public.zf_write(p_subject text,p_email text,p_entity text,p_item jsonb,p_expected integer default null) returns jsonb
+create function public.zf_write(p_subject text,p_email text,p_entity text,p_item jsonb,p_expected integer default null,p_from date default null,p_to date default null) returns jsonb
 language plpgsql security invoker set search_path='' as $$
 declare actor public.zf_users; old jsonb; target text; typ text; sid text; stid text; targetdata jsonb; uid text; rule jsonb; stamp date := (now() at time zone 'Asia/Seoul')::date; nextversion integer; rowcount integer; begin
  perform pg_advisory_xact_lock(91720311);
@@ -191,11 +191,11 @@ declare actor public.zf_users; old jsonb; target text; typ text; sid text; stid 
   end if;
  end if;
  insert into public.zf_audit(actor_id,entity,entity_id,before_json,after_json) values(actor.id,p_entity,p_item->>'id',old,p_item);
- return jsonb_build_object('item',p_item,'data',public.zf_read(p_subject,p_email));
+ return jsonb_build_object('item',p_item,'data',public.zf_read(p_subject,p_email,p_from,p_to));
 end; $$;
 revoke all on function public.zf_can_target(public.zf_users,text,text) from public,anon,authenticated;
-revoke all on function public.zf_read(text,text) from public,anon,authenticated;
-revoke all on function public.zf_write(text,text,text,jsonb,integer) from public,anon,authenticated;
-grant execute on function public.zf_can_target(public.zf_users,text,text),public.zf_read(text,text),public.zf_write(text,text,text,jsonb,integer) to service_role;
+revoke all on function public.zf_read(text,text,date,date) from public,anon,authenticated;
+revoke all on function public.zf_write(text,text,text,jsonb,integer,date,date) from public,anon,authenticated;
+grant execute on function public.zf_can_target(public.zf_users,text,text),public.zf_read(text,text,date,date),public.zf_write(text,text,text,jsonb,integer,date,date) to service_role;
 -- Explicit defense in depth if a later change accidentally grants Data API roles.
 do $$ declare t text; begin foreach t in array array['zf_domains','zf_users','zf_sites','zf_stores','zf_assignments','zf_visits','zf_actions','zf_policy_versions','zf_audit'] loop execute format('create policy zf_server_only on public.%I as restrictive for all to anon,authenticated using (false) with check (false)',t); end loop; end; $$;

@@ -29,7 +29,7 @@ const pageDescriptions:Record<string,string>={dashboard:'방문 이행과 이번
 const nav=[['dashboard','통합 대시보드',LayoutDashboard],['sites','현장·매장 관리',Building2],['visits','방문 일정',CalendarDays],['results','방문 결과·이력',History],['briefings','주차별 활동 브리핑',NotebookPen],['actions','후속 조치 관리',ListChecks],['reports','통계·보고서',BarChart3],['settings','설정',Settings]] as const;
 const unique=(arr:string[])=>[...new Set(arr)];
 const admin:User={id:'demo-admin',name:'데모 관리자',email:'admin@example.test',role:'admin',team:'리테일운영팀',part:'1파트',active:1};
-export default function PlatformApp({initialData,liveMode=false,onSaveLive,onDemo,onConnect,onLegacy,onLogout,onRefresh,connectionError='',connectionStatus=0,refreshing=false}:{initialData?:OperatingData;liveMode?:boolean;onSaveLive?:(entity:string,values:any,record?:any)=>Promise<{data:OperatingData;item:any}>;onDemo?:()=>void;onConnect?:()=>void;onLegacy?:()=>void;onLogout?:()=>void;onRefresh?:()=>void;connectionError?:string;connectionStatus?:number;refreshing?:boolean}={}){
+export default function PlatformApp({initialData,liveMode=false,onSaveLive,onDemo,onConnect,onLegacy,onLogout,onRefresh,onRange,connectionError='',connectionStatus=0,refreshing=false}:{initialData?:OperatingData;liveMode?:boolean;onSaveLive?:(entity:string,values:any,record?:any)=>Promise<{data:OperatingData;item:any}>;onDemo?:()=>void;onConnect?:()=>void;onLegacy?:()=>void;onLogout?:()=>void;onRefresh?:()=>void;onRange?:(start:string,end:string)=>void;connectionError?:string;connectionStatus?:number;refreshing?:boolean}={}){
  const now=today();const [data,setData]=useState<PlatformData>(()=>initialData||platformDemo()),[live,setLive]=useState(false),[persona,setPersona]=useState('admin'),[demoManager,setDemoManager]=useState('demo-mgr-1');
  const [page,setPage]=useState('dashboard'),[kind,setKind]=useState(''),[type,setTypeState]=useState<TargetType>('site'),[division,setDivision]=useState(''),[team,setTeamState]=useState(''),[part,setPartState]=useState(''),[manager,setManagerState]=useState(''),[siteId,setSiteState]=useState(''),[storeId,setStoreState]=useState(''),[region,setRegion]=useState(''),[status,setStatus]=useState(''),[search,setSearch]=useState('');
  const [customPeriod,setCustomPeriod]=useState(false),[start,setStart]=useState(monthRange(now)[0]),[end,setEnd]=useState(monthRange(now)[1]),[calendarMode,setCalendarMode]=useState<'week'|'month'>('month'),[view,setView]=useState('calendar'),[recordType,setRecordType]=useState('all'),[mobile,setMobile]=useState(false),[collapsed,setCollapsed]=useState(false),[filtersOpen,setFiltersOpen]=useState(false);
@@ -64,6 +64,7 @@ export default function PlatformApp({initialData,liveMode=false,onSaveLive,onDem
   };
  },[mobile]);
  const [saving,setSaving]=useState(false);useEffect(()=>{if(initialData)setData(initialData)},[initialData]);
+ useEffect(()=>{if(liveMode)onRange?.(start,end)},[start,end,liveMode]);
  const [briefSite,setBriefSite]=useState(''),[diag,setDiag]=useState<{siteId:string;issueId?:string}|null>(null);
  const [modal,setModal]=useState<any>(null),[detail,setDetail]=useState<{id:string;tab:string}|null>(null),[error,setError]=useState(''),[toast,setToast]=useState(''),[notice,setNotice]=useState(false);
  useEffect(()=>{if(!toast)return;const h=setTimeout(()=>setToast(''),4500);return()=>clearTimeout(h)},[toast]);
