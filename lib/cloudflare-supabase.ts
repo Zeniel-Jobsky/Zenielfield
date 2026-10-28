@@ -1,6 +1,6 @@
 import {assistVisit} from '../app/api/assist/server';
 import {geoSearch} from '../app/api/geo/server';
-type Bindings={ZENIFIELD_SUPABASE_URL?:string;ZENIFIELD_GATEWAY_TOKEN?:string;OPENAI_API_KEY?:string;OPENAI_MODEL?:string;KAKAO_REST_API_KEY?:string};
+type Bindings={ZENIFIELD_SUPABASE_URL?:string;ZENIFIELD_GATEWAY_TOKEN?:string;OPENAI_API_KEY?:string;OPENAI_MODEL?:string};
 const ACCESS='__Host-zf-access',REFRESH='__Host-zf-refresh';
 const VERIFIER='__Host-zf-verifier';
 const base64url=(bytes:Uint8Array)=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');

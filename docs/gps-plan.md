@@ -27,6 +27,7 @@
 
 - 공개 매장 목록 없음 → 내부 자료(CSV) 기준 생산
 - 화면: 현장·매장 등록 "매장명 또는 주소로 검색" → 선택 시 주소·위도·경도 채움
+- **2026-10-28 중지:** 위치 검색·좌표 입력 숨김(`GEO_SEARCH_ENABLED=false`), `/api/geo`는 410, `scripts/geocode-stores.mjs` 삭제, Kakao 키 미사용·폐기. 아래는 중지 전 기록.
 - API: `GET /api/geo?q=` (로그인 필요), Kakao Local 주소 검색 → 결과 없으면 키워드 검색, 5건
 - 일괄: `node --env-file=.env scripts/geocode-stores.mjs 매장.csv` → `매장-geo.csv` (lat·lng·matched·status)
 - 입력 CSV 열 = `code,name,address`

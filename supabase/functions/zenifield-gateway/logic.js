@@ -54,15 +54,41 @@ function distanceM(a, b) {
   return Math.round(12742e3 * Math.asin(Math.sqrt(x)));
 }
 
+// app/platform/judgment.ts
+var ISSUE_TYPES = ["\uC815\uAE30 \uC6B4\uC601\uC810\uAC80", "\uC6B4\uC601 \uBCC0\uACBD\xB7\uACC4\uC57D \uD611\uC758", "\uCC44\uC6A9\xB7\uC778\uB825\uCDA9\uC6D0", "\uBE44\uD488\xB7\uC720\uB2C8\uD3FC \uAD00\uB9AC", "\uC2E0\uADDC \uD22C\uC785\xB7\uC628\uBCF4\uB529", "\uC11C\uBE44\uC2A4 \uD488\uC9C8\xB7\uC751\uB300", "\uC2DC\uC124\xB7\uC548\uC804 \uC810\uAC80", "\uD589\uC0AC\xB7\uD504\uB85C\uBAA8\uC158", "\uADFC\uD0DC\xB7\uADFC\uBB34\uD45C", "\uC9C1\uC6D0 \uC18C\uD1B5\xB7\uACE0\uCDA9", "\uAD50\uC721\xB7\uC5C5\uBB34\uB9E4\uB274\uC5BC", "\uC6B4\uC601 \uC2E4\uC801\xB7\uC815\uC0B0 \uD611\uC758", "\uC774\uC288 \uC7AC\uBC29\uBB38\xB7\uD6C4\uC18D \uC810\uAC80", "\uACE0\uAC1D\uC0AC \uBBF8\uD305\xB7\uC694\uCCAD", "\uAE30\uD0C0"];
+var SEVERITIES = ["\uAE34\uAE09", "\uBCF4\uD1B5", "\uAD00\uCC30"];
+var FLOWS = ["\uC2E0\uADDC", "\uC9C0\uC18D", "\uC545\uD654", "\uD574\uACB0"];
+var LEVELS = ["\uC815\uC0C1", "\uAD00\uCC30", "\uC8FC\uC758", "\uC704\uD5D8"];
+var issueSchema = { type: "object", additionalProperties: false, required: ["type", "summary", "severity", "flow", "customerRequest"], properties: { type: { type: "string", enum: [...ISSUE_TYPES] }, summary: { type: "string" }, severity: { type: "string", enum: [...SEVERITIES] }, flow: { type: "string", enum: [...FLOWS] }, customerRequest: { type: "boolean" } } };
+var judgeSchema = { type: "object", additionalProperties: false, required: ["results"], properties: { results: { type: "array", items: { type: "object", additionalProperties: false, required: ["ref", "level", "assessment", "issues"], properties: { ref: { type: "string" }, level: { type: "string", enum: [...LEVELS] }, assessment: { type: "string" }, issues: { type: "array", items: issueSchema } } } } } };
+var str = (x, n) => typeof x === "string" ? x.trim().slice(0, n) : "";
+var pick = (list, v, dflt) => list.includes(v) ? v : dflt;
+function cleanIssues(x) {
+  if (!Array.isArray(x)) return [];
+  return x.slice(0, 8).flatMap((i) => {
+    if (!i || typeof i !== "object") return [];
+    const o = i, summary = str(o.summary, 120);
+    if (!summary) return [];
+    return [{ type: pick(ISSUE_TYPES, o.type, "\uAE30\uD0C0"), summary, severity: pick(SEVERITIES, o.severity, "\uBCF4\uD1B5"), flow: pick(FLOWS, o.flow, "\uC2E0\uADDC"), customerRequest: o.customerRequest === true }];
+  });
+}
+function cleanJudgment(x) {
+  if (!x || typeof x !== "object") return null;
+  const o = x, issues = cleanIssues(o.issues), assessment = str(o.assessment, 200);
+  if (!assessment && !issues.length && !LEVELS.includes(o.level)) return null;
+  const by = o.by === "person" || o.by === "ai+person" ? o.by : "ai";
+  return { level: pick(LEVELS, o.level, "\uAD00\uCC30"), assessment, issues, by, model: str(o.model, 80), at: str(o.at, 40), confirmedBy: str(o.confirmedBy, 100) || null };
+}
+
 // app/platform/mutations.ts
-var str = (v, max) => typeof v === "string" ? v.slice(0, max) : "";
+var str2 = (v, max) => typeof v === "string" ? v.slice(0, max) : "";
 function aiEntryOf(raw) {
   if (!raw || typeof raw !== "object") throw Error("AI \uC785\uB825 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4. AI \uAC04\uD3B8 \uB4F1\uB85D\uC5D0\uC11C \uB2E4\uC2DC \uC791\uC131\uD574 \uC8FC\uC138\uC694.");
-  const text = str(raw.input?.text, 3e3), imageCount = Number(raw.input?.imageCount);
+  const text = str2(raw.input?.text, 3e3), imageCount = Number(raw.input?.imageCount);
   if (!Number.isInteger(imageCount) || imageCount < 0 || imageCount > 3) throw Error("AI \uC785\uB825 \uC0AC\uC9C4 \uC218\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
   if (!text.trim() && !imageCount) throw Error("AI \uC785\uB825 \uC6D0\uBB38(\uBA54\uBAA8 \uB610\uB294 \uC0AC\uC9C4)\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.");
-  const draft = Object.fromEntries(aiFields.map((k) => [k, str(raw.draft?.[k], 3500)])), edited = Array.isArray(raw.edited) ? [...new Set(raw.edited)].filter((k) => aiFields.includes(k)) : [];
-  return { input: { text, imageCount }, draft, summary: str(raw.summary, 200), category: (Array.isArray(raw.category) ? raw.category : []).filter((c) => aiCategories.includes(c)), urgency: aiUrgencies.includes(raw.urgency) ? raw.urgency : "", confidence: aiConfidences.includes(raw.confidence) ? raw.confidence : "", model: str(raw.model, 80), generatedAt: str(raw.generatedAt, 40), edited };
+  const draft = Object.fromEntries(aiFields.map((k) => [k, str2(raw.draft?.[k], 3500)])), edited = Array.isArray(raw.edited) ? [...new Set(raw.edited)].filter((k) => aiFields.includes(k)) : [];
+  return { input: { text, imageCount }, draft, summary: str2(raw.summary, 200), category: (Array.isArray(raw.category) ? raw.category : []).filter((c) => aiCategories.includes(c)), urgency: aiUrgencies.includes(raw.urgency) ? raw.urgency : "", confidence: aiConfidences.includes(raw.confidence) ? raw.confidence : "", model: str2(raw.model, 80), generatedAt: str2(raw.generatedAt, 40), edited };
 }
 function newId() {
   return typeof crypto.randomUUID === "function" ? crypto.randomUUID() : "demo-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
@@ -173,13 +199,30 @@ function updateDemo(data, entity, values, record, actor, now) {
       item.aiEdits = priorEdits;
       if (prop != null) {
         if (item.status !== "completed" || typeof prop !== "object" || typeof prop.proposed !== "object" || prop.proposed === null) throw Error("AI \uC815\uB9AC\uB294 \uBC29\uBB38 \uACB0\uACFC\uC5D0\uB9CC \uBC18\uC601\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
-        const str2 = (x) => typeof x === "string" ? x.slice(0, 3500) : "";
+        const str3 = (x) => typeof x === "string" ? x.slice(0, 3500) : "";
         const base = record?.status === "completed" ? record : typeof prop.before === "object" && prop.before || {};
-        const before = Object.fromEntries(aiFields.map((k) => [k, str2(base[k])])), proposed = Object.fromEntries(aiFields.map((k) => [k, str2(prop.proposed[k])]));
+        const before = Object.fromEntries(aiFields.map((k) => [k, str3(base[k])])), proposed = Object.fromEntries(aiFields.map((k) => [k, str3(prop.proposed[k])]));
         const applied = aiFields.filter((k) => (item[k] || "") === proposed[k] && proposed[k] !== before[k]);
-        if (applied.length) item.aiEdits = [...priorEdits.slice(-9), { model: str2(prop.model).slice(0, 80), generatedAt: str2(prop.generatedAt).slice(0, 40), appliedAt: (/* @__PURE__ */ new Date()).toISOString(), byId: actor.id, before, proposed, applied }];
+        if (applied.length) item.aiEdits = [...priorEdits.slice(-9), { model: str3(prop.model).slice(0, 80), generatedAt: str3(prop.generatedAt).slice(0, 40), appliedAt: (/* @__PURE__ */ new Date()).toISOString(), byId: actor.id, before, proposed, applied }];
       }
       if (!item.aiEdits.length) delete item.aiEdits;
+      if (item.status !== "completed") delete item.judgment;
+      else if (item.judgment === void 0) {
+        const same = !!record && ["purpose", "detail", "notes", "result", "actualDate"].every((k) => (record[k] || "") === (item[k] || ""));
+        if (same && record?.judgment) item.judgment = record.judgment;
+        else delete item.judgment;
+      } else if (item.judgment === null) delete item.judgment;
+      else {
+        const j = cleanJudgment(item.judgment);
+        if (!j) delete item.judgment;
+        else {
+          if (j.by !== "ai") {
+            j.confirmedBy = actor.id;
+            j.at = (/* @__PURE__ */ new Date()).toISOString();
+          }
+          item.judgment = j;
+        }
+      }
       if (item.geo == null) delete item.geo;
       else {
         const g = item.geo, acc = Number(item.geo.accuracy);

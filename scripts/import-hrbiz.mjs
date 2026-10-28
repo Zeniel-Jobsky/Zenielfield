@@ -1,4 +1,4 @@
-// HR-biz 가상 방문 DB(xlsx) → 시드 데이터셋(JSON). 사용: node --env-file=.env scripts/import-hrbiz.mjs <xlsx> [--geocode]
+// HR-biz 가상 방문 DB(xlsx) → 시드 데이터셋(JSON). 사용: node --env-file=.env scripts/import-hrbiz.mjs <xlsx>  (좌표는 기존 JSON에서 이어받음, 외부 지도 API 미사용)
 // 시트: 잡매니저_30명 · 현장_100개 · 매장_500개 · 방문기록_DB · 후속조치_DB. 브리핑·문구·코드북 시트는 파생 자료라 읽지 않는다.
 import fs from 'node:fs';
 import {createRequire} from 'node:module';
@@ -26,13 +26,13 @@ const sid=Object.fromEntries(S.map(s=>[s['현장ID'],idOf('site',s['현장ID'])]
 const stores=T.map(t=>({id:idOf('store',t['매장ID']),siteId:sid[t['현장ID']],code:t['매장ID'],name:t['매장명'],address:`${t['상위 현장명']} ${t['매장명']}`,region:String(t['방문지역']),managerIds:[uid[t['담당자ID']]].filter(Boolean),rule:rule(t['매장 방문주기']),cycle:String(t['매장 방문주기']),status:t['매장상태']||'운영 중',startDate,version:1,lat:null,lng:null,source:t['데이터구분'],sourceUrl:t['지점명 확인 출처']||''}));
 const stid=Object.fromEntries(T.map(t=>[t['매장ID'],idOf('store',t['매장ID'])]));
 const visits=V.map(v=>{const store=v['매장ID']?stid[v['매장ID']]:null,d=day(v['방문일']);return{id:idOf('visit',v['방문ID']),targetType:store?'store':'site',siteId:sid[v['현장ID']],storeId:store,visitorId:uid[v['잡매니저ID']],plannedDate:d,time:'',purpose:String(v['방문목적']||v['활동유형']),precheck:'',status:'completed',actualDate:d,actualTime:'',detail:String(v['주요활동내역']),notes:String(v['특이사항']),result:v['후속조치필요']==='Y'?'후속 조치 필요':'특이사항 없음',cancelReason:'',requirementId:null,entry:'manual',version:1,activityType:String(v['활동유형']),priority:String(v['우선순위']),template:String(v['문구템플릿ID']),registeredDate:day(v['방문계획등록일'])}});
+// 문제 판정: scripts/judge-reports.mjs가 만든 판정 파일이 있으면 방문 ID로 붙인다(다시 생성해도 AI를 또 부르지 않음).
+const judged=fs.existsSync('data/hrbiz-judgments.json')?JSON.parse(fs.readFileSync('data/hrbiz-judgments.json','utf8')).judgments:{};let judgedN=0;for(const v of visits){const j=judged[v.id];if(j){v.judgment=j;judgedN++}}
 const vid=new Set(visits.map(v=>v.id));
 const actions=A.map(a=>{const store=a['매장ID']?stid[a['매장ID']]:null,visit=idOf('visit',a['연결방문ID']);return{id:idOf('action',a['조치ID']),targetType:store?'store':'site',siteId:sid[a['현장ID']],storeId:store,visitId:vid.has(visit)?visit:null,type:String(a['활동유형']),content:String(a['후속조치 내용']),issue:String(a['접수된 특이사항']),ownerId:uid[a['담당자ID']],createdDate:day(a['방문일']),dueDate:day(a['조치기한']),state:states[String(a['조치상태']).trim()]||'조치 예정',sourceState:String(a['조치상태']),priority:String(a['우선순위']),completedDate:day(a['완료일']),version:1}});
-// 좌표: 실제 지점명(전자랜드)만 Kakao 키워드 검색으로 채운다. 가상 매장명은 좌표를 만들지 않는다.
-if(flags.includes('--geocode')){const key=process.env.KAKAO_REST_API_KEY;if(!key){console.error('KAKAO_REST_API_KEY 필요');process.exit(1)}let hit=0;const real=stores.filter(s=>/실제 지점명/.test(s.source));
- for(const s of real){const r=await fetch(`https://dapi.kakao.com/v2/local/search/keyword.json?size=1&query=${encodeURIComponent(s.name)}`,{headers:{Authorization:'KakaoAK '+key}});const d=(await r.json()).documents?.[0];if(d){s.lat=+Number(d.y).toFixed(6);s.lng=+Number(d.x).toFixed(6);s.address=d.road_address_name||d.address_name||s.address;hit++}await new Promise(x=>setTimeout(x,120))}
- console.log(`좌표: 실제 지점 ${real.length}곳 중 ${hit}곳`)}
+// 좌표 이어받기: 다시 만들면 기존 data/hrbiz-demo.json의 매장 좌표·주소를 매장 코드로 그대로 옮긴다(외부 API 호출 없음).
+if(fs.existsSync('data/hrbiz-demo.json')){const prev=new Map(JSON.parse(fs.readFileSync('data/hrbiz-demo.json','utf8')).stores.filter(s=>s.lat!=null).map(s=>[s.code,s]));let kept=0;for(const s of stores){const o=prev.get(s.code);if(o){s.lat=o.lat;s.lng=o.lng;s.address=o.address;kept++}}console.log(`좌표: 기존 데이터에서 ${kept}곳 이어받음`)}
 const bad=[...sites.filter(s=>!s.managerIds.length).map(s=>'현장 담당자 없음 '+s.code),...stores.filter(s=>!s.siteId||!s.managerIds.length).map(s=>'매장 참조 오류 '+s.code),...visits.filter(v=>!v.siteId||!v.visitorId||!v.actualDate||(v.targetType==='store'&&!v.storeId)).map(v=>'방문 참조 오류 '+v.id),...actions.filter(a=>!a.siteId||!a.ownerId||!a.dueDate||!a.content).map(a=>'조치 참조 오류 '+a.id)];
 if(bad.length){console.error(bad.slice(0,20).join('\n'));process.exit(1)}
 fs.mkdirSync('data',{recursive:true});fs.writeFileSync('data/hrbiz-demo.json',JSON.stringify({source:'ZeniField_HRbiz_3개팀_가상방문DB.xlsx',importedAt:new Date().toISOString().slice(0,10),domains,users,sites,stores,visits,actions}));
-console.log(`사용자 ${users.length} · 현장 ${sites.length} · 매장 ${stores.length} · 방문 ${visits.length} (${visitDates[0]}~${visitDates.at(-1)}) · 조치 ${actions.length} → data/hrbiz-demo.json`);
+console.log(`사용자 ${users.length} · 현장 ${sites.length} · 매장 ${stores.length} · 방문 ${visits.length} (${visitDates[0]}~${visitDates.at(-1)}) · 조치 ${actions.length} · 판정 ${judgedN} → data/hrbiz-demo.json`);

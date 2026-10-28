@@ -29,7 +29,7 @@ const DOWN_KEY='zf-ai-down';
 export function aiDownReason():string{try{const v=JSON.parse(sessionStorage.getItem(DOWN_KEY)||'null');return v&&v.until>Date.now()?v.reason:''}catch{return ''}}
 function markAiDown(reason:string){try{sessionStorage.setItem(DOWN_KEY,JSON.stringify({reason,until:Date.now()+10*60*1000}))}catch{}}
 const clip=(m:string)=>{let s=m.split(' 직접 입력해 주세요')[0].trim();while(s.endsWith('.'))s=s.slice(0,-1).trim();return s};
-async function callAssist(body:unknown):Promise<{draft:any;model:string;generatedAt:string}>{
+export async function callAssist(body:unknown):Promise<{draft:any;model:string;generatedAt:string}>{
  const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json() as {draft:any;model?:string;generatedAt?:string;error?:string};
  if(!r.ok){const msg=clip(d.error||'AI 응답 오류');if(r.status===502||r.status===503)markAiDown(msg);throw Error(msg)}
  return {draft:d.draft,model:d.model||'',generatedAt:d.generatedAt||new Date().toISOString()}}

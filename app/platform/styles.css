@@ -466,3 +466,37 @@
 .ai-brief-targets{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px}
 .ai-brief-targets .link{display:inline-flex;align-items:center;min-height:44px;font-size:13px}
 @media (min-width:1024px){.ai-brief-targets .link{min-height:28px}}
+.ai-brief-theme-status{display:inline-flex;align-items:center;height:20px;padding:0 6px;margin-right:6px;border-radius:10px;font-size:11px;font-weight:600;background:#eef2f6;color:#516e8a}
+.ai-brief-theme-status.bad{background:#fef3f2;color:#b42318}.ai-brief-theme-status.good{background:#edf6f1;color:#003c33}
+.ai-brief-evidence{margin:4px 0 0;padding-left:16px;font-size:12px;color:#65726b;line-height:1.5}
+/* AI 브리핑 독려 한마디 · 잡매니저 방문 코치 */
+.ai-brief-cheer{margin:0;padding:8px 12px;border-radius:6px;background:var(--zf-info-soft,#eef2f6);font-size:13px;line-height:1.6;color:#36443e}
+.panel.coach{padding:16px}
+.coach h3{margin:14px 0 6px;font-size:13px;font-weight:650;color:#36443e}
+.coach-msgs{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.coach-msgs li{display:flex;gap:8px;align-items:flex-start;padding:8px 12px;border-radius:6px;font-size:13px;line-height:1.6}
+.coach-msgs li svg{flex:none;margin-top:2px}
+.coach-msgs li.cheer{background:#edf6f1;color:#003c33}
+.coach-msgs li.nudge{background:var(--zf-warning-soft,#fdf4e7);color:#36443e}.coach-msgs li.nudge svg{color:#8a4b00}
+.coach-picks{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.coach-picks li{display:grid;grid-template-columns:minmax(140px,220px) 1fr auto;gap:8px 12px;align-items:center;padding:8px 0;border-top:1px solid #e3e9e6;font-size:13px}
+.coach-picks .link{display:inline-flex;align-items:center;font-weight:600;min-height:44px}
+.coach-picks .btn{min-height:44px}
+.ai-brief-out .coach-picks .hi-bad,.coach .hi-bad{font-style:normal;font-weight:600;color:#b42318}
+.coach .hi-good{font-style:normal;font-weight:600;color:#003c33}.coach .hi-num{font-weight:700;color:#17171c}
+@media (max-width:760px){.coach-picks li{grid-template-columns:1fr auto}.coach-picks li>span{grid-column:1/-1;grid-row:2}}
+@media (min-width:1024px){.coach-picks .link,.coach-picks .btn{min-height:32px}}
+/* AI 종합 판정(결과 저장 전 확인) */
+.judge-check{display:grid;gap:8px;padding:12px 0 0;border-top:1px solid var(--zf-border);font-size:13px;color:#36443e}
+.judge-check[role=status]{display:flex;align-items:center;gap:8px;color:#59645f}
+.judge-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.judge-head svg{color:#003c33}
+.judge-level{padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;line-height:20px}
+.judge-level.ok{background:#003c33;color:#fff}.judge-level.watch{background:var(--zf-info-soft,#eef2f6);color:#516e8a}.judge-level.warn{background:var(--zf-warning-soft,#fdf4e7);color:#8a4b00}.judge-level.risk{background:#b42318;color:#fff}
+.judge-pick{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-size:12px;color:#59645f}.judge-pick select{min-height:44px;min-width:96px}
+.judge-text{margin:0;line-height:1.6}
+.judge-issues{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.judge-issues li{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:#59645f}
+.judge-issues li>span{padding:1px 8px;border:1px solid var(--zf-control-border);border-radius:999px}.judge-issues li>span.risk{color:#b42318;border-color:#b42318}.judge-issues li>span.ok{color:#003c33;border-color:#003c33}
+.judge-issues em{flex:1 1 200px;min-width:0;font-style:normal;color:#36443e}
+.judge-check>small{font-size:12px;color:#65726b}
+.judge-note{margin:0;font-size:12px;color:#8a4b00}

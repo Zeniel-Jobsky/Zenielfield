@@ -38,7 +38,8 @@ architecture_docs: ""
 | `dist/` | `app/`, `lib/`, `worker/` | `npm run build` |
 | `dist/server/wrangler.ci.json` | 빌드된 `wrangler.json` + `scripts/prepare-cloudflare-deploy.mjs` | `node scripts/prepare-cloudflare-deploy.mjs` (대상 확인 후 폐기된 `legacy_env=true`만 제거) |
 | `supabase/functions/zenifield-gateway/logic.js` | `app/platform/mutations.ts`, `app/platform/model.ts` | `node scripts/bundle-supabase.mjs` |
-| `data/hrbiz-demo.json` | HR-biz xlsx | `node --env-file=.env scripts/import-hrbiz.mjs <xlsx> --geocode` |
+| `data/hrbiz-demo.json` | HR-biz xlsx(`data/`) + 판정 파일 `data/hrbiz-judgments.json` | `node scripts/import-hrbiz.mjs <xlsx>` (좌표는 기존 JSON에서 이어받음) |
+| `data/hrbiz-judgments.json` | 방문 보고 본문 | `node --env-file=.env scripts/judge-reports.mjs` (AI 판정, 이어서 실행 가능) |
 | `seed/out/` (git 제외) | `seed/build.ts`, `data/` | `node scripts/seed.mjs build` |
 | `__ZF_BUILD__` (푸터 빌드 표기) | `vite.config.ts` `buildInfo()` | 빌드·dev 시 자동 |
 | `dist/client/version.json` (새 버전 알림) | `vite.config.ts` `versionFile()` | 빌드 시 자동, dev는 미들웨어 |

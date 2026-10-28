@@ -59,5 +59,12 @@ equal(agingBuckets([{state:'미처리',dueDate:'2026-10-20'},{state:'처리 중'
  equal([tidied.aiEdits.length,tidied.aiEdits[0].applied,tidied.aiEdits[0].before.detail,tidied.aiEdits[0].byId,tidied.entry],[1,['detail'],base.detail,boss.id,'manual']);
  const again=updateDemo(demo,'visit',{...tidied,aiEdit:{...prop,proposed:{...prop.proposed,detail:tidied.detail}}},tidied,boss,now).item;equal(again.aiEdits.length,1);
  const kept=updateDemo(demo,'visit',{...tidied,notes:'추가',aiEdits:[]},tidied,boss,now).item;equal(kept.aiEdits.length,1);
- throws(()=>updateDemo(demo,'visit',{...base,status:'planned',plannedDate:now,aiEdit:prop},null,boss,now));}
+ throws(()=>updateDemo(demo,'visit',{...base,status:'planned',plannedDate:now,aiEdit:prop},null,boss,now));
+ // 종합 판정: 정리해 저장, 사람 확정이면 확정자를 서버가 붙임, 내용 그대로면 유지, 내용 바뀌면 삭제, null이면 삭제
+ const jd={level:'주의',assessment:'인력 공백이 이어짐',issues:[{type:'없는 유형',summary:'결원 1명',severity:'보통',flow:'지속',customerRequest:false}],by:'ai+person',model:'m',at:'x',confirmedBy:'forged'};
+ const judged=updateDemo(demo,'visit',{...base,judgment:jd},null,boss,now).item;
+ equal([judged.judgment.level,judged.judgment.issues[0].type,judged.judgment.confirmedBy],['주의','기타',boss.id]);
+ equal(updateDemo(demo,'visit',{...judged,judgment:undefined,time:'09:00'},judged,boss,now).item.judgment.level,'주의');
+ equal('judgment' in updateDemo(demo,'visit',{...judged,judgment:undefined,notes:'바뀜'},judged,boss,now).item,false);
+ equal('judgment' in updateDemo(demo,'visit',{...judged,judgment:null},judged,boss,now).item,false);}
 console.log(`${assertions} platform assertions passed: independent targets, occurrence math, cancellation, no auto-completion, joint assignments, immutable history and linked action flow.`);

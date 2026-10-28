@@ -61,12 +61,11 @@ let geoCalls=0;
 const geoProxy=async(url,init)=>{
  geoCalls++;
  if(url.includes('/functions/v1/')){equal(JSON.parse(init.body).operation,'session');return Response.json({ok:true,me:actor,session:{access_token:'secret-access',refresh_token:'secret-refresh',expires_in:3600}});}
- equal(new URL(url).hostname,'dapi.kakao.com');equal(init.headers.Authorization,'KakaoAK kakao-test-only');
- return Response.json({documents:[{address_name:'서울 테스트 주소',x:'127.0',y:'37.5'}]});
+ throw Error('외부 지도 API를 호출하면 안 됩니다: '+url);
 };
-r=await worker(wr('/api/geo?q=서울',{headers:{cookie:'__Host-zf-access=valid','oai-authenticated-user-id':'forged'}}),{...env,KAKAO_REST_API_KEY:'kakao-test-only'},geoProxy);
-equal(r.status,200);const geoBody=await r.text();equal(JSON.parse(geoBody).places[0].lat,37.5);equal(geoBody.includes('secret-access'),false);equal(r.headers.get('set-cookie').includes('HttpOnly; Secure; SameSite=Lax'),true);equal(geoCalls,2);
+r=await worker(wr('/api/geo?q=서울',{headers:{cookie:'__Host-zf-access=valid','oai-authenticated-user-id':'forged'}}),env,geoProxy);
+equal(r.status,410);const geoBody=await r.text();equal(geoBody.includes('secret-access'),false);equal(r.headers.get('set-cookie').includes('HttpOnly; Secure; SameSite=Lax'),true);equal(geoCalls,1);
 geoCalls=0;
 r=await worker(wr('/api/geo?q=서울',{headers:{cookie:'__Host-zf-access=valid'}}),env,async()=>{geoCalls++;return Response.json({error:'disabled account'},{status:403})});equal(r.status,403);equal(geoCalls,1);
-r=await worker(wr('/api/geo?q=서울',{headers:{cookie:'__Host-zf-access=valid'}}),{...env,KAKAO_REST_API_KEY:'kakao-test-only'},async()=>Response.json({ok:true}));equal(r.status,403);
+r=await worker(wr('/api/geo?q=서울',{headers:{cookie:'__Host-zf-access=valid'}}),env,async()=>Response.json({ok:true}));equal(r.status,403);
 console.log(assertions+' Cloudflare/Supabase auth assertions passed: server token, verified identity, allowlist, refresh, PKCE, CSRF, secure cookies and no browser token exposure.');

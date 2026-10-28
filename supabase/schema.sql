@@ -42,7 +42,8 @@ create table public.zf_visits (
  check(status<>'planned' or data->>'plannedDate' is not null), check(status<>'cancelled' or length(trim(data->>'cancelReason'))>0),
  entry text generated always as (coalesce(data->>'entry','manual')) stored check(entry in ('manual','ai')),
  check((entry='ai')=(data ? 'ai')), check(entry<>'ai' or (status='completed' and jsonb_typeof(data->'ai'->'input')='object' and jsonb_typeof(data->'ai'->'draft')='object')),
- constraint zf_visits_ai_edits_array check (not (data ? 'aiEdits') or jsonb_typeof(data->'aiEdits')='array')
+ constraint zf_visits_ai_edits_array check (not (data ? 'aiEdits') or jsonb_typeof(data->'aiEdits')='array'),
+ constraint zf_visits_judgment_shape check (not (data ? 'judgment') or jsonb_typeof(data->'judgment')='null' or (jsonb_typeof(data->'judgment')='object' and jsonb_typeof(data->'judgment'->'issues')='array' and data->'judgment'->>'level' in ('정상','관찰','주의','위험')))
 );
 create index zf_visits_entry_idx on public.zf_visits(entry);
 create index zf_visits_site_idx on public.zf_visits(site_id);

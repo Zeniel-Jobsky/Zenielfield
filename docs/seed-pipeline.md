@@ -45,7 +45,7 @@
 
 ## HR-biz 가상 방문 DB (2026-10-28)
 
-- 원본: `ZeniField_HRbiz_3개팀_가상방문DB.xlsx` (카카오톡 수신) → `node --env-file=.env scripts/import-hrbiz.mjs <xlsx> --geocode` → `data/hrbiz-demo.json`
+- 원본: `ZeniField_HRbiz_3개팀_가상방문DB.xlsx` (카카오톡 수신) → `node scripts/import-hrbiz.mjs data/<xlsx>` → `data/hrbiz-demo.json` (좌표는 기존 JSON에서 이어받음, 외부 지도 API 미사용 · 문제 판정은 `data/hrbiz-judgments.json`을 방문 ID로 붙임)
 - `scripts/seed.mjs`는 이 JSON이 있으면 가상 생성기 대신 사용. 지사 7곳·매장 후보 54곳은 그대로 추가
 - 읽는 시트: 잡매니저_30명 · 현장_100개 · 매장_500개 · 방문기록_DB · 후속조치_DB. 브리핑·문구·코드북은 파생 자료라 미사용
 - 결과: 사용자 30 · 현장 100(+7) · 매장 500(+54) · 방문 1,800(2026-07-06~10-26) · 조치 972 · 도메인 2(인재사업 HR · SE운영 SE)

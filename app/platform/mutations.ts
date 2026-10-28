@@ -1,5 +1,6 @@
 import type {User} from '../lib/model';
 import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,validGeo,distanceM,managesDomain,domainName,aiFields,type AiField,aiCategories,aiUrgencies,aiConfidences} from './model';
+import {cleanJudgment} from './judgment';
 const str=(v:unknown,max:number)=>typeof v==='string'?v.slice(0,max):'';
 export function aiEntryOf(raw:any):AiEntry{if(!raw||typeof raw!=='object')throw Error('AI 입력 기록이 없습니다. AI 간편 등록에서 다시 작성해 주세요.');const text=str(raw.input?.text,3000),imageCount=Number(raw.input?.imageCount);if(!Number.isInteger(imageCount)||imageCount<0||imageCount>3)throw Error('AI 입력 사진 수를 확인해 주세요.');if(!text.trim()&&!imageCount)throw Error('AI 입력 원문(메모 또는 사진)이 없습니다.');
  const draft=Object.fromEntries(aiFields.map(k=>[k,str(raw.draft?.[k],3500)])) as AiEntry['draft'],edited=Array.isArray(raw.edited)?[...new Set(raw.edited)].filter((k):k is AiEntry['edited'][number]=>aiFields.includes(k as any)):[];
@@ -60,6 +61,8 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
     const applied=aiFields.filter(k=>(item[k]||'')===proposed[k]&&proposed[k]!==before[k]);
     if(applied.length)item.aiEdits=[...priorEdits.slice(-9),{model:str(prop.model).slice(0,80),generatedAt:str(prop.generatedAt).slice(0,40),appliedAt:new Date().toISOString(),byId:actor.id,before,proposed,applied}];}
    if(!item.aiEdits.length)delete item.aiEdits;
+   // 종합 판정: 방문 결과에만. 보내지 않으면 내용(목적·상세·특이사항·결과·방문일)이 그대로일 때만 기존 판정 유지, 바뀌었으면 지워 미판정으로. 사람이 확인해 저장하면 확정자·시각을 서버가 붙인다.
+   if(item.status!=='completed')delete item.judgment;else if(item.judgment===undefined){const same=!!record&&(['purpose','detail','notes','result','actualDate'] as const).every(k=>(record[k]||'')===(item[k]||''));if(same&&record?.judgment)item.judgment=record.judgment;else delete item.judgment}else if(item.judgment===null)delete item.judgment;else{const j=cleanJudgment(item.judgment);if(!j)delete item.judgment;else{if(j.by!=='ai'){j.confirmedBy=actor.id;j.at=new Date().toISOString()}item.judgment=j}}
    if(item.geo==null)delete item.geo;else{const g=item.geo as {lat:number;lng:number},acc=Number(item.geo.accuracy);if(!validGeo(g)||!Number.isFinite(acc)||acc<0)throw Error('GPS 위치 기록을 확인해 주세요.');item.geo={lat:g.lat,lng:g.lng,accuracy:Math.round(acc),at:typeof item.geo.at==='string'?item.geo.at.slice(0,40):'',distance:target.lat!==null&&target.lng!==null?distanceM(g,{lat:target.lat,lng:target.lng}):null}}
    if(item.status!=='completed'){item.actualDate=null;item.actualTime='';item.detail='';item.notes='';item.result=''}
    array=next.visits;
