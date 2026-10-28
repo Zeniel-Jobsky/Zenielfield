@@ -458,3 +458,11 @@
 @media(max-width:760px){.update-notice{bottom:84px;left:16px;right:16px;transform:none;max-width:none}.update-notice .btn{min-height:44px}}
 
 .ai-fallback-note{padding:8px 10px;border-radius:6px;background:#fdf4e7;color:#8a4b00}
+/* AI 브리핑: 보고 내용에서 보이는 것(맥락 주제) — 헤드라인 바로 아래 기본 표시 */
+.ai-brief-themes h3 small{font-weight:400;font-size:12px;color:#65726b;margin-left:4px}
+.ai-brief-themes ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.ai-brief-themes li{padding:10px 12px;border-top:1px solid #e3e9e6;line-height:1.6}
+.ai-brief-themes li b{color:#003c33;margin-right:4px}
+.ai-brief-targets{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px}
+.ai-brief-targets .link{display:inline-flex;align-items:center;min-height:44px;font-size:13px}
+@media (min-width:1024px){.ai-brief-targets .link{min-height:28px}}
