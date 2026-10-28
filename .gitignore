@@ -58,3 +58,5 @@ yarn-error.log*
 # Per-machine dev server overrides
 /vite.config.local.mjs
 /.certs/
+/.dev-server.pid
+/.dev-server.log
