@@ -1,4 +1,7 @@
 import vinext from "vinext";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { defineConfig } from "vite";
 import hostingConfig from "./.openai/hosting.json";
 import { readExecutionProfile } from "./scripts/execution-profile.mjs";
@@ -44,6 +47,12 @@ export default defineConfig(async ({ command }) => {
   // Wrangler snapshots its log path while the Cloudflare plugin is imported.
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
+  // Per-machine dev server overrides (host, https, ...). vite.config.local.mjs is git-ignored; see vite.config.local.example.mjs.
+  const localFile = resolve(process.cwd(), "vite.config.local.mjs");
+  const local = command === "serve" && existsSync(localFile)
+    ? ((await import(pathToFileURL(localFile).href)).default ?? {})
+    : {};
+
   return {
     server: {
       ...(managedLinux
@@ -52,6 +61,7 @@ export default defineConfig(async ({ command }) => {
       ...(isCodexSeatbeltSandbox
         ? { watch: { useFsEvents: false, usePolling: true } }
         : {}),
+      ...(local.server ?? {}),
     },
     plugins: [
       vinext(),

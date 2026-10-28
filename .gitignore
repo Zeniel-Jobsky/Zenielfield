@@ -53,3 +53,7 @@ yarn-error.log*
 /.vercel/
 /env.zip
 /seed/out/
+
+# Per-machine dev server overrides
+/vite.config.local.mjs
+/.certs/
