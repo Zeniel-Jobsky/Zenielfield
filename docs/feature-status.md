@@ -61,6 +61,7 @@
 - 방문·일지 워크플로 재설계: [문서](visit-workflow.md) 구현(계획 자동 연결·일시 기본 지금·제안 조치 일괄 등록·홈 "지금 여기서").
 - 대시보드·브리핑·필터 2차 개편: [대시보드 계획](dashboard-plan.md).
 - 기입력 결과 AI 정리(`aiEdits`)·AI 현황 요약·푸터 빌드 표기: 구현(2026-10-28). [워크플로](visit-workflow.md), [스키마](ai-entry-schema.md), [대시보드](dashboard-plan.md). 운영 반영 대기: 이관 `20261028120000_read_window.sql`, `20261028130000_ai_edits.sql`, Edge 재배포(gateway·cloudflare).
+- 운영 반영(2026-10-28 14:35, Actions supabase-deploy #40638708419 성공): 이관 기준선 2개(visit_entry, domains) 기록 + 적용 2개(read_window, ai_edits), logic.js 번들, Edge zenifield-gateway·zenifield-cloudflare 재배포.
 - 이관 자동 파이프라인: `scripts/ci/supabase-deploy.yml`(활성화: `.github/workflows/`로 복사·커밋, `workflow` 권한 있는 계정으로 푸시) + `scripts/migrate.mjs` 작성(2026-10-28). 켜기 전 secret 2개와 `--mark-applied` 기준선 필요. [설치 문서](supabase-setup.md).
 - 대시보드 차트화: [대시보드 개선 계획](dashboard-plan.md) DB-1–DB-10·BR-1·BR-2 완료, BR-3 남음.
 
