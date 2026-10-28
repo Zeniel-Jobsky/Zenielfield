@@ -54,7 +54,7 @@
 
 ### 중간
 - AI·직접 입력 분리: [스키마](ai-entry-schema.md) 구현, 원격 이관·Edge 재배포 완료(2026-10-28).
-- GPS 지점 자동 선택: [GPS](gps-plan.md) 구현. 매장 검색·주소 좌표 변환 구현, Kakao 키 설정 필요.
+- GPS 지점 자동 선택: [GPS](gps-plan.md) 구현, **2026-10-28 사용 중지**(`app/platform/geo.tsx` `GPS_ENABLED=false`, 방문 등록 GPS 자동 선택·위치 기록·마스터 현재 위치 좌표 입력 숨김, 주소 검색 좌표 입력은 유지). 매장 검색·주소 좌표 변환 구현, Kakao 키 설정 필요.
 - 데모 주입 파이프라인: [문서](seed-pipeline.md) 구현, 운영 적재 대기. HR-biz 가상 DB(xlsx) 운영 적재 완료(2026-10-28).
 - 방문 등록 기본 AI 입력·권한 요청: [문서](ai-input-default.md) 구현.
 - 관리 도메인: [문서](domain-plan.md) 구현. 원격 이관 적용 완료(2026-10-28).
