@@ -80,5 +80,5 @@
 - 이력: `public.zf_schema_migrations(name, checksum, applied_at)`. 파일명 순으로 미적용만 실행하고 파일마다 `begin … commit`. 적용된 파일의 내용이 바뀌면 경고만 하고 다시 실행하지 않는다(새 파일로 추가).
 - 저장소 설정(사용자): Settings → Secrets → `SUPABASE_ACCESS_TOKEN`(Supabase 계정 → Access Tokens), `SUPABASE_PROJECT_REF`. Environments → `production`에 승인자를 두면 실행 전 승인이 필요하다(AGENTS "승인" 원칙).
 - 처음 켤 때 기준선: `supabase/migrations/APPLIED_BASELINE`에 적힌 파일(손으로 이미 적용한 `visit_entry`, `domains`)은 이력 표가 비어 있는 첫 실행에서 실행하지 않고 적용됨으로만 기록된다. 사람이 따로 할 일은 없다. 필요하면 `--mark-applied`로 수동 지정도 된다.
-- 시크릿 등록(PowerShell): `gh secret set SUPABASE_ACCESS_TOKEN --body ((Get-Content .env | Where-Object {$_ -like 'SUPABASE_ACCESS_TOKEN=*'}) -split '=',2)[1]` · `gh secret set SUPABASE_PROJECT_REF --body nhywssfwtnonytbkufyy`. 등록 뒤 `gh workflow run supabase-deploy`로 즉시 실행할 수 있다.
+- 시크릿 등록: `node scripts/set-ci-secrets.mjs` (cmd·PowerShell·macOS 공통, `.env` 값을 출력 없이 `gh`로 넘김). 등록 뒤 `gh workflow run supabase-deploy`로 즉시 실행한다.
 - 작성 규칙: 이관은 두 번 실행해도 안전하게 쓴다(`create … if not exists`, `drop function if exists`, 제약은 `pg_constraint` 확인 후 추가).
