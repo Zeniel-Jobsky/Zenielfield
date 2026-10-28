@@ -6,7 +6,7 @@ export default function EmailLogin(){
  async function submit(e:FormEvent){e.preventDefault();setBusy(true);setError('');setMessage('');try{
   const r=await fetch(link?'/api/auth/request-link':'/api/auth/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(link?{email}:{email,password})});
   const d=await r.json() as {error?:string};if(!r.ok)throw Error(d.error||(link?'로그인 링크를 보내지 못했습니다.':'로그인하지 못했습니다.'));
-  if(link)setMessage('등록된 이메일이면 로그인 링크가 발송됩니다. 메일의 링크를 이 브라우저에서 열어 주세요.');else window.location.replace('/');
+  if(link)setMessage('등록된 이메일이면 로그인 링크가 발송됩니다. 메일의 링크를 이 브라우저에서 열어 주세요.');else{setMessage('로그인되었습니다. 운영 데이터를 불러옵니다…');window.location.replace('/')}
  }catch(e){setError((e as Error).message)}finally{setBusy(false)}}
  return <form className="email-login" onSubmit={submit}>
   <label htmlFor="zf-login-email">회사 이메일</label>

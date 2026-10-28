@@ -49,6 +49,7 @@ architecture_docs: ""
 | DC-DESIGN-CHECK | 커밋 시 `.githooks/pre-commit` → `scripts/check-design.mjs` 경고(지침·룰 동반 갱신, 지침 밖 색). `npm run setup`으로 활성화, `DESIGN_STRICT=1`이면 차단 |
 | DC-DOCS | 개선 계획·이슈·완료 내역은 `docs/`에 기록, 담당자 배정은 `work/`에만 |
 | DC-DEPLOY | 운영 반영 순서: 이관 적용 → `bundle-supabase.mjs` → Edge 재배포(gateway, cloudflare) → 화면. 자동: `scripts/ci/supabase-deploy.yml`(활성화: `.github/workflows/`로 복사·커밋, `workflow` 권한 있는 계정으로 푸시)(main 푸시·수동) = `scripts/migrate.mjs`(이력 `zf_schema_migrations`, 미적용만, 파일별 트랜잭션) → 번들 → Edge. 기존 수동 적용분은 `--mark-applied`로 기준선. 적용된 이관 수정 금지, 이관은 재실행 안전하게. 이관은 옛 스키마에 로컬 선적용 검증. `schema.sql` 운영 재실행 금지. 운영 DB·Edge·계정 발급은 사용자 승인 후. 반영 내역 `docs/` 기록 |
+| DC-AI-TEXT | AI·규칙 브리핑 문장 강조는 `app/platform/rich.tsx` 조각 트리(`Rich=[{v,tone:'num'|'bad'|'good'}]`, `rich` 태그 템플릿)로 생성 시점에 붙인다. 문장을 정규식으로 재해석해 색칠하지 않는다. AI 응답 스키마도 조각 배열, 화면은 `normalizeBrief`/`toRich`로 검사 후 렌더 |
 | DC-AI | AI 흔적 3종: `entry='ai'`+`ai` · `aiEdits[]`(기입력 AI 정리, 서버가 applied 계산·보관, 클라이언트 `aiEdits` 무시, entry 불변) · 현황 요약은 비저장. AI 전송 = 집계 숫자·메모 본문만, 개인정보 금지. 데모는 서버 호출 없이 규칙 결과(`데모 …` 표기) |
 | DC-AUTH | 로그인 우선 진입. 회사 계정(`ZENIFIELD_AUTH_PROVIDER=supabase-email`, 등록 이메일+비밀번호) 기본. 계정 공용(모든 서버 공유). 에이전트는 계정·권한을 스스로 만들지 않음. 비밀번호 원문 기록 금지 |
 | DC-DATA | 조회는 기간 창(선택 기간+앞 8주+뒤 6주, 미완료 조치 항상). 시드는 출처 표시. 출처 없는 기존 방문 1만 건은 별도 묶음으로 보존(삭제 금지). 데모 기준 = HR-biz 엑셀 |

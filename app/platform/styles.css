@@ -397,3 +397,44 @@
 
 .ai-brief-more{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;font-size:12px}
 @media(max-width:760px){.ai-brief-more{min-height:44px}}
+
+/* 로그인 직후 로딩 화면 */
+.load-screen{display:flex;flex-direction:column;align-items:center}
+.load-panel{width:min(440px,100%);display:grid;gap:16px;padding:28px 28px 24px}
+.load-panel h1{margin:0;font-size:18px;font-weight:500;color:#17171c}
+.load-bar{height:6px;border-radius:3px;background:#e3e9e6;overflow:hidden;position:relative}
+.load-bar i{display:block;height:100%;background:#003c33;border-radius:3px;transition:width .2s}
+.load-bar.indeterminate i{width:35%;position:absolute;left:-35%;animation:load-slide 1.2s ease-in-out infinite}
+@keyframes load-slide{to{left:100%}}
+@media(prefers-reduced-motion:reduce){.load-bar.indeterminate i{animation:none;left:0;width:100%;opacity:.35}}
+.load-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:13px;color:#65726b}
+.load-steps li{display:flex;align-items:center;gap:8px}
+.load-steps li.done{color:#36443e}.load-steps li.done svg{color:#003c33}
+.load-steps li.active{color:#17171c;font-weight:500}
+.load-steps small{margin-left:auto;font-size:12px;color:#65726b;font-weight:400}
+.load-steps .dot{width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center}.load-steps .dot::before{content:'';width:6px;height:6px;border-radius:50%;background:#cfd9d3}
+.load-meta{margin:0;font-size:12px;color:#65726b;line-height:1.6}
+@media(max-width:760px){.load-panel{padding:22px 18px}}
+
+/* AI 브리핑 색 강조: 상태 칩·증감 칩·문장 강조 (지침 상태색과 옅은 표면만) */
+.ai-brief-lead{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ai-brief-tone{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;font-size:12px;font-weight:700}
+.ai-brief-tone.bad{background:#fef3f2;color:#b42318}.ai-brief-tone.warn{background:#fdf4e7;color:#8a4b00}.ai-brief-tone.good{background:#edf6f1;color:#003c33}.ai-brief-tone.plain{background:#f1f6f3;color:#59645f}
+.ai-brief-delta{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:12px;font-size:12px;font-weight:600;background:#f8faf9;color:#36443e;border:1px solid #e3e9e6}
+.ai-brief-delta.up{color:#003c33}.ai-brief-delta.down{color:#b42318}
+.ai-brief-delta small{font-weight:400;color:#65726b}
+.ai-brief-flow{padding:10px 12px;border-radius:6px;background:#f8faf9}
+.ai-brief-out .hi-num{font-weight:700;color:#17171c}
+.ai-brief-out .hi-bad{font-style:normal;font-weight:600;color:#b42318}
+.ai-brief-out .hi-good{font-style:normal;font-weight:600;color:#003c33}
+.ai-brief-grid ol>li::marker{color:#b42318;font-weight:700}
+
+/* 균형 브리핑: 2×2 격자, 잘 되는 점(완료색 표식)·챙길 곳(위험색 표식) */
+.ai-brief-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ai-brief-good ul{list-style:none;padding-left:0}.ai-brief-good li{position:relative;padding-left:20px}.ai-brief-good li::before{content:'✓';position:absolute;left:2px;color:#003c33;font-weight:700}
+.ai-brief-good h3{color:#003c33}.ai-brief-focus h3{color:#b42318}
+.ai-brief-tools select{min-height:32px;font-size:12px;max-width:220px}
+@media(max-width:760px){.ai-brief-grid{grid-template-columns:1fr}.ai-brief-tools select{max-width:none;flex:1;min-height:44px;font-size:16px}}
+
+.ai-brief-out .rich,.ai-brief-out .rich b,.ai-brief-out .rich em{display:inline}
+.ai-brief-grid li>span.rich{display:inline}
