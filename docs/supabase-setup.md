@@ -73,3 +73,13 @@
 - Cloudflare 실제 HTTP 17개 검증: 저장·재조회, 현장/매장 분리, 충돌, 매니저 권한, 세션 갱신/로그아웃, 직접 DB 접근 차단. 폐기용 DB/Auth 계정과 업무 기록은 검증 후 정리했습니다.
 
 원래 Sites 인증을 개인 Cloudflare에서 그대로 신뢰하는 방식은 사용하지 않습니다. Cloudflare에서는 기존 D1 API를 차단하고 Supabase 운영만 제공합니다. 새 계정은 설정에서 업무 프로필을 등록한 뒤 이메일 링크로 로그인합니다. 이메일 발송 자격/SMTP 구성은 Supabase 프로젝트의 설정을 따릅니다.
+
+## 이관 자동 적용 파이프라인 (2026-10-28)
+
+- 워크플로 파일: `scripts/ci/supabase-deploy.yml`. **활성화는 사용자가** 이 파일을 `.github/workflows/supabase-deploy.yml`로 복사해 커밋·푸시한다(워크플로 파일 생성은 `workflow` 권한이 있는 GitHub 계정만 가능해 에이전트 자격으로는 푸시가 거부됨). `main`에 `supabase/**`, `app/platform/mutations.ts`, `app/platform/model.ts`가 푸시되거나 Actions에서 수동 실행하면 → 타입·플랫폼 테스트 → `scripts/migrate.mjs` → `bundle-supabase.mjs` → Edge 2개 재배포.
+- 이력: `public.zf_schema_migrations(name, checksum, applied_at)`. 파일명 순으로 미적용만 실행하고 파일마다 `begin … commit`. 적용된 파일의 내용이 바뀌면 경고만 하고 다시 실행하지 않는다(새 파일로 추가).
+- 저장소 설정(사용자): Settings → Secrets → `SUPABASE_ACCESS_TOKEN`(Supabase 계정 → Access Tokens), `SUPABASE_PROJECT_REF`. Environments → `production`에 승인자를 두면 실행 전 승인이 필요하다(AGENTS "승인" 원칙).
+- 처음 켤 때 기준선: 이미 손으로 적용한 `20261028000000_visit_entry.sql`, `20261028100000_domains.sql`은 실행하지 않고 기록만 한다.
+  `node --env-file=.env scripts/migrate.mjs --mark-applied 20261028000000_visit_entry.sql,20261028100000_domains.sql`
+  그다음 `node --env-file=.env scripts/migrate.mjs --dry-run`으로 남은 파일(`read_window`, `ai_edits`)만 보이는지 확인하고 실제 적용 또는 Actions 수동 실행.
+- 작성 규칙: 이관은 두 번 실행해도 안전하게 쓴다(`create … if not exists`, `drop function if exists`, 제약은 `pg_constraint` 확인 후 추가).

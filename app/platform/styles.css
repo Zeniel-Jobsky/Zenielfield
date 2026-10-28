@@ -351,3 +351,46 @@
 /* 태블릿·모바일 세로 막대 레이블: 낱말 단위로만 줄바꿈 */
 .vbar small{word-break:keep-all}
 @media(max-width:1023px){.vbar-list{gap:4px}}
+
+/* AI로 정리하기: 제안은 옅은 정보 표면, 현재/제안은 한 줄씩 */
+.ai-tidy{display:grid;gap:10px;padding:12px 14px;border-top:1px solid #e3e9e6}
+.ai-tidy-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ai-tidy-head>span{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;color:#36443e;min-width:0;flex:1 1 260px}
+.ai-tidy-head small{flex-basis:100%;font-size:12px;color:#65726b;line-height:1.6}
+.ai-tidy-applied{display:inline-flex;align-items:center;gap:8px}
+.ai-tidy-offer{display:grid;gap:8px;padding:12px;background:#eef2f6;border-radius:8px}
+.ai-tidy-row{display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;padding:8px 0;border-top:1px solid #e3e9e6;font-size:13px;cursor:pointer}
+.ai-tidy-row:first-of-type{border-top:0}
+.ai-tidy-row input{margin-top:3px;width:18px;height:18px}
+.ai-tidy-row span{display:grid;grid-template-columns:34px 1fr;gap:4px 8px;min-width:0}
+.ai-tidy-row b{grid-column:1/-1;font-weight:600;color:#17171c}
+.ai-tidy-row em{font-style:normal;font-size:11px;color:#65726b;padding-top:2px}
+.ai-tidy-row s{text-decoration:none;color:#65726b;white-space:pre-wrap;word-break:break-word}
+.ai-tidy-row ins{text-decoration:none;color:#17171c;white-space:pre-wrap;word-break:break-word}
+.ai-tidy-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:760px){.ai-tidy{padding:12px 0}.ai-tidy-head .btn{min-height:44px;width:100%;justify-content:center}.ai-tidy-actions .btn{min-height:44px;flex:1 1 140px;justify-content:center}}
+
+/* AI 현황 요약: 흰 패널, 머리글 오른쪽에 자동 요약 체크 + 버튼, 결과는 세 열 */
+.ai-brief .panel-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.ai-brief .panel-heading h2{display:inline-flex;align-items:center;gap:6px}
+.ai-brief-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ai-brief-busy{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#59645f}
+.ai-brief-skeleton{display:grid;gap:10px}.ai-brief-skeleton i{display:block;height:14px;border-radius:4px;background:#f1f6f3}.ai-brief-skeleton i:nth-child(1){width:70%}.ai-brief-skeleton i:nth-child(2){width:92%}.ai-brief-skeleton i:nth-child(3){width:55%}
+.ai-brief-out section>p{margin:0;font-size:13px;line-height:1.75;color:#36443e}
+.ai-brief-factor{display:flex;gap:12px;align-items:flex-start;cursor:pointer}.ai-brief-factor input{margin-top:3px;width:18px;height:18px}.ai-brief-factor h3{margin:0 0 2px}
+.ai-brief-empty{margin:0;font-size:13px;color:#65726b;line-height:1.7}
+.ai-brief-out{display:grid;gap:12px}
+.ai-brief-out.stale{opacity:.72}
+.ai-brief-head{margin:0;font-size:14px;line-height:1.7;color:#17171c;font-weight:500}
+.ai-brief-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.ai-brief-grid h3{margin:0 0 6px;font-size:12px;font-weight:600;color:#59645f}
+.ai-brief-grid ul,.ai-brief-grid ol{margin:0;padding-left:18px;font-size:13px;line-height:1.65;color:#36443e;display:grid;gap:4px}
+.ai-brief-grid li>.link{font-weight:600;color:#003c33;display:inline-flex;align-items:center;gap:2px}
+.ai-brief-grid li>span{display:block;color:#65726b;font-size:12px}
+.ai-brief-decide{margin-top:8px!important;padding-top:8px;border-top:1px solid #e3e9e6}
+.ai-brief-decide li::marker{color:#003c33}
+.ai-brief-grid section h3+ul,.ai-brief-grid section h3+ol{margin-bottom:10px}
+.ai-brief-grid section>h3:not(:first-child){margin-top:8px}
+.ai-brief-meta{margin:0;font-size:11px;color:#65726b}
+@media(max-width:1023px){.ai-brief-grid{grid-template-columns:1fr 1fr}.ai-brief-grid>div:first-child{grid-column:1/-1}}
+@media(max-width:760px){.ai-brief-grid{grid-template-columns:1fr}.ai-brief-tools{width:100%;justify-content:space-between}.ai-brief-tools .btn{min-height:44px}}

@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
+import type {AiField} from './model';
 import {Plus,Mic,Square,ArrowUp,X,Loader2,Camera} from 'lucide-react';
 // ChatGPT-style composer: type, speak or attach photos, then send once; the draft fills the form directly. Nothing is saved here.
 export type AiDraft={detail:string;result:string;purpose:string;notes:string;extra:{summary:string;category:string[];urgency:string};actions:{type:string;content:string;dueDate:string}[];confidence:string};
@@ -19,6 +20,16 @@ export function demoDraft(text:string,mode:'result'|'plan'):AiDraft|AiPlanDraft{
  const category=[has(t,'결원','충원','인력','직원')&&'인력',has(t,'고장','온도','수리','안전','시설')&&'시설·안전',has(t,'고객사')&&'고객 요청',has(t,'민원','불만')&&'민원'].filter(Boolean) as string[];
  const actions=[has(t,'결원','충원')&&{type:'인력 충원',content:'결원 인력 충원 요청',dueDate:kstDay(7)},has(t,'고장','수리','온도')&&{type:'안전·시설',content:'설비 점검·수리 요청',dueDate:kstDay(7)},has(t,'민원','불만')&&{type:'민원 대응',content:'민원 처리 결과 회신',dueDate:kstDay(3)}].filter(Boolean) as AiDraft['actions'];
  return {detail:t,result:actions.length?'후속 조치 필요':'특이사항 없음',purpose,notes:'',extra:{summary:t.slice(0,80),category:category.length?category:['운영'],urgency:actions.length>1?'높음':actions.length?'보통':'낮음'},actions,confidence:'low'}}
+// AI 정리 요청: 기입력 값을 문장으로 묶어 보낸다. 데모는 서버 없이 공백·문장부호만 정리한 예시 제안을 만든다.
+export type TidyValues=Record<AiField,string>;
+export const tidyText=(t:string)=>{const s=t.replace(/\s+/g,' ').replace(/\s*([.,!?])\s*/g,'$1 ').replace(/([.!?]) (?=[.!?])/g,'$1').trim().replace(/[,\s]+$/,'');return !s||/[.!?]$/.test(s)?s:s+'.'};
+export function demoTidy(v:TidyValues):AiDraft{const detail=tidyText(v.detail),notes=tidyText(v.notes),t=detail+' '+notes;const follow=has(t,'요청','수리','충원','결원','민원','고장','필요');
+ return {detail,notes,purpose:v.purpose,result:follow?'후속 조치 필요':v.result||'특이사항 없음',extra:{summary:detail.slice(0,80),category:[has(t,'결원','충원','인력')&&'인력',has(t,'고장','수리','온도','안전','시설')&&'시설·안전',has(t,'민원','불만')&&'민원'].filter(Boolean) as string[],urgency:follow?'보통':'낮음'},actions:[],confidence:'low'}}
+export async function requestTidy(v:TidyValues,demo:boolean):Promise<{draft:AiDraft;model:string;generatedAt:string}>{
+ if(demo)return {draft:demoTidy(v),model:'데모 예시 정리',generatedAt:new Date().toISOString()};
+ const text=`방문 목적: ${v.purpose}\n주요 활동 내용: ${v.detail}\n특이사항: ${v.notes||'(없음)'}\n후속 조치 필요 여부: ${v.result}`;
+ const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,images:[],mode:'tidy'})});const d=await r.json() as {draft:AiDraft;model?:string;generatedAt?:string;error?:string};
+ if(!r.ok)throw Error(d.error||'AI 정리에 실패했습니다.');return {draft:d.draft,model:d.model||'',generatedAt:d.generatedAt||new Date().toISOString()}}
 export function AiComposer({onDraft,mode='result',demo=false}:{onDraft:(draft:AiDraft,meta:AiMeta)=>void;mode?:'result'|'plan';demo?:boolean}){
  const [text,setText]=useState(''),[interim,setInterim]=useState(''),[images,setImages]=useState<string[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(''),[listening,setListening]=useState(false),rec=useRef<Recognition|null>(null),box=useRef<HTMLTextAreaElement>(null);
  useEffect(()=>()=>rec.current?.stop(),[]);

@@ -60,6 +60,8 @@
 - 관리 도메인: [문서](domain-plan.md) 구현. 원격 이관 적용 완료(2026-10-28).
 - 방문·일지 워크플로 재설계: [문서](visit-workflow.md) 구현(계획 자동 연결·일시 기본 지금·제안 조치 일괄 등록·홈 "지금 여기서").
 - 대시보드·브리핑·필터 2차 개편: [대시보드 계획](dashboard-plan.md).
+- 기입력 결과 AI 정리(`aiEdits`)·AI 현황 요약·푸터 빌드 표기: 구현(2026-10-28). [워크플로](visit-workflow.md), [스키마](ai-entry-schema.md), [대시보드](dashboard-plan.md). 운영 반영 대기: 이관 `20261028120000_read_window.sql`, `20261028130000_ai_edits.sql`, Edge 재배포(gateway·cloudflare).
+- 이관 자동 파이프라인: `scripts/ci/supabase-deploy.yml`(활성화: `.github/workflows/`로 복사·커밋, `workflow` 권한 있는 계정으로 푸시) + `scripts/migrate.mjs` 작성(2026-10-28). 켜기 전 secret 2개와 `--mark-applied` 기준선 필요. [설치 문서](supabase-setup.md).
 - 대시보드 차트화: [대시보드 개선 계획](dashboard-plan.md) DB-1–DB-10·BR-1·BR-2 완료, BR-3 남음.
 
 - 주기 변경 적용일 지정과 필요 회차 스냅샷: 현재는 방문이 있으면 주기 변경 불가.

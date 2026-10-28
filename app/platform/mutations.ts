@@ -1,5 +1,5 @@
 import type {User} from '../lib/model';
-import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,validGeo,distanceM,managesDomain,domainName,aiFields,aiCategories,aiUrgencies,aiConfidences} from './model';
+import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,validGeo,distanceM,managesDomain,domainName,aiFields,type AiField,aiCategories,aiUrgencies,aiConfidences} from './model';
 const str=(v:unknown,max:number)=>typeof v==='string'?v.slice(0,max):'';
 export function aiEntryOf(raw:any):AiEntry{if(!raw||typeof raw!=='object')throw Error('AI 입력 기록이 없습니다. AI 간편 등록에서 다시 작성해 주세요.');const text=str(raw.input?.text,3000),imageCount=Number(raw.input?.imageCount);if(!Number.isInteger(imageCount)||imageCount<0||imageCount>3)throw Error('AI 입력 사진 수를 확인해 주세요.');if(!text.trim()&&!imageCount)throw Error('AI 입력 원문(메모 또는 사진)이 없습니다.');
  const draft=Object.fromEntries(aiFields.map(k=>[k,str(raw.draft?.[k],3500)])) as AiEntry['draft'],edited=Array.isArray(raw.edited)?[...new Set(raw.edited)].filter((k):k is AiEntry['edited'][number]=>aiFields.includes(k as any)):[];
@@ -52,6 +52,14 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
    if(item.requirementId&&next.visits.some(v=>v.id!==id&&v.requirementId===item.requirementId&&v.status!=='cancelled'))throw Error('이 필요 회차에는 이미 계획 또는 결과가 연결되어 있습니다. 기존 일정을 수정해 주세요.');
    const done=record?.status==='completed',entry=done?entryOf(record):entryOf(item);if(done&&entryOf(item)!==entry)throw Error('AI 등록과 직접 입력 기록은 서로 바꿀 수 없습니다.');delete item.extra;delete item.aiAssisted;delete item.aiFields;
    if(entry==='ai'){if(item.status!=='completed')throw Error('AI 간편 등록은 방문 결과로만 저장합니다.');item.entry='ai';item.ai=aiEntryOf(item.ai);item.ai.edited=aiFields.filter(k=>(item[k]||'')!==item.ai.draft[k])}else{item.entry='manual';delete item.ai}
+   // AI 정리: 제안(aiEdit)을 서버가 기록으로 바꾼다. 반영된 칸 = 저장값이 제안과 같고 이전값과 다른 칸. 기록 목록은 서버 보관본만 쓴다.
+   const priorEdits=Array.isArray(record?.aiEdits)?record.aiEdits:[];const prop=item.aiEdit;delete item.aiEdit;item.aiEdits=priorEdits;
+   if(prop!=null){if(item.status!=='completed'||typeof prop!=='object'||typeof prop.proposed!=='object'||prop.proposed===null)throw Error('AI 정리는 방문 결과에만 반영할 수 있습니다.');
+    const str=(x:unknown)=>typeof x==='string'?x.slice(0,3500):'';const base:Record<string,string>=record?.status==='completed'?record:(typeof prop.before==='object'&&prop.before)||{};
+    const before=Object.fromEntries(aiFields.map(k=>[k,str(base[k])])) as Record<AiField,string>,proposed=Object.fromEntries(aiFields.map(k=>[k,str(prop.proposed[k])])) as Record<AiField,string>;
+    const applied=aiFields.filter(k=>(item[k]||'')===proposed[k]&&proposed[k]!==before[k]);
+    if(applied.length)item.aiEdits=[...priorEdits.slice(-9),{model:str(prop.model).slice(0,80),generatedAt:str(prop.generatedAt).slice(0,40),appliedAt:new Date().toISOString(),byId:actor.id,before,proposed,applied}];}
+   if(!item.aiEdits.length)delete item.aiEdits;
    if(item.geo==null)delete item.geo;else{const g=item.geo as {lat:number;lng:number},acc=Number(item.geo.accuracy);if(!validGeo(g)||!Number.isFinite(acc)||acc<0)throw Error('GPS 위치 기록을 확인해 주세요.');item.geo={lat:g.lat,lng:g.lng,accuracy:Math.round(acc),at:typeof item.geo.at==='string'?item.geo.at.slice(0,40):'',distance:target.lat!==null&&target.lng!==null?distanceM(g,{lat:target.lat,lng:target.lng}):null}}
    if(item.status!=='completed'){item.actualDate=null;item.actualTime='';item.detail='';item.notes='';item.result=''}
    array=next.visits;

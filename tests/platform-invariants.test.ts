@@ -50,4 +50,14 @@ equal(agingBuckets([{state:'미처리',dueDate:'2026-10-20'},{state:'처리 중'
  const store=demo.stores.find(s=>s.siteId===site.id)!;equal(updateDemo(demo,'store',{...store,name:'상속 확인'},store,boss,now).item.domain,'dom-retail');
  const dom=updateDemo(demo,'domain',{code:'new',name:'신규'},null,boss,now);equal(dom.item.code,'NEW');throws(()=>updateDemo(dom.data,'domain',{code:'NEW',name:'중복'},null,boss,now));throws(()=>updateDemo(demo,'domain',{code:'X1',name:'권한'},null,lead,now));
  const u=updateDemo(dom.data,'user',{name:'신규',email:'n@x.test',team:'T',part:'P',role:'manager',active:1,domains:[dom.item.id]},null,boss,now);equal(u.item.domains,[dom.item.id]);throws(()=>updateDemo(demo,'user',{name:'x',email:'x@x.test',team:'T',part:'P',role:'manager',active:1,domains:['nope']},null,boss,now))}
+{// AI 정리: 반영된 칸만 서버가 aiEdits에 기록하고, 클라이언트가 보낸 aiEdits는 무시한다
+ const demo=platformDemo(now),boss={...demo.users[0],role:'admin'},t=targetsOf(demo).find(t=>t.type==='site'&&t.status==='운영 중')!;
+ const base={targetType:'site',siteId:t.siteId,storeId:null,visitorId:t.managerIds[0],plannedDate:null,time:'',purpose:'현장 정기점검',precheck:'',status:'completed',actualDate:now,actualTime:'10:00',detail:'현장  점검함 .  직원 1명 결원 ',notes:'',result:'특이사항 없음',cancelReason:'',requirementId:null};
+ const first=updateDemo(demo,'visit',{...base,aiEdits:[{fake:true}]},null,boss,now).item;equal('aiEdits' in first,false);
+ const prop={model:'m',generatedAt:now,before:{purpose:base.purpose,detail:base.detail,notes:'',result:base.result},proposed:{purpose:base.purpose,detail:'현장 점검함. 직원 1명 결원.',notes:'',result:'후속 조치 필요'}};
+ const tidied=updateDemo(first?demo:demo,'visit',{...first,detail:'현장 점검함. 직원 1명 결원.',result:'특이사항 없음',aiEdit:prop},first,boss,now).item;
+ equal([tidied.aiEdits.length,tidied.aiEdits[0].applied,tidied.aiEdits[0].before.detail,tidied.aiEdits[0].byId,tidied.entry],[1,['detail'],base.detail,boss.id,'manual']);
+ const again=updateDemo(demo,'visit',{...tidied,aiEdit:{...prop,proposed:{...prop.proposed,detail:tidied.detail}}},tidied,boss,now).item;equal(again.aiEdits.length,1);
+ const kept=updateDemo(demo,'visit',{...tidied,notes:'추가',aiEdits:[]},tidied,boss,now).item;equal(kept.aiEdits.length,1);
+ throws(()=>updateDemo(demo,'visit',{...base,status:'planned',plannedDate:now,aiEdit:prop},null,boss,now));}
 console.log(`${assertions} platform assertions passed: independent targets, occurrence math, cancellation, no auto-completion, joint assignments, immutable history and linked action flow.`);

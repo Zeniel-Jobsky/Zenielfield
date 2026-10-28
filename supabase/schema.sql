@@ -41,7 +41,8 @@ create table public.zf_visits (
  check(status<>'completed' or (data->>'actualDate' is not null and length(trim(data->>'detail'))>0)),
  check(status<>'planned' or data->>'plannedDate' is not null), check(status<>'cancelled' or length(trim(data->>'cancelReason'))>0),
  entry text generated always as (coalesce(data->>'entry','manual')) stored check(entry in ('manual','ai')),
- check((entry='ai')=(data ? 'ai')), check(entry<>'ai' or (status='completed' and jsonb_typeof(data->'ai'->'input')='object' and jsonb_typeof(data->'ai'->'draft')='object'))
+ check((entry='ai')=(data ? 'ai')), check(entry<>'ai' or (status='completed' and jsonb_typeof(data->'ai'->'input')='object' and jsonb_typeof(data->'ai'->'draft')='object')),
+ constraint zf_visits_ai_edits_array check (not (data ? 'aiEdits') or jsonb_typeof(data->'aiEdits')='array')
 );
 create index zf_visits_entry_idx on public.zf_visits(entry);
 create index zf_visits_site_idx on public.zf_visits(site_id);

@@ -1,5 +1,6 @@
 import vinext from "vinext";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { defineConfig } from "vite";
@@ -41,8 +42,18 @@ const localBindingConfig = {
     : [],
 };
 
+// Build stamp shown in the app footer: package version, short commit and build time (KST). Dev shows the server start time.
+function buildInfo() {
+  let commit = "";
+  try { commit = execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim(); } catch {}
+  const version = JSON.parse(readFileSync(resolve(process.cwd(), "package.json"), "utf8")).version ?? "";
+  const at = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", dateStyle: "short", timeStyle: "short" }).format(new Date());
+  return { version, commit, at };
+}
+
 export default defineConfig(async ({ command }) => {
   configureToolEnvironment(process.cwd());
+  const build = buildInfo();
 
   // Wrangler snapshots its log path while the Cloudflare plugin is imported.
   const { cloudflare } = await import("@cloudflare/vite-plugin");
@@ -54,6 +65,7 @@ export default defineConfig(async ({ command }) => {
     : {};
 
   return {
+    define: { __ZF_BUILD__: JSON.stringify({ ...build, dev: command === "serve" }) },
     server: {
       ...(managedLinux
         ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] }

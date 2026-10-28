@@ -43,3 +43,16 @@
 
 - AI 기록 = "AI 작성" 배지 · 수정 칸 수 · 긴급도 · 분류 · 한 줄 요약
 - 상단 칩: AI 작성 · 긴급도 높음 · 분류 5종 건수, 누르면 필터
+
+## `aiEdits` — 기입력 결과 AI 정리 기록 (2026-10-28)
+
+| 키 | 내용 |
+| --- | --- |
+| `model` · `generatedAt` | 제안을 만든 모델·시각 |
+| `appliedAt` · `byId` | 반영 저장 시각·반영한 사용자(서버 기록) |
+| `before` · `proposed` | 제안 당시 값과 AI 제안값 (`purpose·detail·notes·result`) |
+| `applied` | 실제 반영된 칸(저장값 = 제안값 ≠ 이전값). 서버가 계산 |
+
+- `entry`와 무관하게 `manual`·`ai` 기록 모두 가질 수 있다. 최근 10개 보관. 클라이언트가 보낸 `aiEdits`는 무시하고 서버 보관본만 쓴다.
+- 제약: `zf_visits_ai_edits_array` (배열). 이관 `supabase/migrations/20261028130000_ai_edits.sql`.
+- 대시보드 `AI 현황 요약`(`mode:'brief'`)은 저장하지 않는다. 입력은 `app/platform/ai-brief.tsx` `buildDigest()`의 집계 숫자뿐이다.

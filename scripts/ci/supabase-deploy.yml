@@ -1,0 +1,59 @@
+# 운영 반영 파이프라인: 이관 적용 → 검증 로직 번들 → Edge 함수 재배포. (AGENTS.md "운영 반영 절차" 순서 그대로)
+# 실행 조건: main 에 supabase/ 또는 검증 로직(app/platform/mutations.ts, model.ts)이 바뀌어 푸시됐을 때, 또는 Actions 화면에서 수동 실행.
+# 필요한 저장소 secret: SUPABASE_ACCESS_TOKEN (Supabase 계정의 Management API 토큰), SUPABASE_PROJECT_REF (예: nhywssfwtnonytbkufyy)
+name: supabase-deploy
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - 'app/platform/mutations.ts'
+      - 'app/platform/model.ts'
+      - 'scripts/migrate.mjs'
+      - '.github/workflows/supabase-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '이관을 적용하지 않고 미적용 목록만 출력'
+        type: boolean
+        default: false
+concurrency:
+  group: supabase-deploy
+  cancel-in-progress: false
+jobs:
+  migrate-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: 로컬 검증 (타입·플랫폼 테스트)
+        run: |
+          node_modules/.bin/tsc --noEmit -p .
+          node tests/run-platform.mjs
+      - name: 이관 적용 (미적용 파일만, 파일마다 트랜잭션)
+        run: node scripts/migrate.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+      - name: 검증 로직 번들
+        if: ${{ !inputs.dry_run }}
+        run: node scripts/bundle-supabase.mjs
+      - name: Edge 함수 재배포
+        if: ${{ !inputs.dry_run }}
+        run: |
+          npx supabase functions deploy zenifield-gateway --project-ref "$SUPABASE_PROJECT_REF" --use-api --no-verify-jwt
+          npx supabase functions deploy zenifield-cloudflare --project-ref "$SUPABASE_PROJECT_REF" --use-api --no-verify-jwt
+      - name: 번들 산출물이 커밋과 다르면 알림
+        if: ${{ !inputs.dry_run }}
+        run: |
+          if ! git diff --quiet -- supabase/functions/zenifield-gateway/logic.js; then
+            echo "::warning::logic.js 가 소스와 달랐습니다. 로컬에서 node scripts/bundle-supabase.mjs 를 실행해 커밋하세요."
+          fi

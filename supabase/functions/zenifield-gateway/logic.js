@@ -167,6 +167,19 @@ function updateDemo(data, entity, values, record, actor, now) {
         item.entry = "manual";
         delete item.ai;
       }
+      const priorEdits = Array.isArray(record?.aiEdits) ? record.aiEdits : [];
+      const prop = item.aiEdit;
+      delete item.aiEdit;
+      item.aiEdits = priorEdits;
+      if (prop != null) {
+        if (item.status !== "completed" || typeof prop !== "object" || typeof prop.proposed !== "object" || prop.proposed === null) throw Error("AI \uC815\uB9AC\uB294 \uBC29\uBB38 \uACB0\uACFC\uC5D0\uB9CC \uBC18\uC601\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
+        const str2 = (x) => typeof x === "string" ? x.slice(0, 3500) : "";
+        const base = record?.status === "completed" ? record : typeof prop.before === "object" && prop.before || {};
+        const before = Object.fromEntries(aiFields.map((k) => [k, str2(base[k])])), proposed = Object.fromEntries(aiFields.map((k) => [k, str2(prop.proposed[k])]));
+        const applied = aiFields.filter((k) => (item[k] || "") === proposed[k] && proposed[k] !== before[k]);
+        if (applied.length) item.aiEdits = [...priorEdits.slice(-9), { model: str2(prop.model).slice(0, 80), generatedAt: str2(prop.generatedAt).slice(0, 40), appliedAt: (/* @__PURE__ */ new Date()).toISOString(), byId: actor.id, before, proposed, applied }];
+      }
+      if (!item.aiEdits.length) delete item.aiEdits;
       if (item.geo == null) delete item.geo;
       else {
         const g = item.geo, acc = Number(item.geo.accuracy);
