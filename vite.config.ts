@@ -48,7 +48,7 @@ function buildInfo() {
   try {
     commit = execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
     // 커밋되지 않은 변경이 있으면 표기에 "+수정"을 붙여 커밋과 다른 코드임을 알린다.
-    if (execSync("git status --porcelain --untracked-files=no", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim()) commit += "+수정";
+    if (execSync("git status --porcelain --untracked-files=no -- . \":(exclude)package.json\"", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim()) commit += "+수정";
   } catch {}
   const version = JSON.parse(readFileSync(resolve(process.cwd(), "package.json"), "utf8")).version ?? "";
   const at = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul", dateStyle: "short", timeStyle: "short" }).format(new Date());

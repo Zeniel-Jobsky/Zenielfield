@@ -45,7 +45,7 @@ architecture_docs: ""
 | Guard | Condition → Action |
 |-------|-------------------|
 | DC-DESIGN | UI·디자인 변경 → `docs/DESIGN-zenielfield.md` 해당 절 확인 → 지침에 없거나 다르면 지침 먼저 갱신 → **같은 변경에서 `AGENTS.md` "현재 디자인 결정"과 이 항목도 갱신(빠지면 미완료)** → 구현 → 390/820/1280px 실화면 검증 → `docs/` 기록 |
-| DC-DESIGN-NOW | 딥그린 `#003c33` 단일 강조(이행률만) · 현장·매장 탭 하단선→지표 셀 간격 PC·태블릿 16px/모바일 12px, 셀은 상단 1px 구조선·왼쪽 컬러 테두리 없음 · 모바일 데모·운영 전환 문구 줄바꿈 허용 · 상태색 완료 `#003c33`/예정 `#516e8a`/지연 `#b42318`/미등록 `#8a4b00` · 도넛·게이지 금지 · 조직 막대 딥그린 단색 · 목표선은 설정된 목표만 · 축·범례 12px · 대시보드 = 조회 범위·탭→핵심 지표 4→차트 6(둘씩 세 줄)→사업장 문제 진단→브리핑→방문 우선 확인(한 숫자 한 자리, 지침 6.1-A) · 반응형 단계 고정 ≤760/761–1023/≥1024/≥1440만(필터 한 줄만 ≥1280) · 모바일 제목 26px/메타 11px 이상/터치 44px · 옅은 표면은 `--zf-warning-soft #fdf4e7`·`--zf-info-soft #eef2f6`만 · 글자 하한 11px(축·범례 12px) · 화면 파일 전체 색 점검 통과 상태 유지 · 잡매니저 홈 = 오늘 업무(기록 버튼)→지표→AI 요약→주간→차트→진단→브리핑 · AI 현황 브리핑(지표 아래, 버튼 없이 자동: 지문 같으면 재사용/다르면 재작성/없으면 작성, 서술형 현황→흐름(기본)→자세히 보기(챙길 곳→현상→판단→다음 주), 요소 선택은 설정 화면) · AI로 정리하기(결과 화면 하단, 바뀌는 칸만 현재/제안 체크, 저장 시 aiEdits) · 푸터 빌드 표기 · 데모 표시는 상단 배너 한 줄+역할 선택만, 중간 반복·운영 화면 데모 전환 금지 · 등록 화면 AI 기본·전환 링크 아이콘+간격·계획 자동 연결 ±14일 · 갱신 2026-10-28 |
+| DC-DESIGN-NOW | 딥그린 `#003c33` 단일 강조(이행률만) · 현장·매장 탭 하단선→지표 셀 간격 PC·태블릿 16px/모바일 12px, 셀은 상단 1px 구조선·왼쪽 컬러 테두리 없음 · 모바일 데모·운영 전환 문구 줄바꿈 허용 · 상태색 완료 `#003c33`/예정 `#516e8a`/지연 `#b42318`/미등록 `#8a4b00` · 도넛·게이지 금지 · 조직 막대 딥그린 단색 · 목표선은 설정된 목표만 · 축·범례 12px · 대시보드 = 조회 범위·탭→핵심 지표 4→차트 6(둘씩 세 줄)→먼저 확인할 사업장(진단 간략형, 지표 칩은 브리핑 화면에만)→브리핑→방문 우선 확인(한 숫자 한 자리, 지침 6.1-A) · 반응형 단계 고정 ≤760/761–1023/≥1024/≥1440만(필터 한 줄만 ≥1280) · 모바일 제목 26px/메타 11px 이상/터치 44px · 옅은 표면은 `--zf-warning-soft #fdf4e7`·`--zf-info-soft #eef2f6`만 · 글자 하한 11px(축·범례 12px) · 화면 파일 전체 색 점검 통과 상태 유지 · 잡매니저 홈 = 오늘 업무(기록 버튼)→지표→AI 요약→주간→차트→진단→브리핑 · AI 현황 브리핑(지표 아래, 버튼 없이 자동: 지문 같으면 재사용/다르면 재작성/없으면 작성, 서술형 현황→흐름(기본)→자세히 보기(챙길 곳→현상→판단→다음 주), 요소 선택은 설정 화면) · AI로 정리하기(결과 화면 하단, 바뀌는 칸만 현재/제안 체크, 저장 시 aiEdits) · 푸터 빌드 표기 · 데모 표시는 상단 배너 한 줄+역할 선택만, 중간 반복·운영 화면 데모 전환 금지 · 등록 화면 AI 기본·전환 링크 아이콘+간격·계획 자동 연결 ±14일 · 갱신 2026-10-28 |
 | DC-DESIGN-CHECK | 커밋 시 `.githooks/pre-commit` → `scripts/check-design.mjs` 경고(지침·룰 동반 갱신, 지침 밖 색). `npm run setup`으로 활성화, `DESIGN_STRICT=1`이면 차단 |
 | DC-DOCS | 개선 계획·이슈·완료 내역은 `docs/`에 기록, 담당자 배정은 `work/`에만 |
 | DC-DEPLOY | 운영 반영 순서: 이관 적용 → `bundle-supabase.mjs` → Edge 재배포(gateway, cloudflare) → 화면. 자동: `scripts/ci/supabase-deploy.yml`(활성화: `.github/workflows/`로 복사·커밋, `workflow` 권한 있는 계정으로 푸시)(main 푸시·수동) = `scripts/migrate.mjs`(이력 `zf_schema_migrations`, 미적용만, 파일별 트랜잭션) → 번들 → Edge. 기존 수동 적용분은 `--mark-applied`로 기준선. 적용된 이관 수정 금지, 이관은 재실행 안전하게. 이관은 옛 스키마에 로컬 선적용 검증. `schema.sql` 운영 재실행 금지. 운영 DB·Edge·계정 발급은 사용자 승인 후. 반영 내역 `docs/` 기록 |
@@ -60,7 +60,7 @@ architecture_docs: ""
 
 | Action | Command |
 |--------|---------|
-| Build | `npm run build` |
+| Build | `npm run build` (먼저 `scripts/bump-version.mjs`가 패치 버전을 1 올림, 올린 `package.json`은 함께 커밋. 건너뛰기 `NO_BUMP=1`) |
 | Test | `node tests/run-platform.mjs` · `run-briefing` · `ui-metrics` · `logic` · `run-geo` · `run-seed` · `run-supabase` · `run-cloudflare-auth` · `run-cloudflare-supabase` (`tests/*.mjs`) |
 | Design check | `node scripts/check-design.mjs <파일...>` (인자 없으면 스테이징 파일) |
 | Type check | `node_modules/.bin/tsc --noEmit -p .` |

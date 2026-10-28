@@ -15,7 +15,8 @@ const prompt=(today:string)=>`너는 현장·매장 방문결과 입력을 돕�
 export async function assistVisit(req:Request,bindings:Record<string,unknown>,fetcher:typeof fetch=fetch){
  const json=(value:unknown,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store'}});
  if(!req.headers.get('oai-authenticated-user-id'))return json({error:'로그인 후 이용할 수 있습니다.'},401);
- if(req.headers.get('origin')!==new URL(req.url).origin)return json({error:'요청 출처를 확인하세요.'},403);
+ // 같은 출처: Origin 일치 또는 브라우저가 붙인 Sec-Fetch-Site=same-origin (개발 서버는 요청 호스트를 localhost로 바꾼다)
+ if(req.headers.get('origin')!==new URL(req.url).origin&&req.headers.get('sec-fetch-site')!=='same-origin')return json({error:'요청 출처를 확인하세요.'},403);
  const key=String(bindings.OPENAI_API_KEY||process.env.OPENAI_API_KEY||''),model=String(bindings.OPENAI_MODEL||process.env.OPENAI_MODEL||'gpt-6-luna');
  if(!key.startsWith('sk-'))return json({error:'AI 연결 설정이 필요합니다.'},503);
  const text=await req.text();if(text.length>6_000_000)return json({error:'사진 크기를 줄여주세요.'},413);

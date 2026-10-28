@@ -17,17 +17,18 @@ function Placeholder({status,onRetry,title}:{status:DxStatus;onRetry?:()=>void;t
 }
 function Empty({kind}:{kind:Diagnosis['state']}){const text={'no-target':['조회할 사업장이 없습니다','조회 조건을 바꾸거나 사업장을 등록해 주세요.'],'no-data':['점검 자료 없음','이 범위에는 완료된 방문 결과와 등록된 이슈가 아직 없습니다. 문제가 없다는 뜻이 아닙니다.'],clear:['미해결 이슈 없음','점검 자료가 있고 현재 등록된 미해결 이슈가 없습니다.'],issues:['','']}[kind];return <div className="dx-state"><Inbox size={22}/><b>{text[0]}</b><p>{text[1]}</p></div>}
 const label=(a:DxIssueRow)=>a.urgentFlag?'긴급':a.late>0?`기한+${a.late}일`:a.open&&a.repeat?'반복':a.unassigned?'담당 미지정':a.state;
-export function SiteDiagnosis({input,now,status='ready',onRetry,onOpen,uname}:StateProps&{input:DxInput;now:string;onOpen:(siteId:string,issueId?:string)=>void;uname:(id:string)=>string}){
+// compact: 대시보드용. 상단 핵심 지표와 겹치는 지표 칩·안내를 빼고 '먼저 확인할 사업장' 목록만 보여 준다.
+export function SiteDiagnosis({input,now,status='ready',onRetry,onOpen,uname,compact=false}:StateProps&{input:DxInput;now:string;onOpen:(siteId:string,issueId?:string)=>void;uname:(id:string)=>string;compact?:boolean}){
  const [flag,setFlag]=useState<DxFlag|''>(''),[all,setAll]=useState(false),[stamp,setStamp]=useState('');
  useEffect(()=>{setStamp(kstStamp());const h=setInterval(()=>setStamp(kstStamp()),60000);return()=>clearInterval(h)},[]);
  const d=useMemo(()=>diagnose(input,now),[input,now]);const sites=sitesWith(d,flag),rows=flag||all?sites:sites.slice(0,3);
  const count=(k:DxFlag)=>d.summary[k];
- return <section className="panel dx-panel" aria-label="사업장 문제 진단"><PanelTitle title="사업장 문제 진단" sub="현재 미해결 기준 · 조직·사업장 필터만 적용, 방문 기간과 무관"><span className="dx-stamp">현재 기준 {stamp||short(now)}</span></PanelTitle>
+ return <section className="panel dx-panel" aria-label="사업장 문제 진단"><PanelTitle title={compact?'먼저 확인할 사업장':'사업장 문제 진단'} sub={compact?`미해결 이슈가 몰린 사업장 순 · 전체 미해결 ${d.summary.totalOpen}건`:'현재 미해결 기준 · 조직·사업장 필터만 적용, 방문 기간과 무관'}><span className="dx-stamp">현재 기준 {stamp||short(now)}</span></PanelTitle>
  {status!=='ready'?<Placeholder status={status} onRetry={onRetry} title="사업장 문제 진단"/>:<>
- <div className="dx-chips" role="group" aria-label="문제 지표">{flags.map(f=>{const n=count(f.key);const na=n===null;return <button key={f.key} className={'dx-chip '+f.key+(flag===f.key?' active':'')} aria-pressed={flag===f.key} disabled={na} title={na?'승인된 심각도 기준이 확정되면 표시됩니다':undefined} onClick={()=>setFlag(flag===f.key?'':f.key)}><span>{f.label}</span><b>{na?'—':n}<small>{na?'':'건'}</small></b>{na&&<em>기준 미확정</em>}</button>})}</div>
- <p className="dx-note"><Info size={12}/>※ 지표 간 중복 포함 · 전체 미해결 <b>{d.summary.totalOpen}</b>건{d.summary.urgent===null&&' · 긴급은 심각도 기준 확정 후 표시'}</p>
+ {!compact&&<><div className="dx-chips" role="group" aria-label="문제 지표">{flags.map(f=>{const n=count(f.key);const na=n===null;return <button key={f.key} className={'dx-chip '+f.key+(flag===f.key?' active':'')} aria-pressed={flag===f.key} disabled={na} title={na?'승인된 심각도 기준이 확정되면 표시됩니다':undefined} onClick={()=>setFlag(flag===f.key?'':f.key)}><span>{f.label}</span><b>{na?'—':n}<small>{na?'':'건'}</small></b>{na&&<em>기준 미확정</em>}</button>})}</div>
+ <p className="dx-note"><Info size={12}/>※ 지표 간 중복 포함 · 전체 미해결 <b>{d.summary.totalOpen}</b>건{d.summary.urgent===null&&' · 긴급은 심각도 기준 확정 후 표시'}</p></>}
  {d.state!=='issues'?<Empty kind={d.state}/>:<>
- <div className="dx-list-head"><h3>{flag?flags.find(f=>f.key===flag)!.label+' 사업장':'우선 확인 사업장'} <small>{sites.length}곳</small></h3>{!flag&&sites.length>3&&<button className="textbtn" aria-expanded={all} onClick={()=>setAll(!all)}>{all?'상위 3곳만 보기':'전체 보기'}<ChevronRight size={14}/></button>}{flag&&<button className="textbtn" onClick={()=>setFlag('')}>필터 해제</button>}</div>
+ <div className="dx-list-head">{compact?<h3><small>{sites.length}곳 중 상위 {Math.min(3,sites.length)}곳</small></h3>:<h3>{flag?flags.find(f=>f.key===flag)!.label+' 사업장':'우선 확인 사업장'} <small>{sites.length}곳</small></h3>}{!flag&&sites.length>3&&<button className="textbtn" aria-expanded={all} onClick={()=>setAll(!all)}>{all?'상위 3곳만 보기':'전체 보기'}<ChevronRight size={14}/></button>}{flag&&<button className="textbtn" onClick={()=>setFlag('')}>필터 해제</button>}</div>
  {rows.length?<ol className="dx-rows"><li className="dx-row dx-row-head" aria-hidden="true"><span>사업장</span><span>주요 문제</span><span>상태·담당</span><span/></li>{rows.map(s=>{const t=s.top;return <li className="dx-row" key={s.siteId}>
   <div className="dx-site"><b>{s.siteName}</b><small>자체 {s.own} · 매장 {s.stores}건</small></div>
   <div className="dx-problem"><span>{t.content}</span><div className="dx-reasons">{s.reasons.slice(1).map(r=><i key={r}>{r}</i>)}{s.issues.length>1&&<em>외 {s.issues.length-1}건</em>}</div></div>

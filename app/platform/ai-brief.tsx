@@ -63,8 +63,10 @@ export function ruleBrief(d:BriefDigest):AiBriefResult{
 }
 export async function requestBrief(d:BriefDigest,demo:boolean):Promise<{result:AiBriefResult;model:string;generatedAt:string}>{
  if(demo)return {result:ruleBrief(d),model:'데모 규칙 브리핑',generatedAt:new Date().toISOString()};
- const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:JSON.stringify(d),images:[],mode:'brief'})});const j=await r.json() as {draft:AiBriefResult;model?:string;generatedAt?:string;error?:string};
- if(!r.ok)throw Error(j.error||'AI 브리핑에 실패했습니다.');return {result:j.draft,model:j.model||'',generatedAt:j.generatedAt||new Date().toISOString()};
+ // AI 연결이 안 되면(키 없음·지연·권한) 규칙 브리핑으로 대신하고 이유를 표기한다. 브리핑 칸이 오류만 남지 않게 한다.
+ try{const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:JSON.stringify(d),images:[],mode:'brief'})});const j=await r.json() as {draft:AiBriefResult;model?:string;generatedAt?:string;error?:string};
+  if(!r.ok)throw Error(j.error||'AI 브리핑에 실패했습니다.');return {result:j.draft,model:j.model||'',generatedAt:j.generatedAt||new Date().toISOString()}}
+ catch(e){return {result:ruleBrief(d),model:`규칙 브리핑 · AI 연결 안 됨(${(e as Error).message.replace(/[.s]+$/,'')})`,generatedAt:new Date().toISOString()}}
 }
 type Cached={key:string;result:AiBriefResult;model:string;generatedAt:string};
 const readCache=(id:string):Cached|null=>{try{return JSON.parse(localStorage.getItem(CACHE_KEY+':'+id)||'null')}catch{return null}};
