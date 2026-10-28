@@ -601,9 +601,8 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  overflow-wrap:anywhere;
 }
 .app-shell .dashboard-content>.panel,
-.app-shell .dashboard-content>.dash-grid-12,
-.app-shell .dashboard-content>.dash-row {margin-bottom:var(--zf-dashboard-group-gap)}
-.app-shell .dashboard-content :is(.dash-grid-12,.dash-row) {
+.app-shell .dashboard-content>.dashboard-chart-grid {margin-bottom:var(--zf-dashboard-group-gap)}
+.app-shell .dashboard-content .dashboard-chart-grid {
  column-gap:var(--zf-dashboard-column-gap);
  row-gap:var(--zf-dashboard-group-gap);
 }
@@ -673,4 +672,21 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  .ai-brief:not(.ai-brief-weekly) .panel-heading {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px}
  .ai-brief:not(.ai-brief-weekly) .ai-brief-tools {width:auto;align-self:start;justify-content:flex-end}
  .ai-brief-site-heading {gap:8px}
+}
+
+/* Equal chart pairs: share heading, legend and body rows without fixed heights. */
+.app-shell .dashboard-chart-grid {display:grid;grid-template-columns:minmax(0,1fr);gap:var(--zf-dashboard-group-gap)}
+.app-shell .dashboard-chart-pair {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto 1fr;column-gap:var(--zf-dashboard-column-gap);row-gap:0;min-width:0}
+.app-shell .dashboard-chart-pair>.chart-panel {display:grid;grid-template-rows:subgrid;grid-row:span 3;row-gap:0;min-width:0;min-height:0;height:auto;margin:0}
+.app-shell .dashboard-chart-pair .panel-heading {grid-row:1;flex-wrap:nowrap}
+.app-shell .dashboard-chart-pair .panel-heading>div:first-child {flex:1 1 0}
+.app-shell .dashboard-chart-pair .panel-tools {flex:0 0 auto}
+.app-shell .dashboard-chart-pair .chart-panel-legend {grid-row:2;min-width:0}
+.app-shell .dashboard-chart-pair .chart-legend {margin:0 0 12px;font-size:12px}
+.app-shell .dashboard-chart-pair .chart-body {grid-row:3;min-width:0;min-height:0;height:auto;overflow:visible}
+.app-shell .dashboard-chart-pair .chart-fold {min-width:44px;min-height:44px}
+.app-shell .dashboard-chart-pair .trend .axis-text {font-size:inherit}
+@media(max-width:1023px) {
+ .app-shell .dashboard-chart-pair {grid-template-columns:minmax(0,1fr);grid-template-rows:none;row-gap:var(--zf-dashboard-group-gap)}
+ .app-shell .dashboard-chart-pair>.chart-panel {display:flex;flex-direction:column;grid-row:auto}
 }
