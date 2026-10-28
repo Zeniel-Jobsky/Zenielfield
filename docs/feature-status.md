@@ -118,6 +118,9 @@
 - 사용자가 승인한 `zenifield` 전용 `Individual Workers Editor` 토큰을 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN` secret으로 등록했다. 토큰과 `.env` 원문은 소스·문서·산출물에 포함하지 않는다.
 - 첫 자동 실행 `40641160666`은 검증·빌드가 성공했으나 기존 Wrangler 4.92.0이 계정 전체 subdomain을 조회해 권한 오류가 발생했다. 배포 단계만 Worker별 조회를 지원하는 `wrangler@4.151.0`으로 고정했다. 앱 빌드 의존성과 토큰의 Worker 전용 권한 범위는 유지한다.
 - 후속 실행 `40641515777`에서 폐기된 `legacy_env` 설정 오류를 확인해 `prepare-cloudflare-deploy.mjs`로 동일 의미의 호환 설정을 생성하도록 보완했다. 백엔드 변경 비교는 마지막 성공한 main 푸시 기준으로 하여 실패·취소된 중간 변경과 수동 dry_run을 잘못된 배포 기준으로 삼지 않는다.
+- 자동 배포 전체 순서 확인 완료: [실행 40641880127](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40641880127)에서 검증 → 이관 확인·Edge 2개 → Cloudflare → 공개 URL 확인 모두 성공했다. 이후 실제 main 푸시도 연속으로 성공했다.
+- 최신 UI `48ea1ed`의 [실행 40644479486](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40644479486)에서 타입·테스트·Cloudflare 인증·빌드·배포 성공, 변경 없는 DB·Edge 단계는 생략됨을 확인했다. 공개 `/version.json`과 화면 푸터가 `v0.1.1 · 48ea1ed · 2026-10-28 15:33`으로 일치했다.
+- 배포 화면 검수: 390·820·1280px에서 가로 넘침 없음, 사이드바 현재 메뉴의 점 제거, 브리핑 메뉴 전환, 기존 Supabase 운영 세션의 대시보드 조회 확인. 이번 확인은 기존 세션 조회이며 새 비밀번호 로그인이나 업무 데이터 쓰기는 실행하지 않았다.
 
 ## 로컬 프로그램 테스트 계획 (2026-10-28)
 
