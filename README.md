@@ -73,7 +73,9 @@ Edge 변경 시 `supabase functions deploy zenifield-cloudflare --project-ref <r
 - 일반 브라우저는 DB 테이블/RPC에 직접 접근하지 않습니다. Sites 인증 → 서버 전용 토큰 검증 Edge Function → 서버 전용 RPC → PostgreSQL 구조입니다.
 - 모든 업무 테이블에 RLS와 직접 접근 차단 정책이 있습니다. 토큰 원문/관리자 키를 프런트엔드·GitHub에 넣지 마세요.
 - 다른 서버에 배포하려면 Sites 인증 헤더를 그대로 신뢰하면 안 됩니다. 해당 호스팅에 맞는 인증 검증 어댑터를 구현해야 합니다.
-- Edge Function 배포와 Sites 배포는 별도입니다. GitHub 자동 배포/양방향 동기화는 구성하지 않았습니다.
+- GitHub `main` 푸시는 `.github/workflows/supabase-deploy.yml`에서 검증 후 Cloudflare `zenifield` Worker로 자동 배포합니다. 백엔드가 바뀌면 이관·Edge 배포가 먼저 성공해야 화면을 배포하며, 화면만 바뀌면 기존 DB·Edge를 그대로 사용합니다. Sites 배포는 별도입니다.
+
+자동 배포에는 저장소 Actions secret `CLOUDFLARE_API_TOKEN`(Worker 전용)과 기존 `SUPABASE_ACCESS_TOKEN`·`SUPABASE_PROJECT_REF`가 필요합니다. 실행 결과는 [GitHub Actions](https://github.com/Zeniel-Jobsky/Zenielfield/actions/workflows/supabase-deploy.yml)에서 확인합니다. 수동 실행의 `dry_run`은 이관 목록만 확인하고 배포하지 않습니다. CI는 `NO_BUMP=1`로 Git에 커밋된 버전을 그대로 빌드합니다. 런타임 비밀값은 Cloudflare의 기존 secret을 사용하며 `.env`는 Git이나 CI 산출물에 올리지 않습니다.
 
 ## 소스 구조
 

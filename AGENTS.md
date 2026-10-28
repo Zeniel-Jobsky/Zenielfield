@@ -78,7 +78,7 @@
 운영 DB·Edge 함수·인증은 여러 사람이 함께 쓰는 공용 자원이다. 아래를 지킨다.
 
 - **순서:** DB 이관(`supabase/migrations/*.sql`) 적용 → 검증 로직 번들(`node scripts/bundle-supabase.mjs`) → Edge 함수 재배포(`zenifield-gateway`, `zenifield-cloudflare`) → 화면 배포. 이관 없이 Edge를 먼저 배포하지 않는다.
-- **자동 파이프라인:** `scripts/ci/supabase-deploy.yml`(활성화: `.github/workflows/`로 복사·커밋, `workflow` 권한 있는 계정으로 푸시)이 `main`에 `supabase/**`·검증 로직이 푸시되면 위 순서를 실행한다(`scripts/migrate.mjs` → 번들 → Edge 배포). 이관 이력은 `public.zf_schema_migrations`에 남고 같은 파일은 다시 실행하지 않는다. 저장소 secret `SUPABASE_ACCESS_TOKEN`·`SUPABASE_PROJECT_REF`와 `production` 환경 승인자는 사용자가 설정한다. 손으로 이미 적용한 이관은 `node scripts/migrate.mjs --mark-applied <파일,…>`로 기준선을 잡은 뒤 켠다. 적용된 이관 파일은 수정하지 않고 새 파일을 추가하며, 이관은 두 번 실행해도 안전하게(`if not exists`, `drop … if exists`) 쓴다.
+- **자동 파이프라인:** `.github/workflows/supabase-deploy.yml`이 `main` 푸시마다 타입·테스트·Cloudflare 인증 경계를 검증하고 Cloudflare `zenifield` Worker를 배포한다. `supabase/`·검증 로직·이관/번들 스크립트가 바뀌면 먼저 이관 → 번들 → Edge 2개 배포가 성공해야 화면을 배포한다. 화면만 바뀌면 DB·Edge 작업은 건너뛴다. 수동 `dry_run`은 이관 목록만 확인하고 배포하지 않는다. CI는 `NO_BUMP=1`로 커밋된 버전을 그대로 빌드한다. 저장소 secret은 기존 `SUPABASE_ACCESS_TOKEN`·`SUPABASE_PROJECT_REF`와 Worker 전용 `CLOUDFLARE_API_TOKEN`, 배포 환경은 기존 `production`이다. 이관 이력은 `public.zf_schema_migrations`에 남고 같은 파일은 다시 실행하지 않는다. 손으로 이미 적용한 이관은 `node scripts/migrate.mjs --mark-applied <파일,…>`로 기준선을 잡은 뒤 켠다. 적용된 이관 파일은 수정하지 않고 새 파일을 추가하며, 이관은 두 번 실행해도 안전하게(`if not exists`, `drop … if exists`) 쓴다.
 - **사전 검증:** 이관은 운영과 같은 옛 스키마에 먼저 적용해 본다(PGlite 등 로컬 PostgreSQL). `supabase/schema.sql`은 빈 프로젝트 설치용이므로 운영에 다시 실행하지 않는다.
 - **승인:** 운영 DB 변경, Edge 배포, 로그인 계정·비밀번호 발급은 사용자 승인 후에만 한다. 에이전트는 계정 접근 권한을 스스로 만들지 않는다. 발급은 시스템 관리자 화면 또는 `scripts/set-password.mjs`(서버 토큰 보유자)로 한다.
 - **기록:** 운영에 반영한 이관·배포·적재는 날짜와 함께 `docs/feature-status.md`(또는 해당 `docs/*.md`)에 남긴다.

@@ -60,9 +60,9 @@
 - 관리 도메인: [문서](domain-plan.md) 구현. 원격 이관 적용 완료(2026-10-28).
 - 방문·일지 워크플로 재설계: [문서](visit-workflow.md) 구현(계획 자동 연결·일시 기본 지금·제안 조치 일괄 등록·홈 "지금 여기서").
 - 대시보드·브리핑·필터 2차 개편: [대시보드 계획](dashboard-plan.md).
-- 기입력 결과 AI 정리(`aiEdits`)·AI 현황 요약·푸터 빌드 표기: 구현(2026-10-28). [워크플로](visit-workflow.md), [스키마](ai-entry-schema.md), [대시보드](dashboard-plan.md). 운영 반영 대기: 이관 `20261028120000_read_window.sql`, `20261028130000_ai_edits.sql`, Edge 재배포(gateway·cloudflare).
+- 기입력 결과 AI 정리(`aiEdits`)·AI 현황 요약·푸터 빌드 표기: 구현(2026-10-28). [워크플로](visit-workflow.md), [스키마](ai-entry-schema.md), [대시보드](dashboard-plan.md). 이관·Edge 운영 반영은 아래 Actions 실행에서 완료.
 - 운영 반영(2026-10-28 14:35, Actions supabase-deploy #40638708419 성공): 이관 기준선 2개(visit_entry, domains) 기록 + 적용 2개(read_window, ai_edits), logic.js 번들, Edge zenifield-gateway·zenifield-cloudflare 재배포.
-- 이관 자동 파이프라인: `scripts/ci/supabase-deploy.yml`(활성화: `.github/workflows/`로 복사·커밋, `workflow` 권한 있는 계정으로 푸시) + `scripts/migrate.mjs` 작성(2026-10-28). 켜기 전 secret 2개와 `--mark-applied` 기준선 필요. [설치 문서](supabase-setup.md).
+- 운영 자동 파이프라인: `.github/workflows/supabase-deploy.yml` + `scripts/migrate.mjs`(활성). `main` 검증 → 필요한 이관·Edge → Cloudflare Worker 순서로 연결. 저장소 secret은 기존 Supabase 2개와 Worker 전용 `CLOUDFLARE_API_TOKEN`. [설치 문서](supabase-setup.md).
 - 대시보드 차트화: [대시보드 개선 계획](dashboard-plan.md) DB-1–DB-10·BR-1·BR-2 완료, BR-3 남음.
 
 - 주기 변경 적용일 지정과 필요 회차 스냅샷: 현재는 방문이 있으면 주기 변경 불가.
@@ -107,3 +107,11 @@
 - 현장·매장 탭 하단선과 핵심 지표의 간격을 PC·태블릿 16px, 모바일 12px로 수정하고 왼쪽 컬러 테두리 선언을 제거했다. 모바일 데모·운영 전환 문구의 가로 넘침도 수정했다.
 - `npm run typecheck`, `npm test`, Cloudflare 인증 테스트 2종, 디자인 점검, Cloudflare 대상 빌드 통과. 공개 데모에서 1280px·390px 간격·테두리·가로 폭 확인, 기존 Chrome 세션의 Supabase 운영 대시보드 조회 확인.
 - 이번 배포에서 운영 DB 이관과 Supabase Edge 함수 변경은 실행하지 않았다.
+
+### 최신 소스·자동 배포 연결 (2026-10-28)
+
+- GitHub `main`의 `2031c71`을 동기화해 Cloudflare에 수동 배포했다. Worker 버전 `b34be923-8d0b-4b36-b2e3-9991c42026ad`, 화면 표기 `v0.1.1 · 2031c71`.
+- 타입 검사·전체 테스트·Cloudflare 인증 테스트 2종·Cloudflare 대상 빌드 통과. 로컬 390·820·1280px 화면과 공개 데모의 빌드 표기 확인. Supabase 선행 배포는 Actions `40638708419`의 이관·Edge 성공 결과를 확인했다.
+- 자동 배포는 같은 `supabase-deploy` 워크플로를 확장했다. UI 변경만 있는 푸시는 DB·Edge를 건너뛰고, 백엔드 변경은 해당 단계가 성공해야 Worker를 배포한다. 검사 실패·취소·수동 `dry_run`에서는 화면을 배포하지 않는다.
+- CI는 `NO_BUMP=1`로 커밋된 버전을 빌드한다. Worker 버전 메시지와 Actions 요약에 소스 커밋·배포 주소를 남기므로 이후 자동 배포 이력은 [Actions 실행 기록](https://github.com/Zeniel-Jobsky/Zenielfield/actions/workflows/supabase-deploy.yml)에서 확인한다.
+- 사용자가 승인한 `zenifield` 전용 `Individual Workers Editor` 토큰을 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN` secret으로 등록했다. 토큰과 `.env` 원문은 소스·문서·산출물에 포함하지 않는다.

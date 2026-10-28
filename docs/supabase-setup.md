@@ -44,7 +44,7 @@
 - Edge 기본 환경의 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`(또는 `SUPABASE_SECRET_KEYS`) 사용.
 - `supabase/schema.sql`은 **빈 전용 프로젝트**를 위한 설치 명세. 현재 운영 프로젝트에 다시 실행하지 않음. 원격 migration history에 이미 적용되어 있음. 기존 테이블 삭제/reset 금지.
 - `node scripts/bundle-supabase.mjs`로 공용 검증 로직을 Edge용 `logic.js`에 번들. 플랫폼 검증 로직 변경 시 함께 재생성 후 Edge 재배포.
-- Edge 배포와 Sites 배포는 별도. GitHub 자동 배포/동기화는 미구성.
+- GitHub `main` 자동 배포는 아래 파이프라인에서 이관·Edge → Cloudflare 순서를 따른다. Sites 배포는 별도.
 
 ## 기존 자료
 
@@ -76,9 +76,9 @@
 
 ## 이관 자동 적용 파이프라인 (2026-10-28)
 
-- 워크플로 파일: `scripts/ci/supabase-deploy.yml`. **활성화는 사용자가** 이 파일을 `.github/workflows/supabase-deploy.yml`로 복사해 커밋·푸시한다(워크플로 파일 생성은 `workflow` 권한이 있는 GitHub 계정만 가능해 에이전트 자격으로는 푸시가 거부됨). `main`에 `supabase/**`, `app/platform/mutations.ts`, `app/platform/model.ts`가 푸시되거나 Actions에서 수동 실행하면 → 타입·플랫폼 테스트 → `scripts/migrate.mjs` → `bundle-supabase.mjs` → Edge 2개 재배포.
+- 워크플로 파일: `.github/workflows/supabase-deploy.yml`(활성). `main` 푸시마다 타입·전체 테스트·Cloudflare 인증 경계를 검증한 뒤 Worker를 배포한다. `supabase/`, `app/platform/mutations.ts`, `app/platform/model.ts`, 이관/번들 스크립트 변경이 있으면 먼저 `scripts/migrate.mjs` → `bundle-supabase.mjs` → Edge 2개 배포가 성공해야 Worker를 배포한다. 화면만 바뀌면 DB·Edge 단계는 생략한다. 수동 실행은 백엔드도 확인하며 `dry_run`을 켜면 목록만 확인하고 배포하지 않는다.
 - 이력: `public.zf_schema_migrations(name, checksum, applied_at)`. 파일명 순으로 미적용만 실행하고 파일마다 `begin … commit`. 적용된 파일의 내용이 바뀌면 경고만 하고 다시 실행하지 않는다(새 파일로 추가).
-- 저장소 설정(사용자): Settings → Secrets → `SUPABASE_ACCESS_TOKEN`(Supabase 계정 → Access Tokens), `SUPABASE_PROJECT_REF`. Environments → `production`에 승인자를 두면 실행 전 승인이 필요하다(AGENTS "승인" 원칙).
+- 저장소 Settings → Secrets → 기존 `SUPABASE_ACCESS_TOKEN`(Supabase Management API 토큰), `SUPABASE_PROJECT_REF`와 `CLOUDFLARE_API_TOKEN`(zenifield Worker 전용 배포 토큰)을 사용한다. 배포 환경은 기존 `production`이며, 승인자를 설정하면 배포 전에 승인이 필요하다. CI 빌드는 `NO_BUMP=1`, `ZENIFIELD_DEPLOY_TARGET=cloudflare`로 실행하고 생성된 `dist/server/wrangler.json`을 배포한다. Cloudflare의 기존 런타임 secret은 유지한다.
 - 처음 켤 때 기준선: `supabase/migrations/APPLIED_BASELINE`에 적힌 파일(손으로 이미 적용한 `visit_entry`, `domains`)은 이력 표가 비어 있는 첫 실행에서 실행하지 않고 적용됨으로만 기록된다. 사람이 따로 할 일은 없다. 필요하면 `--mark-applied`로 수동 지정도 된다.
 - 시크릿 등록: `npm run ci:secrets` (= `node scripts/set-ci-secrets.mjs`), 등록+즉시 실행은 `npm run ci:deploy` (cmd·PowerShell·macOS 공통, `.env` 값을 출력 없이 `gh`로 넘김). 등록 뒤 `gh workflow run supabase-deploy`로 즉시 실행한다.
 - 작성 규칙: 이관은 두 번 실행해도 안전하게 쓴다(`create … if not exists`, `drop function if exists`, 제약은 `pg_constraint` 확인 후 추가).
