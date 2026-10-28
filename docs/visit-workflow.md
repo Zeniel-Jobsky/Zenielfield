@@ -51,7 +51,7 @@
 
 ## 2026-10-28 기입력 결과 AI 정리
 
-- 위치: 직접 입력 방문 결과 화면 `02 실제 방문 결과` 아래 `AI로 정리하기` (`app/platform/form.tsx` `AiTidy`)
+- 위치: 직접 입력 방문 결과 화면 `주요 활동 내용` 바로 위 `AI로 정리하기`(처음엔 폼 맨 아래라 화면 밖에 있어 안 보였음) (`app/platform/form.tsx` `AiTidy`)
 - 흐름: 현재 칸 값 읽기 → `/api/assist` `mode:'tidy'`(사실·수치 유지, 문장만 정리) → 바뀌는 칸만 현재/제안 + 체크(기본 체크) → `선택한 칸 반영`이 폼 값을 바꿈 → 저장 시 `aiEdit`(model·generatedAt·before·proposed) 전달 → 서버(`mutations.ts`)가 저장값이 제안과 같고 이전값과 다른 칸만 `applied`로 계산해 `aiEdits[]`에 추가(최근 10개, byId·appliedAt) → 목록·이력에 `AI 정리 n회` 배지(title에 반영 칸)
 - 되돌리기: 저장 전에는 `되돌리기`로 before 값 복원, 저장 후에는 기록이 남는다(수정은 일반 수정 + 새 정리)
 - 제약: `entry`는 바뀌지 않음(직접 입력은 manual 유지). 클라이언트가 보낸 `aiEdits`는 무시. 방문 결과(completed)에만. DB 제약 `zf_visits_ai_edits_array`(`20261028130000_ai_edits.sql`)
