@@ -21,6 +21,7 @@
   margin: 0 14px 26px;
   min-height: 52px;
 }
+.app-shell .sidebar .brand-logo {display:block;width:180px;height:auto;max-width:100%}
 .app-shell .sidebar .zeniel-company {
   padding: 0;
   border: 0;
@@ -154,6 +155,7 @@
   .app-shell.sidebar-collapsed {--sidebar: 76px}
   .app-shell.sidebar-collapsed .sidebar {padding-inline: 12px}
   .app-shell.sidebar-collapsed .sidebar .brand {align-items: center;justify-content: center;margin: 0 0 18px;min-height: 52px}
+  .app-shell.sidebar-collapsed .sidebar .brand-logo {display:none}
   .app-shell.sidebar-collapsed .sidebar .brand-compact {font-size: 15px;font-weight: 500;letter-spacing: -.5px;color: var(--nav-green)}
   .app-shell.sidebar-collapsed .sidebar nav {margin-top: 0}
   .app-shell.sidebar-collapsed .sidebar nav button {justify-content: center;min-width: 44px;min-height: 46px;padding: 11px}
@@ -163,6 +165,7 @@
 @media (max-width: 760px) {
   .app-shell .sidebar {width: 252px;max-width: calc(100vw - 44px);padding-top: 24px}
   .app-shell .sidebar .brand {margin-bottom: 22px}
+  .app-shell .sidebar .brand-logo,.app-shell.sidebar-collapsed .sidebar .brand-logo {display:block;width:158px}
   .app-shell .sidebar nav button {min-height: 48px;font-size: 14px}
   .app-shell.sidebar-collapsed .sidebar nav button > span {display: inline}
   .app-shell.sidebar-collapsed .sidebar nav em {display: inline-block}
