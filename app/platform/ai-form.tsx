@@ -3,12 +3,12 @@ import {useState,type FormEvent} from 'react';
 import {Check,MapPin,ClipboardCheck,Sparkles,Info,RotateCcw,PenLine} from 'lucide-react';
 import {Field} from '../ui';
 import {purposes} from '../lib/model';
-import {type TargetType,type AiEntry,type AiField,aiFields,targetOf,typeName} from './model';
+import {type TargetType,type AiEntry,type AiField,aiFields,targetOf,typeName,requirements,dayShift} from './model';
 import type {Context} from './context';
 import {AiComposer,type AiDraft} from './ai-assist';
 import {GeoPick} from './geo';
 import {Permissions} from './permissions';
-import type {VisitGeo,Target} from './model';
+import type {VisitGeo,Target,FieldVisit} from './model';
 // AI 간편 등록 전용 화면: 대상 선택 → 말·글·사진 → AI 초안 검토 → 저장. 직접 입력 칸은 두지 않는다.
 const labels:Record<AiField,string>={purpose:'방문 목적',detail:'주요 활동 내용',notes:'특이사항',result:'후속 조치 필요 여부'};
 export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;error:string;onSave:(entity:string,values:any,record?:any)=>void;onClose:()=>void}){
@@ -21,8 +21,10 @@ export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;
  const parents=c.data.sites.filter(s=>c.targets.some(t=>t.siteId===s.id)),stores=c.data.stores.filter(s=>s.siteId===site&&c.targets.some(t=>t.id===s.id));
  const plans=c.data.visits.filter(v=>v.status==='planned'&&c.targets.some(t=>t.id===targetOf(v))&&(c.me.role!=='manager'||v.visitorId===c.me.id)).sort((a,b)=>(a.plannedDate||'').localeCompare(b.plannedDate||'')).slice(0,200);
  const canEdit=c.editable&&(c.me.role!=='manager'||!r||r.visitorId===c.me.id),ready=!!ai&&!!target&&!!owner&&!!values.detail.trim();
- // 대상이 정해지면 그 대상의 미완료 계획 중 예정일이 가장 가까운 것을 자동 연결한다.
- const near=(v:{plannedDate:string|null})=>!!v.plannedDate&&Math.abs(+new Date(v.plannedDate)-+new Date(c.now))<=14*86400000,candidates=target?plans.filter(v=>targetOf(v)===target.id&&near(v)).sort((a,b)=>Math.abs(+new Date(a.plannedDate||c.now)-+new Date(c.now))-Math.abs(+new Date(b.plannedDate||c.now)-+new Date(c.now))):[],linked=r||!candidates.length?null:candidates.find(v=>v.id===(linkId??candidates[0].id))||null;
+ // 대상이 정해지면 그 대상의 미완료 계획 중 오늘 연결할 수 있는 것(필요 회차 인정 기간이 시작됨)을 자동 연결한다. 지난·오늘 계획 우선, 그다음 가까운 예정.
+ const linkable=(v:FieldVisit)=>{if(!v.requirementId||!target)return true;const head=('req:'+target.id+':').length,unit=v.requirementId.slice(head,head+10),req=requirements([target],unit,dayShift(unit,40)).find(q=>q.id===v.requirementId);return !req||req.windowStart<=actualDate};
+ const rank=(v:FieldVisit)=>{const d=(+new Date(v.plannedDate||c.now)-+new Date(c.now))/86400000;return d<=0?-d:100+d};
+ const near=(v:{plannedDate:string|null})=>!!v.plannedDate&&Math.abs(+new Date(v.plannedDate)-+new Date(c.now))<=14*86400000,candidates=target?plans.filter(v=>targetOf(v)===target.id&&near(v)&&linkable(v)).sort((a,b)=>rank(a)-rank(b)):[],linked=r||!candidates.length?null:candidates.find(v=>v.id===(linkId??candidates[0].id))||null;
  function draft(d:AiDraft,meta:{text:string;imageCount:number;model:string;generatedAt:string}){const v={purpose:purposes.includes(d.purpose)?d.purpose:purposes[0],detail:d.detail,notes:d.notes,result:d.result==='후속 조치 필요'?'후속 조치 필요':'특이사항 없음'};setValues(v);setActions(d.actions);setPicked(d.actions.map(()=>true));setAi({input:{text:meta.text,imageCount:meta.imageCount},draft:v,summary:d.extra.summary,category:d.extra.category,urgency:d.extra.urgency,confidence:d.confidence,model:meta.model,generatedAt:meta.generatedAt,edited:[]})}
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!ready||!ai)return;const base=r||linked;onSave('visit',{...(base||{}),entry:'ai',ai,...values,targetType:type,siteId:site,storeId:type==='store'?store:null,visitorId:base?.visitorId||owner,status:'completed',plannedDate:base?.plannedDate||null,time:base?.time||'',precheck:base?.precheck||'',actualDate,actualTime,geo:geo||r?.geo||null,cancelReason:'',requirementId:base?.requirementId||modal.requirementId||null,aiActions:values.result==='후속 조치 필요'?actions.filter((_,i)=>picked[i]):[]},base||undefined)}
  const edited=(k:AiField)=>!!ai&&values[k]!==ai.draft[k];
@@ -30,7 +32,7 @@ export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;
  <fieldset className="form-grid" disabled={!canEdit||c.saving}>
  {!saved&&<Permissions/>}
  <div className="form-section first wide"><span>01</span>말·글·사진으로 입력</div>
- {!saved&&<AiComposer onDraft={draft}/>}
+ {!saved&&<AiComposer onDraft={draft} demo={c.demo!==false}/>}
  <div className="form-section wide"><span>02</span>방문 대상</div>
  <GeoPick auto={!saved} targets={c.targets} target={target} onPick={locked?undefined:pick} onGeo={setGeo}/>
  {!r&&target&&(candidates.length?<p className="form-hint wide link-hint"><span>계획 연결</span><b>{linked?`${linked.plannedDate} ${linked.time||''} 예정`.replace(/s+예정$/,' 예정'):'계획 외 방문'}</b>{candidates.length>1&&<select value={linkId??candidates[0].id} onChange={e=>setLinkId(e.target.value)}>{candidates.map(v=><option key={v.id} value={v.id}>{v.plannedDate} {v.time}</option>)}<option value="none">계획 외 방문으로 저장</option></select>}{candidates.length===1&&<button type="button" className="textbtn" onClick={()=>setLinkId(linkId==='none'?null:'none')}>{linkId==='none'?'계획에 연결':'계획 외로 저장'}</button>}</p>:<p className="form-hint wide">이 대상에 오늘 기준 ±14일 안의 미완료 계획이 없어 계획 외 방문으로 저장됩니다.</p>)}

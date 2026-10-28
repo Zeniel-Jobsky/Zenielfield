@@ -25,7 +25,7 @@ export function Drawer({title,sub,children,onClose,busy=false}:{title:string;sub
   onClick={e=>{if(e.target===e.currentTarget)close()}}
   onClickCapture={e=>{const el=e.target as HTMLElement;if(el.closest('form button[type="button"]')&&!el.closest('.form-footer'))dirty.current=true}}
  >
-  <div className="drawer-head"><div><span>{sub}</span><h2 id={titleId}>{title}</h2></div><button type="button" className="iconbtn" disabled={busy} aria-label="닫기" onClick={close}><X size={20}/></button></div>
+  <div className="drawer-head"><div>{sub&&<span>{sub}</span>}<h2 id={titleId}>{title}</h2></div><button type="button" className="iconbtn" disabled={busy} aria-label="닫기" onClick={close}><X size={20}/></button></div>
   <div className="drawer-body" onClickCapture={e=>{const el=e.target as HTMLElement;if(el.closest('.form-footer button[type="button"]')){e.preventDefault();e.stopPropagation();close()}}}>{children}</div>
  </dialog>
 }

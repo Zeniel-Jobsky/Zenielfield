@@ -24,7 +24,7 @@ export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;e
  <fieldset className="form-grid" disabled={!c.editable||c.saving}>
  <Permissions/>
  <div className="form-section first wide"><span>01</span>말·글로 일정 입력</div>
- <AiComposer mode="plan" onDraft={d=>draft(d as unknown as AiPlanDraft)}/>
+ <AiComposer mode="plan" demo={c.demo!==false} onDraft={d=>draft(d as unknown as AiPlanDraft)}/>
  <div className="form-section wide"><span>02</span>방문 대상</div>
  <GeoPick auto targets={c.targets} target={target} onPick={locked?undefined:pick} onGeo={()=>{}}/>
  {plan&&hint&&<p className="form-hint wide">AI가 들은 대상: <b>{hint}</b>{target?' → '+target.name:' → 일치하는 대상 없음, 직접 선택해 주세요'}</p>}

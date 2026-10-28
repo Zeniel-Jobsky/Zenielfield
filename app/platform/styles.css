@@ -345,3 +345,6 @@
 .link-hint{gap:6px 10px}
 .link-hint>span{color:#65726b}
 .link-hint .textbtn,.notice .textbtn{display:inline-flex;align-items:center;gap:4px;margin-left:auto}
+
+/* 잡매니저 홈: 모바일에서 오늘 업무 머리글을 세로로 쌓고 기록 버튼을 전체 폭으로 둔다. */
+@media(max-width:760px){.platform-app .manager-welcome{flex-wrap:wrap;gap:12px}.platform-app .manager-welcome>div{flex:1 1 0;min-width:0}.platform-app .manager-welcome .here-btn{flex:1 1 100%;justify-content:center;min-height:48px;margin-left:0}}
