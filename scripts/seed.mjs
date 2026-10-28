@@ -8,10 +8,11 @@ const [cmd='build']=process.argv.slice(2),out='seed/out',ref='nhywssfwtnonytbkuf
 const bundle=await esbuild.build({entryPoints:['seed/build.ts'],bundle:true,write:false,platform:'node',format:'esm'});
 const m=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].contents).toString('base64'));
 const now=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date());
-const data=m.buildSeed(now,m.parseCsv(fs.readFileSync('data/zeniel-branches-geo.csv','utf8')),m.parseCsv(fs.readFileSync('data/zeniel-stores-candidates-geo.csv','utf8')));
+const base=fs.existsSync('data/hrbiz-demo.json')?JSON.parse(fs.readFileSync('data/hrbiz-demo.json','utf8')):null;if(base)base.audit=[];
+const data=m.buildSeed(now,m.parseCsv(fs.readFileSync('data/zeniel-branches-geo.csv','utf8')),m.parseCsv(fs.readFileSync('data/zeniel-stores-candidates-geo.csv','utf8')),base);
 fs.mkdirSync(out,{recursive:true});const seed=m.seedSql(data),purge=m.purgeSql();
 fs.writeFileSync(out+'/seed.json',JSON.stringify(data));fs.writeFileSync(out+'/seed.sql',seed);fs.writeFileSync(out+'/purge.sql',purge);
-console.log(`기준일 ${now} · 사용자 ${data.users.length} · 현장 ${data.sites.length} · 매장 ${data.stores.length} · 방문 ${data.visits.length} · 조치 ${data.actions.length} → ${out}/`);
+console.log(`${base?'HR-biz 가상 DB('+base.importedAt+')':'가상 생성기'} · 기준일 ${now} · 사용자 ${data.users.length} · 현장 ${data.sites.length} · 매장 ${data.stores.length} · 방문 ${data.visits.length} · 조치 ${data.actions.length} → ${out}/`);
 if(cmd==='build')process.exit(0);
 const token=process.env.SUPABASE_ACCESS_TOKEN;if(!token){console.error('SUPABASE_ACCESS_TOKEN 필요');process.exit(1)}
 const query=cmd==='purge'?`begin;\n${purge}\ncommit;`:cmd==='apply'?`begin;\n${purge}\n${seed}\ncommit;`:null;if(!query){console.error('build | apply | purge');process.exit(1)}

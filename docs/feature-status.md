@@ -7,7 +7,7 @@
 | 항목 | 결과 |
 | --- | --- |
 | `tsc --noEmit` | 오류 없음 |
-| `tests/run-platform.mjs` | 82개 통과 |
+| `tests/run-platform.mjs` | 82개 통과 · 시드 19개 |
 | `tests/run-briefing.mjs` | 32개 통과 |
 | `tests/run-supabase.mjs` | 서버 15개 + Edge 10개 통과 |
 | `tests/ui-metrics.mjs` | 9개 통과 |
@@ -55,7 +55,7 @@
 ### 중간
 - AI·직접 입력 분리: [스키마](ai-entry-schema.md) 구현, 목록 AI 표시·필터 완료. 원격 DB 이관·Edge 재배포 대기.
 - GPS 지점 자동 선택: [GPS](gps-plan.md) 구현. 매장 검색·주소 좌표 변환 구현, Kakao 키 설정 필요.
-- 데모 주입 파이프라인: [문서](seed-pipeline.md) 구현, 운영 적재 대기.
+- 데모 주입 파이프라인: [문서](seed-pipeline.md) 구현, 운영 적재 대기. HR-biz 가상 DB(xlsx) 반영 완료, 운영 적재는 이관 2건 선행 필요.
 - 방문 등록 기본 AI 입력·권한 요청: [문서](ai-input-default.md) 구현.
 - 관리 도메인: [문서](domain-plan.md) 구현. 원격 이관 `20261028100000_domains.sql` 미적용.
 - 방문·일지 워크플로 재설계: [문서](visit-workflow.md) 구현(계획 자동 연결·일시 기본 지금·제안 조치 일괄 등록·홈 "지금 여기서").
