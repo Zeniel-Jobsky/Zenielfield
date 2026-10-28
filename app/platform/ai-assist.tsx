@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import type {AiField} from './model';
+import {collapseRepeats} from '../lib/dedupe-text';
 import {Plus,Mic,Square,ArrowUp,X,Loader2,Camera} from 'lucide-react';
 // ChatGPT-style composer: type, speak or attach photos, then send once; the draft fills the form directly. Nothing is saved here.
 export type AiDraft={detail:string;result:string;purpose:string;notes:string;extra:{summary:string;category:string[];urgency:string};actions:{type:string;content:string;dueDate:string}[];confidence:string};
@@ -22,16 +23,26 @@ export function demoDraft(text:string,mode:'result'|'plan'):AiDraft|AiPlanDraft{
  return {detail:t,result:actions.length?'후속 조치 필요':'특이사항 없음',purpose,notes:'',extra:{summary:t.slice(0,80),category:category.length?category:['운영'],urgency:actions.length>1?'높음':actions.length?'보통':'낮음'},actions,confidence:'low'}}
 // AI 정리 요청: 기입력 값을 문장으로 묶어 보낸다. 데모는 서버 없이 공백·문장부호만 정리한 예시 제안을 만든다.
 export type TidyValues=Record<AiField,string>;
+// AI 연결 상태: 크레딧 소진·키 없음 같은 운영 설정 문제는 한 번 확인되면 10분 동안 다시 부르지 않고 간단 정리로 대신한다.
+// 사용자가 누를 때마다 같은 오류("관리자 문의")를 보지 않게 하기 위함이다. 이 브라우저 탭에만 기억한다.
+const DOWN_KEY='zf-ai-down';
+export function aiDownReason():string{try{const v=JSON.parse(sessionStorage.getItem(DOWN_KEY)||'null');return v&&v.until>Date.now()?v.reason:''}catch{return ''}}
+function markAiDown(reason:string){try{sessionStorage.setItem(DOWN_KEY,JSON.stringify({reason,until:Date.now()+10*60*1000}))}catch{}}
+const clip=(m:string)=>{let s=m.split(' 직접 입력해 주세요')[0].trim();while(s.endsWith('.'))s=s.slice(0,-1).trim();return s};
+async function callAssist(body:unknown):Promise<{draft:any;model:string;generatedAt:string}>{
+ const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json() as {draft:any;model?:string;generatedAt?:string;error?:string};
+ if(!r.ok){const msg=clip(d.error||'AI 응답 오류');if(r.status===502||r.status===503)markAiDown(msg);throw Error(msg)}
+ return {draft:d.draft,model:d.model||'',generatedAt:d.generatedAt||new Date().toISOString()}}
 export const tidyText=(t:string)=>{const s=t.replace(/\s+/g,' ').replace(/\s*([.,!?])\s*/g,'$1 ').replace(/([.!?]) (?=[.!?])/g,'$1').trim().replace(/[,\s]+$/,'');return !s||/[.!?]$/.test(s)?s:s+'.'};
-export function demoTidy(v:TidyValues):AiDraft{const detail=tidyText(v.detail),notes=tidyText(v.notes),t=detail+' '+notes;const follow=has(t,'요청','수리','충원','결원','민원','고장','필요');
+export function demoTidy(v:TidyValues):AiDraft{const detail=tidyText(collapseRepeats(v.detail)),notes=tidyText(collapseRepeats(v.notes)),t=detail+' '+notes;const follow=has(t,'요청','수리','충원','결원','민원','고장','필요');
  return {detail,notes,purpose:v.purpose,result:follow?'후속 조치 필요':v.result||'특이사항 없음',extra:{summary:detail.slice(0,80),category:[has(t,'결원','충원','인력')&&'인력',has(t,'고장','수리','온도','안전','시설')&&'시설·안전',has(t,'민원','불만')&&'민원'].filter(Boolean) as string[],urgency:follow?'보통':'낮음'},actions:[],confidence:'low'}}
 export async function requestTidy(v:TidyValues,demo:boolean):Promise<{draft:AiDraft;model:string;generatedAt:string}>{
  if(demo)return {draft:demoTidy(v),model:'데모 예시 정리',generatedAt:new Date().toISOString()};
+ const down=aiDownReason();if(down)return {draft:demoTidy(v),model:`간단 정리 · AI 연결 안 됨(${down})`,generatedAt:new Date().toISOString()};
  const text=`방문 목적: ${v.purpose}\n주요 활동 내용: ${v.detail}\n특이사항: ${v.notes||'(없음)'}\n후속 조치 필요 여부: ${v.result}`;
- const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,images:[],mode:'tidy'})});const d=await r.json() as {draft:AiDraft;model?:string;generatedAt?:string;error?:string};
- if(!r.ok)throw Error(d.error||'AI 정리에 실패했습니다.');return {draft:d.draft,model:d.model||'',generatedAt:d.generatedAt||new Date().toISOString()}}
+ try{return await callAssist({text,images:[],mode:'tidy'})}catch(e){return {draft:demoTidy(v),model:`간단 정리 · AI 연결 안 됨(${(e as Error).message})`,generatedAt:new Date().toISOString()}}}
 export function AiComposer({onDraft,mode='result',demo=false}:{onDraft:(draft:AiDraft,meta:AiMeta)=>void;mode?:'result'|'plan';demo?:boolean}){
- const [text,setText]=useState(''),[interim,setInterim]=useState(''),[images,setImages]=useState<string[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(''),[listening,setListening]=useState(false),rec=useRef<Recognition|null>(null),box=useRef<HTMLTextAreaElement>(null);
+ const [text,setText]=useState(''),[interim,setInterim]=useState(''),[images,setImages]=useState<string[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(''),[note,setNote]=useState(''),[listening,setListening]=useState(false),rec=useRef<Recognition|null>(null),box=useRef<HTMLTextAreaElement>(null);
  useEffect(()=>()=>rec.current?.stop(),[]);
  useEffect(()=>{const el=box.current;if(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,180)+'px'}},[text,interim]);
  function toggleVoice(){if(listening){rec.current?.stop();return}
@@ -51,7 +62,9 @@ export function AiComposer({onDraft,mode='result',demo=false}:{onDraft:(draft:Ai
   r.onerror=e=>setError(e.error==='not-allowed'||e.error==='service-not-allowed'?'마이크가 허용되지 않았습니다. 브라우저 사이트 설정에서 마이크를 허용하고, 아이폰은 설정 → Siri에서 받아쓰기를 켜 주세요.':e.error==='no-speech'?'음성이 들리지 않았습니다. 다시 눌러 말해 주세요.':'음성 인식이 중단되었습니다 ('+e.error+').');
   r.onend=()=>{setListening(false);setInterim('')};rec.current=r;setError('');r.start();setListening(true)}
  async function addImages(files:FileList|null){if(!files)return;try{const next=await Promise.all([...files].slice(0,3-images.length).map(shrink));setImages([...images,...next])}catch(e){setError((e as Error).message)}}
- async function send(){if(listening)rec.current?.stop();if(demo){onDraft(demoDraft(text,mode) as AiDraft,{text,imageCount:images.length,model:'데모 예시 초안',generatedAt:new Date().toISOString()});return}setBusy(true);setError('');try{const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,images,mode})});const d=await r.json() as {draft:AiDraft;model?:string;generatedAt?:string;error?:string};if(!r.ok)throw Error(d.error||'AI 요약에 실패했습니다.');onDraft(d.draft,{text,imageCount:images.length,model:d.model||'',generatedAt:d.generatedAt||new Date().toISOString()})}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
+ async function send(){if(listening)rec.current?.stop();const clean=collapseRepeats(text);if(clean!==text)setText(clean);const text0=clean;if(demo){onDraft(demoDraft(text0,mode) as AiDraft,{text:text0,imageCount:images.length,model:'데모 예시 초안',generatedAt:new Date().toISOString()});return}setBusy(true);setError('');setNote('');const fallback=(why:string)=>{setNote(`AI 연결이 안 돼(${why}) 입력한 낱말로 간단 정리했습니다. 내용을 꼭 확인하세요.`);onDraft(demoDraft(text0,mode) as AiDraft,{text:text0,imageCount:images.length,model:`간단 정리 · AI 연결 안 됨(${why})`,generatedAt:new Date().toISOString()})};
+  const down=aiDownReason();if(down){fallback(down);setBusy(false);return}
+  try{const d=await callAssist({text:text0,images,mode});onDraft(d.draft,{text:text0,imageCount:images.length,model:d.model,generatedAt:d.generatedAt})}catch(e){fallback((e as Error).message)}finally{setBusy(false)}}
  const ready=!busy&&(text.trim().length>0||images.length>0);
  return <div className="ai-composer-wrap wide">
   <div className={'ai-composer'+(listening?' listening':'')}>
@@ -66,6 +79,7 @@ export function AiComposer({onDraft,mode='result',demo=false}:{onDraft:(draft:Ai
   </div>
   {demo&&<p className="form-hint">데모에서는 AI를 부르지 않고 입력한 낱말로 예시 초안을 만듭니다.</p>}
   <p className="form-hint">사진은 요약에만 쓰고 저장하지 않습니다. 얼굴·연락처·서류가 보이지 않게 찍어 주세요.</p>
+  {note&&<p className="form-hint ai-fallback-note" role="status">{note}</p>}
   {error&&<p className="form-error" role="alert">{error} 직접 입력은 방문 결과 등록에서 할 수 있습니다.</p>}
  </div>
 }

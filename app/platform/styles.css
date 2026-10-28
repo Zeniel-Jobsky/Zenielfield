@@ -454,3 +454,5 @@
 .update-notice small{color:#65726b;font-size:12px;margin-left:6px}
 .update-notice code{font-size:12px}
 @media(max-width:760px){.update-notice{bottom:84px;left:16px;right:16px;transform:none;max-width:none}.update-notice .btn{min-height:44px}}
+
+.ai-fallback-note{padding:8px 10px;border-radius:6px;background:#fdf4e7;color:#8a4b00}

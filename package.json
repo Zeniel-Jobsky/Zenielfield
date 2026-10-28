@@ -21,7 +21,7 @@
     "preview:dist": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit",
-    "test": "node tests/run-platform.mjs && node tests/run-briefing.mjs && node tests/run-diagnosis.mjs && node tests/run-supabase.mjs && node tests/logic.mjs && node tests/ui-metrics.mjs",
+    "test": "node tests/run-platform.mjs && node tests/run-briefing.mjs && node tests/run-diagnosis.mjs && node tests/run-supabase.mjs && node tests/logic.mjs && node tests/ui-metrics.mjs && node tests/run-dedupe.mjs",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
