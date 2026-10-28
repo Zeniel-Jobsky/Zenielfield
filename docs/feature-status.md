@@ -97,3 +97,10 @@
 - Edge `zenifield-cloudflare` 재배포: Sites 서버 토큰도 허용(로컬·Sites 서버가 같은 로그인 경로 사용)
 - 로컬 개발 전용: `@example.test` 시드 계정 역할별 로그인 버튼 (ChatGPT 모드에서만 표시)
 - 방문 1만 건(`…-extra-01~05`, 출처 표시 없음): 기존 데이터. 묶음(dataset)으로 보존 예정, 시드 `apply` 전 처리 필요
+
+## Cloudflare 화면 배포 (2026-10-28)
+
+- 대상: `ugen.kwon@gmail.com` 계정의 `zenifield` Worker, [공개 주소](https://zenifield.ugen-kwon.workers.dev). 화면 소스 커밋 `3377e3a`, 배포 버전 `ecab24f3-03c0-4f4a-a180-f8688c008434`.
+- 현장·매장 탭 하단선과 핵심 지표의 간격을 PC·태블릿 16px, 모바일 12px로 수정하고 왼쪽 컬러 테두리 선언을 제거했다. 모바일 데모·운영 전환 문구의 가로 넘침도 수정했다.
+- `npm run typecheck`, `npm test`, Cloudflare 인증 테스트 2종, 디자인 점검, Cloudflare 대상 빌드 통과. 공개 데모에서 1280px·390px 간격·테두리·가로 폭 확인, 기존 Chrome 세션의 Supabase 운영 대시보드 조회 확인.
+- 이번 배포에서 운영 DB 이관과 Supabase Edge 함수 변경은 실행하지 않았다.
