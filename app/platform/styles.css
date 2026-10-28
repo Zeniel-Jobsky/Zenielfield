@@ -353,8 +353,10 @@
 @media(max-width:1023px){.vbar-list{gap:4px}}
 
 /* AI로 정리하기: 제안은 옅은 정보 표면, 현재/제안은 한 줄씩 */
-.ai-tidy{display:grid;gap:10px;padding:12px 14px;border-top:1px solid #e3e9e6}
-.ai-tidy-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ai-tidy{display:grid;gap:8px;margin-top:-4px}
+.ai-tidy-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ai-tidy-head>small{flex:1 1 240px;min-width:0;font-size:12px;color:#65726b;line-height:1.5}
+.ai-tidy-msg{margin:0;font-size:12px;color:#59645f}
 .ai-tidy-head>span{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;color:#36443e;min-width:0;flex:1 1 260px}
 .ai-tidy-head small{flex-basis:100%;font-size:12px;color:#65726b;line-height:1.6}
 .ai-tidy-applied{display:inline-flex;align-items:center;gap:8px}
@@ -368,7 +370,7 @@
 .ai-tidy-row s{text-decoration:none;color:#65726b;white-space:pre-wrap;word-break:break-word}
 .ai-tidy-row ins{text-decoration:none;color:#17171c;white-space:pre-wrap;word-break:break-word}
 .ai-tidy-actions{display:flex;gap:8px;flex-wrap:wrap}
-@media(max-width:760px){.ai-tidy{padding:12px 0}.ai-tidy-head .btn{min-height:44px;width:100%;justify-content:center}.ai-tidy-actions .btn{min-height:44px;flex:1 1 140px;justify-content:center}}
+@media(max-width:760px){.ai-tidy-head .btn{min-height:44px;width:100%;justify-content:center}.ai-tidy-actions .btn{min-height:44px;flex:1 1 140px;justify-content:center}}
 
 /* AI 현황 요약: 흰 패널, 머리글 오른쪽에 자동 요약 체크 + 버튼, 결과는 세 열 */
 .ai-brief .panel-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
