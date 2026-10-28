@@ -317,3 +317,5 @@
 .login-screen .panel{max-width:420px;text-align:left}
 .login-screen h1{font-size:24px;margin:0 0 4px}
 .login-screen .panel>p{margin:0 0 16px;color:#6d7f9c;font-size:13px}
+.login-screen .demo-entry{display:flex;width:100%;box-sizing:border-box;justify-content:center;margin:14px 0 0}
+.login-screen .demo-note{margin:6px 0 0;font-size:11px;color:#8a9ab3;text-align:center}
