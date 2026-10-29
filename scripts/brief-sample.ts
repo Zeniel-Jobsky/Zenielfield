@@ -23,6 +23,6 @@ for(const role of ['manager','partlead','lead','director']){const me=pick(role);
  const b=j.draft;console.log('현황:',t(b.headline));console.log('전할 말:',t(b.cheer));
  console.log('무슨 일:',t(b.story));console.log('주제:',(b.themes||[]).map((x:any)=>`${x.title}(${x.status})`).join(' / '));
  console.log('먼저 챙길 곳:',(b.focus||[]).map((x:any)=>`${x.name}: ${t(x.reason)}`).join(' | '));
- console.log('판단:',(b.judgment||[]).map(t).join(' | '));console.log('다음 주:',(b.watch||[]).map(t).join(' | '));
+ console.log('지시:',(b.directive||[]).map((x:any)=>x.to+': '+t(x.say)).join(' | '));console.log('이행:',(b.steps||[]).map(t).join(' | '));console.log('판단:',(b.judgment||[]).map(t).join(' | '));console.log('다음 주:',(b.watch||[]).map(t).join(' | '));
  fs.writeFileSync(`.brief-${role}.json`,JSON.stringify({digest:{role:d.role,units:d.units.length,reports:d.reportTotal,judged:d.judged.reports},brief:b},null,1));
 }
