@@ -8,7 +8,9 @@ const [input,...flags]=process.argv.slice(2);if(!input){console.error('xlsx 경�
 const XLSX=require('xlsx');
 const wb=XLSX.readFile(input),sheet=n=>{if(!wb.Sheets[n])throw Error('시트 없음: '+n);return XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:''})};
 const day=v=>typeof v==='number'?new Date(Math.round((v-25569)*86400000)).toISOString().slice(0,10):/^\d{4}-\d{2}-\d{2}/.test(String(v))?String(v).slice(0,10):null;
-const rule=t=>({'월 1회':{period:'month',count:1},'월 2회':{period:'month',count:2},'격주 1회':{period:'month',count:2},'주 1회':{period:'week',count:1},'필요 시':{period:'manual',count:1}})[String(t).trim()]||{period:'manual',count:1};
+// 모르는 주기 값은 필요 시로 바꾸지 않고 적재를 멈춘다. 엑셀의 '필요 시'는 근거 칸이 없으므로 근거 없는 필요 시(manual 없음)로 들어온다.
+const RULES={'월 1회':{period:'month',count:1},'월 2회':{period:'month',count:2},'격주 1회':{period:'month',count:2},'주 1회':{period:'week',count:1},'필요 시':{period:'manual',count:1}};
+const rule=t=>{const r=RULES[String(t).trim()];if(!r)throw Error(`알 수 없는 방문주기: ${t}`);return r};
 const states={'조치 예정':'조치 예정','처리 중':'처리 중','보류':'보류','완료':'완료','기한 초과':'조치 예정'};
 const idOf=(prefix,code)=>'demo-'+prefix+'-'+String(code).toLowerCase().replace(/[^a-z0-9]+/g,'-');
 const domains=[{id:'dom-hr',code:'HR',name:'인재사업',active:1,version:1},{id:'dom-se',code:'SE',name:'SE운영',active:1,version:1}];
