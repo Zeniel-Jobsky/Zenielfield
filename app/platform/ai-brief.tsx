@@ -200,7 +200,7 @@ function ReportSite({name,themes,jump,canJump}:{name:string;themes:BriefTheme[];
  </li>;
 }
 // 브리핑 표시: 늘 보이는 것 = 현황 한 줄 → 무슨 일이 벌어지고 있나(가장 눈에 띄게) → 먼저 챙길 곳(누르면 이동).
-// 세부(보고 주제·판단 ①②·전할 말·다음 주·지표 변화·근거)는 보고 싶은 사람만 펼친다.
+// 세부(AI 해석 더 보기: 반복되는 주제·전할 말·다음 주·근거 — 카드·아래 목록에 없는 것만)는 보고 싶은 사람만 펼친다.
 const FOLD_KEY='zf-ai-brief-folded';
 function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;digest:BriefDigest;stale:boolean;jump:(name:string)=>void;targetNames:Set<string>}){
  const [detailsOpen,setDetailsOpen]=useState(false),[folded,setFoldedState]=useState(false),id=useId();
@@ -209,7 +209,8 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
  const setFolded=(v:boolean)=>{setFoldedState(v);try{localStorage.setItem(FOLD_KEY,v?'1':'0')}catch{}};
  const r=out.result,k=digest.kpi,tone=toneOf(digest),ai=!out.model.includes('규칙');
  const sites=useMemo(()=>{const groups=new Map<string,BriefTheme[]>();for(const t of r.themes)for(const name of new Set(t.targets.length?t.targets:['현장 미지정'])){const list=groups.get(name)||[];list.push(t);groups.set(name,list)}return [...groups]},[r.themes]);
- const peek=[sites.length&&'보고 주제',r.judgment.length&&'판단',r.cheer.length&&CHEER_TO[digest.role],r.watch.length&&'다음 주 볼 것'].filter(Boolean).join(' · ');
+ // 세부 내용 = AI가 해석한 것 중 위쪽·아래 목록에 없는 것만(지표 숫자는 카드에 있으므로 넣지 않는다)
+ const peek=[r.cheer.length&&CHEER_TO[digest.role],r.watch.length&&'다음 주 볼 것',sites.length&&'반복되는 주제'].filter(Boolean).join(' · ');
  const story=<section className="ai-brief-story"><h3>{ai&&<Sparkles size={14}/>}무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>;
  if(folded)return <div className={'ai-brief-out folded'+(stale?' stale':'')}>{story}<button type="button" className="brief-fold" aria-expanded="false" onClick={()=>setFolded(false)}>브리핑 펼치기<ChevronDown size={14}/></button></div>;
  return <div className={'ai-brief-out'+(stale?' stale':'')}>
@@ -218,17 +219,12 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
   <section className="ai-brief-focus"><h3>{ai&&<Sparkles size={14}/>}먼저 챙길 곳</h3><ol>{r.focus.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}>{a.name}<ChevronRight size={14}/></button><span><RichText r={a.reason}/></span></li>)}{!r.focus.length&&<li><span>{digest.role==='manager'?'바로 확인·조치 필요로 남은 곳이 없어요(저장된 판정 기준).':'일정 잡을 회차나 기한 넘긴 조치가 있는 곳이 없어요.'}</span></li>}</ol></section>
   {(r.directive?.length||0)>0&&<section className="ai-brief-guide"><h3>{ai&&<Sparkles size={14}/>}지시 가이드 <small>누구에게 무엇을</small></h3><ul>{r.directive!.map((x,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(x.to)}>{x.to}<ChevronRight size={14}/></button><span><RichText r={x.say}/></span></li>)}</ul></section>}
   {(r.steps?.length||0)>0&&<section className="ai-brief-guide"><h3>{ai&&<Sparkles size={14}/>}이행 가이드 <small>순서대로</small></h3><ol className="ai-brief-steps">{r.steps!.map((x,i)=><li key={i}><b>{i+1}</b><span><RichText r={x}/></span></li>)}</ol></section>}
-  <button type="button" className="brief-disclosure" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>{detailsOpen?'세부 내용 접기':'세부 내용 보기'}{!detailsOpen&&peek&&<small className="brief-disclosure-peek"> · {peek}</small>}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
+  <button type="button" className="brief-disclosure" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>{detailsOpen?'AI 해석 더 보기 접기':'AI 해석 더 보기'}{!detailsOpen&&peek&&<small className="brief-disclosure-peek"> · {peek}</small>}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
   <div id={id+'-details'} className="ai-brief-details" hidden={!detailsOpen}>
    <dl className="ai-brief-dl">
-    {sites.length>0&&<div><dt>보고 주제</dt><dd><ul className="ai-brief-sites">{detailsOpen&&sites.map(([name,themes])=><ReportSite key={name} name={name} themes={themes} jump={jump} canJump={targetNames.has(name)}/>)}</ul></dd></div>}
+    {sites.length>0&&<div><dt>보고에서 반복되는 주제</dt><dd><ul className="ai-brief-sites">{detailsOpen&&sites.map(([name,themes])=><ReportSite key={name} name={name} themes={themes} jump={jump} canJump={targetNames.has(name)}/>)}</ul></dd></div>}
     {r.cheer.length>0&&<div><dt>{CHEER_TO[digest.role]}</dt><dd><RichText r={r.cheer}/></dd></div>}
     {r.watch.length>0&&<div><dt>다음 주 볼 것</dt><dd><ul>{r.watch.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></dd></div>}
-    {(k.rateWeek!==null&&k.rateWeekPrev!==null||k.resolved>0||k.overdue>0)&&<div><dt>지표 변화</dt><dd className="ai-brief-lead">
-     {k.rateWeek!==null&&k.rateWeekPrev!==null&&<span className={'ai-brief-delta '+(k.rateWeek>k.rateWeekPrev?'up':k.rateWeek<k.rateWeekPrev?'down':'')}>{k.rateWeek>k.rateWeekPrev?'▲':k.rateWeek<k.rateWeekPrev?'▼':'–'} 주간 이행률 {k.rateWeek}% <small>전주 {k.rateWeekPrev}%</small></span>}
-     {k.resolved>0&&<span className="ai-brief-delta up">✓ 조치 완료 {k.resolved}건</span>}
-     {k.overdue>0&&<span className={'ai-brief-delta '+(k.overdue>k.overduePrev?'down':'up')}>{k.overdue>k.overduePrev?'▲':k.overdue<k.overduePrev?'▼':'–'} 기한 초과 {k.overdue}건 <small>전주 {k.overduePrev}건</small></span>}
-    </dd></div>}
     <div><dt>근거</dt><dd className="ai-brief-meta">{digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 보고 {digest.reportTotal}건(판정 {digest.judged.reports-digest.judged.unjudged}건) · {out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} · 연락처 미전송</dd></div>
    </dl>
   </div>
