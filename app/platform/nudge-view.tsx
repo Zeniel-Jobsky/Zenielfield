@@ -2,7 +2,7 @@
 // 독려 안내 화면(지침 10-A): 도형 캐릭터 + 큰 숫자 칸(누르면 해당 목록) + 칩(누르면 그 범위) + 다음 대상 일정 잡기.
 // 한 번 재생 트윈(막대 600ms·정수 카운트업 600ms·등장 240ms). 반복 없음, 같은 값이면 재생 안 함, reduced-motion이면 최종 상태.
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {CalendarPlus,ChevronRight} from 'lucide-react';
+import {CalendarPlus,ChevronRight,CheckCircle2,CalendarClock,AlertTriangle,AlertCircle} from 'lucide-react';
 import type {Context} from './context';
 import {buildNudge,type Nudge,type NudgeStat} from './nudge';
 import {scopeUnits} from './decision';
@@ -17,30 +17,42 @@ function useTween(target:number,from=0,ms=600){
   raf=requestAnimationFrame(step);return()=>cancelAnimationFrame(raf)},[target,from,ms]);
  return v;
 }
-// 단순 도형 캐릭터: 딥그린 선·흰 채움. joy=웃는 눈, cheer=점 눈 + 응원 표시. 장식이므로 낭독하지 않는다.
-export function Mascot({mood}:{mood:'joy'|'cheer'}){
- return <svg className="zf-nudge-mascot" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-  <circle cx="16" cy="17" r="12" fill="#fff" stroke="#003c33" strokeWidth="2"/>
-  {mood==='joy'?<><path d="M10.5 15.5q1.5-2 3 0M18.5 15.5q1.5-2 3 0" fill="none" stroke="#003c33" strokeWidth="1.8" strokeLinecap="round"/><path d="M11 19.5q5 5 10 0" fill="#003c33" stroke="#003c33" strokeWidth="1.6" strokeLinejoin="round"/></>
-   :<><circle cx="12" cy="15.5" r="1.4" fill="#003c33"/><circle cx="20" cy="15.5" r="1.4" fill="#003c33"/><path d="M12.5 20.5q3.5 2.5 7 0" fill="none" stroke="#003c33" strokeWidth="1.8" strokeLinecap="round"/><path d="M27 6v5M24.5 8.5h5" stroke="#003c33" strokeWidth="1.8" strokeLinecap="round"/></>}
- </svg>;
+// 도형 캐릭터: 딥그린 선·흰 채움. 표정과 몸짓이 먼저 말한다(한 번 재생).
+// joy=웃는 눈·두 팔 올림·두 번 통통 + 반짝이 터짐, cheer=점 눈·한 손 흔들기, concern=걱정 눈썹·기울기 + 느낌표.
+export function Mascot({mood,size}:{mood:'joy'|'cheer'|'concern';size:number}){
+ const g='#003c33';
+ return <span className={'zf-mascot zf-mascot-'+mood} style={{width:size,height:size}} aria-hidden="true">
+  <svg viewBox="0 0 64 64" width={size} height={size} focusable="false">
+   {mood==='joy'?<><path className="zf-arm-l" d="M14 38 L5 22" stroke={g} strokeWidth="3.5" strokeLinecap="round"/><path className="zf-arm-r" d="M50 38 L59 22" stroke={g} strokeWidth="3.5" strokeLinecap="round"/></>
+    :mood==='cheer'?<><path d="M14 40 L7 48" stroke={g} strokeWidth="3.5" strokeLinecap="round"/><path className="zf-arm-wave" d="M50 38 L58 24" stroke={g} strokeWidth="3.5" strokeLinecap="round"/></>
+    :<><path d="M14 40 L8 48" stroke={g} strokeWidth="3.5" strokeLinecap="round"/><path d="M50 40 L56 48" stroke={g} strokeWidth="3.5" strokeLinecap="round"/></>}
+   <circle cx="32" cy="36" r="20" fill="#fff" stroke={g} strokeWidth="3.5"/>
+   {mood==='joy'?<><path d="M22 33q3-4 6 0M36 33q3-4 6 0" fill="none" stroke={g} strokeWidth="3" strokeLinecap="round"/><path d="M23 40q9 10 18 0z" fill={g}/></>
+    :mood==='cheer'?<><circle cx="25" cy="33" r="2.6" fill={g}/><circle cx="39" cy="33" r="2.6" fill={g}/><path d="M25 42q7 5 14 0" fill="none" stroke={g} strokeWidth="3" strokeLinecap="round"/></>
+    :<><path d="M21 27l7 2M43 27l-7 2" stroke={g} strokeWidth="2.6" strokeLinecap="round"/><circle cx="25" cy="34" r="2.4" fill={g}/><circle cx="39" cy="34" r="2.4" fill={g}/><path d="M26 45q6-4 12 0" fill="none" stroke={g} strokeWidth="3" strokeLinecap="round"/></>}
+  </svg>
+  {mood==='joy'&&<span className="zf-burst">{[0,1,2,3,4,5,6,7].map(i=><i key={i} style={{'--a':i*45+'deg'} as React.CSSProperties}/>)}</span>}
+  {mood==='concern'&&<span className="zf-mark">!</span>}
+ </span>;
 }
+const ICONS={done:CheckCircle2,plan:CalendarClock,risk:AlertTriangle,caution:AlertCircle};
 function Stat({s,onGo}:{s:NudgeStat;onGo:(s:NudgeStat)=>void}){
  const v=useTween(s.value,s.from??0),pct=s.max?Math.min(100,v/s.max*100):0;
  return <button type="button" className={'zf-nudge-stat'+(s.tone?' '+s.tone:'')} onClick={()=>onGo(s)} aria-label={`${s.label} ${s.value}${s.unit} — 목록 보기`}>
-  <span className="zf-nudge-stat-label">{s.label}<ChevronRight size={12}/></span>
-  <span className="zf-nudge-stat-value"><b>{Math.round(v)}</b><small>{s.unit}</small></span>
-  {s.max?<span className="zf-nudge-bar" aria-hidden="true"><i style={{width:pct+'%'}}/></span>:null}
+  <span className="zf-nudge-stat-label">{(()=>{const I=ICONS[s.icon];return <I size={16}/>})()}{s.label}<ChevronRight size={12}/></span>
+  <span className="zf-nudge-stat-value"><b>{Math.round(v)}</b><small>{s.unit}</small>{s.from!==undefined&&s.value>s.from&&<em className="zf-plus">+{s.value-s.from}</em>}</span>
+  {s.max?<span className="zf-nudge-bar" aria-hidden="true"><i style={{width:pct+'%'}}/>{s.from!==undefined&&<u style={{left:pct+'%'}}/>}</span>:null}
  </button>;
 }
 export function NudgeCard({n,c,variant='band',onLeave}:{n:Nudge;c:Context;variant?:'band'|'sheet';onLeave?:()=>void}){
  const leave=(f:()=>void)=>{onLeave?.();f()};
  const drill=(key:string)=>leave(()=>scopeUnits(c).drill(key));
- const schedule=()=>{const t=c.target(n.next!.id),sl=n.next!.slot;if(!t)return;leave(()=>c.open('visit',undefined,sl?{targetType:t.type,siteId:t.siteId,storeId:t.storeId,date:sl.dueDate<c.now?c.now:sl.windowStart>c.now?sl.windowStart:c.now,requirementId:sl.id,dueDate:sl.dueDate}:{targetType:t.type,siteId:t.siteId,storeId:t.storeId}))};
+ const schedule=()=>{// 인정 기간이 이미 지난 회차는 그 회차로 채울 수 없으므로 대상만 채워 연다
+ const t=c.target(n.next!.id),s0=n.next!.slot,sl=s0&&s0.windowEnd>=c.now?s0:null;if(!t)return;leave(()=>c.open('visit',undefined,sl?{targetType:t.type,siteId:t.siteId,storeId:t.storeId,date:sl.dueDate<c.now?c.now:sl.windowStart>c.now?sl.windowStart:c.now,requirementId:sl.id,dueDate:sl.dueDate}:{targetType:t.type,siteId:t.siteId,storeId:t.storeId}))};
  return <section className={'zf-nudge zf-nudge-'+variant} aria-label="독려 안내">
-  <Mascot mood={n.mood}/>
+  <Mascot mood={n.mood} size={variant==='sheet'?72:56}/>
   <div className="zf-nudge-body">
-   <p className="zf-nudge-title"><RichText r={n.title}/></p>
+   <p className={'zf-bubble zf-bubble-'+n.mood}><RichText r={n.title}/></p>
    {n.stats.length>0&&<div className="zf-nudge-stats">{n.stats.map(s=><Stat key={s.label} s={s} onGo={x=>leave(()=>c.go(x.go.page,x.go.kind))}/>)}</div>}
    {n.chips&&<div className="zf-nudge-chips"><span>{n.chips.title}</span>{n.chips.items.map(x=><button type="button" key={x.key} onClick={()=>drill(x.key)}>{x.label}<b>{x.value}</b></button>)}</div>}
    {n.help&&<p className="zf-nudge-help"><RichText r={n.help}/></p>}

@@ -9,21 +9,22 @@ import {rich,num,bad,type Rich} from './rich';
 
 export type NudgeRole='manager'|'partlead'|'lead'|'director';
 // tone: good=딥그린, bad=판정 위험(빨강), warn=판정 주의(앰버). max가 있으면 숫자 아래 진행 막대. go: 누르면 가는 목록.
-export type NudgeStat={label:string;value:number;unit:string;from?:number;max?:number;tone?:'good'|'bad'|'warn';go:{page:string;kind?:string}};
+export type NudgeStat={icon:'done'|'plan'|'risk'|'caution';label:string;value:number;unit:string;from?:number;max?:number;tone?:'good'|'bad'|'warn';go:{page:string;kind?:string}};
 export type NudgeChip={key:string;label:string;value:number};
-export type Nudge={role:NudgeRole;mood:'joy'|'cheer';title:Rich;stats:NudgeStat[];chips:{title:string;items:NudgeChip[]}|null;help:Rich|null;next:{name:string;id:string;why:Rich;slot:Occurrence|null}|null};
+export type Nudge={role:NudgeRole;mood:'joy'|'cheer'|'concern';title:Rich;stats:NudgeStat[];chips:{title:string;items:NudgeChip[]}|null;help:Rich|null;next:{name:string;id:string;why:Rich;slot:Occurrence|null}|null};
 export const nudgeRole=(role:string):NudgeRole=>role==='manager'?'manager':role==='partlead'?'partlead':role==='lead'?'lead':'director';
 
 // before: 저장 직전 필요 방문 완료 회차(저장 직후 안내에서 카운트업 시작값)
 export function buildNudge(c:Context,before?:number):Nudge{
  const role=nudgeRole(c.me.role),m=c.metrics,facts=targetFacts(c.scope.filter(t=>t.type===c.type),c.visits,c.actions,m.slots,c.now);
  const gap=m.delayed+m.unplanned;let risk=0,warn=0;for(const f of facts.values()){if(f.judgment?.level==='위험')risk++;else if(f.judgment?.level==='주의')warn++}
- const stats=([m.required?{label:'필요 방문 완료',value:m.completed,unit:`/ ${m.required}회차`,max:m.required,from:before,tone:'good',go:{page:'requirements',kind:'completed'}}:null,
-  gap?{label:'일정 잡을 회차',value:gap,unit:'회차',go:{page:'requirements',kind:m.unplanned?'unplanned':'delayed'}}:null,
-  risk?{label:'판정 위험',value:risk,unit:'곳',tone:'bad',go:{page:'results',kind:'level:위험'}}:null,
-  warn?{label:'판정 주의',value:warn,unit:'곳',tone:'warn',go:{page:'results',kind:'level:주의'}}:null].filter(Boolean)) as NudgeStat[];
- const title=before!==undefined?rich`저장했어요.`:gap?rich`날짜만 잡으면 되는 방문이 있어요.`:rich`필요 방문이 모두 완료 또는 일정 확정이에요.`;
- const mood=before!==undefined||!gap?'joy':'cheer';
+ const stats=([m.required?{icon:'done',label:'필요 방문 완료',value:m.completed,unit:`/ ${m.required}회차`,max:m.required,from:before,tone:'good',go:{page:'requirements',kind:'completed'}}:null,
+  gap?{icon:'plan',label:'일정 잡을 회차',value:gap,unit:'회차',go:{page:'requirements',kind:m.unplanned?'unplanned':'delayed'}}:null,
+  risk?{icon:'risk',label:'판정 위험',value:risk,unit:'곳',tone:'bad',go:{page:'results',kind:'level:위험'}}:null,
+  warn?{icon:'caution',label:'판정 주의',value:warn,unit:'곳',tone:'warn',go:{page:'results',kind:'level:주의'}}:null].filter(Boolean)) as NudgeStat[];
+// 표정: 저장 직후·남은 일 없음 = 기쁨, 판정 위험이 있으면 걱정, 일정 잡을 회차가 남으면 응원(사실·저장된 판정만으로 고른다)
+ const mood=before!==undefined||!gap&&!risk?'joy':risk?'concern':'cheer';
+ const title=before!==undefined?rich`저장 완료! 한 걸음 더 왔어요.`:risk?rich`지난 판정에서 위험으로 남은 곳이 있어요.`:gap?rich`날짜만 잡으면 되는 방문이 있어요.`:rich`필요 방문이 모두 완료 또는 일정 확정이에요!`;
  if(role==='manager'){
   const first=attentionOf(facts.values())[0],j=first?.judgment;
   const why=!first?rich``:j&&LEVEL_ORDER[j.level]?rich`판정 ${j.level==='위험'?bad(j.level):j.level}${j.assessment?' — '+j.assessment:''}`:first.delayed[0]?rich`기한 ${num(first.delayed[0].dueDate.slice(5).replace('-','.'))} 지남`:first.unplanned[0]?rich`${num(first.unplanned[0].dueDate.slice(5).replace('-','.'))}까지 · 일정 없음`:rich`기한 넘긴 조치 ${num(first.lateActions+'건')}`;
