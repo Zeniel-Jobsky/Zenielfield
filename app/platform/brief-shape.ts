@@ -25,7 +25,7 @@ const noTail=(r:Rich):Rich=>{if(!r.length)return r;const last=r[r.length-1],v=la
 const toRich=(x:unknown):Rich=>typeof x==='string'?(x?[{v:x}]:[]):Array.isArray(x)?clean(x as Rich):[];
 const join=(...parts:Rich[]):Rich=>parts.filter(p=>p.length).flatMap((p,i)=>i?[{v:' '},...p]:p);
 // 칸 안에 모델이 다시 쓴 번호(①②·1.·가.)는 뗀다: 번호는 구조가 붙인다
-const noMark=(r:Rich):Rich=>r.length?[{...r[0],v:r[0].v.replace(/^s*([①②③④]|(?[0-9가나])|[0-9].)s*/,'')},...r.slice(1)].filter(x=>x.v):r;
+const noMark=(r:Rich):Rich=>r.length?[{...r[0],v:r[0].v.replace(/^\s*([①②③④]|\(?[0-9가나]\)|[0-9]\.)\s*/,'')},...r.slice(1)].filter(x=>x.v):r;
 const opt=(o:any,mark:string):Rich=>{if(!o)return [];const d=noMark(noTail(toRich(o.do))),g=noTail(toRich(o.gain)),c=noTail(toRich(o.check));if(!d.length)return [];return join([{v:mark}],d,g.length?join([{v:'→'}],g):[],c.length?[{v:'(확인: '},...c,{v:')'}]:[])};
 // 모델 출력(새 구조) → 화면 표시 형식. 옛 구조(문장 하나)도 받는다.
 export function shapeBrief(x:any){
