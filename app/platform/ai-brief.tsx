@@ -9,6 +9,7 @@ import {weekRanges,weekTitle} from '../briefing/model';
 import {rich,join,num,bad,good,toRich,RichText,type Rich} from './rich';
 import {collapseRepeats} from '../lib/dedupe-text';
 import {isCurrentJudgment} from './judgment';
+import {LEVEL_ORDER} from './status';
 // AI 현황 브리핑: 비서가 결정권자에게 보고하듯 균형 있게 쓴다. "지금 상태 → 흐름 → 잘 되고 있는 것 → 챙길 곳 → 무슨 일이 벌어지나 → 선택지와 판단 → 다음에 볼 것".
 // 버튼 없이 자동이다. 화면 집계(다이제스트)의 지문이 같으면 저장본을 쓰고, 바뀌면 다시 만들고, 없으면 만든다.
 // 기간은 대시보드(조회 기간) 또는 주차별 화면(선택 주차·조회 기간 전체)처럼 비정형이라 DB에 저장하지 않고, 브라우저에 지문별로만 보관한다.
@@ -49,9 +50,8 @@ export function judgedSummary(visits:FieldVisit[],nameOf:(id:string)=>string=id=
  for(const v of visits){const j=v.judgment;if(!isCurrentJudgment(j)){unjudged++;continue}levels[j.level]=(levels[j.level]||0)+1;const id=targetOf(v),p=last.get(id);if(!p||(p.actualDate||'')<=(v.actualDate||''))last.set(id,v);
   for(const i of j.issues){const b=by.get(i.type)||{n:0,urgent:0,worse:0,ongoing:0,resolved:0,customer:0,t:new Set<string>()};b.n++;if(i.severity==='긴급')b.urgent++;if(i.flow==='악화')b.worse++;if(i.flow==='지속')b.ongoing++;if(i.flow==='해결')b.resolved++;if(i.customerRequest)b.customer++;b.t.add(id);by.set(i.type,b)}}
  const latest:Record<string,number>={};for(const v of last.values())latest[v.judgment!.level]=(latest[v.judgment!.level]||0)+1;
- // 지금 상태가 위험·주의인 대상(가장 최근 판정 기준). 순서는 저장된 판정 수준 → 최근 보고일.
- const order:Record<string,number>={위험:0,주의:1};
- const attention=[...last].filter(([,v])=>v.judgment!.level in order).sort((a,b)=>order[a[1].judgment!.level]-order[b[1].judgment!.level]||(b[1].actualDate||'').localeCompare(a[1].actualDate||'')).map(([id,v])=>({target:nameOf(id),level:v.judgment!.level,assessment:v.judgment!.assessment,date:v.actualDate||''}));
+ // 지금 상태가 위험·주의인 대상(가장 최근 판정 기준). 순서는 공통 현황(status.ts)과 같은 판정 수준 → 최근 보고일.
+ const attention=[...last].filter(([,v])=>LEVEL_ORDER[v.judgment!.level]).sort((a,b)=>LEVEL_ORDER[b[1].judgment!.level]-LEVEL_ORDER[a[1].judgment!.level]||(b[1].actualDate||'').localeCompare(a[1].actualDate||'')).map(([id,v])=>({target:nameOf(id),level:v.judgment!.level,assessment:v.judgment!.assessment,date:v.actualDate||''}));
  return {reports:visits.length,unjudged,levels,latest,attention,byType:[...by].map(([type,b])=>({type,n:b.n,urgent:b.urgent,worse:b.worse,ongoing:b.ongoing,resolved:b.resolved,customer:b.customer,targets:b.t.size})).sort((a,b)=>b.n-a.n)};
 }
 export function reportGroups(c:Context,targets:Context['scope'],start:string,end:string){

@@ -6,6 +6,7 @@ import {platformDemo} from '../app/platform/demo';
 import {targetsOf,visibleTargets} from '../app/platform/model';
 import {judgedSummary} from '../app/platform/ai-brief';
 import {isCurrentJudgment} from '../app/platform/judgment';
+import {targetFacts,attentionOf} from '../app/platform/status';
 let count=0;const eq=(a:unknown,b:unknown)=>{assert.deepEqual(a,b);count++};
 const target=(id:string,siteId:string,type:'site'|'store'='site')=>({id,siteId,siteName:'가상 '+siteId,name:type==='store'?'가상 매장 '+id:'가상 '+siteId,type});
 const visit=(id:string,targetId:string,siteId:string,date:string,status='completed',visitorId='m1'):BriefVisit=>({id,targetId,siteId,actualDate:date,actualTime:'10:00',plannedDate:date,status,visitorId,visitorName:visitorId==='m1'?'잡매니저 01':'잡매니저 02',purpose:'점검',detail:'원문 '+id,notes:''});
@@ -27,4 +28,11 @@ const legacy:any={users:[manager],sites:[{id:'a',name:'실제 가상 현장'}],v
 {const base={...platformDemo().visits[0],status:'completed' as const,actualDate:'2026-10-20'};const now:any={level:'주의',assessment:'인력 공백 지속',issues:[{type:'채용·인력충원',summary:'공백',severity:'긴급',flow:'지속',customerRequest:false}],by:'ai',model:'m',at:'',confirmedBy:null};
  const old:any={has:true,items:[{type:'채용·인력충원',summary:'공백',severity:'보통'}]};const s=judgedSummary([{...base,id:'n',judgment:now},{...base,id:'o',judgment:old}]);
  eq([s.reports,s.unjudged,s.levels,s.byType.map(b=>[b.type,b.n,b.urgent,b.ongoing])],[2,1,{주의:1},[['채용·인력충원',1,1,1]]]);eq(isCurrentJudgment(old),false);eq(isCurrentJudgment(now),true)}
+// 공통 현황(status.ts): 코치·현황표·브리핑이 같은 목록. 판정 위험이 먼저, 그다음 가장 이른 기한. 사실이 없고 판정이 정상이면 빠진다.
+{const T=(id:string)=>({id,type:'site' as const,siteId:id,storeId:null,name:id,siteName:id,team:'',part:'',division:'',domain:'',region:'',address:'',managerIds:['m'],rule:{period:'month' as const,count:1},status:'운영 중',startDate:'2026-01-01',lat:null,lng:null});
+ const J=(level:string)=>({level,assessment:'',issues:[],by:'ai',model:'',at:'',confirmedBy:null});
+ const V=(id:string,t:string,level:string):any=>({id,targetType:'site',siteId:t,storeId:null,visitorId:'m',status:'completed',actualDate:'2026-10-20',plannedDate:'2026-10-20',judgment:J(level)});
+ const slot=(t:string,due:string):any=>({id:'s'+t,targetId:t,state:'delayed',dueDate:due,windowStart:due,windowEnd:due,visitId:null,overdue:true});
+ const facts=targetFacts([T('a'),T('b'),T('c'),T('d')],[V('1','b','위험'),V('2','d','정상')],[],[slot('a','2026-10-10'),slot('c','2026-10-05')],'2026-10-27');
+ eq(attentionOf(facts.values()).map(f=>f.target.id),['b','c','a'])}
 console.log(`${count} briefing assertions passed: week boundaries, deduplication, independent targets, actual visitors, access scope and legacy data reuse and current-format judgment counts.`);
