@@ -8,6 +8,7 @@ import {judgedSummary} from '../app/platform/ai-brief';
 import {isCurrentJudgment} from '../app/platform/judgment';
 import {targetFacts,attentionOf} from '../app/platform/status';
 import {scheduleFacts,scheduleCandidates} from '../app/platform/schedule';
+import {shapeBrief} from '../app/platform/brief-shape';
 let count=0;const eq=(a:unknown,b:unknown)=>{assert.deepEqual(a,b);count++};
 const target=(id:string,siteId:string,type:'site'|'store'='site')=>({id,siteId,siteName:'가상 '+siteId,name:type==='store'?'가상 매장 '+id:'가상 '+siteId,type});
 const visit=(id:string,targetId:string,siteId:string,date:string,status='completed',visitorId='m1'):BriefVisit=>({id,targetId,siteId,actualDate:date,actualTime:'10:00',plannedDate:date,status,visitorId,visitorName:visitorId==='m1'?'잡매니저 01':'잡매니저 02',purpose:'점검',detail:'원문 '+id,notes:''});
@@ -46,4 +47,10 @@ const ownVisit=fixture.visits.find(v=>v.visitorId===manager.id)!;const moved=str
  eq(list.map(x=>[x.date,x.time,x.tags.join('/')]),[['2026-10-27','10:00','비어 있음'],['2026-10-28','10:00','비어 있음'],['2026-10-29','11:00','같은 지역 1건'],['2026-10-30','10:00','비어 있음'],['2026-10-31','10:00','비어 있음/마감 전 마지막 빈 날']])
  // 오늘 후보는 지금 시각 이후만: 14:20이면 15:00, 18시가 지나면 오늘 제외
  eq(scheduleCandidates(a,new Map([[a.id,a],[b.id,b]]),visits,'m','2026-10-27',f,5,'14:20')[0].time,'15:00');eq(scheduleCandidates(a,new Map([[a.id,a],[b.id,b]]),visits,'m','2026-10-27',f,5,'18:10')[0].date,'2026-10-28')}
+// 브리핑 출력 구조(brief-shape): 받는 사람 칸 없음·머리말 제거, 판단은 ①② 둘 다 있어야 남고 추천 꼬리는 떼어 낸다
+{const out=shapeBrief({headline:{situation:[{v:'A 현장 조치 2건 기한 지남.'}],action:[{v:'이번 주 완료일을 정해요.'}]},cheer:{praise:[{v:'실무자에게: 채용 일정을 세웠어요.'}],ask:[{v:'남은 조치를 닫아 주세요. 먼저 담당자를 확인하는 편이 좋겠습니다.'}]},
+ judgment:[{topic:'A 현장',a:{do:[{v:'완료일 재지정'}],gain:[{v:'지연 정리'}],check:[{v:'담당자'}]},b:{do:[{v:'② 현장 동행'}],gain:[{v:'원인 확인'}],check:[{v:'다른 일정'}]}},{topic:'반쪽',a:{do:[{v:'x'}],gain:[],check:[]},b:{do:[],gain:[],check:[]}}],themes:[],focus:[],strengths:[],watch:[],flow:[],story:[],confidence:'medium'});
+ const txt=(r:any[])=>r.map(x=>x.v).join('');
+ eq(txt(out.headline),'A 현장 조치 2건 기한 지남. 이번 주 완료일을 정해요.');eq(txt(out.cheer).startsWith('채용 일정을 세웠어요.'),true);eq(txt(out.cheer).includes('좋겠습니다'),false);
+ eq(out.judgment.length,1);eq(txt(out.judgment[0]),'A 현장: ① 완료일 재지정 → 지연 정리 (확인: 담당자) ② 현장 동행 → 원인 확인 (확인: 다른 일정)')}
 console.log(`${count} briefing assertions passed: week boundaries, deduplication, independent targets, actual visitors, access scope and legacy data reuse and current-format judgment counts.`);
