@@ -39,3 +39,23 @@
 .brief-visit-open .brief-visit-head{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
 .brief-visit-open>svg{margin-top:4px;color:#65726b}
 @media(max-width:760px){.brief-visit-open{grid-template-columns:minmax(0,1fr) 16px;gap:4px 12px}.brief-visit-open time{grid-column:1/-1}}
+/* 주차별 날짜 타임라인: 날짜64px · 축16px · 본문(지침 9.1 토큰). 반복 가로선 없이 날짜 사이 간격으로 구분 */
+.tl-days{display:grid;gap:24px;margin:0;padding:0;list-style:none}
+.tl-day{position:relative;display:grid;grid-template-columns:var(--zf-detail-timeline-date-width,64px) var(--zf-detail-timeline-track-width,16px) minmax(0,1fr);column-gap:16px}
+.tl-date{display:grid;align-content:start;gap:2px;font-size:13px;color:var(--zf-text-secondary);font-variant-numeric:tabular-nums}
+.tl-date b{font-size:15px;color:var(--zf-text)}
+.tl-track{position:relative}
+.tl-track::before{content:'';position:absolute;left:50%;top:0;bottom:-24px;width:1px;background:var(--zf-border);transform:translateX(-50%)}
+.tl-track::after{content:'';position:absolute;left:50%;top:6px;width:9px;height:9px;border-radius:50%;background:#003c33;transform:translateX(-50%)}
+.tl-day:last-child .tl-track::before{bottom:auto;height:12px}
+.tl-list>ol{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.tl-visit>button{display:grid;grid-template-columns:48px minmax(0,1fr) 16px;gap:12px;align-items:start;width:100%;min-height:44px;padding:6px 8px;border:0;border-radius:6px;background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.tl-visit>button:hover{background:var(--zf-surface-hover,#f5f7f6)}
+.tl-visit>button:focus-visible{outline:2px solid #003c33;outline-offset:-2px}
+.tl-time{font-size:13px;color:var(--zf-text-secondary);font-variant-numeric:tabular-nums;padding-top:1px}
+.tl-body{display:grid;gap:2px;min-width:0}
+.tl-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;font-size:14px}
+.tl-meta{font-size:12px;color:var(--zf-text-secondary)}
+.tl-line{font-size:13px;line-height:1.6;color:var(--zf-text-body);overflow-wrap:anywhere}
+.tl-visit svg{margin-top:4px;color:var(--zf-text-secondary)}
+@media(max-width:760px){.tl-day{grid-template-columns:44px 12px minmax(0,1fr);column-gap:8px}.tl-visit>button{grid-template-columns:40px minmax(0,1fr);padding:6px 4px}.tl-visit svg{display:none}}

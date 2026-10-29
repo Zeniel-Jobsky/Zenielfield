@@ -1,8 +1,9 @@
 'use client';
+import {downloadCsv} from '../lib/csv';
 import {staleStores,overdueAt} from './status';
 import {daysBetween as days} from '../lib/date';
 import {useEffect,useMemo,useState,type ReactNode} from 'react';
-import {TrendingUp,TrendingDown,Minus,AlertTriangle,Clock3,Store as StoreIcon,BarChart3} from 'lucide-react';
+import {TrendingUp,TrendingDown,Minus,AlertTriangle,Clock3,Store as StoreIcon,BarChart3,Download} from 'lucide-react';
 import {nice,short} from '../ui';
 import {type Context} from './context';
 import {ChartPanel} from './charts';
@@ -44,7 +45,9 @@ export function ScopeRisk({c}:{c:Context}){
  const maxGap=Math.max(1,...rows.map(r=>r.m.delayed+r.m.unplanned)),maxIssue=Math.max(1,...rows.map(r=>r.overdue));
  // 열마다 의미색: 이행률 딥그린 · 지연·미등록 중립 · 기한 초과 이슈 지연색. 막대는 옅은 트랙 위에 그리고 값은 막대 오른쪽에 둔다.
  const bar=(w:number,color:string,label:ReactNode)=><span className="risk-bar"><span className="risk-track"><i style={{width:w+'%',background:color}}/></span><b>{label}</b></span>;
- return <ChartPanel title={`${s.title}별 방문 공백`} sub="조직 순서 · 할 일 사실만(순위 없음) · 행을 누르면 하위로 이동"><div className="risk-table"><div className="risk-head"><span>{s.title}</span><span>이행률 (완료/필요)</span><span title="지연·계획 미등록 회차">지연·미등록</span><span title="기한 넘긴 후속 조치">기한 넘긴 조치</span><span title="60일 넘게 방문하지 않은 매장">60일+</span></div>
+ // 보고용 내려받기(통계·보고서 메뉴를 이 표로 합침): 화면과 같은 행·같은 계산
+ const csv=()=>downloadCsv([[s.title,'필요 회차','완료','이행률(%)','지연','계획 미등록','기한 넘긴 조치','60일+ 미방문 매장'],...rows.map(r=>[r.label,r.m.required,r.m.completed,r.m.rate??'',r.m.delayed,r.m.unplanned,r.overdue,r.stale])],`${s.title}별_방문_공백_${c.start}_${c.end}.csv`);
+ return <ChartPanel title={`${s.title}별 방문 공백`} sub="조직 순서 · 행을 누르면 하위로 이동" legend={<div className="panel-tools"><button type="button" className="btn small" onClick={csv}><Download size={14}/>CSV</button></div>}><div className="risk-table"><div className="risk-head"><span>{s.title}</span><span>이행률 (완료/필요)</span><span title="지연·계획 미등록 회차">지연·미등록</span><span title="기한 넘긴 후속 조치">기한 넘긴 조치</span><span title="60일 넘게 방문하지 않은 매장">60일+</span></div>
   {rows.slice(0,8).map(r=>{const rate=r.m.rate??0;return <button key={r.key} className="risk-row" onClick={()=>s.drill(r.key)}><span className="risk-name">{r.label}</span>{bar(rate,tone.ok,<>{r.m.rate??'—'}% <small>({r.m.completed}/{r.m.required})</small></>)}{bar(pct(r.m.delayed+r.m.unplanned,maxGap),tone.gray,r.m.delayed+r.m.unplanned)}{bar(pct(r.overdue,maxIssue),tone.late,<span className={r.overdue?'red-text':''}>{r.overdue}</span>)}<span className="risk-num">{r.stale}</span></button>})}
   {rows.length>8&&<p className="chart-empty">처음 8개만 표시 · 나머지 {rows.length-8}개는 통계·보고서 표에서 확인</p>}{!rows.length&&<p className="chart-empty">비교할 단위가 없습니다.</p>}</div></ChartPanel>
 
