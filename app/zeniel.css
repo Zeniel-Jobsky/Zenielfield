@@ -146,15 +146,15 @@ input::placeholder,textarea::placeholder {color:var(--zf-text-muted)}
 }
 @media (prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 /* Cohere reference: neutral editorial surfaces,restrained brand accents. */
-.organization b,.organization-icon,.header-context>b,.user-menu b,.capacity-card p,.capacity-card b,.metric-top,.metric-definition b,.panel-tools,.hierarchy-name,.nested-store-heading,.operating-user b,.mobile-record-title>div>b,.mobile-record-title>b,.drawer-head h2,.form-section{
+.header-context>b,.user-menu b,.capacity-card p,.capacity-card b,.metric-top,.metric-definition b,.panel-tools,.hierarchy-name,.nested-store-heading,.operating-user b,.mobile-record-title>div>b,.mobile-record-title>b,.drawer-head h2,.form-section{
  color:var(--zf-text);
 }
-.mode-tag,.help-box>span,.help-box button,.help-box p,.organization div>span,.capacity-card div>span,.metric-definition,.metric-definition>svg,.panel-heading p,.table-footnote,.mobile-record small,.mobile-record p{
+.mode-tag,.help-box>span,.help-box button,.help-box p,.capacity-card div>span,.metric-definition,.metric-definition>svg,.panel-heading p,.table-footnote,.mobile-record small,.mobile-record p{
  color:var(--zf-text-muted);
 }
 
 .mode-tag,.operating .mode-tag {background:var(--zf-surface-muted);border-color:var(--zf-border);color:var(--zf-text-secondary)}
-.capacity-icon,.metric-icon,.site-icon,.org-symbol,.organization-icon {color:var(--zf-text-secondary);background:var(--zf-surface-muted);box-shadow:none}
+.capacity-icon,.metric-icon,.site-icon,.org-symbol {color:var(--zf-text-secondary);background:var(--zf-surface-muted);box-shadow:none}
 .metric.blue .metric-value {color:var(--zf-text)}
 .metric.green .metric-value {color:var(--zf-success)}
 .metric.red .metric-value {color:var(--zf-danger)}
@@ -211,7 +211,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 }
 .btn:not(.primary) {border-color:var(--zf-control-border);color:var(--zf-text-secondary)}
 .btn:not(.primary):hover {border-color:var(--zf-control-border-hover);color:var(--zf-text)}
-:is(.topbar,.sidebar,.organization,.help-box,.filterbar,.record-type-bar,.tabs,.target-tabs,.panel-heading,.form-footer,.drawer-head,.mobile-record,.platform-filter-chip,.pagination,table th,table td){
+:is(.topbar,.sidebar,.help-box,.filterbar,.record-type-bar,.tabs,.target-tabs,.panel-heading,.form-footer,.drawer-head,.mobile-record,.platform-filter-chip,.pagination,table th,table td){
   border-color:var(--zf-border);
 }
 :is(.field,.filterbar,.record-type-bar,.persona-bar,.brief-search-tools,.brief-preview-controls,.pagination) select,.field input,.field textarea,.global-search{
