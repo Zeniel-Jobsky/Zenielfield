@@ -44,6 +44,13 @@
   --zf-dashboard-column-gap: 24px;
   --zf-dashboard-content-gap: 16px;
   --zf-dashboard-heading-inset: 20px;
+  --zf-detail-heading-size: 20px;
+  --zf-detail-week-size: 18px;
+  --zf-detail-subheading-size: 16px;
+  --zf-detail-value-size: 28px;
+  --zf-detail-group-gap: 32px;
+  --zf-detail-content-gap: 16px;
+  --zf-detail-heading-inset: 24px;
   --sidebar: 240px;
   --shadow: none;
 }
@@ -116,6 +123,7 @@ input::placeholder,textarea::placeholder {color:var(--zf-text-muted)}
 .skip-link:focus {top:8px}
 @media (max-width:1023px) {.visit-metric-grid {grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:760px) {
+ :root {--zf-detail-heading-size:18px;--zf-detail-week-size:17px;--zf-detail-value-size:26px;--zf-detail-group-gap:24px;--zf-detail-heading-inset:20px}
  .workspace-content {padding:20px 16px 0}
  .topbar {padding-inline:16px}
  .brand {margin-bottom:20px}
