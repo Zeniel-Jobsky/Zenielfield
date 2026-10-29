@@ -590,3 +590,6 @@
 .suggest-list li.on svg{color:#003c33}
 /* 브리핑 펼치기 미리보기: 안에 든 내용 수를 버튼에 적는다 */
 .brief-disclosure-peek{font-size:12px;font-weight:400;color:var(--zf-text-secondary)}
+/* 운영 띠: 새로고침·로그아웃은 '운영' 표시 바로 옆(왼쪽 정렬) */
+.platform-live-banner{justify-content:flex-start}
+@media(min-width:761px){.platform-live-banner .live-mode-actions{display:inline-flex;align-items:center;gap:12px}}
