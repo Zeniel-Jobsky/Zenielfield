@@ -3,7 +3,7 @@
 // 필요 회차 기간 안의 날은 딥그린 테두리. 방문 목록 전체는 방문 일정 화면의 달력에서 본다(여기서 반복하지 않는다).
 import {useMemo} from 'react';
 import type {Context} from './context';
-import {dayShift,mmdd,between,daysBetween} from '../lib/date';
+import {dayShift,mmdd,between,daysBetween,kstToday,kstTime} from '../lib/date';
 import type {Target} from './model';
 import {scheduleFacts,scheduleCandidates} from './schedule';
 
@@ -21,7 +21,7 @@ export function MySchedule({c,visitor,window,picked,onPick}:{c:Context;visitor:s
 export function ScheduleHints({c,target,visitor,picked,onPick}:{c:Context;target:Target;visitor:string;picked:string;onPick:(date:string,time:string,requirementId:string|null)=>void}){
  const facts=useMemo(()=>scheduleFacts(target,c.visits,c.now),[target,c.visits,c.now]);
  const index=useMemo(()=>new Map(c.targets.map(t=>[t.id,t])),[c.targets]);
- const list=useMemo(()=>scheduleCandidates(target,index,c.visits,visitor,c.now,facts),[target,index,c.visits,visitor,c.now,facts]);
+ const list=useMemo(()=>scheduleCandidates(target,index,c.visits,visitor,c.now,facts,5,c.now===kstToday()?kstTime():'00:00'),[target,index,c.visits,visitor,c.now,facts]);
  const w=facts.window,left=w?daysBetween(c.now,w.end):null;
  return <div className="schedule-hints wide">
   <p className="schedule-facts">{w?<span>필요 방문 <b>{mmdd(w.end)}까지</b>{left!==null&&left>=0?` (${left}일 남음)`:''}</span>:<span>정해진 필요 회차 없음 · 앞으로 2주에서 찾았어요</span>}

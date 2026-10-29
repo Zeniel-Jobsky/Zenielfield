@@ -23,3 +23,5 @@ export const mmdd=(day:string)=>day.slice(5).replace('-','.');
 export const validDay=(s:string)=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!isNaN(noon(s))&&new Date(noon(s)).toISOString().slice(0,10)===s;
 // 그 달 [1일, 말일]
 export const monthRange=(day:string):[string,string]=>{const a=day.slice(0,8)+'01',x=new Date(noon(a));x.setUTCMonth(x.getUTCMonth()+1);x.setUTCDate(0);return [a,x.toISOString().slice(0,10)]};
+// 한국 시간 기준 지금 'HH:MM'
+export const kstTime=()=>new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());

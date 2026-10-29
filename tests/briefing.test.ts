@@ -44,5 +44,7 @@ const legacy:any={users:[manager],sites:[{id:'a',name:'실제 가상 현장'}],v
  const visits=[V('1','a',{status:'completed',actualDate:'2026-09-01',actualTime:'10:00'}),V('2','a',{status:'completed',actualDate:'2026-08-01',actualTime:'10:00'}),V('3','b',{status:'planned',plannedDate:'2026-10-29',time:'10:00'})];
  const f=scheduleFacts(a,visits,'2026-10-27');eq([f.window?.end,f.lastVisit,f.usualTime],['2026-10-31','2026-09-01',{time:'10:00',n:2}]);
  const list=scheduleCandidates(a,new Map([[a.id,a],[b.id,b]]),visits,'m','2026-10-27',f);
- eq(list.map(x=>[x.date,x.time,x.tags.join('/')]),[['2026-10-27','10:00','비어 있음'],['2026-10-28','10:00','비어 있음'],['2026-10-29','11:00','같은 지역 1건'],['2026-10-30','10:00','비어 있음'],['2026-10-31','10:00','비어 있음/마감 전 마지막 빈 날']])}
+ eq(list.map(x=>[x.date,x.time,x.tags.join('/')]),[['2026-10-27','10:00','비어 있음'],['2026-10-28','10:00','비어 있음'],['2026-10-29','11:00','같은 지역 1건'],['2026-10-30','10:00','비어 있음'],['2026-10-31','10:00','비어 있음/마감 전 마지막 빈 날']])
+ // 오늘 후보는 지금 시각 이후만: 14:20이면 15:00, 18시가 지나면 오늘 제외
+ eq(scheduleCandidates(a,new Map([[a.id,a],[b.id,b]]),visits,'m','2026-10-27',f,5,'14:20')[0].time,'15:00');eq(scheduleCandidates(a,new Map([[a.id,a],[b.id,b]]),visits,'m','2026-10-27',f,5,'18:10')[0].date,'2026-10-28')}
 console.log(`${count} briefing assertions passed: week boundaries, deduplication, independent targets, actual visitors, access scope and legacy data reuse and current-format judgment counts.`);

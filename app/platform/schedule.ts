@@ -22,9 +22,11 @@ export function scheduleFacts(t:Target,visits:FieldVisit[],now:string):ScheduleF
 
 // 후보 날짜: 필요 회차 기간 안(없으면 오늘부터 2주)의 날 중 사실 꼬리표가 붙는 날만, 날짜순 최대 limit개.
 // 꼬리표: 비어 있음(내 일정 없음) · 같은 지역 n건(그날 같은 지역 대상 일정) · 마감 전 마지막 빈 날. 시간은 주로 간 시간, 그날 겹치면 마지막 일정 1시간 뒤.
-export function scheduleCandidates(t:Target,targets:Map<string,Target>,visits:FieldVisit[],visitor:string,now:string,facts:ScheduleFacts,limit=5):ScheduleCandidate[]{
+// nowTime: 지금 시각(HH:MM). 오늘 후보는 그 이후 시간만 채우고, 18시가 지나면 오늘은 후보에서 뺀다.
+export function scheduleCandidates(t:Target,targets:Map<string,Target>,visits:FieldVisit[],visitor:string,now:string,facts:ScheduleFacts,limit=5,nowTime='00:00'):ScheduleCandidate[]{
+ const nextHour=Number(nowTime.slice(0,2))+1,todayOpen=nextHour<=18;
  const from=facts.window?.start||now,to=facts.window?.end||dayShift(now,13);
- const len=Math.max(0,daysBetween(from,to)),days=Array.from({length:len+1},(_,i)=>dayShift(from,i)).filter(d=>!facts.planned.includes(d));
+ const len=Math.max(0,daysBetween(from,to)),days=Array.from({length:len+1},(_,i)=>dayShift(from,i)).filter(d=>!facts.planned.includes(d)&&(d!==now||todayOpen));
  const plans=mine(visits,visitor,from,to),byDay=new Map<string,FieldVisit[]>();for(const v of plans){const a=byDay.get(v.plannedDate!)||[];a.push(v);byDay.set(v.plannedDate!,a)}
  const free=days.filter(d=>!byDay.has(d)),lastFree=facts.window?free[free.length-1]:undefined;
  const out:ScheduleCandidate[]=[];
@@ -33,6 +35,7 @@ export function scheduleCandidates(t:Target,targets:Map<string,Target>,visits:Fi
   if(!tags.length)continue;
   const taken=vs.map(v=>v.time).filter(Boolean).sort();let time=facts.usualTime?.time||'';
   if(time&&taken.includes(time)){const h=Number(taken[taken.length-1].slice(0,2))+1;time=h<=18?String(h).padStart(2,'0')+':00':''}
+  if(d===now&&(!time||time<=nowTime))time=String(Math.max(nextHour,Number((time||'00').slice(0,2)))).padStart(2,'0')+':00';
   out.push({date:d,time,tags});}
  // 마감 전 마지막 빈 날은 앞쪽 후보에 밀려 잘리지 않게 남긴다
  const head=out.slice(0,limit);if(lastFree&&!head.some(x=>x.date===lastFree)){const l=out.find(x=>x.date===lastFree);if(l)head[head.length-1]=l}
