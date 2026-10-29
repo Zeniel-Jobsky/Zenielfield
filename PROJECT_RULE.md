@@ -1,16 +1,6 @@
----
-architecture_docs: ""
----
-
 # Project Rules
 
 ## Architecture Boundaries
-
-> [!NOTE] **To AI Agents**
-> If `architecture_docs` is empty and no rules are defined below,
-> this project has no architecture rules yet.
-> → Ask user to define them, or analyze codebase and propose a draft.
-> → Do NOT make assumptions about project architecture.
 
 ### Module Ownership
 <!-- Define which modules exist and who owns them -->
@@ -47,7 +37,6 @@ architecture_docs: ""
 ## DC-* Guards (project-specific)
 
 DC-DESIGN: 모든 후속 조치 상태 탭에 공통 정렬 선택 적용. 담당자는 현재 탭 건수 내림차순. 초과 일수는 미완료 오늘 기준·완료 완료일 기준, 기한 내 또는 완료일 미상은 0일. 공통 날짜 함수·정렬 함수를 재사용하고 권한·필터 보존.
-
 
 운영 현황·방문 기록 필터는 태블릿·데스크톱에서 조직 필터 다음 줄에 최신 기간 선택·초기화를 왼쪽 정렬한다. 기간 팝오버·모바일 접이식 범위 선택은 유지한다(DC-DESIGN).
 
@@ -92,3 +81,22 @@ DC-DESIGN: 모든 후속 조치 상태 탭에 공통 정렬 선택 적용. 담�
 | Accounts (prod) | `node --env-file=.env scripts/provision-accounts.mjs [--dry-run]` 권한별 zf.*@zeniel.co.kr 11개, 비밀번호 → `work/accounts.local.csv`(git 제외). 사용자 승인 후 |
 | Migrate (prod) | `node --env-file=.env scripts/migrate.mjs [--dry-run] [--mark-applied a.sql,b.sql]` · CI: Actions `supabase-deploy` |
 | Lint | `npx deuk-agent-flow lint:md` |
+
+## Rules (id-based)
+
+deuk-agent-flow 티켓이 참조하는 룰 id다. 상세 지시문은 위 DC-* 표가 정본이며 여기는 포인터만 둔다.
+
+- [DR-01] @start 승인된 티켓 범위 안에서 작업한다.
+- [DR-02] @modify 생성 파일은 직접 고치지 말고 소스를 고쳐 빌드로 갱신한다(DC-CODEGEN 표).
+- [DR-03] @create,modify 같은 개념·식별자·분기 기준을 두 곳에 쓰지 않는다(DC-COMMON).
+- [DR-04] @start,create,modify 손대기 전에 설계 정본을 확인하고 어긋나면 멈춰 정본을 먼저 고친다.
+- [DC-HALT] @modify 인프라 에러는 멈추고 사용자에게 보고한다.
+- [DC-INFRA] @modify 인프라 코드는 티켓 스코프에 명시된 경우만 고친다.
+- [DC-JUDGMENT] @modify 코드는 사실만 계산하고 판정은 저장된 AI 종합 판정에서만(위 표).
+- [DC-FEEDBACK] @create,modify 화면·브리핑 문구는 docs/briefing-research.md 근거를 따른다(위 표).
+- [DC-COMMON] @create,modify 공통 로직은 정해진 한 모듈만 쓴다(위 표).
+- [DC-DEPLOY] @modify main 푸시가 CI 배포를 실행하며 운영 DB·Edge·계정은 승인 후(위 표).
+- [DC-DESIGN] @create,modify UI 변경은 지침·AGENTS.md·이 파일을 같은 변경에서 갱신하고 390/820/1280 확인(위 표).
+- [DC-AI] @modify AI 전송은 집계·본문만, 개인정보 금지(위 표).
+- [DC-AUTH] @modify 로그인 우선·계정 공용·비밀번호 기록 금지(위 표).
+- [DC-DOCS] @create,modify 계획·이슈·완료 내역은 docs/에(위 표).
