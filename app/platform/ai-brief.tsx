@@ -8,7 +8,7 @@ import {PanelTitle} from '../ui';
 import {type FieldVisit,aggregate,dayShift,lastTargetVisit,targetOf,targetStatus,typeName,weeklyTrend} from './model';
 import {scopeUnits} from './decision';
 import {weekRanges,weekTitle} from '../briefing/model';
-import {rich,join,num,bad,good,toRich,RichText,type Rich} from './rich';
+import {rich,join,num,bad,good,toRich,RichText,site,store,type Rich} from './rich';
 import {collapseRepeats} from '../lib/dedupe-text';
 import {isCurrentJudgment,maskText,levelLabel} from './judgment';
 import {callAssist,aiDownReason} from './ai-assist';
@@ -125,13 +125,14 @@ export function ruleBrief(d:BriefDigest):AiBriefResult{
  const say=(x:string)=>x==='필요 방문 기한 지남'?'필요 방문 기한이 지났어요.':x==='필요 방문 일정 없음'?'필요 방문 일정이 아직 없어요.':x.startsWith('일정 잡힘 ')?x.slice(6)+'에 방문 일정이 잡혀 있어요.':x;
  const what=(p:BriefDigest['problems'][number])=>[p.판단?p.판단.replace(/[.。]?$/,'.'):'',...p.방문상태.map(say),p.기한넘긴조치[0]?`기한 넘긴 조치(${p.기한넘긴조치[0]})가 남아 있어요.`:''].filter(Boolean).join(' ');
  // 상황 판단(숫자 없이): 문제 지도 첫 대상과 그 문제, 이번 주 할 일
+ const nm=(p:BriefDigest['problems'][number])=>p.구분==='매장'?store(p.대상):site(p.대상);
  const p0=d.problems[0],place=(p:BriefDigest['problems'][number])=>[p.부서,p.매니저&&p.매니저+' 담당',p.대상].filter(Boolean).join(' › ');
  const hasDelay=d.problems.some(p=>p.방문상태.some(x=>x.includes('기한 지남')||x.includes('일정 없음'))),hasLate=d.problems.some(p=>p.기한넘긴조치.length),hasJudged=d.problems.some(p=>p.판정==='위험'||p.판정==='주의');
  const steps:Rich[]=[hasDelay&&rich`기한이 지났거나 일정이 빈 곳부터 방문 날짜를 하나씩 잡아 볼까요? 이번 주 안에 등록해 두면 한결 가벼워져요.`,hasLate&&rich`기한 넘긴 조치는 담당자와 새 완료일만 정해 기록해도 충분해요. 하나씩 정리해 봐요.`,hasJudged&&rich`바로 확인·조치 필요 대상은 다음 방문 때 지난 이슈가 풀렸는지 살펴 주세요. 그 한 줄이 큰 도움이 돼요.`].filter(Boolean) as Rich[];
  const headline=p0?rich`${place(p0)}부터 볼게요. ${what(p0)||'확인할 일이 있어요.'} ${steps[0]||''}`:rich`지금 바로 챙길 곳은 보이지 않아요. 이번 주 일정이 비어 있는 곳만 같이 확인해 봐요.`;
  // 지시 가이드: 관리자 화면은 담당자 개인별(첫 문제 대상), 잡매니저는 본인 할 일
  const byOwner=new Map<string,BriefDigest['problems'][number]>();for(const p of d.problems){const k=p.매니저||'담당 미지정';if(!byOwner.has(k))byOwner.set(k,p)}
- const directive=d.role==='manager'?d.problems.slice(0,3).map(p=>({to:'본인',say:rich`${p.대상}${eun(p.대상)} ${what(p)} 이번 주 안에 챙겨 볼까요?`})):[...byOwner].slice(0,3).map(([who,p])=>({to:who,say:rich`${p.대상}${eun(p.대상)} ${what(p)} 이번 주 안에 완료일을 정해 주세요.`}));
+ const directive=d.role==='manager'?d.problems.slice(0,3).map(p=>({to:'본인',say:rich`${nm(p)}${eun(p.대상)} ${what(p)} 이번 주 안에 챙겨 볼까요?`})):[...byOwner].slice(0,3).map(([who,p])=>({to:who,say:rich`${nm(p)}${eun(p.대상)} ${what(p)} 이번 주 안에 완료일을 정해 주세요.`}));
  const flow=join([rated.length>=2&&first&&last&&rich`최근 ${rated.length}주 동안 이행률이 ${num(first.rate+'%')}에서 ${num(last.rate+'%')}로 움직였어요.`,
   dir!==null&&rich`지난주보다 이행률은 ${num((dir>0?'+':'')+dir+'%p')}, 기한 넘긴 조치는 ${num((odir>0?'+':'')+odir+'건')} 달라졌어요.`,
   k.required>0&&rich`필요 방문 ${num(k.required+'회차')} 중 ${num(k.gapShare+'%')}가 계획 없음·지연이에요.`]);
@@ -142,13 +143,13 @@ export function ruleBrief(d:BriefDigest):AiBriefResult{
  // 먼저 챙길 곳: 저장된 판정이 위험·주의인 대상만(코드가 순위를 매기지 않는다)
  // 직급별 초점: 잡매니저는 판정 위험·주의 대상, 그 위는 하위 단위(파트장=잡매니저, 팀장=파트, 사업부장=팀) 중 일정 잡을 회차가 있는 곳(많은 순)
  const focus=d.role==='manager'?j.attention.slice(0,4).map(a=>({name:a.target,reason:rich`${wk(a.date)} ${levelLabel(a.level)}${a.assessment?' — '+a.assessment:''}`})):
-  [...d.units].filter(u=>u.gap>0||u.overdue>0).sort((a,b)=>b.gap-a.gap||b.overdue-a.overdue).slice(0,3).map(u=>{const p=d.problems.find(x=>x.부서===u.label||x.파트===u.label||x.매니저.split('·').includes(u.label));return {name:u.label,reason:p?rich`${p.대상}${p.매니저&&!p.매니저.split('·').includes(u.label)?`(${p.매니저} 담당)`:''}${eun(p.대상)} ${what(p)}`:rich`일정을 잡을 필요 방문이나 기한 넘긴 조치가 있어요.`}});
+  [...d.units].filter(u=>u.gap>0||u.overdue>0).sort((a,b)=>b.gap-a.gap||b.overdue-a.overdue).slice(0,3).map(u=>{const p=d.problems.find(x=>x.부서===u.label||x.파트===u.label||x.매니저.split('·').includes(u.label));return {name:u.label,reason:p?rich`${nm(p)}${p.매니저&&!p.매니저.split('·').includes(u.label)?`(${p.매니저} 담당)`:''}${eun(p.대상)} ${what(p)}`:rich`일정을 잡을 필요 방문이나 기한 넘긴 조치가 있어요.`}});
  // 무슨 일이 벌어지고 있나(규칙): 문제 지도에서 앞의 3곳을 '팀 › 담당 › 대상: 무엇' 문장으로(숫자 나열 없이 사실만)
- const story=join(d.problems.slice(0,3).map(p=>rich`${[p.부서,p.매니저&&p.매니저+' 담당',p.대상].filter(Boolean).join(' › ')}에서는 ${what(p)}`));
+ const story=join(d.problems.slice(0,3).map(p=>rich`${[p.부서,p.매니저&&p.매니저+' 담당'].filter(Boolean).map(x=>x+' › ').join('')}${nm(p)}에서는 ${what(p)}`));
  const themes:BriefTheme[]=j.byType.slice(0,3).map(t=>({title:t.type,status:'',evidence:[],summary:rich`판정된 이슈가 ${num(t.targets+'곳')}에서 ${num(t.n+'건')} 나왔어요${t.worse>0&&rich`. 악화 ${num(t.worse+'건')}`}${t.ongoing>0&&rich`, 지속 ${num(t.ongoing+'건')}`}${t.resolved>0&&rich`, 해결 ${num(t.resolved+'건')}`}${(t.worse>0||t.ongoing>0||t.resolved>0)?'이에요':''}.`,targets:[]}));
  const watch=[rich`비어 있던 필요 방문이 일정으로 바뀌었는지 봐 주세요.`,hasLate&&rich`기한 넘긴 조치가 완료나 새 완료일로 정리됐는지 봐 주세요.`,hasJudged&&rich`바로 확인·조치 필요 대상의 다음 방문 판정을 함께 봐요.`].filter(Boolean) as Rich[];
  // 전할 말(규칙): 받는 사람 머리말·숫자 없이 할 일 하나
- const cheer=p0?rich`${p0.대상}처럼 일정이 비거나 기한이 지난 곳부터 이번 주 안에 정리해 주세요.`:rich`지금처럼 방문 일정을 미리 잡아 두면 돼요.`;
+ const cheer=p0?rich`${nm(p0)}처럼 일정이 비거나 기한이 지난 곳부터 이번 주 안에 정리해 주세요.`:rich`지금처럼 방문 일정을 미리 잡아 두면 돼요.`;
  return {directive,steps,headline,cheer,themes,flow,strengths,focus,story,judgment:[],watch,confidence:'rule'};
 }
 // 문제 지도: 어느 부서·어느 매니저·어느 매장에 무슨 문제가 있는지. 대상 선택·순서는 공통 현황(저장된 판정 → 이른 기한)과 같다.
@@ -202,16 +203,13 @@ function BriefPresentation({out,digest,stale,busy=false,jump,targetNames,who}:{w
   <section className="ai-brief-focus"><h3>먼저 챙길 곳과 할 일</h3><ol>{merged.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}><WhoName w={who(a.name)}/><ChevronRight size={14}/></button><span>{a.reason.length>0&&<RichText r={a.reason}/>}{a.say.length>0&&<em className="ai-brief-do">{a.to&&a.to!==a.name&&<b>{who(a.to).label} · </b>}<RichText r={a.say}/></em>}</span></li>)}{!r.focus.length&&<li><span>{digest.role==='manager'?'바로 확인·조치 필요로 남은 곳이 없어요(저장된 판정 기준).':'일정 잡을 회차나 기한 넘긴 조치가 있는 곳이 없어요.'}</span></li>}</ol></section>
   {(r.steps?.length||0)>0&&<section className="ai-brief-guide"><h3>이행 가이드</h3><ol className="ai-brief-steps">{r.steps!.map((x,i)=><li key={i}><b>{i+1}</b><span><RichText r={x}/></span></li>)}</ol></section>}
   {r.cheer.length>0&&<section className="ai-brief-cheer"><h3>{CHEER_TO[digest.role]}</h3><p><RichText r={r.cheer}/></p></section>}
-  <button type="button" className="brief-disclosure" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>{detailsOpen?'접기':'더 보기'}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
   <div id={id+'-details'} className="ai-brief-details" hidden={!detailsOpen}>
    <dl className="ai-brief-dl">
     {r.watch.length>0&&<div><dt>다음 주 볼 것</dt><dd><ul>{r.watch.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></dd></div>}
     <div><dt>근거</dt><dd className="ai-brief-meta">{digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 보고 {digest.reportTotal}건(판정 {digest.judged.reports-digest.judged.unjudged}건) · {out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} · 연락처 미전송</dd></div>
    </dl>
   </div>
-  <button type="button" className="brief-fold" aria-expanded="true" onClick={()=>setFolded(true)}>브리핑 접기<ChevronUp size={14}/></button>
-  {ai&&<p className="ai-brief-disclaimer">제니에리(AI)가 작성했어요. 실수가 있을 수 있어요.</p>}
-  {(out.model.includes('규칙')||r.confidence==='low')&&<p className="ai-brief-source">{[out.model.includes('규칙')&&out.model,r.confidence==='low'&&'확신 낮음'].filter(Boolean).join(' · ')}</p>}
+  <div className="ai-brief-foot"><small>{[ai&&'제니에리(AI)가 작성했어요. 실수가 있을 수 있어요.',out.model.includes('규칙')&&out.model,r.confidence==='low'&&'확신 낮음'].filter(Boolean).join(' · ')}</small><span><button type="button" className="textbtn" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>{detailsOpen?'접기':'더 보기'}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button><button type="button" className="textbtn" aria-expanded="true" onClick={()=>setFolded(true)}>브리핑 접기<ChevronUp size={14}/></button></span></div>
  </div>;
 }
 

@@ -1,9 +1,13 @@
 // AI 브리핑 출력 구조(모델에 주는 스키마)와 정리 함수. 서버(응답 직후)와 화면(저장본 읽기)이 같은 함수를 쓴다.
 // 구멍 막기: 받는 사람·직급은 입력(tellTo·role)으로만 주고 출력에는 그 칸이 없다. 전할 말은 {잘한 점, 부탁},
 // 판단은 {주제, 안①, 안②}(각 {할 일, 좋아지는 점, 확인할 것})로 고정해 추천 칸이 없다. 칸 안에 남은 머리말·추천 꼬리는 걸러 낸다.
-export type Seg={v:string;tone?:'num'|'bad'|'good'};
+// 조각 의미: num·bad·good = 강조, site·store·region = 현장·매장·영업권 이름(종류별 색). 한 곳에서만 정한다(DC-AI-TEXT).
+export const TONES=['num','bad','good','site','store','region'] as const;
+export type Tone=typeof TONES[number];
+export const isTone=(t:unknown):t is Tone=>TONES.includes(t as Tone);
+export type Seg={v:string;tone?:Tone};
 export type Rich=Seg[];
-const segSchema={type:'object',additionalProperties:false,required:['v','tone'],properties:{v:{type:'string'},tone:{type:'string',enum:['','num','bad','good']}}};
+const segSchema={type:'object',additionalProperties:false,required:['v','tone'],properties:{v:{type:'string'},tone:{type:'string',enum:['',...TONES]}}};
 const rich={type:'array',items:segSchema};
 // 출력이 길수록 느리다(초당 약 110토큰): 화면에서 겹치는 칸(흐름·강점·근거 문장)은 받지 않고, 판단은 1개·안마다 {할 일, 좋아지는 점}만
 const option={type:'object',additionalProperties:false,required:['do','gain'],properties:{do:rich,gain:rich}};
@@ -21,7 +25,7 @@ export const briefOutputSchema={type:'object',additionalProperties:false,require
 // 칸 안의 구멍: 받는 사람 머리말, 추천 꼬리('먼저 ~하는 편이 좋겠습니다' 등), 앞뒤 공백
 const ADDRESSEE=/^\s*(실무자|잡매니저|파트장|팀장|사업부장|담당자)(님)?(들)?(께|에게|께서는)?\s*[:：,]\s*/;
 const RECOMMEND=/\s*(먼저|우선)?[^.。!?]*(편이|것이)\s*(좋겠|낫겠|바람직)[^.。!?]*[.。]?\s*$/;
-const clean=(r:Rich,first=true):Rich=>{const out=r.filter(s=>s&&typeof s.v==='string').map(s=>({v:s.v,...(s.tone==='num'||s.tone==='bad'||s.tone==='good'?{tone:s.tone}:{})}));
+const clean=(r:Rich,first=true):Rich=>{const out=r.filter(s=>s&&typeof s.v==='string').map(s=>({v:s.v,...(isTone(s.tone)?{tone:s.tone}:{})}));
  if(first&&out.length)out[0]={...out[0],v:out[0].v.replace(ADDRESSEE,'')};return out.filter(s=>s.v.length)};
 // 이유 앞의 경로('부서 › 매니저 › ' 또는 '부서 › 매니저 › 대상: ')는 화면이 이름을 보이므로 뗀다
 const stripPath=(r:Rich):Rich=>{if(!r.length)return r;const v=r[0].v.replace(/^(?:[^›:]{1,40}›\s*){1,3}/,'');return v===r[0].v?r:[{...r[0],v},...r.slice(1)].filter(s=>s.v.trim())};

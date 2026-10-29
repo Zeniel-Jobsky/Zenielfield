@@ -25,7 +25,7 @@ export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;e
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!ready)return;onSave('visit',{entry:'manual',...values,targetType:type,siteId:site,storeId:type==='store'?store:null,visitorId:owner,status:'planned',actualDate:null,actualTime:'',detail:'',notes:'',result:'',cancelReason:'',requirementId:modal.requirementId||pickedReq||null})}
  return <form className="record-form ai-form" onSubmit={submit}><div className="form-scroll"><div className="notice slim ai-notice"><Sparkles size={16}/><span><b>AI 입력</b> 언제·어디·무엇을 말하면 제니에리가 일정을 채워 드려요.</span><button type="button" className="textbtn" onClick={()=>c.open('visit',undefined,{...modal,ai:false,manual:true})}><PenLine size={14}/>직접 입력</button></div>
  <fieldset className="form-grid" disabled={!c.editable||c.saving}>
- <Permissions/>
+ <Permissions need={['microphone']}/>
  <div className="form-section first wide"><span>00</span>방문할 날 고르기</div>
  {target?<ScheduleHints c={c} target={target} visitor={owner||c.me.id} picked={pickedDay} onPick={(d,tm,rid)=>{setPickedDay(d);setPickedReq(rid);setValues(v=>({...v,plannedDate:d,time:tm||v.time}))}}/>
   :<MySchedule c={c} visitor={owner||c.me.id} window={modal.requirementId&&modal.dueDate?{start:c.now,end:modal.dueDate}:null} picked={pickedDay} onPick={d=>{setPickedDay(d);setSeed(`${Number(d.slice(5,7))}월 ${Number(d.slice(8))}일`)}}/>}

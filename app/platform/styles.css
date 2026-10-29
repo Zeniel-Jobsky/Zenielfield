@@ -97,20 +97,6 @@
 .capacity-grid{margin-bottom:12px}
 
 /* permission card */
-.permission-card{border:1px solid #eef2f6;border-radius:10px;background:#eef2f6;padding:12px 14px}
-.permission-card header{display:flex;align-items:center;gap:8px;color:#36443e;font-size:13px}
-.permission-card header .btn{margin-left:auto}
-.permission-card ul{list-style:none;margin:10px 0 8px;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.permission-card li{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:white;border:1px solid #f1f6f3;font-size:12px;color:#65726b}
-.permission-card li span{display:flex;flex-direction:column;min-width:0}
-.permission-card li b{color:#36443e}
-.permission-card li small{font-size:11px;color:#65726b}
-.permission-card li em{margin-left:auto;font-style:normal;font-size:11px;font-weight:700;white-space:nowrap}
-.permission-card li.granted em{color:#003c33}
-.permission-card li.denied{border-color:#fff0ed}
-.permission-card li.denied em{color:#b42318}
-.permission-card p{margin:0;font-size:11px;color:#65726b}
-.permission-ok{display:flex;align-items:center;gap:6px;font-size:11px;color:#003c33}
 .geo-near summary{cursor:pointer;font-size:12px;color:#65726b;padding:4px 0}
 .geo-near[open]{display:flex;flex-direction:column;gap:5px;width:100%}
 .geo-status.muted{color:#65726b}
@@ -294,12 +280,6 @@
  .form-section{margin:12px 0 6px;font-size:13px}
  .form-section.first{margin-top:6px}
  .ai-notice{padding:8px 10px;font-size:11px;margin-bottom:8px}
- .permission-card{padding:10px 12px}
- .permission-card ul{grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0 6px}
- .permission-card li{flex-direction:column;align-items:flex-start;gap:2px;padding:6px 8px;font-size:11px}
- .permission-card li small{display:none}
- .permission-card li em{margin-left:0}
- .permission-card p{font-size:11px}
  .ai-composer textarea{font-size:15px}
  .form-footer{padding:10px 14px;gap:8px}
  .form-footer .btn{flex:1;justify-content:center}
@@ -351,7 +331,7 @@
  .decision-kpi b{font-size:30px}
  .decision-kpi-top,.decision-kpi-note,.kpi-delta,.chart-panel .panel-heading p,.risk-table,.hbar,.vbar small,.heatmap,.ai-stats button,.mobile-record p,.mobile-record dl,.visit-mobile-info,.metric-top span:first-child,.metric>small,.permission-card li,.permission-card p,.ai-notice,.platform-demo-banner{font-size:12px}
  .metric-value{font-size:30px}
- .metric-value small,.permission-card li small{font-size:11px}
+ .metric-value small{font-size:11px}
 }
 /* SVG charts scale with width: cap width so 12px axis text stays ~12px on screen */
 .trend{display:block;width:100%;max-width:560px;margin:0 auto}
@@ -799,3 +779,22 @@
 .su-gap{color:#8a4b00;font-weight:600}
 @media(max-width:760px){.su-row{grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr))}.su-row>:nth-child(4),.su-row>:nth-child(6){display:none}}
 .sidebar .collapse-btn>span{display:none}
+/* 기기 권한 안내: 제니에리 한 줄 + 권한별 (다시) 요청, 닫기. 흐름을 막지 않는 얇은 띠 */
+.zf-permission{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:8px 12px;border-radius:8px;background:var(--zf-info-soft)}
+.zf-permission p{flex:1 1 240px;margin:0;font-size:13px;line-height:1.5;color:var(--zf-text-body)}
+.zf-permission p b{color:#003c33}.zf-permission p small{display:block;font-size:12px;color:var(--zf-text-secondary)}
+.zf-permission-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.zf-permission-actions .btn{min-height:44px}
+/* 브리핑 맨 아래 한 줄: 왼쪽 작성 고지·출처, 오른쪽 더 보기·접기 */
+.ai-brief-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;padding-top:8px;border-top:1px solid var(--zf-border)}
+.ai-brief-foot small{font-size:12px;color:var(--zf-text-secondary)}
+.ai-brief-foot>span{display:flex;gap:4px;margin-left:auto}
+.ai-brief-foot .textbtn{min-height:44px}
+/* 모든 패널 본문은 제목과 같은 왼쪽 기준선(패널 제목 좌우 여백 0과 맞춤) */
+.app-shell .chart-body{padding-left:0;padding-right:0}
+/* 브리핑 속 이름 종류: 현장 딥그린 · 매장 예정 블루 · 영업권 중립 밑줄. 색만으로 구분하지 않게 굵기·밑줄도 */
+.zf-ent{font-weight:600}
+.zf-ent-site{color:var(--zf-domain-hr)}
+.zf-ent-store{color:var(--zf-domain-se)}
+.zf-ent-region{color:var(--zf-text);text-decoration:underline dotted 1px;text-underline-offset:3px}
+@media(max-width:760px){.app-shell .ai-brief:not(.ai-brief-weekly) .panel-heading,.app-shell .ai-brief .panel-heading{display:grid;grid-template-columns:1fr;gap:8px}.ai-brief .panel-heading h2{font-size:16px}}

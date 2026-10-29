@@ -10,6 +10,7 @@ import {daysBetween,monthRange} from '../lib/date';
 import {BrandIdentity} from '../brand';
 import {useMemo,useState,useEffect,useRef,useTransition} from 'react';
 import './styles.css';
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 import '../zeniel.css';
 import {LayoutDashboard,Building2,CalendarDays,History,ListChecks,BarChart3,Settings,Plus,Search,Menu,X,ChevronDown,ChevronRight,ArrowRight,ArrowUpRight,PanelLeftClose,PanelLeftOpen,Bell,Home,MoreHorizontal,Download,Printer,Clock3,Store as StoreIcon,Info,CheckCircle2,ShieldCheck,RefreshCw,UsersRound,NotebookPen,Sparkles} from 'lucide-react';
 import {Drawer,Avatar,Badge,PanelTitle,Empty,nice,Metric} from '../ui';
@@ -90,7 +91,7 @@ export default function PlatformApp({initialData,liveMode=false,onSaveLive,onDem
  // 메뉴·필터 전환은 transition으로: 클릭은 바로 반응하고, 무거운 화면을 그리는 동안 상단 진행 막대를 보인다.
  const [pending,startTransition]=useTransition();
  function setPeriod(a:string,b:string){if(!a||!b||a>b)return;if(daysBetween(a,b)>366){setToast('한 번에 최대 1년 범위로 조회해 주세요.');return}setCustomPeriod(false);startTransition(()=>{setStart(a);setEnd(b)})}
- function go(p:string,k=''){setBriefSite('');window.scrollTo(0,0);setMobile(false);startTransition(()=>{setPage(p);setKind(k)});setMobile(false);setNotice(false);setDetail(null);if(k==='today'){setPeriod(now,now);setView('list')}else setView(k?'list':'calendar')}
+ function go(p:string,k=''){setBriefSite('');window.scrollTo(0,0);setMobile(false);startTransition(()=>{setPage(p);setKind(k)});setMobile(false);setNotice(false);setDetail(null);if(k==='today'){setPeriod(now,now);setView('list')}else setView(k?'list':'auto')}
  function resetFilters(){setDivision('');chooseTeam('');setRegion('');setStatus('');setSearch('');setKind('');setRecordType('all');setPeriod(...monthRange(now) as [string,string])}
  function open(entity:string,record?:any,extra:any={}){setError('');setDetail(null);setNotice(false);setMobile(false);setModal({entity,record,...extra})}
  // 역할별 필터 단계: 본인 범위로 고정되는 단계(팀장=사업부·팀, 파트장=+파트, 잡매니저=+잡매니저)와 선택지가 하나뿐인 단계는 숨긴다.

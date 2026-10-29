@@ -67,7 +67,7 @@
   --sidebar: 240px;
   --shadow: none;
 }
-body {font-family:Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;letter-spacing:0;line-height:1.6}
+body {font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;letter-spacing:0;line-height:1.6}
 html {scroll-behavior:auto}
 :where(button,a,input,select,textarea,summary):focus-visible {outline:2px solid var(--zf-focus);outline-offset:2px}
 input:focus,select:focus,textarea:focus {outline:2px solid var(--zf-focus);outline-offset:2px;border-color:var(--zf-focus)!important}
