@@ -1,5 +1,9 @@
 # 기능 현황 및 개선 과제
 
+## 2026-10-29 Cloudflare 배포 자격증명 원격 관리
+
+Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN` Secret에서 관리한다. 로컬 `.env`·키체인에 의존하지 않는다. 기존 Secret 존재·환경 중복 없음·원격 배포 성공을 확인했다. `ci:deploy`·`deploy:cloudflare`는 로컬 Secret 등록·빌드·직접 배포 대신 원격 main 워크플로만 요청하도록 변경했다. CI는 배포 토큰 누락을 먼저 확인한다. 앱 실행용 비밀값은 기존 Cloudflare Worker Secrets를 유지한다. 상세: [원격 배포 자격증명](cloudflare-credentials-plan.md).
+
 ## 2026-10-28 메뉴·레이블 검토안
 
 로컬 화면·현재 코드·첨부 개선안을 대조한 엑셀 제안서를 작성했다. 사이트 구조 43행, 레이블 376행, 검토 기준 33행이며 검토 상태와 최종 명칭 입력란을 제공한다. 구현은 미적용이다. 상세 계획은 [메뉴·레이블 개선 검토안](navigation-label-plan.md), 산출물은 `outputs/label-audit-20261028/ZeniField_사이트구조_레이블_개선안.xlsx`다. 60일 초과·기록 없음과 사업부·업무 영역의 의미 차이를 별도 보완했다. 엑셀 구조·렌더 검증을 수행했고 앱 코드·DB·배포는 변경하지 않았다.

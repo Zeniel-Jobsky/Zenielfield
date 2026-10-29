@@ -112,6 +112,15 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: d50191f54ac6859d1ecedddf26094351
       ZENIFIELD_PUBLIC_URL: https://zenifield.jobsky.workers.dev
     steps:
+      - name: GitHub 배포 자격증명 확인
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo '::error::GitHub Settings → Secrets and variables → Actions에 CLOUDFLARE_API_TOKEN을 등록하세요.'
+            exit 1
+          fi
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4

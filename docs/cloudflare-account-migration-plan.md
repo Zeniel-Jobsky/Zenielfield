@@ -20,7 +20,7 @@
 | 토큰 | 계정 소유 zenifield-github-actions, 단일 Worker의 Individual Workers Editor |
 | 데이터 | 기존 Supabase 유지, 회사 Worker에는 D1/R2 바인딩 없음 |
 
-사용자가 이번 계정 전환을 요청했으며 이메일 인증과 배포 토큰 발급을 직접 완료했다. 기존 Gateway/OpenAI 비밀값의 새 Worker 등록도 승인했다. 이 문서는 `DC-INFRA`의 별도 인프라 작업 기록이다. 토큰 원문은 로컬 `.env`와 암호화된 서비스 secret에만 보관한다.
+사용자가 이번 계정 전환을 요청했으며 이메일 인증과 배포 토큰 발급을 직접 완료했다. 기존 Gateway/OpenAI 비밀값의 새 Worker 등록도 승인했다. 이 문서는 `DC-INFRA`의 별도 인프라 작업 기록이다. 배포 토큰은 GitHub Actions 암호화 Secret에 보관하며 로컬 `.env`·키체인에 의존하지 않는다. [원격 자격증명 관리](cloudflare-credentials-plan.md).
 
 ## 준비·변경
 
