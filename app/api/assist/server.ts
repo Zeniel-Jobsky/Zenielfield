@@ -1,3 +1,4 @@
+import {kstToday} from '../../lib/date';
 import {purposes} from '../../lib/model';
 import {judgePrompt,judgeSchema,ISSUE_TYPES} from '../../platform/judgment';
 import {collapseRepeats} from '../../lib/dedupe-text';
@@ -37,7 +38,7 @@ export async function assistVisit(req:Request,bindings:Record<string,unknown>,fe
  const raw=typeof body.text==='string'?body.text.slice(0,body.mode==='brief'||body.mode==='judge'?60000:3000):'',memo=body.mode==='brief'||body.mode==='judge'?raw:collapseRepeats(raw),images=(Array.isArray(body.images)?body.images:[]).filter((i):i is string=>typeof i==='string'&&/^data:image\/(jpeg|png|webp);base64,/.test(i)).slice(0,3);
  if(!memo.trim()&&!images.length)return json({error:'메모나 사진을 입력하세요.'},400);
  const mode=String(body.mode||'result'),plan=mode==='plan',tidy=mode==='tidy',brief=mode==='brief',judge=mode==='judge';
- const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date());
+ const today=kstToday();
  try{const result=await fetcher('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},signal:AbortSignal.timeout(brief||judge?60000:30000),body:JSON.stringify({model,
   messages:[{role:'system',content:judge?judgePrompt():brief?briefPrompt(today):plan?planPrompt(today):tidy?tidyPrompt(today):prompt(today)},{role:'user',content:[{type:'text',text:memo||'(메모 없음, 사진만 첨부)'},...images.map(url=>({type:'image_url',image_url:{url,detail:'low'}}))]}],
   response_format:{type:'json_schema',json_schema:judge?{name:'visit_judgment',strict:true,schema:judgeSchema}:brief?{name:'ops_brief',strict:true,schema:briefSchema}:plan?{name:'visit_plan',strict:true,schema:planSchema}:{name:'visit_draft',strict:true,schema}}})});

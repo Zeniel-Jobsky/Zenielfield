@@ -1,3 +1,4 @@
+import {daysBetween as days,between as within} from '../lib/date';
 import {shift} from '../lib/model';
 import {weekRanges} from '../briefing/model';
 export type DxTarget={id:string;type:'site'|'store';siteId:string;name:string;siteName:string};
@@ -9,8 +10,6 @@ export type DxSite={siteId:string;siteName:string;own:number;stores:number;issue
 export type DxFlag='urgent'|'overdue'|'repeat'|'unassigned';
 export type DxSummary={totalOpen:number;urgent:number|null;overdue:number;repeat:number;unassigned:number};
 export type Diagnosis={state:'no-target'|'no-data'|'clear'|'issues';issues:DxIssueRow[];open:DxIssueRow[];summary:DxSummary;sites:DxSite[]};
-const days=(a:string,b:string)=>Math.round((Date.parse(b+'T12:00:00Z')-Date.parse(a+'T12:00:00Z'))/86400000);
-const within=(d:string|null,a:string,b:string)=>!!d&&d>=a&&d<=b;
 const unique=<T extends {id:string}>(rows:T[])=>[...new Map(rows.map(r=>[r.id,r])).values()];
 // 같은 입력은 한 번만 정규화한다(진단·주차 진단·상세가 같은 입력으로 여러 번 부른다).
 const normalized=new WeakMap<DxInput,{targets:DxInput['targets'];issues:DxInput['issues'];visits:DxInput['visits']}>();

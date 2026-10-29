@@ -1,4 +1,10 @@
 import assert from 'node:assert/strict';
+import {dayShift,daysBetween,weekRange,monthRange,mmdd,validDay,between} from '../app/lib/date.ts';
+// 날짜 공통 함수(lib/date.ts): 월말·윤년·주 경계·null
+assert.equal(dayShift('2024-02-28',1),'2024-02-29');assert.equal(dayShift('2026-03-01',-1),'2026-02-28');
+assert.equal(daysBetween('2026-10-01','2026-10-29'),28);assert.equal(daysBetween(null,'2026-10-29'),null);
+assert.deepEqual(weekRange('2026-11-01'),['2026-10-26','2026-11-01']);assert.deepEqual(monthRange('2024-02-10'),['2024-02-01','2024-02-29']);
+assert.equal(mmdd('2026-10-04'),'10.04');assert.equal(validDay('2026-02-30'),false);assert.equal(between(null,'a','b'),false);
 import {nextDue,visitState,canSite,siteState,week} from '../app/lib/model.ts';
 assert.equal(nextDue('2026-01-31','monthly'),'2026-02-28');
 assert.equal(nextDue('2024-01-31','monthly'),'2024-02-29');

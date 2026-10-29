@@ -1,4 +1,5 @@
 'use client';
+import {kstDay} from '../lib/date';
 import {useEffect,useRef,useState} from 'react';
 import type {AiField} from './model';
 import {collapseRepeats} from '../lib/dedupe-text';
@@ -12,7 +13,6 @@ const speechApi=()=>typeof window==='undefined'?null:((window as unknown as Reco
 export type AiPlanDraft={target:string;plannedDate:string;time:string;purpose:string;precheck:string;confidence:string};
 export type AiMeta={text:string;imageCount:number;model:string;generatedAt:string};
 // AI 없이 만드는 초안(데모·AI 연결 안 됨): 입력 원문을 그대로 옮기기만 한다. 목적·결과·조치·분류를 낱말로 추정하지 않는다(DC-JUDGMENT). 사람이 고른다.
-const kstDay=(n=0)=>{const d=new Date(Date.now()+9*3600e3);d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
 export function demoDraft(text:string,mode:'result'|'plan'):AiDraft|AiPlanDraft{const t=text.trim();
  if(mode==='plan'){const day=t.includes('모레')?kstDay(2):t.includes('오늘')?kstDay(0):kstDay(1),m=t.match(/(오전|오후)?s*(d{1,2})시/),h=m?(Number(m[2])%12)+(m[1]==='오후'||(!m[1]&&Number(m[2])<8)?12:0):null;
   return {target:t.split(/s/).find(w=>/점|현장|매장/.test(w))||'',plannedDate:day,time:h===null?'':String(h).padStart(2,'0')+':00',purpose:'',precheck:'',confidence:'low'}}

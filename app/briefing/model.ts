@@ -1,3 +1,4 @@
+import {between as within} from '../lib/date';
 import {shift,week} from '../lib/model';
 import {isCurrentJudgment} from '../platform/judgment';
 import {LEVEL_ORDER} from '../platform/status';
@@ -6,7 +7,6 @@ export type BriefVisit={id:string;targetId:string;siteId:string;visitorId:string
 export type BriefIssue={id:string;targetId:string;siteId:string;visitId:string|null;ownerId:string;ownerName:string;content:string;type:string;state:string;dueDate:string;createdDate:string|null;completedDate:string|null};
 export type BriefData={targets:BriefTarget[];visits:BriefVisit[];issues:BriefIssue[]};
 export type BriefCard={siteId:string;siteName:string;visits:BriefVisit[];issues:BriefIssue[];newIssues:BriefIssue[];doneIssues:BriefIssue[];late:number;delayed:number;priority:number;lastDate:string|null;excerpts:string[]};
-const within=(d:string|null,a:string,b:string)=>!!d&&d>=a&&d<=b;
 export function kstDay(value:string){if(/^\d{4}-\d{2}-\d{2}$/.test(value))return value;const date=new Date(value);return Number.isNaN(+date)?null:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(date)}
 export function weekTitle(start:string){const monthStart=start.slice(0,8)+'01',offset=(new Date(monthStart+'T12:00:00Z').getUTCDay()+6)%7;return `${Number(start.slice(5,7))}월 ${Math.ceil((Number(start.slice(8))+offset)/7)}주차`}
 export function weekRanges(start:string,end:string){if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||start>end)return [];const rows:{start:string;end:string;from:string;to:string}[]=[];for(let a=week(start)[0],i=0;a<=end&&i<54;a=shift(a,7),i++){const b=shift(a,6);rows.push({start:a,end:b,from:a<start?start:a,to:b>end?end:b})}return rows.reverse()}

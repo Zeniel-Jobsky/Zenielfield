@@ -1,6 +1,7 @@
 import type {User} from '../lib/model';
 import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,validGeo,distanceM,managesDomain,domainName,aiFields,type AiField,aiConfidences,MANUAL_REASONS} from './model';
 import {cleanJudgment} from './judgment';
+import {validDay} from '../lib/date';
 const str=(v:unknown,max:number)=>typeof v==='string'?v.slice(0,max):'';
 export function aiEntryOf(raw:any):AiEntry{if(!raw||typeof raw!=='object')throw Error('AI 입력 기록이 없습니다. AI 간편 등록에서 다시 작성해 주세요.');const text=str(raw.input?.text,3000),imageCount=Number(raw.input?.imageCount);if(!Number.isInteger(imageCount)||imageCount<0||imageCount>3)throw Error('AI 입력 사진 수를 확인해 주세요.');if(!text.trim()&&!imageCount)throw Error('AI 입력 원문(메모 또는 사진)이 없습니다.');
  const draft=Object.fromEntries(aiFields.map(k=>[k,str(raw.draft?.[k],3500)])) as AiEntry['draft'],edited=Array.isArray(raw.edited)?[...new Set(raw.edited)].filter((k):k is AiEntry['edited'][number]=>aiFields.includes(k as any)):[];
@@ -8,7 +9,6 @@ export function aiEntryOf(raw:any):AiEntry{if(!raw||typeof raw!=='object')throw 
 export function newId(){return typeof crypto.randomUUID==='function'?crypto.randomUUID():'demo-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)}
 export function updateDemo(data:PlatformData,entity:string,values:any,record:any,actor:User,now:string){
  const next=structuredClone(data),id=record?.id||newId();const manager=actor.role==='manager';if(actor.role==='director')throw Error('사업부장은 조회 전용입니다.');
- const validateDate=(s:string)=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!isNaN(Date.parse(s+'T12:00:00Z'))&&new Date(s+'T12:00:00Z').toISOString().slice(0,10)===s;
  const targets=targetsOf(data);const allowed=visibleTargets(targets,actor);const can=(targetId:string)=>allowed.some(t=>t.id===targetId);
  let item:any={...values,id,version:(record?.version||0)+1};let array:any[];
  if(entity==='domain'){
@@ -47,8 +47,8 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
   if(entity==='visit'){
    if(!['planned','completed','cancelled'].includes(item.status)||!item.purpose)throw Error('방문 목적과 진행 상태를 확인해 주세요.');
    if(record?.status==='completed'&&item.status!=='completed'||record?.status==='cancelled'&&item.status!=='cancelled')throw Error('완료·취소 기록의 상태는 되돌릴 수 없습니다. 새 방문을 등록해 주세요.');
-   if(item.plannedDate&&!validateDate(item.plannedDate))throw Error('유효한 예정일을 입력해 주세요.');if(item.status==='planned'&&!item.plannedDate)throw Error('방문 예정일을 입력해 주세요.');
-   if(item.status==='completed'&&(!validateDate(item.actualDate)||item.actualDate>now||!item.detail?.trim()))throw Error('오늘까지의 실제 방문일과 주요 활동 내용을 입력해 주세요.');
+   if(item.plannedDate&&!validDay(item.plannedDate))throw Error('유효한 예정일을 입력해 주세요.');if(item.status==='planned'&&!item.plannedDate)throw Error('방문 예정일을 입력해 주세요.');
+   if(item.status==='completed'&&(!validDay(item.actualDate)||item.actualDate>now||!item.detail?.trim()))throw Error('오늘까지의 실제 방문일과 주요 활동 내용을 입력해 주세요.');
    if(item.status==='cancelled'&&!item.cancelReason?.trim())throw Error('취소 사유를 입력해 주세요.');
    if(item.requirementId){
     if(!item.requirementId.startsWith('req:'+target.id+':'))throw Error('필요 회차와 방문 대상이 일치하지 않습니다.');
@@ -74,7 +74,7 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
    if(item.status!=='completed'){item.actualDate=null;item.actualTime='';item.detail='';item.notes='';item.result=''}
    array=next.visits;
   }else{
-   if(!item.content?.trim()||!validateDate(item.dueDate)||!['조치 예정','처리 중','보류','완료'].includes(item.state))throw Error('조치 내용, 유효한 기한 및 상태를 입력해 주세요.');
+   if(!item.content?.trim()||!validDay(item.dueDate)||!['조치 예정','처리 중','보류','완료'].includes(item.state))throw Error('조치 내용, 유효한 기한 및 상태를 입력해 주세요.');
    if(item.visitId&&!data.visits.some(v=>v.id===item.visitId&&targetOf(v)===target.id))throw Error('관련 방문기록과 대상이 일치하지 않습니다.');
    item.completedDate=item.state==='완료'?(record?.completedDate||now):null;item.createdDate=record?.createdDate||now;array=next.actions;
   }

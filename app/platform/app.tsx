@@ -1,4 +1,5 @@
 'use client';
+import {daysBetween} from '../lib/date';
 import {BrandIdentity} from '../brand';
 import {useMemo,useState,useEffect,useRef,useTransition} from 'react';
 import './styles.css';
@@ -85,7 +86,7 @@ export default function PlatformApp({initialData,liveMode=false,onSaveLive,onDem
  function chooseType(t:TargetType){setTypeState(t);setKind('');if(t==='site')setStoreState('')}
  // 메뉴·필터 전환은 transition으로: 클릭은 바로 반응하고, 무거운 화면을 그리는 동안 상단 진행 막대를 보인다.
  const [pending,startTransition]=useTransition();
- function setPeriod(a:string,b:string){if(!a||!b||a>b)return;if((Date.parse(b)-Date.parse(a))/86400000>366){setToast('한 번에 최대 1년 범위로 조회해 주세요.');return}setCustomPeriod(false);startTransition(()=>{setStart(a);setEnd(b)})}
+ function setPeriod(a:string,b:string){if(!a||!b||a>b)return;if(daysBetween(a,b)>366){setToast('한 번에 최대 1년 범위로 조회해 주세요.');return}setCustomPeriod(false);startTransition(()=>{setStart(a);setEnd(b)})}
  function go(p:string,k=''){setBriefSite('');window.scrollTo(0,0);setMobile(false);startTransition(()=>{setPage(p);setKind(k)});setMobile(false);setNotice(false);setDetail(null);if(k==='today'){setPeriod(now,now);setView('list')}else setView(k?'list':'calendar')}
  function resetFilters(){setDivision('');chooseTeam('');setRegion('');setStatus('');setSearch('');setKind('');setRecordType('all');setPeriod(...monthRange(now) as [string,string])}
  function open(entity:string,record?:any,extra:any={}){setError('');setDetail(null);setNotice(false);setMobile(false);setModal({entity,record,...extra})}

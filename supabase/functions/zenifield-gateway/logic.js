@@ -1,3 +1,12 @@
+// app/lib/date.ts
+var noon = (day) => Date.parse(day + "T12:00:00Z");
+var dayShift = (day, n) => {
+  const d = new Date(noon(day));
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+var validDay = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(noon(s)) && new Date(noon(s)).toISOString().slice(0, 10) === s;
+
 // app/platform/model.ts
 var MANUAL_REASONS = ["\uACE0\uAC1D\uC0AC \uC694\uCCAD \uC2DC\uC5D0\uB9CC \uBC29\uBB38", "\uC0C1\uC8FC \uC778\uB825\uC774 \uBCC4\uB3C4 \uAD00\uB9AC", "\uACC4\uC57D\uC0C1 \uBC29\uBB38 \uC758\uBB34 \uC5C6\uC74C", "\uC6B4\uC601 \uCD95\uC18C\xB7\uC885\uB8CC \uC608\uC815", "\uAE30\uD0C0"];
 var aiFields = ["purpose", "detail", "notes", "result"];
@@ -5,11 +14,6 @@ var aiConfidences = ["low", "medium", "high"];
 var entryOf = (v) => v.entry === "ai" ? "ai" : "manual";
 var managesDomain = (me, domain) => ["admin", "director"].includes(me.role) || !!domain && (me.domains || []).includes(domain);
 var domainName = (data, id) => data.domains.find((d) => d.id === id)?.name || "";
-var dayShift = (day, n) => {
-  const d = /* @__PURE__ */ new Date(day + "T12:00:00Z");
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
-};
 var targetOf = (v) => v.targetType === "store" ? v.storeId || "missing-store" : v.siteId;
 function targetsOf(data) {
   return [...data.sites.map((s) => ({ id: s.id, type: "site", siteId: s.id, storeId: null, name: s.name, siteName: s.name, team: s.team, part: s.part, division: s.division, domain: s.domain || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, manual: s.manual ?? null, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null })), ...data.stores.map((s) => {
@@ -96,7 +100,6 @@ function updateDemo(data, entity, values, record, actor, now) {
   const next = structuredClone(data), id = record?.id || newId();
   const manager = actor.role === "manager";
   if (actor.role === "director") throw Error("\uC0AC\uC5C5\uBD80\uC7A5\uC740 \uC870\uD68C \uC804\uC6A9\uC785\uB2C8\uB2E4.");
-  const validateDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s + "T12:00:00Z")) && (/* @__PURE__ */ new Date(s + "T12:00:00Z")).toISOString().slice(0, 10) === s;
   const targets = targetsOf(data);
   const allowed = visibleTargets(targets, actor);
   const can = (targetId) => allowed.some((t) => t.id === targetId);
@@ -178,9 +181,9 @@ function updateDemo(data, entity, values, record, actor, now) {
     if (entity === "visit") {
       if (!["planned", "completed", "cancelled"].includes(item.status) || !item.purpose) throw Error("\uBC29\uBB38 \uBAA9\uC801\uACFC \uC9C4\uD589 \uC0C1\uD0DC\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
       if (record?.status === "completed" && item.status !== "completed" || record?.status === "cancelled" && item.status !== "cancelled") throw Error("\uC644\uB8CC\xB7\uCDE8\uC18C \uAE30\uB85D\uC758 \uC0C1\uD0DC\uB294 \uB418\uB3CC\uB9B4 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. \uC0C8 \uBC29\uBB38\uC744 \uB4F1\uB85D\uD574 \uC8FC\uC138\uC694.");
-      if (item.plannedDate && !validateDate(item.plannedDate)) throw Error("\uC720\uD6A8\uD55C \uC608\uC815\uC77C\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
+      if (item.plannedDate && !validDay(item.plannedDate)) throw Error("\uC720\uD6A8\uD55C \uC608\uC815\uC77C\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
       if (item.status === "planned" && !item.plannedDate) throw Error("\uBC29\uBB38 \uC608\uC815\uC77C\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
-      if (item.status === "completed" && (!validateDate(item.actualDate) || item.actualDate > now || !item.detail?.trim())) throw Error("\uC624\uB298\uAE4C\uC9C0\uC758 \uC2E4\uC81C \uBC29\uBB38\uC77C\uACFC \uC8FC\uC694 \uD65C\uB3D9 \uB0B4\uC6A9\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
+      if (item.status === "completed" && (!validDay(item.actualDate) || item.actualDate > now || !item.detail?.trim())) throw Error("\uC624\uB298\uAE4C\uC9C0\uC758 \uC2E4\uC81C \uBC29\uBB38\uC77C\uACFC \uC8FC\uC694 \uD65C\uB3D9 \uB0B4\uC6A9\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
       if (item.status === "cancelled" && !item.cancelReason?.trim()) throw Error("\uCDE8\uC18C \uC0AC\uC720\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
       if (item.requirementId) {
         if (!item.requirementId.startsWith("req:" + target.id + ":")) throw Error("\uD544\uC694 \uD68C\uCC28\uC640 \uBC29\uBB38 \uB300\uC0C1\uC774 \uC77C\uCE58\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.");
@@ -250,7 +253,7 @@ function updateDemo(data, entity, values, record, actor, now) {
       }
       array = next.visits;
     } else {
-      if (!item.content?.trim() || !validateDate(item.dueDate) || !["\uC870\uCE58 \uC608\uC815", "\uCC98\uB9AC \uC911", "\uBCF4\uB958", "\uC644\uB8CC"].includes(item.state)) throw Error("\uC870\uCE58 \uB0B4\uC6A9, \uC720\uD6A8\uD55C \uAE30\uD55C \uBC0F \uC0C1\uD0DC\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
+      if (!item.content?.trim() || !validDay(item.dueDate) || !["\uC870\uCE58 \uC608\uC815", "\uCC98\uB9AC \uC911", "\uBCF4\uB958", "\uC644\uB8CC"].includes(item.state)) throw Error("\uC870\uCE58 \uB0B4\uC6A9, \uC720\uD6A8\uD55C \uAE30\uD55C \uBC0F \uC0C1\uD0DC\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
       if (item.visitId && !data.visits.some((v) => v.id === item.visitId && targetOf(v) === target.id)) throw Error("\uAD00\uB828 \uBC29\uBB38\uAE30\uB85D\uACFC \uB300\uC0C1\uC774 \uC77C\uCE58\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.");
       item.completedDate = item.state === "\uC644\uB8CC" ? record?.completedDate || now : null;
       item.createdDate = record?.createdDate || now;

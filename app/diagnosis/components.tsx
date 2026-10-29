@@ -1,4 +1,5 @@
 'use client';
+import {dayShift as addDays} from '../lib/date';
 import {useEffect,useMemo,useState} from 'react';
 import {AlertTriangle,RefreshCw,ChevronRight,ShieldOff,CalendarClock,Info,Inbox} from 'lucide-react';
 import {PanelTitle,Badge,short,nice} from '../ui';
@@ -49,7 +50,7 @@ export function WeeklyDiagnosis({input,now,start,end,status='ready',onRetry,onOp
  <div className="dx-block"><h3>{isNow?'이번 주':'이 주차'} 주목할 변화</h3>{d.changes.length?<><ul className="dx-changes">{(more?d.changes:d.changes.slice(0,5)).map(c=><li key={c.kind+c.issue.id}><span className={'dx-kind '+c.kind}>{c.kind}</span><div><b>{place(c.issue.targetId)}</b><span>{c.issue.content}</span></div><button className="dx-link" onClick={()=>onOpen(c.issue.siteId,c.issue.id)}>관련 방문·원문 보기<ChevronRight size={13}/></button></li>)}</ul>{d.changes.length>5&&<button className="dx-more" aria-expanded={more} onClick={()=>setMore(!more)}>{more?'접기':`변화 ${d.changes.length-5}건 더 보기`}</button>}</>:<p className="dx-empty-line">{d.phase==='future'?'아직 집계할 변화가 없습니다.':'이 주차에 등록되거나 해결된 이슈가 없습니다.'}</p>}</div>
  <div className="dx-block"><h3><CalendarClock size={14}/>다음 주 조치 예정 <small>{short(addDays(w.end,1))}~{short(addDays(w.end,7))}</small></h3>{d.upcoming.length?<ul className="dx-plans">{d.upcoming.slice(0,5).map(p=><li key={p.key}><b>{p.kind==='조치'?'조치 · ':'방문 · '}{place(p.targetId)}</b><span>{p.text}</span><time dateTime={p.date}>{short(p.date)}</time><small>{p.ownerId?uname(p.ownerId):'담당 미지정'}</small></li>)}</ul>:<p className="dx-empty-line">등록된 기한·방문 일정이 없습니다.</p>}{d.upcoming.length>5&&<p className="dx-empty-line">외 {d.upcoming.length-5}건 · 기한 조치를 먼저, 이어서 예정 방문을 날짜순으로 표시합니다. 전체는 후속 조치·방문 일정에서 확인하세요.</p>}<div className="dx-actions"><button className="dx-link strong" onClick={onActions}>연결된 조치 보기<ChevronRight size={13}/></button></div></div></>}</section>
 }
-function addDays(day:string,n:number){const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+
 const stateText=(a:DxIssueRow)=>a.open?a.state:'완료'+(a.completedDate?' · '+short(a.completedDate):'');
 export function DiagnosisDetail({data,targetsScope,siteId,issueId,now,uname,onAction,onVisit,onRevisit}:{data:PlatformData;targetsScope:Target[];siteId:string;issueId?:string;now:string;uname:(id:string)=>string;onAction:(a:FieldAction)=>void;onVisit:(id:string)=>void;onRevisit:(a:DxIssueRow)=>void}){
  const d=useMemo(()=>diagnose(scopeInput(data,targetsScope),now),[data,targetsScope,now]);const focus=d.issues.find(a=>a.id===issueId&&a.siteId===siteId);

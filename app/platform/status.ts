@@ -1,6 +1,6 @@
 // 화면 공통 현황: 방문 코치·대시보드 브리핑·현황표·주차별 브리핑·독려 안내가 같은 사실과 같은 판정을 읽는다.
 // 코드는 사실만 계산하고(필요 회차·조치 기한·마지막 방문일), 상태 이름과 순서는 저장된 종합 판정에서만 온다(DC-JUDGMENT).
-import {dayShift,lastTargetVisit,targetOf,type FieldAction,type FieldVisit,type Occurrence,type Target} from './model';
+import {dayShift,weekOf,lastTargetVisit,targetOf,type FieldAction,type FieldVisit,type Occurrence,type Target} from './model';
 import {isCurrentJudgment,type VisitJudgment} from './judgment';
 
 export const LEVEL_ORDER:Record<string,number>={위험:2,주의:1};
@@ -34,8 +34,7 @@ export function attentionOf(facts:Iterable<TargetFacts>){
 }
 
 // 본인 방문 흐름(주 단위 완료 수): 독려 문장은 다른 사람과 비교하지 않고 본인 지난주와만 비교한다.
-export const weekStart=(d:string)=>{const w=new Date(d+'T12:00:00Z').getUTCDay();return dayShift(d,-((w+6)%7))};
 export function selfWeeks(visits:FieldVisit[],userId:string,now:string){
- const wk=weekStart(now),prev=dayShift(wk,-7),done=(a:string,b:string)=>visits.filter(v=>v.visitorId===userId&&v.status==='completed'&&!!v.actualDate&&v.actualDate>=a&&v.actualDate<=b).length;
+ const wk=weekOf(now),prev=dayShift(wk,-7),done=(a:string,b:string)=>visits.filter(v=>v.visitorId===userId&&v.status==='completed'&&!!v.actualDate&&v.actualDate>=a&&v.actualDate<=b).length;
  return {thisWeek:done(wk,now),lastWeek:done(prev,dayShift(wk,-1))};
 }

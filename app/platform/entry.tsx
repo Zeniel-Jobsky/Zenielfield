@@ -1,4 +1,5 @@
 'use client';
+import {kstToday as kst,dayShift as shiftDay,monthRange as monthOf} from '../lib/date';
 import {BrandIdentity} from '../brand';
 import {useEffect,useRef,useState} from 'react';
 import {RefreshCw,ArrowRight,ShieldCheck} from 'lucide-react';
@@ -11,10 +12,7 @@ import {DevLogin} from './dev-login';
 import {LoadingProgress,readJsonWithProgress,type LoadInfo} from './loading-progress';
 export type OperatingData=PlatformData&{me:User};
 // 조회 창: 선택 기간 + 추이용 앞 8주 + 다가올 일정 6주. 미완료 조치는 기간과 무관하게 서버가 포함한다.
-const kst=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date());
-const shiftDay=(d:string,n:number)=>{const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
 export function windowFor(start:string,end:string,today=kst()){const from=shiftDay(start,-56),to=[end,shiftDay(today,42)].sort().at(-1)!;return {from,to}}
-const monthOf=(d:string)=>{const a=d.slice(0,8)+'01',x=new Date(a+'T12:00:00Z');x.setUTCMonth(x.getUTCMonth()+1);x.setUTCDate(0);return [a,x.toISOString().slice(0,10)] as const};
 export default function PlatformEntry(){
  const rangeRef=useRef(windowFor(...monthOf(kst())));
  // 인증 방식(null = 아직 모름). 알기 전에는 로그인 폼·개발용 계정 목록을 그리지 않는다(이름이 잠깐 보이는 문제 방지).

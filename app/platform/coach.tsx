@@ -1,4 +1,5 @@
 'use client';
+import {daysBetween as days,mmdd} from '../lib/date';
 import {useMemo} from 'react';
 import {CalendarPlus,ChevronRight,PartyPopper,Footprints} from 'lucide-react';
 import type {Context} from './context';
@@ -10,12 +11,11 @@ import {rich,num,bad,good,RichText,type Rich} from './rich';
 // 순서는 저장된 판정 수준 → 가장 이른 기한 날짜. 꾸짖지 않고 다음 행동 하나를 권한다.
 export type CoachPick={target:Target;why:Rich;slot:Occurrence|null};
 export type CoachMessage={tone:'cheer'|'nudge';text:Rich};
-const days=(from:string|null,to:string)=>from?Math.round((+new Date(to)-+new Date(from))/86400000):null;
 export function coachPlan(c:Context){
  const mine=c.scope,now=c.now,m=aggregate(mine,c.visits,c.start,c.end,now);
  // 대상·순서는 공통 현황(status.ts)과 같다: 대시보드·현황표와 같은 곳을 같은 이유로 보여 준다.
  const picks:CoachPick[]=attentionOf(targetFacts(mine,c.visits,c.actions,m.slots,now).values()).map(f=>{const delayed=f.delayed[0],unplanned=f.unplanned[0],j=f.judgment,gap=days(f.lastVisit,now);
-  const why=[delayed&&rich`필요 방문 ${bad((days(delayed.dueDate,now)||0)>0?`기한 ${days(delayed.dueDate,now)}일 지남`:"오늘이 기한")}`,!delayed&&unplanned&&rich`${num(unplanned.dueDate.slice(5).replace('-','.'))}까지 방문 필요, 일정 없음`,f.lateActions>0&&rich`기한 넘긴 조치 ${bad(f.lateActions+'건')}`,j&&LEVEL_ORDER[j.level]&&rich`지난 방문 판정 ${bad(j.level)}${j.assessment?' — '+j.assessment:''}`,gap===null?rich`방문 기록 없음`:rich`마지막 방문 ${num(gap+'일')} 전`].filter(Boolean) as Rich[];
+  const why=[delayed&&rich`필요 방문 ${bad((days(delayed.dueDate,now)||0)>0?`기한 ${days(delayed.dueDate,now)}일 지남`:"오늘이 기한")}`,!delayed&&unplanned&&rich`${num(mmdd(unplanned.dueDate))}까지 방문 필요, 일정 없음`,f.lateActions>0&&rich`기한 넘긴 조치 ${bad(f.lateActions+'건')}`,j&&LEVEL_ORDER[j.level]&&rich`지난 방문 판정 ${bad(j.level)}${j.assessment?' — '+j.assessment:''}`,gap===null?rich`방문 기록 없음`:rich`마지막 방문 ${num(gap+'일')} 전`].filter(Boolean) as Rich[];
   return {target:f.target,why:why.flatMap((w,i)=>i?[{v:' · '},...w]:w),slot:delayed||unplanned||null}});
  // 독려·격려 문장: 잘한 점을 먼저, 그다음 지금 할 한 가지
  const {thisWeek,lastWeek}=selfWeeks(c.visits,c.me.id,now),unplanned=m.slots.filter(s=>s.state==='unplanned').length,delayed=m.delayed;

@@ -1,4 +1,5 @@
 'use client';
+import {daysBetween as days} from '../lib/date';
 import {useEffect,useMemo,useState} from 'react';
 import {TrendingUp,TrendingDown,Minus,AlertTriangle,Clock3,Store as StoreIcon,BarChart3} from 'lucide-react';
 import {nice,short} from '../ui';
@@ -9,7 +10,6 @@ import {ISSUE_TYPES} from './judgment';
 // 의사결정용 차트: 보는 사람의 포지션(사업부 → 팀 → 파트 → 잡매니저 → 담당 대상)에 맞춰 비교 단위가 바뀐다.
 const tone={ok:'#003c33',plan:'#516e8a',late:'#b42318',miss:'#8a4b00',gray:'#65726b',dark:'#59645f'};
 const pct=(a:number,b:number)=>b?Math.round(a/b*100):0;
-const days=(from:string|null,to:string)=>from?Math.round((+new Date(to)-+new Date(from))/86400000):null;
 export function scopeUnits(c:Context){
  const level=c.manager?'target':c.part||c.me.role==='partlead'?'manager':c.team||c.me.role==='lead'?'part':c.me.role==='manager'?'target':'team';
  const keyOf=(t:Target)=>level==='team'?[t.team]:level==='part'?[t.part]:level==='manager'?t.managerIds:[t.id];

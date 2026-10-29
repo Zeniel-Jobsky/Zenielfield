@@ -1,3 +1,4 @@
+import {dayShift,between,weekOf} from '../lib/date';
 import type {Site,User,Visit,Action,Audit} from '../lib/model';
 import type {VisitJudgment} from './judgment';
 export type TargetType='site'|'store';
@@ -32,8 +33,7 @@ export type Occurrence=Requirement&{state:'completed'|'planned'|'delayed'|'unpla
 export type Metrics={slots:Occurrence[];required:number;completed:number;planned:number;delayed:number;unplanned:number;targets:number;rate:number|null;completedTargets:number;extraCompleted:number;manualTargets:number};
 export const typeName=(type:TargetType)=>type==='site'?'현장 방문':'매장 방문';
 export const ruleName=(rule:Rule)=>rule.period==='manual'?'수동 관리':`${rule.period==='week'?'주':'월'} ${rule.count}회`;
-export const dayShift=(day:string,n:number)=>{const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
-export const between=(d:string|null,a:string,b:string)=>!!d&&d>=a&&d<=b;
+export {dayShift,between,weekOf};
 export const targetOf=(v:{siteId:string;targetType:TargetType;storeId:string|null})=>v.targetType==='store'?v.storeId||'missing-store':v.siteId;
 export function targetsOf(data:PlatformData):Target[]{return [...data.sites.map(s=>({id:s.id,type:'site' as const,siteId:s.id,storeId:null,name:s.name,siteName:s.name,team:s.team,part:s.part,division:s.division,domain:s.domain||'',region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,manual:s.manual??null,status:s.status,startDate:s.startDate,lat:s.lat??null,lng:s.lng??null})),...data.stores.map(s=>{const p=data.sites.find(p=>p.id===s.siteId)!;return{id:s.id,type:'store' as const,siteId:s.siteId,storeId:s.id,name:s.name,siteName:p?.name||'미연결 현장',team:p?.team||'',part:p?.part||'',division:p?.division||'',domain:p?.domain||'',region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,manual:s.manual??null,status:s.status,startDate:s.startDate,lat:s.lat??null,lng:s.lng??null}})]}
 export function requirements(targets:Target[],start:string,end:string):Requirement[]{
@@ -70,7 +70,6 @@ const slotsOf=(m:Metrics,id:string)=>{let idx=slotIndex.get(m);if(!idx){idx=new 
 export function targetStatus(t:Target,visits:FieldVisit[],metrics:Metrics){if(t.status!=='운영 중')return t.status;const slots=slotsOf(metrics,t.id);if(slots.some(s=>s.state==='delayed'))return '방문 지연';if(slots.some(s=>s.state==='unplanned'))return '계획 미등록';if(slots.some(s=>s.state==='planned'))return '방문 예정';if(slots.length&&slots.every(s=>s.state==='completed'))return '방문 완료';if(!lastTargetVisit(t.id,visits))return '이력 미확인';return '정상 관리'}
 export function visibleTargets(targets:Target[],me:User){if(['admin','director'].includes(me.role))return targets;const inDomain=(t:Target)=>!(me.domains||[]).length||(me.domains||[]).includes(t.domain);if(me.role==='lead')return targets.filter(t=>t.team===me.team&&inDomain(t));if(me.role==='partlead')return targets.filter(t=>t.team===me.team&&t.part===me.part&&inDomain(t));return targets.filter(t=>t.managerIds.includes(me.id)&&inDomain(t))}
 export type WeekRow={start:string;required:number;completed:number;planned:number;delayed:number;unplanned:number;rate:number|null};
-export const weekOf=(day:string)=>dayShift(day,-((new Date(day+'T12:00:00Z').getUTCDay()+6)%7));
 export function weeklyTrend(targets:Target[],visits:FieldVisit[],end:string,now:string,weeks=8):{rows:WeekRow[];slots:Occurrence[]}{const first=dayShift(weekOf(end),-7*(weeks-1)),m=aggregate(targets,visits,first,dayShift(weekOf(end),6),now);return{slots:m.slots,rows:Array.from({length:weeks},(_,i)=>{const a=dayShift(first,i*7),b=dayShift(a,6),s=m.slots.filter(x=>between(x.dueDate,a,b)),n=(k:Occurrence['state'])=>s.filter(x=>x.state===k).length;return{start:a,required:s.length,completed:n('completed'),planned:n('planned'),delayed:n('delayed'),unplanned:n('unplanned'),rate:s.length?Math.round(n('completed')/s.length*100):null}})}}
 export function agingBuckets(actions:FieldAction[],now:string){const late=actions.filter(a=>a.state!=='완료'&&!!a.dueDate&&a.dueDate<now).map(a=>Math.round((+new Date(now)-+new Date(a.dueDate))/86400000));return [{label:'0–7일',value:late.filter(d=>d<=7).length},{label:'8–30일',value:late.filter(d=>d>7&&d<=30).length},{label:'30일 초과',value:late.filter(d=>d>30).length}]}
 export const validGeo=(g:any):g is Geo=>!!g&&typeof g.lat==='number'&&typeof g.lng==='number'&&Number.isFinite(g.lat)&&Number.isFinite(g.lng)&&Math.abs(g.lat)<=90&&Math.abs(g.lng)<=180;

@@ -1,5 +1,6 @@
 // Creates only uniquely named disposable fixtures, then removes those exact fixtures.
 // Run from the checkout that owns the ignored .env with Supabase management access.
+import {kstToday} from '../app/lib/date.ts';
 import assert from 'node:assert/strict';
 import {randomUUID,randomBytes} from 'node:crypto';
 import {loadEnv} from 'vite';
@@ -31,7 +32,7 @@ try{
  const base={name:'폐기용 Cloudflare 검수 현장',code:'QA-CF-'+run,client:'폐기용 검수',address:'검수용 가상 주소',team:'검수팀',part:'검수파트',division:'검수사업부',region:'서울',priority:'보통',status:'운영 중',managerIds:[manager.id],rule:{period:'month',count:1}};
  const site=(await save('site',base)).item;
  const store=(await save('store',{...base,name:'폐기용 Cloudflare 검수 매장',siteId:site.id,code:'QA-CF-STORE-'+run})).item;
- const now=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const now=kstToday();
  const visit=(await save('visit',{targetType:'store',siteId:site.id,storeId:store.id,visitorId:manager.id,plannedDate:now,time:'10:00',purpose:'현장 정기점검',precheck:'',actualDate:null,actualTime:'',result:'',detail:'',notes:'',status:'planned',cancelReason:'',requirementId:null})).item;
  const done=(await save('visit',{...visit,status:'completed',actualDate:now,actualTime:'10:30',detail:'Cloudflare 실제 저장 검수',result:'후속 조치 필요'},visit)).item;
  const action=(await save('action',{targetType:'store',siteId:site.id,storeId:store.id,visitId:done.id,ownerId:manager.id,type:'기타',content:'폐기용 검수 조치',dueDate:now,state:'처리 중'})).item;

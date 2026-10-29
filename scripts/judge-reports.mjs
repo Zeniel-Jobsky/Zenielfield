@@ -2,6 +2,7 @@
 // 한 대상의 타임라인은 한 번에 보내므로 앞선 보고의 흐름(지속·악화·해결)을 보고 판단한다. 판정은 판정 파일(방문 ID → judgment)에 쌓는다.
 // 사용: node --env-file=.env scripts/judge-reports.mjs [입력 JSON=data/hrbiz-demo.json] [판정 파일=data/hrbiz-judgments.json] [--redo] [--targets N] [--ids 파일]
 // 보내는 것: 목적·결과 칸·상세·특이사항·조치 내용과 날짜·상태만(사람 이름·담당자 ID 미전송, 전화·메일 가림). 판정은 by='ai', 사람 확정 전(confirmedBy=null).
+import {kstToday} from '../app/lib/date.ts';
 import fs from 'node:fs';
 import {judgePrompt,judgeSchema,cleanJudgment,buildJudgeInput,isCurrentJudgment} from '../app/platform/judgment.ts';
 const args=process.argv.slice(2),flag=n=>{const i=args.indexOf(n);return i<0?null:args.splice(i,2)[1]};
@@ -24,7 +25,7 @@ console.log(`판정 대상 ${targets.length}곳 · 보고 ${total}건 (기존 �
 const save=()=>{saved.model=model;fs.writeFileSync(out,JSON.stringify(saved))};
 const calls=[];let cur=[],n=0;for(const t of targets){if(n+t[1].length>REPORTS_PER_CALL&&cur.length){calls.push(cur);cur=[];n=0}cur.push(t);n+=t[1].length}if(cur.length)calls.push(cur);
 async function judge(group){
- const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date());
+ const today=kstToday();
  const {payload,refs:refIds}=buildJudgeInput(group.map(([t,vs])=>({visits:vs,actions:actionsOf.get(t)||[]})),today);const byId=new Map(group.flatMap(([,vs])=>vs).map(v=>[v.id,v]));const refs=new Map([...refIds].map(([r,id])=>[r,byId.get(id)]));
  for(let attempt=1;;attempt++){
   const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},signal:AbortSignal.timeout(180000),

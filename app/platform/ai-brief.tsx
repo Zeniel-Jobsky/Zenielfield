@@ -1,4 +1,5 @@
 'use client';
+import {daysBetween as days,mmdd as wk} from '../lib/date';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {Sparkles,Loader2,ChevronRight,RefreshCw,ChevronDown,ChevronUp} from 'lucide-react';
 import type {Context} from './context';
@@ -72,7 +73,6 @@ export function reportGroups(c:Context,targets:Context['scope'],start:string,end
  let groups=build(1);for(const k of [8,6,4,3,2]){const g=build(k);if(JSON.stringify(g).length<=REPORT_BUDGET){groups=g;break}}
  return {groups,total,sent:groups.reduce((n,g)=>n+g.items.filter(i=>!i.prev).length,0),judged:judgedSummary(rows.filter(v=>v.status==='completed'&&v.actualDate!>=start),id=>c.target(id)?.name||'')};
 }
-const days=(from:string|null,to:string)=>from?Math.round((+new Date(to)-+new Date(from))/86400000):null;
 export function buildDigest(c:Context,f:BriefFactors=defaultFactors,range?:BriefRange):BriefDigest{
  const start=range?.start||c.start,end=range?.end||c.end,asOf=end<c.now?end:c.now;
  const s=scopeUnits(c),targets=c.scope.filter(t=>t.type===c.type),m=range?aggregate(targets,c.visits,start,end,c.now):c.metrics,stores=c.storeScope.filter(t=>t.status==='운영 중');
@@ -98,7 +98,6 @@ export function buildDigest(c:Context,f:BriefFactors=defaultFactors,range?:Brief
 // 다이제스트 지문: 이 값이 같으면 "변경 없음"으로 보고 저장된 요약을 재사용한다.
 export const digestKey=(d:BriefDigest)=>{const s=JSON.stringify(d);let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return (h>>>0).toString(36)+':'+s.length};
 const eun=(w:string)=>{const c=w.charCodeAt(w.length-1);return c>=0xac00&&c<=0xd7a3?((c-0xac00)%28?'은':'는'):'은(는)'};
-const wk=(d:string)=>d.slice(5).replace('-','.');
 // AI 없이 만드는 브리핑(데모·AI 연결 안 됨): 판정하지 않는다(DC-JUDGMENT). 숫자 사실과 저장된 종합 판정만 옮긴다.
 // 상태 평가(양호·위험·따라잡기 어려움)·우선순위·선택지 판단은 쓰지 않고, 판단은 AI 연결 시에만 표시한다.
 export function ruleBrief(d:BriefDigest):AiBriefResult{

@@ -2,12 +2,13 @@
 //   node scripts/seed.mjs build              → seed/out/seed.json, seed.sql, purge.sql
 //   node --env-file=.env scripts/seed.mjs apply   → purge + seed 를 한 트랜잭션으로 원격 적용
 //   node --env-file=.env scripts/seed.mjs purge   → 데모 행만 삭제
+import {kstToday} from '../app/lib/date.ts';
 import fs from 'node:fs';
 import esbuild from '../node_modules/.pnpm/esbuild@0.28.0/node_modules/esbuild/lib/main.js';
 const [cmd='build']=process.argv.slice(2),out='seed/out',ref='nhywssfwtnonytbkufyy';
 const bundle=await esbuild.build({entryPoints:['seed/build.ts'],bundle:true,write:false,platform:'node',format:'esm'});
 const m=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].contents).toString('base64'));
-const now=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul'}).format(new Date());
+const now=kstToday();
 const base=fs.existsSync('data/hrbiz-demo.json')?JSON.parse(fs.readFileSync('data/hrbiz-demo.json','utf8')):null;if(base)base.audit=[];
 const data=m.buildSeed(now,m.parseCsv(fs.readFileSync('data/zeniel-branches-geo.csv','utf8')),m.parseCsv(fs.readFileSync('data/zeniel-stores-candidates-geo.csv','utf8')),base);
 fs.mkdirSync(out,{recursive:true});const seed=m.seedSql(data),purge=m.purgeSql();

@@ -1,4 +1,5 @@
 'use client';
+import {daysBetween} from '../lib/date';
 import {JudgeCheck,runJudge,judgeKey,confirmed,type JudgeState} from './judge-check';
 import {useState,type FormEvent} from 'react';
 import {Check,MapPin,ClipboardCheck,Sparkles,Info,RotateCcw,PenLine} from 'lucide-react';
@@ -24,8 +25,8 @@ export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;
  const canEdit=c.editable&&(c.me.role!=='manager'||!r||r.visitorId===c.me.id),ready=!!ai&&!!target&&!!owner&&!!values.detail.trim();
  // 대상이 정해지면 그 대상의 미완료 계획 중 오늘 연결할 수 있는 것(필요 회차 인정 기간이 시작됨)을 자동 연결한다. 지난·오늘 계획 우선, 그다음 가까운 예정.
  const linkable=(v:FieldVisit)=>{if(!v.requirementId||!target)return true;const head=('req:'+target.id+':').length,unit=v.requirementId.slice(head,head+10),req=requirements([target],unit,dayShift(unit,40)).find(q=>q.id===v.requirementId);return !req||req.windowStart<=actualDate};
- const rank=(v:FieldVisit)=>{const d=(+new Date(v.plannedDate||c.now)-+new Date(c.now))/86400000;return d<=0?-d:100+d};
- const near=(v:{plannedDate:string|null})=>!!v.plannedDate&&Math.abs(+new Date(v.plannedDate)-+new Date(c.now))<=14*86400000,candidates=target?plans.filter(v=>targetOf(v)===target.id&&near(v)&&linkable(v)).sort((a,b)=>rank(a)-rank(b)):[],linked=r||!candidates.length?null:candidates.find(v=>v.id===(linkId??candidates[0].id))||null;
+ const rank=(v:FieldVisit)=>{const d=daysBetween(c.now,v.plannedDate||c.now);return d<=0?-d:100+d};
+ const near=(v:{plannedDate:string|null})=>!!v.plannedDate&&Math.abs(daysBetween(c.now,v.plannedDate))<=14,candidates=target?plans.filter(v=>targetOf(v)===target.id&&near(v)&&linkable(v)).sort((a,b)=>rank(a)-rank(b)):[],linked=r||!candidates.length?null:candidates.find(v=>v.id===(linkId??candidates[0].id))||null;
  function draft(d:AiDraft,meta:{text:string;imageCount:number;model:string;generatedAt:string}){const v={purpose:purposes.includes(d.purpose)?d.purpose:'',detail:d.detail,notes:d.notes,result:['후속 조치 필요','특이사항 없음'].includes(d.result)?d.result:''};setValues(v);setActions(d.actions);setPicked(d.actions.map(()=>true));setAi({input:{text:meta.text,imageCount:meta.imageCount},draft:v,summary:d.extra.summary,confidence:d.confidence,model:meta.model,generatedAt:meta.generatedAt,edited:[]})}
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!ready||!ai||!target)return;const base=r||linked;
   // 종합 판정: 직접 입력과 같은 기준. 내용이 판정 때와 다르면 먼저 판정해 보여 주고 저장은 다음 클릭에서.
