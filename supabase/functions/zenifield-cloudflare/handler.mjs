@@ -1,4 +1,9 @@
 import {createHandler} from '../zenifield-gateway/handler.mjs';
+// 계정 전환 중 기존 링크도 유지한다. 정확한 콜백만 허용하고 와일드카드는 쓰지 않는다.
+const loginCallbacks=new Set([
+ 'https://zenifield.jobsky.workers.dev/auth/callback',
+ 'https://zenifield.ugen-kwon.workers.dev/auth/callback',
+]);
 
 // tokenHash: one hash or a list (Cloudflare Worker token, Sites server token). Both are server-only secrets.
 export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
@@ -31,7 +36,7 @@ export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
     if(!/^\S+@\S+\.\S+$/.test(email)||email.length>254)return reply({error:'이메일을 확인하세요.'},400);
     // Do not expose whether a submitted address is registered.
     if(!await profile(email))return reply({ok:true});
-    if(!/^[A-Za-z0-9_-]{43}$/.test(body.codeChallenge||'')||body.redirectTo!=='https://zenifield.ugen-kwon.workers.dev/auth/callback')return reply({error:'로그인 요청을 확인하세요.'},400);
+    if(!/^[A-Za-z0-9_-]{43}$/.test(body.codeChallenge||'')||!loginCallbacks.has(body.redirectTo))return reply({error:'로그인 요청을 확인하세요.'},400);
     const r=await call('/auth/v1/otp?redirect_to='+encodeURIComponent(body.redirectTo),{method:'POST',body:JSON.stringify({email,create_user:true,code_challenge:body.codeChallenge,code_challenge_method:'s256'})});
     if(!r.ok)return reply({error:r.status===429?'잠시 후 로그인 링크를 다시 요청해 주세요.':'인증 메일을 보내지 못했습니다. 이메일 발송 설정을 확인해 주세요.'},r.status===429?429:502);
     return reply({ok:true});

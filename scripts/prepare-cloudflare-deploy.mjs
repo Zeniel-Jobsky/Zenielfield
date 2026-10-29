@@ -9,6 +9,12 @@ const target = JSON.parse(readFileSync(resolve('wrangler.cloudflare.json'), 'utf
 if (config.name !== target.name || config.account_id !== target.account_id) {
   throw new Error('Cloudflare 대상 빌드를 먼저 실행하세요. 배포 대상이 일치하지 않습니다.');
 }
+if (process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_ACCOUNT_ID !== target.account_id) {
+  throw new Error('CI Cloudflare 계정과 배포 설정이 다릅니다. 계정 전환을 확인하세요.');
+}
+if ((config.d1_databases || []).length || (config.r2_buckets || []).length) {
+  throw new Error('회사 계정 Worker는 Supabase 전용입니다. 다른 계정의 D1/R2 바인딩을 연결할 수 없습니다.');
+}
 if (config.legacy_env === false) {
   throw new Error('기존 Service environment 설정은 자동 변환할 수 없습니다.');
 }

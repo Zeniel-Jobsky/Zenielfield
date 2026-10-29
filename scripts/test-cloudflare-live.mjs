@@ -5,7 +5,7 @@ import {randomUUID,randomBytes} from 'node:crypto';
 import {loadEnv} from 'vite';
 const env=loadEnv('production',process.cwd(),'');
 const url=env.ZENIFIELD_SUPABASE_URL,ref=new URL(url).hostname.split('.')[0];
-const app='https://zenifield.ugen-kwon.workers.dev';
+const app='https://zenifield.jobsky.workers.dev';
 const run=randomUUID(),qaId='qa-cf-'+run,qaEmail='qa-cf-'+run+'@example.invalid',managerEmail='qa-cf-manager-'+run+'@example.invalid';
 const managementHeaders={Authorization:'Bearer '+env.SUPABASE_ACCESS_TOKEN,'Content-Type':'application/json'};
 async function sql(query){const r=await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`,{method:'POST',headers:managementHeaders,body:JSON.stringify({query})});if(!r.ok)throw Error('Fixture SQL failed '+r.status);return r.json();}

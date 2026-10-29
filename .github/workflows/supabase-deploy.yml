@@ -59,6 +59,8 @@ jobs:
         run: |
           node tests/run-cloudflare-auth.mjs
           node tests/run-cloudflare-supabase.mjs
+          node tests/cloudflare-deployment.test.mjs
+          node tests/cloudflare-deploy-config.test.mjs
   migrate-and-deploy:
     needs: verify
     if: needs.verify.outputs.backend_changed == 'true'
@@ -105,7 +107,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: production
+    env:
+      # 회사 Cloudflare 계정으로 고정. Worker 전용 토큰과 wrangler 대상도 함께 검증한다.
+      CLOUDFLARE_ACCOUNT_ID: d50191f54ac6859d1ecedddf26094351
+      ZENIFIELD_PUBLIC_URL: https://zenifield.jobsky.workers.dev
     steps:
+      - name: GitHub 배포 자격증명 확인
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo '::error::GitHub Settings → Secrets and variables → Actions에 CLOUDFLARE_API_TOKEN을 등록하세요.'
+            exit 1
+          fi
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -126,8 +141,8 @@ jobs:
         # Worker 전용 토큰을 지원하는 CLI만 별도 사용해 앱의 기존 빌드 의존성을 유지한다.
         run: pnpm dlx wrangler@4.151.0 deploy --config dist/server/wrangler.ci.json --message "GitHub Actions $GITHUB_SHA"
       - name: 공개 URL 응답 확인
-        run: curl --fail --silent --show-error --retry 3 --retry-delay 5 --output /dev/null 'https://zenifield.ugen-kwon.workers.dev/?mode=demo'
+        run: node scripts/check-cloudflare-deployment.mjs "$ZENIFIELD_PUBLIC_URL" "$GITHUB_SHA"
       - name: 배포 기록
         run: |
           echo "Deployed commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
-          echo 'URL: https://zenifield.ugen-kwon.workers.dev' >> "$GITHUB_STEP_SUMMARY"
+          echo "URL: $ZENIFIELD_PUBLIC_URL" >> "$GITHUB_STEP_SUMMARY"

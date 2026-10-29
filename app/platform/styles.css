@@ -458,17 +458,9 @@
 @media(max-width:760px){.update-notice{bottom:84px;left:16px;right:16px;transform:none;max-width:none}.update-notice .btn{min-height:44px}}
 
 .ai-fallback-note{padding:8px 10px;border-radius:6px;background:#fdf4e7;color:#8a4b00}
-/* AI 브리핑: 보고 내용에서 보이는 것(맥락 주제) — 헤드라인 바로 아래 기본 표시 */
-.ai-brief-themes h3 small{font-weight:400;font-size:12px;color:#65726b;margin-left:4px}
-.ai-brief-themes ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
-.ai-brief-themes li{padding:10px 12px;border-top:1px solid #e3e9e6;line-height:1.6}
-.ai-brief-themes li b{color:#003c33;margin-right:4px}
-.ai-brief-targets{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px}
-.ai-brief-targets .link{display:inline-flex;align-items:center;min-height:44px;font-size:13px}
-@media (min-width:1024px){.ai-brief-targets .link{min-height:28px}}
-.ai-brief-theme-status{display:inline-flex;align-items:center;height:20px;padding:0 6px;margin-right:6px;border-radius:10px;font-size:11px;font-weight:600;background:#eef2f6;color:#516e8a}
-.ai-brief-theme-status.bad{background:#fef3f2;color:#b42318}.ai-brief-theme-status.good{background:#edf6f1;color:#003c33}
-.ai-brief-evidence{margin:4px 0 0;padding-left:16px;font-size:12px;color:#65726b;line-height:1.5}
+/* 보고 주제 상태: 목록 구분선은 현장 행에만 적용한다. */
+.ai-brief-theme-status{display:inline-flex;align-items:center;min-height:20px;padding:0 6px;border-radius:10px;font-size:11px;font-weight:600;background:var(--zf-info-soft);color:#516e8a}
+.ai-brief-theme-status.bad{background:var(--zf-surface-muted);color:var(--zf-danger)}.ai-brief-theme-status.good{background:var(--zf-selected);color:var(--zf-action)}
 /* AI 브리핑 독려 한마디 · 잡매니저 방문 코치 */
 .ai-brief-cheer{margin:0;padding:8px 12px;border-radius:6px;background:var(--zf-info-soft,#eef2f6);font-size:13px;line-height:1.6;color:#36443e}
 .panel.coach{padding:16px}
