@@ -15,7 +15,9 @@ const data:BriefData={targets:[target('a','a'),target('a1','a','store'),target('
 data.visits.push(data.visits[0]);data.issues.push(data.issues[0]);
 const cards=weeklyCards(data,'2026-10-19','2026-10-25','2026-10-27');
 // 판정이 없으면 최근 보고일 순, 저장된 판정이 위험이면 먼저(조치·지연 건수로 순위를 매기지 않음)
-eq(cards.map(c=>c.siteId),['a','c','b']);{const j=structuredClone(data);j.visits.find(v=>v.id==='b')!.judgment={level:'위험',assessment:'x'};eq(weeklyCards(j,'2026-10-19','2026-10-25','2026-10-27')[0].siteId,'b')}
+eq(cards.map(c=>c.siteId),['a','c','b']);{const j=structuredClone(data);const J=(level:string)=>({level,assessment:'x',issues:[],by:'ai',model:'',at:'',confirmedBy:null});j.visits.find(v=>v.id==='b')!.judgment=J('위험');eq(weeklyCards(j,'2026-10-19','2026-10-25','2026-10-27')[0].siteId,'b');
+ // 같은 사업장에선 가장 최근 판정이 기준(앞선 위험이 뒤의 정상보다 우선하지 않음), 옛 형식 판정은 무시
+ const k=structuredClone(data);k.visits.find(v=>v.id==='a-hq')!.judgment=J('위험');k.visits.find(v=>v.id==='a-store')!.judgment=J('정상');k.visits.find(v=>v.id==='c')!.judgment={has:true,items:[]} as any;eq(weeklyCards(k,'2026-10-19','2026-10-25','2026-10-27').map(c=>c.priority),[0,0,0])}
 eq(cards[0].visits.length,2);eq(cards[0].issues.length,1);eq(cards[0].doneIssues.length,1);eq(cards[0].delayed,1);eq(cards[0].excerpts,['점검 · 원문 a-store','점검 · 원문 a-hq']);eq(cards.some(c=>c.siteId==='x'),false);
 eq(weeklyCards(data,'2026-11-02','2026-11-08','2026-10-27'),[]);eq(weeklyCards(data,'2026-10-26','2026-11-01','2026-10-27'),[]);
 eq(weekStats(data,'2026-10-19','2026-10-25','2026-10-27').visits.length,4);eq(weekStats(data,'2026-10-19','2026-10-25','2026-10-27').newIssues.length,3);

@@ -8,7 +8,8 @@ import {scopeUnits} from './decision';
 import {weekRanges,weekTitle} from '../briefing/model';
 import {rich,join,num,bad,good,toRich,RichText,type Rich} from './rich';
 import {collapseRepeats} from '../lib/dedupe-text';
-import {isCurrentJudgment} from './judgment';
+import {isCurrentJudgment,maskText} from './judgment';
+import {callAssist,aiDownReason} from './ai-assist';
 import {LEVEL_ORDER} from './status';
 // AI 현황 브리핑: 비서가 결정권자에게 보고하듯 균형 있게 쓴다. "지금 상태 → 흐름 → 잘 되고 있는 것 → 챙길 곳 → 무슨 일이 벌어지나 → 선택지와 판단 → 다음에 볼 것".
 // 버튼 없이 자동이다. 화면 집계(다이제스트)의 지문이 같으면 저장본을 쓰고, 바뀌면 다시 만들고, 없으면 만든다.
@@ -39,8 +40,8 @@ export type BriefTheme={title:string;status:string;summary:Rich;evidence:string[
 export type AiBriefResult={headline:Rich;cheer:Rich;themes:BriefTheme[];flow:Rich;strengths:Rich[];focus:{name:string;reason:Rich}[];story:Rich;judgment:Rich[];watch:Rich[];confidence:string};
 export function normalizeBrief(x:any):AiBriefResult{const list=(v:unknown)=>Array.isArray(v)?v.map(toRich).filter(r=>r.length):[];return {headline:toRich(x?.headline),cheer:toRich(x?.cheer),themes:Array.isArray(x?.themes)?x.themes.filter((t:any)=>t&&typeof t.title==='string').map((t:any)=>({title:t.title,status:typeof t.status==='string'?t.status:'',summary:toRich(t.summary),evidence:Array.isArray(t.evidence)?t.evidence.filter((e:unknown)=>typeof e==='string').slice(0,3):[],targets:Array.isArray(t.targets)?t.targets.filter((n:unknown)=>typeof n==='string'):[]})):[],flow:toRich(x?.flow),strengths:list(x?.strengths),focus:Array.isArray(x?.focus)?x.focus.filter((f:any)=>f&&typeof f.name==='string').map((f:any)=>({name:f.name,reason:toRich(f.reason)})):[],story:toRich(x?.story),judgment:list(x?.judgment),watch:list(x?.watch),confidence:typeof x?.confidence==='string'?x.confidence:''}}
 // 보고 본문 정리: 연락처를 지우고 반복 말을 줄여 한 건당 길이를 제한한다.
-const PHONE=/\d{2,4}[-.\s]?\d{3,4}[-.\s]?\d{4}/g,MAIL=/[\w.+-]+@[\w-]+\.[\w.]+/g;
-const clean=(s:string)=>collapseRepeats(s.replace(PHONE,'(연락처)').replace(MAIL,'(메일)').replace(/\s+/g,' ').trim());
+// 보고 본문 가림은 판정과 같은 규칙(maskText) + 반복 말 정리
+const clean=(s:string)=>collapseRepeats(maskText(s));
 const REPORT_CHARS=220,REPORT_BUDGET=36000,REPORT_GROUPS=80;
 // 보고 본문은 거르지 않고 그대로 보낸다. 문제 여부는 방문 기록에 저장된 판정(judgment)을 붙여 보내고, 미판정이면 AI가 내용을 읽고 판단한다(빈도·키워드로 추측하지 않음).
 const judgedText=(j:FieldVisit['judgment'])=>!j||!isCurrentJudgment(j)?'판정: 미판정':`판정: ${j.level} — ${j.assessment}`+(j.issues.length?' / 이슈: '+j.issues.map(i=>`[${i.type}·${i.severity}·${i.flow}${i.customerRequest?'·고객사 요청':''}] ${i.summary}`).join(' / '):'');
@@ -126,10 +127,12 @@ export function ruleBrief(d:BriefDigest):AiBriefResult{
 }
 export async function requestBrief(d:BriefDigest,demo:boolean):Promise<{result:AiBriefResult;model:string;generatedAt:string}>{
  if(demo)return {result:ruleBrief(d),model:'데모 규칙 브리핑',generatedAt:new Date().toISOString()};
- // AI 연결이 안 되면(키 없음·지연·권한) 규칙 브리핑으로 대신하고 이유를 표기한다.
- try{const r=await fetch('/api/assist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:JSON.stringify(d),images:[],mode:'brief'})});const j=await r.json() as {draft:AiBriefResult;model?:string;generatedAt?:string;error?:string};
-  if(!r.ok)throw Error(j.error||'AI 브리핑에 실패했습니다.');return {result:normalizeBrief(j.draft),model:j.model||'',generatedAt:j.generatedAt||new Date().toISOString()}}
- catch(e){return {result:ruleBrief(d),model:`규칙 브리핑 · AI 연결 안 됨(${(e as Error).message.replace(/[.\s]+$/,'')})`,generatedAt:new Date().toISOString()}}
+ // AI 호출은 다른 AI 기능과 같은 경로(callAssist): 크레딧·키 문제로 막힌 탭은 10분간 다시 부르지 않고, 오류 문구도 같은 규칙으로 줄인다.
+ // AI가 안 되면 사실만 담은 브리핑으로 대신하고 이유를 표기한다.
+ const fallback=(why:string)=>({result:ruleBrief(d),model:`규칙 브리핑 · AI 연결 안 됨(${why})`,generatedAt:new Date().toISOString()});
+ const down=aiDownReason();if(down)return fallback(down);
+ try{const r=await callAssist({text:JSON.stringify(d),images:[],mode:'brief'});return {result:normalizeBrief(r.draft),model:r.model,generatedAt:r.generatedAt}}
+ catch(e){return fallback((e as Error).message)}
 }
 type Cached={key:string;result:AiBriefResult;model:string;generatedAt:string};
 // 머리 칩: 저장된 판정의 지금 상태(대상별 최근 판정)만 쓴다. 이행률로 위험·주의를 정하지 않는다.
