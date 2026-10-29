@@ -664,3 +664,19 @@
 .ai-brief-dl .ai-brief-sites{padding-left:0;list-style:none}
 @media(max-width:760px){.ai-brief-dl>div{grid-template-columns:1fr}}
 .warn-text{color:#8a4b00}
+/* 브리핑: 접는 이야기 칸, 제목과 같은 줄의 반짝이, 브리핑 안 '나쁨' 강조는 앰버(빨강은 기한 넘긴 사실 칩에만), 작성 중 반짝이 캐릭터 */
+.ai-brief-out h3{display:flex;align-items:center;gap:4px}
+.ai-brief-out h3>svg{margin:0}
+.ai-brief-out .hi-bad{color:#8a4b00}
+.ai-brief-writing{display:flex;align-items:center;gap:10px;margin:0;font-size:14px;font-weight:600;color:var(--zf-text)}
+.ai-brief-twinkle{position:relative;display:inline-block;width:28px;height:24px;color:#003c33}
+.ai-brief-twinkle svg{position:absolute}
+.ai-brief-twinkle svg:nth-child(1){left:2px;top:2px;animation:zf-twinkle 1.4s ease-in-out infinite}
+.ai-brief-twinkle svg:nth-child(2){right:0;top:0;animation:zf-twinkle 1.4s ease-in-out .45s infinite}
+.ai-brief-twinkle svg:nth-child(3){right:2px;bottom:0;animation:zf-twinkle 1.4s ease-in-out .9s infinite}
+@keyframes zf-twinkle{0%,100%{opacity:.35;transform:scale(.8) rotate(0)}50%{opacity:1;transform:scale(1.1) rotate(15deg)}}
+@media(prefers-reduced-motion:reduce){.ai-brief-twinkle svg{animation:none;opacity:1}}
+.brief-fold{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-top:8px;padding:0 4px;font-size:13px;font-weight:600;color:var(--zf-text-secondary)}
+.brief-fold small{font-weight:400}
+.brief-fold:hover{color:var(--zf-text)}
+.ai-brief-out.folded .ai-brief-story{margin-bottom:4px}

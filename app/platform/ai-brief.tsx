@@ -201,14 +201,20 @@ function ReportSite({name,themes,jump,canJump}:{name:string;themes:BriefTheme[];
 }
 // 브리핑 표시: 늘 보이는 것 = 현황 한 줄 → 무슨 일이 벌어지고 있나(가장 눈에 띄게) → 먼저 챙길 곳(누르면 이동).
 // 세부(보고 주제·판단 ①②·전할 말·다음 주·지표 변화·근거)는 보고 싶은 사람만 펼친다.
+const FOLD_KEY='zf-ai-brief-folded';
 function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;digest:BriefDigest;stale:boolean;jump:(name:string)=>void;targetNames:Set<string>}){
- const [detailsOpen,setDetailsOpen]=useState(false),id=useId();
+ const [detailsOpen,setDetailsOpen]=useState(false),[folded,setFoldedState]=useState(false),id=useId();
+ // 브리핑 접기: 다 본 뒤 접으면 '무슨 일이 벌어지고 있나'만 남긴다(이 브라우저에 기억)
+ useEffect(()=>{try{setFoldedState(localStorage.getItem(FOLD_KEY)==='1')}catch{}},[]);
+ const setFolded=(v:boolean)=>{setFoldedState(v);try{localStorage.setItem(FOLD_KEY,v?'1':'0')}catch{}};
  const r=out.result,k=digest.kpi,tone=toneOf(digest),ai=!out.model.includes('규칙');
  const sites=useMemo(()=>{const groups=new Map<string,BriefTheme[]>();for(const t of r.themes)for(const name of new Set(t.targets.length?t.targets:['현장 미지정'])){const list=groups.get(name)||[];list.push(t);groups.set(name,list)}return [...groups]},[r.themes]);
  const peek=[sites.length&&'보고 주제',r.judgment.length&&'판단',r.cheer.length&&CHEER_TO[digest.role],r.watch.length&&'다음 주 볼 것'].filter(Boolean).join(' · ');
+ const story=<section className="ai-brief-story"><h3>{ai&&<Sparkles size={14}/>}무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>;
+ if(folded)return <div className={'ai-brief-out folded'+(stale?' stale':'')}>{story}<button type="button" className="brief-fold" aria-expanded="false" onClick={()=>setFolded(false)}>브리핑 펼치기<ChevronDown size={14}/></button></div>;
  return <div className={'ai-brief-out'+(stale?' stale':'')}>
   <p className="ai-brief-head"><span className={'ai-brief-tone '+tone.cls}><AiMark size={12}/>{tone.label}</span><RichText r={r.headline}/></p>
-  <section className="ai-brief-story"><h3>{ai&&<Sparkles size={14}/>}무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>
+  {story}
   <section className="ai-brief-focus"><h3>{ai&&<Sparkles size={14}/>}먼저 챙길 곳</h3><ol>{r.focus.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}>{a.name}<ChevronRight size={14}/></button><span><RichText r={a.reason}/></span></li>)}{!r.focus.length&&<li><span>{digest.role==='manager'?'바로 확인·조치 필요로 남은 곳이 없어요(저장된 판정 기준).':'일정 잡을 회차나 기한 넘긴 조치가 있는 곳이 없어요.'}</span></li>}</ol></section>
   {(r.directive?.length||0)>0&&<section className="ai-brief-guide"><h3>{ai&&<Sparkles size={14}/>}지시 가이드 <small>누구에게 무엇을</small></h3><ul>{r.directive!.map((x,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(x.to)}>{x.to}<ChevronRight size={14}/></button><span><RichText r={x.say}/></span></li>)}</ul></section>}
   {(r.steps?.length||0)>0&&<section className="ai-brief-guide"><h3>{ai&&<Sparkles size={14}/>}이행 가이드 <small>순서대로</small></h3><ol className="ai-brief-steps">{r.steps!.map((x,i)=><li key={i}><b>{i+1}</b><span><RichText r={x}/></span></li>)}</ol></section>}
@@ -226,6 +232,7 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
     <div><dt>근거</dt><dd className="ai-brief-meta">{digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 보고 {digest.reportTotal}건(판정 {digest.judged.reports-digest.judged.unjudged}건) · {out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} · 연락처 미전송</dd></div>
    </dl>
   </div>
+  <button type="button" className="brief-fold" aria-expanded="true" onClick={()=>setFolded(true)}>브리핑 접기 <small>무슨 일이 벌어지고 있나만 남겨요</small><ChevronUp size={14}/></button>
   {(out.model.includes('규칙')||r.confidence==='low'||stale)&&<p className="ai-brief-source">{[out.model.includes('규칙')&&out.model,r.confidence==='low'&&'확신 낮음',stale&&'조건이 바뀌어 다시 쓰는 중'].filter(Boolean).join(' · ')}</p>}
  </div>;
 }
@@ -235,7 +242,7 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
 function BriefProgress({startedAt,demo}:{startedAt:number;demo:boolean}){
  const [now,setNow]=useState(Date.now());useEffect(()=>{const h=setInterval(()=>setNow(Date.now()),250);return()=>clearInterval(h)},[]);
  const sec=Math.max(0,(now-startedAt)/1000),steps=['조회 범위 데이터 모으기','보고 읽고 분석하기','브리핑 정리하기'],at=demo?2:sec<1?0:sec<9?1:2;
- return <div className="ai-brief-progress" role="status" aria-live="polite"><ol>{steps.map((s,i)=><li key={s} className={i<at?'done':i===at?'on':''}>{s}</li>)}</ol><div className="ai-brief-progress-bar" aria-hidden="true"><i style={{width:Math.min(95,sec/10*100)+'%'}}/></div><small>{sec.toFixed(0)}초 · 보통 10초 안팎</small></div>;
+ return <div className="ai-brief-progress" role="status" aria-live="polite"><p className="ai-brief-writing"><span className="ai-brief-twinkle" aria-hidden="true"><Sparkles size={20}/><Sparkles size={12}/><Sparkles size={10}/></span>브리핑 작성 중이에요</p><ol>{steps.map((s,i)=><li key={s} className={i<at?'done':i===at?'on':''}>{s}</li>)}</ol><div className="ai-brief-progress-bar" aria-hidden="true"><i style={{width:Math.min(95,sec/10*100)+'%'}}/></div><small>{sec.toFixed(0)}초 · 보통 10초 안팎</small></div>;
 }
 export function AiBrief({c,weekly=false}:{c:Context;weekly?:boolean}){
  const weeks=useMemo(()=>weekly?weekRanges(c.start,c.end):[],[weekly,c.start,c.end]);
