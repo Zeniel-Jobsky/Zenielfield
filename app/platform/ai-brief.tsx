@@ -272,9 +272,10 @@ export function AiBrief({c,weekly=false}:{c:Context;weekly?:boolean}){
  const targetNames=useMemo(()=>new Set(c.scope.map(t=>t.name)),[c.scope]);
  const about=useMemo(()=>{const me=c.me,you=me.role==='manager'?me.name+' 매니저님':(HONOR[me.role]||'')==='님'?me.name+'님':(HONOR[me.role]||'님');
   const st=c.storeId&&c.target(c.storeId)?.name,si=c.siteId&&c.target(c.siteId)?.name,mg=c.manager&&c.uname(c.manager);
-  const what=st?st+' 매장':si?si+' 현장':mg?(mg===me.name?'직접 담당하는 현장·매장':mg+' 매니저님 담당 현장·매장'):c.part?c.part+' 전체':c.team?c.team+' 전체':me.role==='manager'?'직접 담당하는 현장·매장':me.role==='partlead'?(me.part||'파트')+' 전체':me.role==='lead'?(me.team||'팀')+' 전체':'전체 사업부';
+  const what=st?st+' 매장':si?si+' 현장':mg?(mg===me.name?'직접 담당하는 현장·매장':mg+' 매니저의 현장·매장'):c.part?c.part+' 전체':c.team?c.team+' 전체':me.role==='manager'?'직접 담당하는 현장·매장':me.role==='partlead'?(me.part||'파트')+' 전체':me.role==='lead'?(me.team||'팀')+' 전체':'전체 사업부';
   return `${you}, ${what}에 대한 내용이에요${weekly&&range?' · '+range.label:''}.`},[c.me,c.storeId,c.siteId,c.manager,c.part,c.team,weekly,range]);
- const nameTones=useMemo(()=>new Map<string,Tone>([...c.scope.flatMap(t=>[[t.name,t.type==='store'?'store':'site'] as [string,Tone],[t.siteName,'site'] as [string,Tone]]),...[...new Set(c.scope.map(t=>t.region).filter(Boolean))].map(r=>[r+'권','region'] as [string,Tone])]),[c.scope]);
+ const clientOf=useMemo(()=>new Map(c.data.sites.map(x=>[x.id,(x as any).client as string||''])),[c.data.sites]);
+ const nameTones=useMemo(()=>new Map<string,Tone>([...c.scope.flatMap(t=>[[t.name,t.type==='store'?'store':'site'] as [string,Tone],[t.siteName,'site'] as [string,Tone],[clientOf.get(t.siteId)||'','site'] as [string,Tone]]).filter(([k])=>k.length>1),...[...new Set(c.scope.map(t=>t.region).filter(Boolean))].map(r=>[r+'권','region'] as [string,Tone])]),[c.scope,clientOf]);
  const who=useMemo(()=>{const users=new Map(c.data.users.map(u=>[u.name,u])),byName=new Map(c.scope.map(t=>[t.name,t])),dom=(id:string)=>c.data.domains.find(d=>d.id===id),w=(label:string,id='')=>({label,dom:dom(id)?.code||'',domName:dom(id)?.name||''});
   return (name:string):Who=>{if(name==='본인')return w(c.me.name+' '+(HONOR[c.me.role]||'님'));const t=byName.get(name);if(t)return w(name,t.domain);const u=users.get(name);if(u)return w(name+' '+(HONOR[u.role]||'님'));
    const tt=c.scope.find(x=>x.team===name);if(tt)return w(name+' 팀장님',tt.domain);const tp=c.scope.find(x=>x.part===name);if(tp)return w(name+' 파트장님',tp.domain);return w(name)}},[c.data.users,c.data.domains,c.scope,c.me]);
