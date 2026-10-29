@@ -678,3 +678,15 @@
  .ai-brief-steps li{align-items:flex-start}.ai-brief-steps b{margin-top:2px}
  .brief-disclosure-peek{display:none}
 }
+/* 먼저 챙길 곳: 본문은 중립, AI가 태깅한 핵심 상태 조각만 색(기한 넘김 앰버·완료 딥그린·상태 굵게) */
+.ai-brief-out .ai-brief-focus li span{color:var(--zf-text-body)}
+.ai-brief-out .ai-brief-focus .hi-bad{color:#8a4b00;font-weight:600}
+.ai-brief-out .ai-brief-focus .hi-num{color:var(--zf-text);font-weight:700}
+.ai-brief-out .ai-brief-focus .hi-good{color:#003c33;font-weight:600}
+/* 전할 말(격려): 이행 가이드 아래 늘 보임, 옅은 선택 배경 */
+.ai-brief-out .ai-brief-cheer{margin:4px 0 10px;padding:12px 14px;border-radius:8px;background:var(--zf-selected)}
+.ai-brief-out .ai-brief-cheer h3{margin:0 0 4px;font-size:12px;font-weight:600;color:#003c33}
+.ai-brief-out .ai-brief-cheer p{margin:0;font-size:14px;line-height:1.6;color:var(--zf-text)}
+.ai-brief-out .ai-brief-focus li span{display:grid;gap:2px}
+.ai-brief-do{font-style:normal;color:var(--zf-text)}
+.ai-brief-do b{font-weight:600;color:#003c33}
