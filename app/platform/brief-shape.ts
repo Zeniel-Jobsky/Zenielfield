@@ -24,7 +24,9 @@ const RECOMMEND=/\s*(먼저|우선)?[^.。!?]*(편이|것이)\s*(좋겠|낫겠|�
 const clean=(r:Rich,first=true):Rich=>{const out=r.filter(s=>s&&typeof s.v==='string').map(s=>({v:s.v,...(s.tone==='num'||s.tone==='bad'||s.tone==='good'?{tone:s.tone}:{})}));
  if(first&&out.length)out[0]={...out[0],v:out[0].v.replace(ADDRESSEE,'')};return out.filter(s=>s.v.length)};
 const noTail=(r:Rich):Rich=>{if(!r.length)return r;const last=r[r.length-1],v=last.v.replace(RECOMMEND,'');return v===last.v?r:[...r.slice(0,-1),{...last,v}].filter(s=>s.v.trim())};
-const toRich=(x:unknown):Rich=>typeof x==='string'?(x?[{v:x}]:[]):Array.isArray(x)?clean(x as Rich):[];
+// 문장 사이 띄어쓰기: 마침표·물음표·느낌표 바로 뒤에 글자가 붙으면 한 칸 띄운다(조각 경계 포함). 조사 자리는 건드리지 않는다.
+const spaceSentences=(r:Rich):Rich=>r.map((s,i)=>{let v=s.v.replace(/([.!?])(?=[가-힣A-Za-z0-9(])/g,'$1 ');const next=r[i+1];if(next&&/[.!?]$/.test(v)&&/^[가-힣A-Za-z0-9(]/.test(next.v))v+=' ';return v===s.v?s:{...s,v}});
+const toRich=(x:unknown):Rich=>typeof x==='string'?(x?spaceSentences([{v:x}]):[]):Array.isArray(x)?spaceSentences(clean(x as Rich)):[];
 const join=(...parts:Rich[]):Rich=>parts.filter(p=>p.length).flatMap((p,i)=>i?[{v:' '},...p]:p);
 // 칸 안에 모델이 다시 쓴 번호(①②·1.·가.)는 뗀다: 번호는 구조가 붙인다
 const noMark=(r:Rich):Rich=>r.length?[{...r[0],v:r[0].v.replace(/^\s*([①②③④]|\(?[0-9가나]\)|[0-9]\.)\s*/,'')},...r.slice(1)].filter(x=>x.v):r;
