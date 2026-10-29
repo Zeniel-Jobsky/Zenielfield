@@ -838,3 +838,26 @@
 .domain-row>div{display:grid;gap:2px}.domain-row>div small{font-size:12px;color:var(--zf-text-secondary)}
 .domain-row.inactive{opacity:.6}
 .domain-row .textbtn{min-height:44px}
+/* 브리핑 펼침 버튼 하나(더 보기/접기): 전체 폭 보조 버튼 */
+.ai-brief-out .brief-more{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;border:1px solid var(--zf-border);border-radius:6px;background:#fff;font:inherit;font-size:14px;font-weight:600;color:var(--zf-text);cursor:pointer}
+.ai-brief-out .brief-more:hover{background:var(--zf-surface-hover)}
+.ai-brief-out .brief-more:focus-visible{outline:2px solid #003c33;outline-offset:2px}
+.ai-brief-more{display:grid;gap:20px}
+.ai-brief-more .ai-brief-disclaimer{margin:0;font-size:12px;color:var(--zf-text-secondary)}
+/* 브리핑: 누구에 대한 내용인지 한 줄 + 한눈에 표 */
+.ai-brief .panel-heading .ai-brief-about{margin:4px 0 0;font-size:14px;line-height:1.5;color:var(--zf-text-body)}
+.ai-brief-glance h3{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--zf-text-secondary)}
+.ai-brief-glance ol{display:grid;margin:0;padding:0;list-style:none;border-top:1px solid var(--zf-border)}
+.ai-brief-glance li>button{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.3fr) minmax(0,2fr);gap:12px;align-items:center;width:100%;min-height:52px;padding:8px 4px;border:0;border-bottom:1px solid var(--zf-border);background:#fff;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.ai-brief-glance li>button:hover{background:var(--zf-surface-hover)}
+.ai-brief-glance li>button:focus-visible{outline:2px solid #003c33;outline-offset:-2px}
+.g-place{display:grid;gap:2px;min-width:0}.g-place small{font-size:12px;color:var(--zf-text-secondary)}
+.g-tags{display:flex;flex-wrap:wrap;gap:4px}
+.g-tags em{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:11px;font-style:normal;font-size:12px;font-weight:600}
+.g-type{background:var(--zf-info-soft);color:#516e8a}
+.g-level{background:var(--zf-warning-soft);color:#8a4b00}
+.g-late{background:#fff;border:1px solid #b42318;color:#b42318}
+.g-visit{background:var(--zf-warning-soft);color:#8a4b00}
+.g-note{font-size:13px;line-height:1.5;color:var(--zf-text-body);overflow-wrap:anywhere}
+.ai-brief-glance-empty,.ai-brief-glance-more{margin:8px 0 0;font-size:13px;color:var(--zf-text-secondary)}
+@media(max-width:760px){.ai-brief-glance li>button{grid-template-columns:1fr;gap:4px}}

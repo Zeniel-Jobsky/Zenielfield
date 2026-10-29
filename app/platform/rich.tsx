@@ -17,6 +17,11 @@ const push=(out:Rich,p:Part)=>{if(p===null||p===undefined||p===false||p==='')ret
 export function rich(strings:TemplateStringsArray,...vals:Part[]):Rich{const out:Rich=[];strings.forEach((s,i)=>{push(out,s);if(i<vals.length)push(out,vals[i])});return out}
 // 여러 문장을 이어 붙인다(빈 문장은 건너뜀)
 export function join(parts:(Rich|false|null|undefined)[],sep=' '):Rich{const out:Rich=[];for(const p of parts){if(!p||!p.length)continue;if(out.length)out.push({v:sep});out.push(...p)}return out}
+// 이름 조각 붙이기(생성 단계): tone 없는 조각만, 조회 범위의 실제 이름과 정확히 같은 글자를 site·store·region 조각으로 나눈다.
+// 화면에서 문장을 다시 읽지 않도록 브리핑을 받은 직후 한 번만 쓰고 저장본에 남긴다(DC-AI-TEXT).
+export function tagNames(r:Rich,names:Map<string,Tone>):Rich{if(!names.size)return r;const keys=[...names.keys()].filter(k=>k.length>1).sort((a,b)=>b.length-a.length);const out:Rich=[];
+ for(const seg of r){if(seg.tone){out.push(seg);continue}let rest=seg.v;while(rest){let at=-1,hit='';for(const k of keys){const i=rest.indexOf(k);if(i>=0&&(at<0||i<at||i===at&&k.length>hit.length)){at=i;hit=k}}if(at<0){out.push({v:rest});break}if(at>0)out.push({v:rest.slice(0,at)});out.push({v:hit,tone:names.get(hit)});rest=rest.slice(at+hit.length)}}
+ return out}
 export const plain=(r:Rich)=>r.map(s=>s.v).join('');
 // AI 응답·옛 저장본 정규화: 문자열이면 강조 없는 한 조각으로, 조각 배열이면 tone 값을 검사한다.
 export function toRich(x:unknown):Rich{if(typeof x==='string')return x?[{v:x}]:[];if(!Array.isArray(x))return [];return x.filter(s=>s&&typeof s.v==='string').map(s=>({v:s.v,...(isTone(s.tone)?{tone:s.tone}:{})}))}
