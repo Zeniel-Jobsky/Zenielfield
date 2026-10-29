@@ -14,7 +14,7 @@ export type AiPlanDraft={target:string;plannedDate:string;time:string;purpose:st
 export type AiMeta={text:string;imageCount:number;model:string;generatedAt:string};
 // AI 없이 만드는 초안(데모·AI 연결 안 됨): 입력 원문을 그대로 옮기기만 한다. 목적·결과·조치·분류를 낱말로 추정하지 않는다(DC-JUDGMENT). 사람이 고른다.
 export function demoDraft(text:string,mode:'result'|'plan'):AiDraft|AiPlanDraft{const t=text.trim();
- if(mode==='plan'){const day=t.includes('모레')?kstDay(2):t.includes('오늘')?kstDay(0):kstDay(1),m=t.match(/(오전|오후)?s*(d{1,2})시/),h=m?(Number(m[2])%12)+(m[1]==='오후'||(!m[1]&&Number(m[2])<8)?12:0):null;
+ if(mode==='plan'){const md=t.match(/(d{1,2})월s*(d{1,2})일/),y=kstDay(0).slice(0,4),day=md?`${y}-${md[1].padStart(2,'0')}-${md[2].padStart(2,'0')}`:t.includes('모레')?kstDay(2):t.includes('오늘')?kstDay(0):kstDay(1),m=t.match(/(오전|오후)?s*(d{1,2})시/),h=m?(Number(m[2])%12)+(m[1]==='오후'||(!m[1]&&Number(m[2])<8)?12:0):null;
   return {target:t.split(/s/).find(w=>/점|현장|매장/.test(w))||'',plannedDate:day,time:h===null?'':String(h).padStart(2,'0')+':00',purpose:'',precheck:'',confidence:'low'}}
  return {detail:t,result:'',purpose:'',notes:'',extra:{summary:t.slice(0,80)},actions:[],confidence:'low'}}
 // AI 정리 요청: 기입력 값을 문장으로 묶어 보낸다. 데모는 서버 없이 공백·문장부호만 정리한 예시 제안을 만든다.
@@ -37,9 +37,11 @@ export async function requestTidy(v:TidyValues,demo:boolean):Promise<{draft:AiDr
  const down=aiDownReason();if(down)return {draft:demoTidy(v),model:`간단 정리 · AI 연결 안 됨(${down})`,generatedAt:new Date().toISOString()};
  const text=`방문 목적: ${v.purpose}\n주요 활동 내용: ${v.detail}\n특이사항: ${v.notes||'(없음)'}\n후속 조치 필요 여부: ${v.result}`;
  try{return await callAssist({text,images:[],mode:'tidy'})}catch(e){return {draft:demoTidy(v),model:`간단 정리 · AI 연결 안 됨(${(e as Error).message})`,generatedAt:new Date().toISOString()}}}
-export function AiComposer({onDraft,mode='result',demo=false}:{onDraft:(draft:AiDraft,meta:AiMeta)=>void;mode?:'result'|'plan';demo?:boolean}){
+// seed: 바깥에서 고른 값(예: 내 일정에서 고른 날짜)을 입력 앞에 넣는다. 값이 바뀔 때마다 앞부분을 바꾼다.
+export function AiComposer({onDraft,mode='result',demo=false,seed=''}:{onDraft:(draft:AiDraft,meta:AiMeta)=>void;mode?:'result'|'plan';demo?:boolean;seed?:string}){
  const [text,setText]=useState(''),[interim,setInterim]=useState(''),[images,setImages]=useState<string[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(''),[note,setNote]=useState(''),[listening,setListening]=useState(false),rec=useRef<Recognition|null>(null),box=useRef<HTMLTextAreaElement>(null);
  useEffect(()=>()=>rec.current?.stop(),[]);
+ const lastSeed=useRef('');useEffect(()=>{if(!seed)return;setText(t=>{const rest=lastSeed.current&&t.startsWith(lastSeed.current)?t.slice(lastSeed.current.length):t;lastSeed.current=seed+' ';return seed+' '+rest.trimStart()});box.current?.focus()},[seed]);
  useEffect(()=>{const el=box.current;if(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,180)+'px'}},[text,interim]);
  function toggleVoice(){if(listening){rec.current?.stop();return}
   if(!window.isSecureContext){setError('음성 입력은 https 주소에서만 됩니다. 휴대폰 키보드의 마이크를 사용하세요.');return}

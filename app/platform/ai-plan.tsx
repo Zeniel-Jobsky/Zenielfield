@@ -8,23 +8,27 @@ import type {Context} from './context';
 import {AiComposer,type AiPlanDraft} from './ai-assist';
 import {GeoPick} from './geo';
 import {Permissions} from './permissions';
+import {MySchedule} from './my-schedule';
 // AI 방문 일정 등록: 말·글로 "언제·어디·무엇"을 받아 계획 초안을 만든다. 저장은 일반 방문계획(planned)과 같다.
 export function matchTarget(targets:Target[],hint:string){const q=hint.replace(/\s+/g,'').toLowerCase();if(q.length<2)return undefined;const score=(t:Target)=>{const n=t.name.replace(/\s+/g,'').toLowerCase(),s=t.siteName.replace(/\s+/g,'').toLowerCase();return n===q?100:n.includes(q)||q.includes(n)?60+n.length:s.includes(q)?20:0};return targets.filter(t=>t.status==='운영 중').map(t=>({t,s:score(t)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s)[0]?.t}
 export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;error:string;onSave:(entity:string,values:any,record?:any)=>void;onClose:()=>void}){
  const locked=!!modal.requirementId;
  const [type,setType]=useState<TargetType>(modal.targetType||c.type),[site,setSite]=useState(modal.siteId||c.siteId||''),[store,setStore]=useState(modal.storeId||c.storeId||'');
- const [plan,setPlan]=useState<AiPlanDraft|null>(null),[values,setValues]=useState({plannedDate:modal.date||c.now,time:'',purpose:purposes[0],precheck:''}),[hint,setHint]=useState('');
+ const [plan,setPlan]=useState<AiPlanDraft|null>(null),[values,setValues]=useState({plannedDate:modal.date||c.now,time:'',purpose:purposes[0],precheck:''}),[hint,setHint]=useState(''),[pickedDay,setPickedDay]=useState(''),[seed,setSeed]=useState('');
  const pick=(t:Target)=>{setType(t.type);setSite(t.siteId);setStore(t.storeId||'')};
  const target=c.targets.find(t=>t.id===(type==='store'?store:site)),owners=(target?.managerIds||[]).filter(id=>c.me.role!=='manager'||id===c.me.id),[visitor,setVisitor]=useState(c.me.id),owner=owners.includes(visitor)?visitor:owners[0]||'';
  const parents=c.data.sites.filter(s=>c.targets.some(t=>t.siteId===s.id)),stores=c.data.stores.filter(s=>s.siteId===site&&c.targets.some(t=>t.id===s.id));
  const ready=!!plan&&!!target&&!!owner&&/^\d{4}-\d{2}-\d{2}$/.test(values.plannedDate);
- function draft(d:AiPlanDraft){setPlan(d);setValues({plannedDate:/^\d{4}-\d{2}-\d{2}$/.test(d.plannedDate)?d.plannedDate:values.plannedDate,time:/^\d{2}:\d{2}$/.test(d.time)?d.time:'',purpose:purposes.includes(d.purpose)?d.purpose:purposes[0],precheck:d.precheck});setHint(d.target);const t=!locked&&matchTarget(c.targets,d.target);if(t)pick(t)}
+ // 초안(AI·데모)은 빈칸만 채운다. 사람이 고른 값이 항상 우선: 내 일정에서 고른 날짜, 일정 잡기로 정해진 대상(locked), 이미 고른 대상·목적.
+ function draft(d:AiPlanDraft){setPlan(d);const valid=(x:string)=>/^d{4}-d{2}-d{2}$/.test(x);setValues({plannedDate:pickedDay||(valid(d.plannedDate)?d.plannedDate:values.plannedDate),time:/^d{2}:d{2}$/.test(d.time)?d.time:values.time,purpose:values.purpose!==purposes[0]?values.purpose:purposes.includes(d.purpose)?d.purpose:purposes[0],precheck:values.precheck||d.precheck});setHint(d.target);const t=!locked&&!target&&matchTarget(c.targets,d.target);if(t)pick(t)}
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!ready)return;onSave('visit',{entry:'manual',...values,targetType:type,siteId:site,storeId:type==='store'?store:null,visitorId:owner,status:'planned',actualDate:null,actualTime:'',detail:'',notes:'',result:'',cancelReason:'',requirementId:modal.requirementId||null})}
  return <form className="record-form ai-form" onSubmit={submit}><div className="form-scroll"><div className="notice slim ai-notice"><Sparkles size={16}/><span><b>AI 입력</b> 언제·어디·무엇을 말하면 AI가 일정을 채웁니다.</span><button type="button" className="textbtn" onClick={()=>c.open('visit',undefined,{...modal,ai:false,manual:true})}><PenLine size={13}/>직접 입력</button></div>
  <fieldset className="form-grid" disabled={!c.editable||c.saving}>
  <Permissions/>
- <div className="form-section first wide"><span>01</span>말·글로 일정 입력</div>
- <AiComposer mode="plan" demo={c.demo!==false} onDraft={d=>draft(d as unknown as AiPlanDraft)}/>
+ <div className="form-section first wide"><span>00</span>내 일정 확인</div>
+ <MySchedule c={c} visitor={owner||c.me.id} window={modal.requirementId&&modal.dueDate?{start:c.now,end:modal.dueDate}:null} picked={pickedDay} onPick={d=>{setPickedDay(d);setSeed(`${Number(d.slice(5,7))}월 ${Number(d.slice(8))}일`)}}/>
+ <div className="form-section wide"><span>01</span>말·글로 일정 입력</div>
+ <AiComposer mode="plan" seed={seed} demo={c.demo!==false} onDraft={d=>draft(d as unknown as AiPlanDraft)}/>
  <div className="form-section wide"><span>02</span>방문 대상</div>
  <GeoPick auto targets={c.targets} target={target} onPick={locked?undefined:pick} onGeo={()=>{}}/>
  {plan&&hint&&<p className="form-hint wide">AI가 들은 대상: <b>{hint}</b>{target?' → '+target.name:' → 일치하는 대상 없음, 직접 선택해 주세요'}</p>}
