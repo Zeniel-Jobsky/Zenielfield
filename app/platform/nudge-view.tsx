@@ -69,12 +69,6 @@ export function NudgeCard({n,c,variant='band',onLeave}:{n:Nudge;c:Context;varian
   </div>
  </section>;
 }
-// 대시보드·잡매니저 홈: 핵심 지표 바로 아래 한 줄 띠
-export function NudgeBand({c}:{c:Context}){
- const n=useMemo(()=>buildNudge(c),[c.scope,c.visits,c.actions,c.metrics,c.type,c.now,c.me.id,c.start,c.end]);
- if(!n.stats.length&&!n.next&&!n.chips)return null;
- return <NudgeCard n={n} c={c}/>;
-}
 // 방문 결과·일정 저장 직후 시트 안 안내
 export function SavedNudge({c,before,onClose}:{c:Context;before:number;onClose:()=>void}){
  const n=useMemo(()=>buildNudge(c,before),[c.visits,c.actions,c.metrics,c.me.id]);

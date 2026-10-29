@@ -281,5 +281,5 @@ export function AiBriefSettings({c}:{c:Context}){
  if(!['admin','director'].includes(c.me.role))return null;
  const items:[keyof BriefFactors,string,string][]=[['reports','보고 내용 맥락','방문 보고·후속 조치 본문에서 반복되는 주제, 현장 분위기, 새로 생긴 문제를 읽어요(담당자 이름·연락처 제외)'],['units','조직 비교','팀·파트·잡매니저 단위의 이행률·지연 비교, 가장 안정적인 곳과 챙길 곳'],['trend','주별 흐름','최근 8주 이행률 흐름과 전주 대비'],['issues','후속 조치','기한 넘긴 조치·완료된 조치와 전주 대비'],['types','이슈 유형','어떤 유형의 요청이 많고 반복되는지'],['stale','장기 미방문','60일 넘게 찾지 않은 매장']];
  const set=(k:keyof BriefFactors,v:boolean)=>{const n={...f,[k]:v};setF(n);try{localStorage.setItem(FACTORS_KEY,JSON.stringify(n))}catch{}};
- return <section className="panel"><PanelTitle title="AI 현황 브리핑 요소" sub="대시보드·주차별 브리핑에 넣을 분석 요소예요. 브리핑은 자동이며 여기서 끄고 켜기만 해요. 이 설정은 이 PC·브라우저에 저장돼요."/><div className="settings-blocks">{items.map(([k,t,p])=><label key={k} className="checkbox ai-brief-factor"><input type="checkbox" checked={f[k]} onChange={e=>set(k,e.target.checked)}/><div><h3>{t}</h3><p>{p}</p></div></label>)}</div></section>;
+ return <section className="panel"><PanelTitle title="브리핑에 넣을 내용"/><div className="settings-blocks">{items.map(([k,t,p])=><label key={k} className="checkbox ai-brief-factor"><input type="checkbox" checked={f[k]} onChange={e=>set(k,e.target.checked)}/><div><h3>{t}</h3><p>{p}</p></div></label>)}</div></section>;
 }
