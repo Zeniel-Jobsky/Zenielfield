@@ -6,7 +6,7 @@ import {TrendingUp,TrendingDown,Minus,AlertTriangle,Clock3,Store as StoreIcon,Ba
 import {nice,short} from '../ui';
 import {type Context} from './context';
 import {ChartPanel} from './charts';
-import {aggregate,dayShift,lastTargetVisit,targetOf,targetStatus,typeName,weeklyTrend,type Target} from './model';
+import {aggregate,dayShift,lastTargetVisit,targetOf,targetStatus,typeName,weeklyTrend,type Target,SLOT_LABEL,NO_HISTORY,NO_REQUIRED} from './model';
 import {ISSUE_TYPES} from './judgment';
 // 의사결정용 차트: 보는 사람의 포지션(사업부 → 팀 → 파트 → 잡매니저 → 담당 대상)에 맞춰 비교 단위가 바뀐다.
 const tone={ok:'#003c33',plan:'#516e8a',late:'#b42318',miss:'#8a4b00',gray:'#65726b',dark:'#59645f'};
@@ -43,7 +43,7 @@ export function ScopeRisk({c}:{c:Context}){
   {rows.slice(0,8).map(r=>{const rate=r.m.rate??0;return <button key={r.key} className="risk-row" onClick={()=>s.drill(r.key)}><span className="risk-name">{r.label}</span><span className="risk-bar"><i style={{width:rate+'%',background:tone.ok}}/><b>{r.m.rate??'—'}%</b></span><span className="risk-bar"><i style={{width:pct(r.m.delayed+r.m.unplanned,maxGap)+'%',background:tone.ok}}/><b>{r.m.delayed+r.m.unplanned}</b></span><span className="risk-bar"><i style={{width:pct(r.overdue,maxIssue)+'%',background:tone.ok}}/><b>{r.overdue}</b></span><span className={'risk-num'+(r.stale?' red-text':'')}>{r.stale}</span></button>})}
   {rows.length>8&&<p className="chart-empty">상위 8개만 표시 · 나머지 {rows.length-8}개는 표에서 확인</p>}{!rows.length&&<p className="chart-empty">비교할 단위가 없습니다.</p>}</div></ChartPanel>
 }
-const statusOrder=[['방문 지연',tone.late,'delayed'],['계획 미등록',tone.miss,'unplanned'],['이력 미확인',tone.gray,'stale'],['방문 예정',tone.plan,'planned'],['방문 완료',tone.ok,'completed'],['정상 관리','#166534','']] as const;
+const statusOrder=[[SLOT_LABEL.delayed,tone.late,'delayed'],[SLOT_LABEL.unplanned,tone.miss,'unplanned'],[NO_HISTORY,tone.gray,'stale'],[SLOT_LABEL.planned,tone.plan,'planned'],[SLOT_LABEL.completed,tone.ok,'completed'],[NO_REQUIRED,tone.gray,'']] as const;
 export function StoreStatusChart({c}:{c:Context}){
  const targets=c.scope.filter(t=>t.type===c.type&&t.status==='운영 중'),counts=useMemo(()=>{const m=new Map<string,number>();for(const t of targets)m.set(targetStatus(t,c.visits,c.allMetrics),(m.get(targetStatus(t,c.visits,c.allMetrics))||0)+1);return m},[targets,c.visits,c.allMetrics]);
  const total=targets.length,max=Math.max(1,...statusOrder.map(([k])=>counts.get(k)||0));

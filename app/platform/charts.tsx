@@ -1,11 +1,12 @@
 'use client';
+import {SLOT_SHORT} from './model';
 import {useState,type ReactNode} from 'react';
 import {ChevronDown} from 'lucide-react';
 import {PanelTitle,nice,short} from '../ui';
 import {type Context} from './context';
 import {aggregate,agingBuckets,between,dayShift,typeName,weekOf,weeklyTrend,type Metrics,type Target,type WeekRow} from './model';
 const tone={completed:'#003c33',planned:'#516e8a',delayed:'#b42318',unplanned:'#8a4b00'};
-const parts=[{key:'completed',label:'완료'},{key:'planned',label:'예정'},{key:'delayed',label:'지연'},{key:'unplanned',label:'계획 미등록'}] as const;
+const parts=(['completed','planned','delayed','unplanned'] as const).map(key=>({key,label:SLOT_SHORT[key]}));
 const pct=(a:number,b:number)=>b?a/b*100:0;
 export function ChartPanel({title,sub,legend,children}:{title:string;sub?:string;legend?:ReactNode;children:ReactNode}){const [open,setOpen]=useState(true);return <section className={'panel chart-panel'+(open?'':' folded')}><PanelTitle title={title} sub={sub}><button className="iconbtn chart-fold" aria-expanded={open} aria-label={title+(open?' 접기':' 펼치기')} onClick={()=>setOpen(!open)}><ChevronDown size={16}/></button></PanelTitle>{open&&legend&&<div className="chart-panel-legend">{legend}</div>}{open&&<div className="chart-body">{children}</div>}</section>}
 function Legend(){return <div className="chart-legend">{parts.map(p=><span key={p.key}><i style={{background:tone[p.key]}}/>{p.label}</span>)}</div>}
