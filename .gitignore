@@ -62,3 +62,4 @@ yarn-error.log*
 /.dev-server.log
 /.preview.log
 /.build.log
+.brief-*.json

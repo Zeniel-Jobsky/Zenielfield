@@ -42,7 +42,9 @@ export type ReportGroup={target:string;now:number;prev:number;open:number;items:
 export type BriefTheme={title:string;status:string;summary:Rich;evidence:string[];targets:string[]};
 // cheer: 보는 사람이 잡매니저면 본인에게 하는 격려·독려 한마디, 관리자면 실무자에게 전할 독려 문구 제안.
 export type AiBriefResult={headline:Rich;cheer:Rich;themes:BriefTheme[];flow:Rich;strengths:Rich[];focus:{name:string;reason:Rich}[];story:Rich;judgment:Rich[];watch:Rich[];confidence:string};
-export function normalizeBrief(x:any):AiBriefResult{const list=(v:unknown)=>Array.isArray(v)?v.map(toRich).filter(r=>r.length):[];return {headline:toRich(x?.headline),cheer:toRich(x?.cheer),themes:Array.isArray(x?.themes)?x.themes.filter((t:any)=>t&&typeof t.title==='string').map((t:any)=>({title:t.title,status:typeof t.status==='string'?t.status:'',summary:toRich(t.summary),evidence:Array.isArray(t.evidence)?t.evidence.filter((e:unknown)=>typeof e==='string').slice(0,3):[],targets:Array.isArray(t.targets)?t.targets.filter((n:unknown)=>typeof n==='string'):[]})):[],flow:toRich(x?.flow),strengths:list(x?.strengths),focus:Array.isArray(x?.focus)?x.focus.filter((f:any)=>f&&typeof f.name==='string').map((f:any)=>({name:f.name,reason:toRich(f.reason)})):[],story:toRich(x?.story),judgment:list(x?.judgment),watch:list(x?.watch),confidence:typeof x?.confidence==='string'?x.confidence:''}}
+// 전할 말 앞의 받는 사람 머리말('실무자에게:' 등)은 화면 제목과 겹치므로 뗀다
+const dropAddressee=(r:Rich):Rich=>{if(!r.length)return r;const v=r[0].v.replace(/^s*(실무자|잡매니저|파트장|팀장|담당자)(님)?(들)?에게s*[:：]s*/,'');return v===r[0].v?r:[{...r[0],v},...r.slice(1)]};
+export function normalizeBrief(x:any):AiBriefResult{const list=(v:unknown)=>Array.isArray(v)?v.map(toRich).filter(r=>r.length):[];return {headline:toRich(x?.headline),cheer:dropAddressee(toRich(x?.cheer)),themes:Array.isArray(x?.themes)?x.themes.filter((t:any)=>t&&typeof t.title==='string').map((t:any)=>({title:t.title,status:typeof t.status==='string'?t.status:'',summary:toRich(t.summary),evidence:Array.isArray(t.evidence)?t.evidence.filter((e:unknown)=>typeof e==='string').slice(0,3):[],targets:Array.isArray(t.targets)?t.targets.filter((n:unknown)=>typeof n==='string'):[]})):[],flow:toRich(x?.flow),strengths:list(x?.strengths),focus:Array.isArray(x?.focus)?x.focus.filter((f:any)=>f&&typeof f.name==='string').map((f:any)=>({name:f.name,reason:toRich(f.reason)})):[],story:toRich(x?.story),judgment:list(x?.judgment),watch:list(x?.watch),confidence:typeof x?.confidence==='string'?x.confidence:''}}
 // 보고 본문 정리: 연락처를 지우고 반복 말을 줄여 한 건당 길이를 제한한다.
 // 보고 본문 가림은 판정과 같은 규칙(maskText) + 반복 말 정리
 const clean=(s:string)=>collapseRepeats(maskText(s));
@@ -174,7 +176,7 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
   </div>
   <div className="ai-brief-actions">
    {sites.length>0&&<button type="button" className="brief-disclosure" aria-expanded={reportsOpen} aria-controls={id+'-reports'} onClick={()=>setReportsOpen(!reportsOpen)}>보고 내용에서 보이는 것 <span>{reportsOpen?'접기':'더 보기'}</span>{reportsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>}
-   <button type="button" className="brief-disclosure" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>브리핑 {detailsOpen?'간략히 보기':'자세히 보기'}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
+   <button type="button" className="brief-disclosure" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>브리핑 {detailsOpen?'간략히 보기':'자세히 보기'}{!detailsOpen&&r.focus.length>0&&<small className="brief-disclosure-peek"> · 먼저 챙길 곳: {r.focus[0].name}{r.focus.length>1?` 외 ${r.focus.length-1}곳`:''}</small>}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
   </div>
   <div id={id+'-reports'} className="ai-brief-reports" hidden={!reportsOpen}>
    <p className="ai-brief-report-note">{digest.reports.length}곳 보고 {digest.reportTotal}건{digest.reportTotal>digest.reportSent&&` 중 대상별 최근 ${digest.reportSent}건`} 기준 · 현장별 더 보기에서 보고 근거를 확인하세요.</p>
@@ -194,7 +196,7 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
     <section>{r.judgment.length>1&&<><h3>추가 선택지와 판단</h3><ul className="ai-brief-decide">{r.judgment.slice(1).map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></>}{remainingWatch.length>0&&<><h3>다음에 볼 것</h3><ul>{remainingWatch.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></>}</section>
    </div>
    {r.cheer.length>0&&<section className="ai-brief-cheer"><h3>{CHEER_TO[digest.role]}</h3><p><RichText r={r.cheer}/></p></section>}
-   <p className="ai-brief-meta">{out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} 작성 · {digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 보고 내용 맥락 중심 · 담당자 이름·연락처 미전송 · 조건 변경 시 자동 갱신</p>
+   <p className="ai-brief-meta">{out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} 작성 · {digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 근거: 보고 {digest.reportTotal}건(판정 {digest.judged.reports-digest.judged.unjudged}건) · 담당자 이름·연락처 미전송 · 조건 변경 시 자동 갱신</p>
   </div>
   {(out.model.includes('규칙')||r.confidence==='low'||stale)&&<p className="ai-brief-source">{[out.model.includes('규칙')&&out.model,r.confidence==='low'&&'확신 낮음',stale&&'조건이 바뀌어 다시 쓰는 중'].filter(Boolean).join(' · ')}</p>}
  </div>;

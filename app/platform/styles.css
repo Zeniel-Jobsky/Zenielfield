@@ -588,3 +588,5 @@
 .suggest-list li small{font-size:11px;color:var(--zf-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .suggest-list li.on{background:var(--zf-selected)}
 .suggest-list li.on svg{color:#003c33}
+/* 브리핑 펼치기 미리보기: 안에 든 내용 수를 버튼에 적는다 */
+.brief-disclosure-peek{font-size:12px;font-weight:400;color:var(--zf-text-secondary)}
