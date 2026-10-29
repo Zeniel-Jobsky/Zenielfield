@@ -121,7 +121,7 @@ export function ruleBrief(d:BriefDigest):AiBriefResult{
  const dir=k.rateWeek!==null&&k.rateWeekPrev!==null?k.rateWeek-k.rateWeekPrev:null,odir=k.overdue-k.overduePrev;
  const scopeTxt=`${d.period.label}${d.scope.filters.length?' · '+d.scope.filters.join(' · '):''}`;
  const judgedTxt=j.reports?rich` 보고 ${num(j.reports+'건')} 중 판정 ${num((j.reports-j.unjudged)+'건')}, 지금 위험 ${num((j.latest['위험']||0)+'곳')}·주의 ${num((j.latest['주의']||0)+'곳')}이에요.`:'';
- const what=(p:BriefDigest['problems'][number])=>[p.판정!=='미판정'?`판정 ${p.판정}${p.판단?'('+p.판단+')':''}`:'',...p.방문상태,p.기한넘긴조치[0]?'기한 넘긴 조치 '+p.기한넘긴조치[0]:''].filter(Boolean).join(', ');
+ const what=(p:BriefDigest['problems'][number])=>[p.판단||'',...p.방문상태,p.기한넘긴조치[0]?'기한 넘긴 조치 '+p.기한넘긴조치[0]:''].filter(Boolean).join(', ');
  // 상황 판단(숫자 없이): 문제 지도 첫 대상과 그 문제, 이번 주 할 일
  const p0=d.problems[0],place=(p:BriefDigest['problems'][number])=>[p.부서,p.매니저&&p.매니저+' 담당',p.대상].filter(Boolean).join(' › ');
  const hasDelay=d.problems.some(p=>p.방문상태.some(x=>x.includes('기한 지남')||x.includes('일정 없음'))),hasLate=d.problems.some(p=>p.기한넘긴조치.length),hasJudged=d.problems.some(p=>p.판정==='위험'||p.판정==='주의');
