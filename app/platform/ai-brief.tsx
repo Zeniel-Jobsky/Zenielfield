@@ -202,7 +202,7 @@ function ReportSite({name,themes,jump,canJump}:{name:string;themes:BriefTheme[];
 // 브리핑 표시: 늘 보이는 것 = 현황 한 줄 → 무슨 일이 벌어지고 있나(가장 눈에 띄게) → 먼저 챙길 곳(누르면 이동).
 // 세부(AI 해석 더 보기: 반복되는 주제·전할 말·다음 주·근거 — 카드·아래 목록에 없는 것만)는 보고 싶은 사람만 펼친다.
 const FOLD_KEY='zf-ai-brief-folded';
-function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;digest:BriefDigest;stale:boolean;jump:(name:string)=>void;targetNames:Set<string>}){
+function BriefPresentation({out,digest,stale,busy=false,jump,targetNames}:{out:Cached;digest:BriefDigest;stale:boolean;busy?:boolean;jump:(name:string)=>void;targetNames:Set<string>}){
  const [detailsOpen,setDetailsOpen]=useState(false),[folded,setFoldedState]=useState(false),id=useId();
  // 브리핑 접기: 다 본 뒤 접으면 '무슨 일이 벌어지고 있나'만 남긴다(이 브라우저에 기억)
  useEffect(()=>{try{setFoldedState(localStorage.getItem(FOLD_KEY)==='1')}catch{}},[]);
@@ -212,6 +212,7 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
  // 세부 내용 = AI가 해석한 것 중 위쪽·아래 목록에 없는 것만(지표 숫자는 카드에 있으므로 넣지 않는다)
  const peek=[r.cheer.length&&CHEER_TO[digest.role],r.watch.length&&'다음 주 볼 것',sites.length&&'반복되는 주제'].filter(Boolean).join(' · ');
  const story=<section className="ai-brief-story"><h3>{ai&&<Sparkles size={14}/>}무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>;
+ if(busy)return null;
  if(folded)return <div className={'ai-brief-out folded'+(stale?' stale':'')}>{story}<button type="button" className="brief-fold" aria-expanded="false" onClick={()=>setFolded(false)}>브리핑 펼치기<ChevronDown size={14}/></button></div>;
  return <div className={'ai-brief-out'+(stale?' stale':'')}>
   <p className="ai-brief-head"><span className={'ai-brief-tone '+tone.cls}><AiMark size={12}/>{tone.label}</span><RichText r={r.headline}/></p>
@@ -237,8 +238,14 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
 // 만드는 동안 단계 표시: 데이터 모으기 → 보고 읽고 분석하기(AI) → 정리하기, 경과 초와 진행 막대(보통 10초, 최대 20초)
 function BriefProgress({startedAt,demo}:{startedAt:number;demo:boolean}){
  const [now,setNow]=useState(Date.now());useEffect(()=>{const h=setInterval(()=>setNow(Date.now()),250);return()=>clearInterval(h)},[]);
- const sec=Math.max(0,(now-startedAt)/1000),steps=['조회 범위 데이터 모으기','보고 읽고 분석하기','브리핑 정리하기'],at=demo?2:sec<1?0:sec<9?1:2;
- return <div className="ai-brief-progress" role="status" aria-live="polite"><p className="ai-brief-writing"><span className="ai-brief-twinkle" aria-hidden="true"><Sparkles size={20}/><Sparkles size={12}/><Sparkles size={10}/></span>브리핑 작성 중이에요</p><ol>{steps.map((s,i)=><li key={s} className={i<at?'done':i===at?'on':''}>{s}</li>)}</ol><div className="ai-brief-progress-bar" aria-hidden="true"><i style={{width:Math.min(95,sec/10*100)+'%'}}/></div><small>{sec.toFixed(0)}초 · 보통 10초 안팎</small></div>;
+ const sec=Math.max(0,(now-startedAt)/1000),at=demo?2:sec<1.5?0:sec<9?1:2;
+ const steps=['현장 보고를 모으고 있어요','보고를 읽고 무슨 일이 있는지 살피고 있어요','브리핑을 정리하고 있어요'];
+ // 판정 칩·'무슨 일이 벌어지고 있나' 자리에 제니에리 작업 표시(반짝이 캐릭터 + 지금 단계 문장 + 경과 초·막대)
+ return <div className="ai-brief-progress" role="status" aria-live="polite">
+  <p className="ai-brief-writing"><span className="ai-brief-twinkle" aria-hidden="true"><Sparkles size={20}/><Sparkles size={12}/><Sparkles size={10}/></span><span><b>제니에리가 열심히 일하고 있어요</b><small>{steps[at]}</small></span></p>
+  <ol>{steps.map((t,i)=><li key={t} className={i<at?'done':i===at?'on':''}>{['보고 모으기','읽고 살피기','정리하기'][i]}</li>)}</ol>
+  <div className="ai-brief-progress-bar" aria-hidden="true"><i style={{width:Math.min(95,sec/10*100)+'%'}}/></div><small>{sec.toFixed(0)}초 · 보통 10초 안팎</small>
+ </div>;
 }
 export function AiBrief({c,weekly=false}:{c:Context;weekly?:boolean}){
  const weeks=useMemo(()=>weekly?weekRanges(c.start,c.end):[],[weekly,c.start,c.end]);
@@ -264,7 +271,7 @@ export function AiBrief({c,weekly=false}:{c:Context;weekly?:boolean}){
    {error&&<p className="form-error" role="alert">{error} <button type="button" className="textbtn" onClick={()=>run(true)}>다시 시도</button></p>}
    {busy&&<BriefProgress startedAt={startedAt} demo={c.demo!==false}/>}
    {!r&&!error&&!busy&&<div role="status"><span className="sr-only">브리핑을 준비하고 있어요.</span><div className="ai-brief-skeleton" aria-hidden="true"><i/><i/><i/></div></div>}
-   {out&&r&&<BriefPresentation key={cacheId+':'+key+':'+out.generatedAt} out={out} digest={digest} stale={stale} jump={jump} targetNames={targetNames}/>}
+   {out&&r&&<BriefPresentation key={cacheId+':'+key+':'+out.generatedAt} out={out} digest={digest} stale={stale} busy={busy} jump={jump} targetNames={targetNames}/>}
   </div>
  </section>;
 }

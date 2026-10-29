@@ -680,3 +680,5 @@
 .brief-fold small{font-weight:400}
 .brief-fold:hover{color:var(--zf-text)}
 .ai-brief-out.folded .ai-brief-story{margin-bottom:4px}
+.ai-brief-writing>span:last-child{display:grid;gap:2px}.ai-brief-writing small{font-size:13px;font-weight:400;color:var(--zf-text-secondary)}
+.ai-brief-progress{padding:16px;border-radius:8px;background:var(--zf-info-soft)}
