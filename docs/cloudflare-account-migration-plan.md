@@ -2,7 +2,7 @@
 
 # Cloudflare 회사 계정 이관
 
-2026-10-29 · Codex · 인프라 변경 · 진행 중
+2026-10-29 · Codex · 인프라 변경 · 이관 완료
 
 ---
 
@@ -39,8 +39,14 @@
 - 회사 계정 대상 빌드 및 배포 설정 검사 통과. 버전 `0.1.4`.
 - 운영 DB 스키마와 로그인 계정·비밀번호는 변경하지 않는다. 계정 생성·쓰기 검수 스크립트는 실행하지 않는다.
 
-## 남은 확인
+## 운영 반영 결과
 
-- GitHub 저장소의 암호화된 Cloudflare 배포 토큰 교체 완료. production 환경에 이전 값을 덮어쓰는 동명 secret이 없음도 확인.
-- 검증한 변경을 main에 반영하고 자동 배포가 새 계정에서 성공하는지 확인.
-- 새 주소의 버전·로그인·데모 화면과 인증 경계 확인.
+- GitHub 저장소의 암호화된 Cloudflare 배포 토큰 교체 완료. production 환경에 옛 값을 덮어쓰는 동명 secret이 없음도 확인했다.
+- 소스 커밋 `ca57cea`의 [자동 배포 40799902115](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40799902115)에서 verify → migrate-and-deploy → cloudflare-deploy가 모두 성공했다. DB 스키마 변경은 없고 Edge 로그인 콜백 변경을 배포했다.
+- 새 공개 주소 `/version.json`이 `v0.1.4 · ca57cea`와 일치한다. 새 계정 Worker 메타데이터에서도 기존 로그인·AI 비밀값 4개와 Supabase 로그인 모드, D1/R2 바인딩 없음을 확인했다.
+- Chrome에서 새 주소의 회사 이메일·비밀번호 로그인 화면과 `로그인 없이 체험하기` → 운영 현황 데모 진입을 확인했다.
+- 비로그인 데이터 API 401, 기존 D1 API 503, 존재하지 않는 검증용 주소의 비밀번호 로그인 401을 확인했다. 마지막 검사는 기존 Worker→Supabase 서버 토큰 연결을 검증하며 계정 생성·DB 쓰기는 수행하지 않았다.
+- 실제 사용자 비밀번호로의 로그인과 유료 AI 호출은 실행하지 않았다. 새 도메인에서 기존 회사 계정으로 다시 로그인하면 된다.
+- 기존 개인 계정의 Worker·D1·기존 로그인 콜백은 전환 중 보존했다. 앞으로 main의 자동 배포 대상은 회사 계정이다.
+
+참고: [Cloudflare Worker 권한](https://developers.cloudflare.com/workers/authorization/workers/), [Supabase 인증 설정 API](https://supabase.com/docs/reference/api/v1-update-auth-service-config).
