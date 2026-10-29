@@ -610,6 +610,13 @@
 .my-day.window{border-color:#003c33}
 .my-day.on{outline:2px solid #003c33;outline-offset:1px;background:var(--zf-selected)}
 .my-day:hover{background:var(--zf-surface-hover)}
+/* 일정 미리 찾기: 사실 한 줄 + 후보 칩(날짜·시간·사실 꼬리표) */
+.schedule-hints{display:grid;gap:8px}
+.schedule-facts{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--zf-text-secondary)}
+.schedule-facts b{color:var(--zf-text);font-weight:600}
+.schedule-facts .warn b{color:#8a4b00}
+.my-day.cand{flex:1 0 120px}
+.my-day.cand b span{font-weight:400;color:var(--zf-text-secondary)}
 /* 통합 검색 자동완성: 입력 아래 목록(담당자·현장·매장), 선택 줄 딥그린 옅은 배경 */
 .search-suggest{position:relative}
 .suggest-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:70;max-height:360px;overflow:auto;margin:0;padding:4px;list-style:none;border:1px solid var(--zf-border);border-radius:8px;background:var(--zf-surface);box-shadow:0 8px 24px rgba(23,23,28,.12)}

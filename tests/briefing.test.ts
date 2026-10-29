@@ -7,6 +7,7 @@ import {targetsOf,visibleTargets} from '../app/platform/model';
 import {judgedSummary} from '../app/platform/ai-brief';
 import {isCurrentJudgment} from '../app/platform/judgment';
 import {targetFacts,attentionOf} from '../app/platform/status';
+import {scheduleFacts,scheduleCandidates} from '../app/platform/schedule';
 let count=0;const eq=(a:unknown,b:unknown)=>{assert.deepEqual(a,b);count++};
 const target=(id:string,siteId:string,type:'site'|'store'='site')=>({id,siteId,siteName:'가상 '+siteId,name:type==='store'?'가상 매장 '+id:'가상 '+siteId,type});
 const visit=(id:string,targetId:string,siteId:string,date:string,status='completed',visitorId='m1'):BriefVisit=>({id,targetId,siteId,actualDate:date,actualTime:'10:00',plannedDate:date,status,visitorId,visitorName:visitorId==='m1'?'잡매니저 01':'잡매니저 02',purpose:'점검',detail:'원문 '+id,notes:''});
@@ -37,4 +38,11 @@ const legacy:any={users:[manager],sites:[{id:'a',name:'실제 가상 현장'}],v
  const slot=(t:string,due:string):any=>({id:'s'+t,targetId:t,state:'delayed',dueDate:due,windowStart:due,windowEnd:due,visitId:null,overdue:true});
  const facts=targetFacts([T('a'),T('b'),T('c'),T('d')],[V('1','b','위험'),V('2','d','정상')],[],[slot('a','2026-10-10'),slot('c','2026-10-05')],'2026-10-27');
  eq(attentionOf(facts.values()).map(f=>f.target.id),['b','c','a'])}
+// 일정 미리 찾기·후보(schedule.ts): 사실만. 이미 잡힌 날 제외, 비어 있음·같은 지역·마감 전 마지막 빈 날 꼬리표, 주로 간 시간, 겹치면 마지막 일정 1시간 뒤
+{const T=(id:string,region:string)=>({id,type:'site' as const,siteId:id,storeId:null,name:id,siteName:id,team:'',part:'',division:'',domain:'',region,address:'',managerIds:['m'],rule:{period:'month' as const,count:1},status:'운영 중',startDate:'2026-01-01',lat:null,lng:null});
+ const a=T('a','서울'),b=T('b','서울');const V=(id:string,t:string,o:any):any=>({id,targetType:'site',siteId:t,storeId:null,visitorId:'m',requirementId:null,time:'',actualTime:'',...o});
+ const visits=[V('1','a',{status:'completed',actualDate:'2026-09-01',actualTime:'10:00'}),V('2','a',{status:'completed',actualDate:'2026-08-01',actualTime:'10:00'}),V('3','b',{status:'planned',plannedDate:'2026-10-29',time:'10:00'})];
+ const f=scheduleFacts(a,visits,'2026-10-27');eq([f.window?.end,f.lastVisit,f.usualTime],['2026-10-31','2026-09-01',{time:'10:00',n:2}]);
+ const list=scheduleCandidates(a,new Map([[a.id,a],[b.id,b]]),visits,'m','2026-10-27',f);
+ eq(list.map(x=>[x.date,x.time,x.tags.join('/')]),[['2026-10-27','10:00','비어 있음'],['2026-10-28','10:00','비어 있음'],['2026-10-29','11:00','같은 지역 1건'],['2026-10-30','10:00','비어 있음'],['2026-10-31','10:00','비어 있음/마감 전 마지막 빈 날']])}
 console.log(`${count} briefing assertions passed: week boundaries, deduplication, independent targets, actual visitors, access scope and legacy data reuse and current-format judgment counts.`);
