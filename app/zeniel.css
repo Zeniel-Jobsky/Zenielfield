@@ -653,3 +653,5 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 :root{--zf-icon-xs:14px;--zf-icon-sm:16px;--zf-icon-md:20px;--zf-icon-lg:24px}
 svg.lucide{stroke-width:1.75;flex-shrink:0}
 :where(p,span,small,b,a,button,label,h1,h2,h3,li,td,th)>svg.lucide:not(:only-child){vertical-align:-.15em}
+/* 사업 영역(업체 성격) 표식: 인재사업 딥그린 · SE운영 예정 블루 계열 */
+:root{--zf-domain-hr:#003c33;--zf-domain-se:#516e8a}

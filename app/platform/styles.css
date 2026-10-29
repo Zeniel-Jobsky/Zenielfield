@@ -779,3 +779,23 @@
 @media(prefers-reduced-motion:reduce){.zenieri,.zenieri-say,.zenieri-mark svg{animation:none}}
 /* 메뉴 이름은 H1 한 곳만: 상단 경로 글자 숨김 */
 .header-context>b,.header-context>span,.header-context>svg{display:none}
+/* 강조 조각은 문장 안 글자: 목록 칸의 grid 규칙이 RichText에 걸리지 않게 */
+.ai-brief-out .ai-brief-focus li span.rich{display:inline}
+.ai-brief-disclaimer{margin:0;font-size:12px;color:var(--zf-text-secondary)}
+/* 이번 주 일정 우선순위 묶음 */
+.priority-schedule{display:grid;gap:20px}
+.priority-schedule h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:14px;font-weight:600;color:var(--zf-text)}
+.priority-schedule h3 b{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:12px;background:var(--zf-selected);color:#003c33;font-size:12px}
+.priority-schedule h3 small{font-size:12px;font-weight:400;color:var(--zf-text-secondary)}
+.zf-dom{display:inline-flex;align-items:center;min-height:20px;margin-right:6px;padding:0 6px;border:1px solid currentColor;border-radius:4px;font-size:11px;font-weight:600;line-height:1;background:#fff;color:var(--zf-text-secondary)}
+.zf-dom-hr{color:var(--zf-domain-hr)}.zf-dom-se{color:var(--zf-domain-se)}
+/* 방문 일정 단위별 요약(파트장 이상) */
+.schedule-units{display:grid;border-top:1px solid var(--zf-border)}
+.su-row{display:grid;grid-template-columns:minmax(0,2fr) repeat(5,minmax(0,1fr));gap:8px;align-items:center;min-height:44px;padding:8px 4px;border:0;border-bottom:1px solid var(--zf-border);background:#fff;text-align:left;font:inherit;font-size:13px;color:var(--zf-text-body);cursor:pointer}
+.su-row:hover{background:var(--zf-selected)}
+.su-row:focus-visible{outline:2px solid #003c33;outline-offset:-2px}
+.su-head{cursor:default;font-size:12px;font-weight:600;color:var(--zf-text-secondary)}.su-head:hover{background:#fff}
+.su-row b{font-weight:600;color:var(--zf-text);overflow-wrap:anywhere}
+.su-gap{color:#8a4b00;font-weight:600}
+@media(max-width:760px){.su-row{grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr))}.su-row>:nth-child(4),.su-row>:nth-child(6){display:none}}
+.sidebar .collapse-btn>span{display:none}

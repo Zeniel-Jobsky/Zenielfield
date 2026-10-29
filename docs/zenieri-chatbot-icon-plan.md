@@ -1,7 +1,7 @@
 # 제니에리 챗봇 아이콘
 
 - 목표: 제니엘 느낌의 제니에리 아이콘을 AI 표시·브리핑 작성 중에 공유.
-- 자산: `public/brand/jerieri-chatbot.png`, 투명 배경·딥그린 헤드셋·흰 얼굴·Z 머리.
+- 자산: `public/brand/zenieri-chatbot.png`, 투명 배경·딥그린 헤드셋·흰 얼굴·Z 머리.
 - 적용: `AiMark` 기본24px·최소20px, 작성 중44px·처리 중 동작·말풍선·장식 이미지·상태 안내.
 - 정본: 디자인 지침9-B·AGENTS 현재 디자인 결정·PROJECT_RULE DC-DESIGN.
 - 제작: 내장 imagegen, 프롬프트는 제니엘 업무 앱용 친근한 챗봇·딥그린/흰색·투명 배경·헤드셋·Z 머리·머리만·글자 없음.
