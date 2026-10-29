@@ -1,10 +1,10 @@
 import type {User} from '../lib/model';
-import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,validGeo,distanceM,managesDomain,domainName,aiFields,type AiField,aiCategories,aiUrgencies,aiConfidences} from './model';
+import {type PlatformData,type TargetType,type Rule,type AiEntry,targetsOf,targetOf,visibleTargets,requirements,dayShift,entryOf,validGeo,distanceM,managesDomain,domainName,aiFields,type AiField,aiConfidences,MANUAL_REASONS} from './model';
 import {cleanJudgment} from './judgment';
 const str=(v:unknown,max:number)=>typeof v==='string'?v.slice(0,max):'';
 export function aiEntryOf(raw:any):AiEntry{if(!raw||typeof raw!=='object')throw Error('AI 입력 기록이 없습니다. AI 간편 등록에서 다시 작성해 주세요.');const text=str(raw.input?.text,3000),imageCount=Number(raw.input?.imageCount);if(!Number.isInteger(imageCount)||imageCount<0||imageCount>3)throw Error('AI 입력 사진 수를 확인해 주세요.');if(!text.trim()&&!imageCount)throw Error('AI 입력 원문(메모 또는 사진)이 없습니다.');
  const draft=Object.fromEntries(aiFields.map(k=>[k,str(raw.draft?.[k],3500)])) as AiEntry['draft'],edited=Array.isArray(raw.edited)?[...new Set(raw.edited)].filter((k):k is AiEntry['edited'][number]=>aiFields.includes(k as any)):[];
- return{input:{text,imageCount},draft,summary:str(raw.summary,200),category:(Array.isArray(raw.category)?raw.category:[]).filter((c:unknown)=>aiCategories.includes(c as string)),urgency:aiUrgencies.includes(raw.urgency)?raw.urgency:'',confidence:aiConfidences.includes(raw.confidence)?raw.confidence:'',model:str(raw.model,80),generatedAt:str(raw.generatedAt,40),edited}}
+ return{input:{text,imageCount},draft,summary:str(raw.summary,200),confidence:aiConfidences.includes(raw.confidence)?raw.confidence:'',model:str(raw.model,80),generatedAt:str(raw.generatedAt,40),edited}}
 export function newId(){return typeof crypto.randomUUID==='function'?crypto.randomUUID():'demo-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)}
 export function updateDemo(data:PlatformData,entity:string,values:any,record:any,actor:User,now:string){
  const next=structuredClone(data),id=record?.id||newId();const manager=actor.role==='manager';if(actor.role==='director')throw Error('사업부장은 조회 전용입니다.');
@@ -18,6 +18,7 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
   if(actor.role!=='admin')throw Error('사용자 등록은 시스템 관리자 권한입니다.');if(!item.name?.trim()||!/^[^@\s]+@[^@\s]+$/.test(item.email||'')||!item.team?.trim()||!item.part?.trim())throw Error('이름, 이메일, 팀, 파트를 입력해 주세요.');
   const domains=[...new Set((Array.isArray(item.domains)?item.domains:[]).filter((d:unknown):d is string=>typeof d==='string'))];if(domains.some(d=>!next.domains.some(x=>x.id===d&&x.active)))throw Error('활성 관리 도메인만 지정할 수 있습니다.');
   if(record?.id===actor.id&&(item.role!=='admin'||Number(item.active)!==1))throw Error('본인의 관리자 권한은 해제할 수 없습니다.');
+  if(record&&(record.active&&!Number(item.active)||record.team!==String(item.team).trim()||record.part!==String(item.part).trim())){const open=[...data.sites,...data.stores].filter(t=>t.managerIds.includes(record.id)).length;if(open)throw Error(`담당 중인 현장·매장 ${open}곳을 먼저 다른 담당자에게 배정해 주세요.`)}
   item={id,email:String(item.email).trim().toLowerCase(),name:item.name.trim(),role:item.role,team:item.team.trim(),part:item.part.trim(),active:Number(item.active)?1:0,domains,version:item.version};array=next.users;
  }else if(entity==='site'||entity==='store'){
   if(manager)throw Error('현장·매장 등록 및 담당자 배정은 관리자 권한입니다.');if(!item.name?.trim()||!item.code?.trim()||!item.address?.trim())throw Error('이름, 코드, 주소를 입력해 주세요.');
@@ -28,6 +29,12 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
   const team=parent?.team||item.team,part=parent?.part||item.part;for(const uid of (item.managerIds||[]) as string[]){const u=data.users.find(x=>x.id===uid);if(u&&domain&&(u.domains||[]).length&&!u.domains!.includes(domain))throw Error(`${u.name}은(는) 이 도메인을 관리하지 않습니다.`)}if(entity==='site'&&record&&(team!==record.team||part!==record.part)&&data.stores.some(s=>s.siteId===record.id))throw Error('산하 매장이 있는 현장의 조직 변경은 별도 이관 절차가 필요합니다.');if(actor.role==='lead'&&team!==actor.team||actor.role==='partlead'&&(team!==actor.team||part!==actor.part))throw Error('소속 조직 범위에서만 등록할 수 있습니다.');
   if(!item.managerIds?.length||item.managerIds.some((u:string)=>!data.users.some(x=>x.id===u&&x.active&&x.team===team&&x.part===part)))throw Error('대상과 같은 팀·파트의 담당자를 1명 이상 선택해 주세요.');
   if(!['week','month','manual'].includes(item.rule?.period)||!Number.isInteger(item.rule?.count)||item.rule.count<1||item.rule.count>8||(item.rule.period==='week'&&item.rule.count>7))throw Error('주간 1~7회, 월간 1~8회 범위의 방문 회차를 입력해 주세요.');
+  // 필요 시는 근거가 있어야 한다(서버 저장 함수와 같은 규칙). 지정·변경은 팀장 이상, 지정자·지정일·재검토일은 여기서 붙인다.
+  if(item.rule.period==='manual'){const m=item.manual,old=record?.manual;
+   if(!m?.reason&&record&&record.rule?.period==='manual'&&!old)delete item.manual;
+   else if(!MANUAL_REASONS.includes(m?.reason)||m.reason==='기타'&&!String(m.note||'').trim())throw Error('필요 시로 두려면 근거를 선택해 주세요(기타는 설명 필수).');
+   else if(!old||record.rule?.period!=='manual'||old.reason!==m.reason||(old.note||'')!==String(m.note||'').trim()){if(!['admin','lead'].includes(actor.role))throw Error('필요 시 지정·변경은 팀장 이상 권한입니다.');item.manual={reason:m.reason,note:String(m.note||'').trim().slice(0,200),by:actor.id,at:now,review:dayShift(now,90)}}
+   else item.manual=old}else delete item.manual;
   array=entity==='site'?next.sites:next.stores;if(array.some(t=>t.code===item.code&&t.id!==id))throw Error('이미 사용 중인 코드입니다.');
   if(entity==='site')item={...item,client:item.client||'가상 고객사',division:item.division||'유통사업부',cycle:item.rule.period==='week'?'weekly':item.rule.period==='manual'?'manual':'monthly'};
   item.startDate=record?.startDate||now;

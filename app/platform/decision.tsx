@@ -5,6 +5,7 @@ import {nice,short} from '../ui';
 import {type Context} from './context';
 import {ChartPanel} from './charts';
 import {aggregate,dayShift,lastTargetVisit,targetOf,targetStatus,typeName,weeklyTrend,type Target} from './model';
+import {ISSUE_TYPES} from './judgment';
 // 의사결정용 차트: 보는 사람의 포지션(사업부 → 팀 → 파트 → 잡매니저 → 담당 대상)에 맞춰 비교 단위가 바뀐다.
 const tone={ok:'#003c33',plan:'#516e8a',late:'#b42318',miss:'#8a4b00',gray:'#65726b',dark:'#59645f'};
 const pct=(a:number,b:number)=>b?Math.round(a/b*100):0;
@@ -47,7 +48,7 @@ export function StoreStatusChart({c}:{c:Context}){
  const total=targets.length,max=Math.max(1,...statusOrder.map(([k])=>counts.get(k)||0));
  return <ChartPanel title={`${typeName(c.type).replace(' 방문','')} 운영 상태`} sub={`운영 중 ${total}개 · 조회 기간 회차 기준`}><div className="hbar-list">{statusOrder.map(([label,color,key])=>{const v=counts.get(label)||0;return <button key={label} className="hbar" onClick={()=>key==='stale'?c.go('sites','stale'):key?c.go('requirements',key):c.go('sites')}><span className="hbar-label">{label}</span><span className="hbar-track"><i style={{width:pct(v,max)+'%',background:color}}/></span><b>{v}<small>{pct(v,total)}%</small></b></button>})}</div></ChartPanel>
 }
-const issueTypes=['인력 충원','고객사 요청','운영환경 개선','민원 대응','안전·시설','기타'];
+const issueTypes=ISSUE_TYPES;
 export function IssueTypeChart({c}:{c:Context}){
  const rows=useMemo(()=>[...new Set([...issueTypes,...c.actions.map(a=>a.type)])].map(t=>{const all=c.actions.filter(a=>a.type===t);return{t,overdue:all.filter(a=>a.state!=='완료'&&a.dueDate<c.now).length,open:all.filter(a=>a.state!=='완료'&&a.dueDate>=c.now).length,done:all.filter(a=>a.state==='완료').length}}).filter(r=>r.overdue+r.open+r.done>0).sort((a,b)=>b.overdue-a.overdue||b.open-a.open).slice(0,8),[c.actions,c.now]);
  const max=Math.max(1,...rows.map(r=>r.overdue+r.open+r.done));

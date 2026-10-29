@@ -25,7 +25,7 @@ export type BriefDigest={asOf:string;period:{start:string;end:string;label:strin
  trend:{week:string;rate:number|null;completed:number;delayed:number;unplanned:number}[];topOverdue:{target:string;type:string;content:string;late:number;owner:string}[];staleTargets:{name:string;days:number|null}[];
  reports:ReportGroup[];reportTotal:number;reportSent:number;
  // 문제 판정 집계(방문 기록에 저장된 judgment만, 본문을 다시 추측하지 않음). 미판정은 따로 센다.
- judged:{reports:number;unjudged:number;levels:Record<string,number>;latest:Record<string,number>;byType:{type:string;n:number;urgent:number;worse:number;ongoing:number;resolved:number;customer:number;targets:number}[]};
+ judged:{reports:number;unjudged:number;levels:Record<string,number>;latest:Record<string,number>;attention:{target:string;level:string;assessment:string;date:string}[];byType:{type:string;n:number;urgent:number;worse:number;ongoing:number;resolved:number;customer:number;targets:number}[]};
  // audience: 보는 사람. manager면 본인에게 하는 코칭(어디를 더 갈지·격려), leader면 결정권자 보고 + 실무자에게 전할 독려 문구.
  audience:'manager'|'leader'};
 // 보고 묶음: 대상 하나의 이번 기간 보고 수(now)·직전 기간 보고 수(prev)·진행 중 조치 수(open)와 날짜순 보고. prev:true는 직전 기간 보고.
@@ -44,19 +44,22 @@ const REPORT_CHARS=220,REPORT_BUDGET=36000,REPORT_GROUPS=80;
 // 보고 본문은 거르지 않고 그대로 보낸다. 문제 여부는 방문 기록에 저장된 판정(judgment)을 붙여 보내고, 미판정이면 AI가 내용을 읽고 판단한다(빈도·키워드로 추측하지 않음).
 const judgedText=(j:FieldVisit['judgment'])=>!j||!isCurrentJudgment(j)?'판정: 미판정':`판정: ${j.level} — ${j.assessment}`+(j.issues.length?' / 이슈: '+j.issues.map(i=>`[${i.type}·${i.severity}·${i.flow}${i.customerRequest?'·고객사 요청':''}] ${i.summary}`).join(' / '):'');
 // 판정 집계: levels=보고 시점 수준 분포, latest=대상별 가장 최근 판정의 수준 분포(지금 상태), byType=이슈 유형별 건수·긴급·악화·지속·해결.
-export function judgedSummary(visits:FieldVisit[]):BriefDigest['judged']{
+export function judgedSummary(visits:FieldVisit[],nameOf:(id:string)=>string=id=>id):BriefDigest['judged']{
  const levels:Record<string,number>={},last=new Map<string,FieldVisit>(),by=new Map<string,{n:number;urgent:number;worse:number;ongoing:number;resolved:number;customer:number;t:Set<string>}>();let unjudged=0;
  for(const v of visits){const j=v.judgment;if(!isCurrentJudgment(j)){unjudged++;continue}levels[j.level]=(levels[j.level]||0)+1;const id=targetOf(v),p=last.get(id);if(!p||(p.actualDate||'')<=(v.actualDate||''))last.set(id,v);
   for(const i of j.issues){const b=by.get(i.type)||{n:0,urgent:0,worse:0,ongoing:0,resolved:0,customer:0,t:new Set<string>()};b.n++;if(i.severity==='긴급')b.urgent++;if(i.flow==='악화')b.worse++;if(i.flow==='지속')b.ongoing++;if(i.flow==='해결')b.resolved++;if(i.customerRequest)b.customer++;b.t.add(id);by.set(i.type,b)}}
  const latest:Record<string,number>={};for(const v of last.values())latest[v.judgment!.level]=(latest[v.judgment!.level]||0)+1;
- return {reports:visits.length,unjudged,levels,latest,byType:[...by].map(([type,b])=>({type,n:b.n,urgent:b.urgent,worse:b.worse,ongoing:b.ongoing,resolved:b.resolved,customer:b.customer,targets:b.t.size})).sort((a,b)=>b.n-a.n)};
+ // 지금 상태가 위험·주의인 대상(가장 최근 판정 기준). 순서는 저장된 판정 수준 → 최근 보고일.
+ const order:Record<string,number>={위험:0,주의:1};
+ const attention=[...last].filter(([,v])=>v.judgment!.level in order).sort((a,b)=>order[a[1].judgment!.level]-order[b[1].judgment!.level]||(b[1].actualDate||'').localeCompare(a[1].actualDate||'')).map(([id,v])=>({target:nameOf(id),level:v.judgment!.level,assessment:v.judgment!.assessment,date:v.actualDate||''}));
+ return {reports:visits.length,unjudged,levels,latest,attention,byType:[...by].map(([type,b])=>({type,n:b.n,urgent:b.urgent,worse:b.worse,ongoing:b.ongoing,resolved:b.resolved,customer:b.customer,targets:b.t.size})).sort((a,b)=>b.n-a.n)};
 }
 export function reportGroups(c:Context,targets:Context['scope'],start:string,end:string){
  const len=Math.max(1,days(start,end)??0)+1,prevStart=dayShift(start,-len),ids=new Set(targets.map(t=>t.id));
  const map=new Map<string,{now:ReportItem[];prev:ReportItem[];open:number}>();const at=(id:string)=>{let g=map.get(id);if(!g){g={now:[],prev:[],open:0};map.set(id,g)}return g};
  const rows=c.visits.filter(v=>v.actualDate&&v.actualDate>=prevStart&&v.actualDate<=end&&ids.has(targetOf(v)));
  for(const v of rows){const d=v.actualDate!,id=targetOf(v),detail=clean(v.detail||''),notes=clean(v.notes||'');
-  const text=[v.purpose&&`목적: ${v.purpose}`,v.result&&`결과: ${v.result}`,detail&&`상세: ${detail}`,notes&&`특이사항: ${notes}`,!detail&&!notes&&'(본문 없음)',judgedText(v.judgment)].filter(Boolean).join(' / ').slice(0,REPORT_CHARS);
+  const text=[v.purpose&&`목적: ${v.purpose}`,detail&&`상세: ${detail}`,notes&&`특이사항: ${notes}`,!detail&&!notes&&'(본문 없음)',judgedText(v.judgment)].filter(Boolean).join(' / ').slice(0,REPORT_CHARS);
   if(d>=start)at(id).now.push({date:d,kind:'방문',text});else at(id).prev.push({date:d,kind:'방문',text,prev:true})}
  for(const a of c.actions){const id=targetOf(a);if(!ids.has(id)||(a.createdDate&&a.createdDate>end)||(a.state==='완료'&&(a.completedDate||'')<start))continue;const g=at(id);if(a.state!=='완료')g.open++;
   g.now.push({date:a.createdDate||a.dueDate,kind:'조치',text:clean(`[${a.type}·${a.state==='완료'?`완료 ${a.completedDate}`:a.dueDate<end?`기한 ${a.dueDate} 초과`:a.state}] ${a.content}`).slice(0,REPORT_CHARS)})}
@@ -66,7 +69,7 @@ export function reportGroups(c:Context,targets:Context['scope'],start:string,end
  const build=(k:number)=>all.map(([id,g])=>{const now=[...g.now].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,k),prev=[...g.prev].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,Math.min(2,k));
   return {target:c.target(id)?.name||'',now:g.now.length,prev:g.prev.length,open:g.open,items:[...prev,...now].sort((a,b)=>a.date.localeCompare(b.date))}});
  let groups=build(1);for(const k of [8,6,4,3,2]){const g=build(k);if(JSON.stringify(g).length<=REPORT_BUDGET){groups=g;break}}
- return {groups,total,sent:groups.reduce((n,g)=>n+g.items.filter(i=>!i.prev).length,0),judged:judgedSummary(rows.filter(v=>v.status==='completed'&&v.actualDate!>=start))};
+ return {groups,total,sent:groups.reduce((n,g)=>n+g.items.filter(i=>!i.prev).length,0),judged:judgedSummary(rows.filter(v=>v.status==='completed'&&v.actualDate!>=start),id=>c.target(id)?.name||'')};
 }
 const days=(from:string|null,to:string)=>from?Math.round((+new Date(to)-+new Date(from))/86400000):null;
 export function buildDigest(c:Context,f:BriefFactors=defaultFactors,range?:BriefRange):BriefDigest{
@@ -94,43 +97,32 @@ export function buildDigest(c:Context,f:BriefFactors=defaultFactors,range?:Brief
 // 다이제스트 지문: 이 값이 같으면 "변경 없음"으로 보고 저장된 요약을 재사용한다.
 export const digestKey=(d:BriefDigest)=>{const s=JSON.stringify(d);let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return (h>>>0).toString(36)+':'+s.length};
 const eun=(w:string)=>{const c=w.charCodeAt(w.length-1);return c>=0xac00&&c<=0xd7a3?((c-0xac00)%28?'은':'는'):'은(는)'};
-const pctWord=(n:number)=>n>=50?'절반 넘게':n>=30?'3분의 1 가까이':n>=15?'적지 않은 비중으로':'일부';
 const wk=(d:string)=>d.slice(5).replace('-','.');
-// 데모·AI 미연결용 규칙 브리핑: 성과와 위험을 함께 쓰고, 판단은 선택지와 근거로 제시한다. 원인은 단정하지 않는다.
+// AI 없이 만드는 브리핑(데모·AI 연결 안 됨): 판정하지 않는다(DC-JUDGMENT). 숫자 사실과 저장된 종합 판정만 옮긴다.
+// 상태 평가(양호·위험·따라잡기 어려움)·우선순위·선택지 판단은 쓰지 않고, 판단은 AI 연결 시에만 표시한다.
 export function ruleBrief(d:BriefDigest):AiBriefResult{
- const k=d.kpi,unit=d.scope.unit,kind=d.scope.type.replace(' 방문',''),worst=d.units[0],best=d.units.length>1?d.units.at(-1):undefined,biggest=[...d.status].sort((a,b)=>b.n-a.n)[0],topType=d.issueTypes[0];
- const rated=d.trend.filter(t=>t.rate!==null),first=rated[0],last=rated.at(-1),hi=rated.length?rated.reduce((a,b)=>(b.rate!>a.rate!?b:a)):null,lo=rated.length?rated.reduce((a,b)=>(b.rate!<a.rate!?b:a)):null;
- const dir=k.rateWeek!==null&&k.rateWeekPrev!==null?k.rateWeek-k.rateWeekPrev:null,odir=k.overdue-k.overduePrev,rising=!!(first&&last&&last.rate!>first.rate!+3),falling=!!(first&&last&&last.rate!<first.rate!-3);
- const level=k.rate===null?rich`산정 대상이 없는`:k.rate>=80?rich`${good('계획대로 관리되고 있는')}`:k.rate>=50?rich`절반 이상 따라가고 있는`:rich`${bad('목표에 못 미치는')}`;
+ const k=d.kpi,j=d.judged,unit=d.scope.unit,kind=d.scope.type.replace(' 방문',''),top=d.units.length>1?[...d.units].filter(u=>u.rate!==null).sort((a,b)=>b.rate!-a.rate!)[0]:undefined;
+ const rated=d.trend.filter(t=>t.rate!==null),first=rated[0],last=rated.at(-1);
+ const dir=k.rateWeek!==null&&k.rateWeekPrev!==null?k.rateWeek-k.rateWeekPrev:null,odir=k.overdue-k.overduePrev;
  const scopeTxt=`${d.period.label}${d.scope.filters.length?' · '+d.scope.filters.join(' · '):''}`;
- const tasks=join([k.overdue>0&&rich`기한을 넘긴 후속 조치 ${num(k.overdue+'건')}`,k.stale>0&&rich`장기 미방문 매장(${num(k.staleShare+'%')})`],'과 ');
- const headline=rich`${scopeTxt} 기준 ${kind} ${num(d.scope.targets+'곳')}의 방문은 ${level} 상태입니다${k.rate!==null&&rich` (이행률 ${num(k.rate+'%')}, 완료 ${num(k.completed+'회차')})`}. ${rising&&rich`최근 흐름은 ${good('나아지고 있지만')}, `}${tasks.length?rich`${tasks}이 남은 과제입니다.`:rich`큰 과제는 보이지 않습니다.`}`;
- const flow=join([rated.length>=2&&first&&last&&rich`최근 ${rated.length}주 이행률은 ${num(first.rate+'%')}에서 ${num(last.rate+'%')}로 ${rising?good('올라오는'):falling?bad('내려가는'):'비슷한'} 흐름입니다${hi&&lo&&hi.week!==lo.week&&rich` (최고 ${wk(hi.week)} 주 ${num(hi.rate+'%')}, 최저 ${wk(lo.week)} 주 ${num(lo.rate+'%')})`}.`,
-  dir!==null&&rich`지난주와 비교하면 이행률은 ${dir>0?good(`${dir}%p 나아졌고`):dir<0?bad(`${-dir}%p 빠졌고`):'같고'}, 기한 초과 조치는 ${odir>0?bad(`${odir}건 늘었습니다`):odir<0?good(`${-odir}건 줄었습니다`):'변화가 없습니다'}.`,
-  k.required>0&&rich`필요 방문 중 ${pctWord(k.gapShare)}(${num(k.gapShare+'%')})가 계획이 없거나 날짜를 넘겼습니다. ${k.gapShare>=30?rich`일정 등록 없이 지금 속도라면 기간 안에 ${bad('따라잡기 어렵습니다')}.`:rich`남은 기간 일정으로 ${good('충분히 메울 수 있는 수준')}입니다.`}`]);
- const strengths=([best&&best.rate!==null&&rich`${best.label}${eun(best.label)} 이행률 ${num(best.rate+'%')}로 ${unit} 중 ${good('가장 안정적입니다')}. 운영 방식을 다른 ${unit}에 참고할 만합니다.`,
-  rising&&last&&rich`최근 ${rated.length}주 흐름이 ${num(last.rate+'%')}까지 ${good('올라왔습니다')}. 개선 노력이 숫자로 나타나고 있습니다.`,
-  k.completed>0&&rich`이번 ${d.period.label}에 완료된 방문은 ${num(k.completed+'회차')}${k.planned>0&&rich`, 일정이 잡힌 방문 ${num(k.planned+'회차')}`}입니다.`,
-  k.resolved>0&&rich`같은 기간 후속 조치 ${num(k.resolved+'건')}이 ${good('완료 처리되었습니다')}.`,
-  odir<0&&rich`기한 초과 조치가 지난주보다 ${good(`${-odir}건 줄었습니다`)}.`,
-  k.stale===0&&rich`60일 넘게 찾지 않은 매장은 ${good('없습니다')}.`].filter(Boolean) as Rich[]).slice(0,4);
- const focus=[...d.units.slice(0,best?2:1).filter(u=>u!==best).map(u=>({name:u.label,reason:rich`${unit} 중 ${u.rate===null?'산정 대상 없음':rich`이행률 ${num(u.rate+'%')}`}${best&&u===worst&&rich`, 가장 높은 ${best.label}(${num(best.rate+'%')})과 ${bad(`${(best.rate??0)-(u.rate??0)}%p 차이`)}`}${u.overdue>0&&rich` · 기한 넘긴 조치 ${num(u.overdue+'건')}`}${u.stale>0&&rich` · 60일+ 매장 ${num(u.stale+'곳')}`}`})),
-  ...d.topOverdue.slice(0,2).map(o=>({name:o.target,reason:rich`"${o.content}" 요청이 ${bad(`기한을 ${o.late}일 넘겼습니다`)} (${o.type}, ${o.owner})`}))].slice(0,4);
- const story=join([biggest&&rich`운영 중인 ${kind}은 "${biggest.label}" 상태가 가장 많습니다.`,
-  worst&&best&&rich`${unit} 간 ${bad('차이가 큽니다')}. ${worst.label}${eun(worst.label)} 지연·미등록이 ${num(worst.gap+'회차')}로 많고, ${best.label}${eun(best.label)} ${num(best.gap+'회차')}입니다. 인력·동선·관리 주기 중 어느 쪽 차이인지는 현장 확인이 필요합니다.`,
-  topType&&rich`후속 조치는 "${topType.type}" 요청이 가장 많습니다(진행 ${num(topType.open+'건')}, 기한 초과 ${num(topType.overdue+'건')}, 완료 ${num(topType.done+'건')})${topType.overdue>=3&&'. 같은 요청이 반복되는지 함께 볼 필요가 있습니다'}.`,
-  k.stale>0&&d.staleTargets[0]&&rich`${d.staleTargets[0].name}${eun(d.staleTargets[0].name)} ${d.staleTargets[0].days===null?'방문 기록이 아직 없어':rich`${num(d.staleTargets[0].days+'일')}째 방문이 없어`} 현황 확인이 필요합니다.`]);
- const judgment=[k.overdue>0&&rich`기한 넘긴 조치 ${num(k.overdue+'건')}: ① 담당자와 새 기한을 다시 정한다 ② 이미 끝났는데 완료 처리만 안 된 건을 먼저 정리한다. 두 경우가 섞여 있을 수 있어 ②부터 확인하면 실제 미결 규모가 드러납니다.`,
-  k.gapShare>=30?rich`계획 미등록·지연 ${num(k.gap+'회차')}: 이번 주 일정 등록을 지시하면 이행률을 가장 빨리 올릴 수 있습니다. 다만 인력이 부족한 ${unit}이라면 주기 조정도 함께 검토할 수 있습니다.`:k.required>0&&rich`남은 지연 회차는 현재 일정 안에서 처리 가능한 수준이라 별도 조치 없이 지켜봐도 됩니다.`,
-  worst&&best&&rich`${worst.label}: 질책보다 원인 확인이 먼저입니다. ${best.label}의 방식(일정 등록 습관, 담당 범위)을 비교해 보면 판단 근거가 생깁니다.`,
-  k.stale>0&&rich`60일+ 매장 ${num(k.stale+'곳')}: 전부 방문하기 어렵다면 매출·민원이 있는 곳부터 순서를 정하는 방법이 있습니다.`].filter(Boolean) as Rich[];
- const watch=[dir!==null&&rich`다음 주 이행률이 ${num(k.rateWeek+'%')}보다 오르는지`,k.overdue>0&&rich`기한 초과 조치가 ${num(k.overdue+'건')}보다 줄어드는지`,worst&&rich`${worst.label}의 지연·미등록 변화`].filter(Boolean) as Rich[];
- // 규칙 브리핑은 문장 맥락을 읽지 못하므로 보고가 몰린 곳만 묶어 보여 준다.
- const busy=d.reports.filter(g=>g.target).slice(0,3).map(g=>[g.target,g.now] as const);
- const themes:BriefTheme[]=busy.length?[{title:'보고가 몰린 곳',status:'',evidence:[],summary:rich`이번 기간 보고 ${num(d.reportTotal+'건')} 중 ${busy.map(([n,k])=>`${n} ${k}건`).join(', ')}에 보고가 많습니다. 보고 내용의 맥락 분석은 AI 연결 시 표시됩니다.`,targets:busy.map(([n])=>n)}]:[];
- // 독려 문구(규칙): 관리자에게는 실무자에게 전할 말, 잡매니저에게는 본인 격려(상세 코칭은 홈의 방문 코치).
- const cheer=d.audience==='leader'?(k.gap>0?rich`실무자에게: "일정 없는 필요 방문 ${num(k.gap+'회차')}을 이번 주에 먼저 잡아 주세요. ${rising?'최근 흐름이 좋아지고 있어요, 조금만 더 힘내 주세요.':'하나씩 잡으면 금방 따라잡을 수 있어요.'}"`:rich`실무자에게: "계획대로 잘 관리해 주고 있어요. 지금처럼만 이어 가 주세요."`):(k.rate!==null&&k.rate>=80?rich`${good('잘하고 계세요!')} 이행률 ${num(k.rate+'%')}로 담당 현장을 계획대로 챙기고 있어요.`:rich`조금만 더 힘내요. 일정 없는 방문 ${num(k.gap+'회차')}부터 잡아 두면 이행률이 바로 올라가요.`);
- return {headline,cheer,themes,flow,strengths,focus,story,judgment,watch,confidence:'rule'};
+ const judgedTxt=j.reports?rich` 보고 ${num(j.reports+'건')} 중 판정 ${num((j.reports-j.unjudged)+'건')}, 지금 위험 ${num((j.latest['위험']||0)+'곳')}·주의 ${num((j.latest['주의']||0)+'곳')}입니다.`:'';
+ const headline=rich`${scopeTxt} 기준 ${kind} ${num(d.scope.targets+'곳')}: 이행률 ${num(k.rate===null?'산정 전':k.rate+'%')}, 완료 ${num(k.completed+'회차')}, 계획 없음·지연 ${num(k.gap+'회차')}, 기한 넘긴 조치 ${num(k.overdue+'건')}.${judgedTxt}`;
+ const flow=join([rated.length>=2&&first&&last&&rich`최근 ${rated.length}주 이행률 ${num(first.rate+'%')} → ${num(last.rate+'%')}.`,
+  dir!==null&&rich`지난주 대비 이행률 ${num((dir>0?'+':'')+dir+'%p')}, 기한 초과 조치 ${num((odir>0?'+':'')+odir+'건')}.`,
+  k.required>0&&rich`필요 방문 ${num(k.required+'회차')} 중 ${num(k.gapShare+'%')}가 계획 없음·지연입니다.`]);
+ const strengths=([k.completed>0&&rich`완료된 방문 ${num(k.completed+'회차')}${k.planned>0&&rich`, 일정이 잡힌 방문 ${num(k.planned+'회차')}`}.`,
+  k.resolved>0&&rich`완료 처리된 후속 조치 ${num(k.resolved+'건')}.`,
+  top&&rich`${unit} 중 이행률이 가장 높은 곳은 ${top.label}(${num(top.rate+'%')}).`,
+  (j.latest['정상']||0)>0&&rich`지금 판정이 정상인 곳 ${num(j.latest['정상']+'곳')}.`].filter(Boolean) as Rich[]).slice(0,4);
+ // 먼저 챙길 곳: 저장된 판정이 위험·주의인 대상만(코드가 순위를 매기지 않는다)
+ const focus=j.attention.slice(0,4).map(a=>({name:a.target,reason:rich`${wk(a.date)} 판정 ${a.level==='위험'?bad(a.level):a.level}${a.assessment?' — '+a.assessment:''}`}));
+ const story=join([j.byType.length>0&&rich`판정에 나온 이슈 유형: ${j.byType.slice(0,4).map(t=>`${t.type} ${t.n}건(대상 ${t.targets}곳${t.urgent?`, 긴급 ${t.urgent}`:''}${t.worse?`, 악화 ${t.worse}`:''}${t.resolved?`, 해결 ${t.resolved}`:''})`).join(' · ')}.`,
+  d.issueTypes[0]&&rich`후속 조치 유형별: ${d.issueTypes.slice(0,3).map(t=>`${t.type} 진행 ${t.open}·기한 초과 ${t.overdue}·완료 ${t.done}`).join(' / ')}.`,
+  k.stale>0&&rich`60일 넘게 방문 기록이 없는 매장 ${num(k.stale+'곳')}(${num(k.staleShare+'%')}).`]);
+ const themes:BriefTheme[]=j.byType.slice(0,3).map(t=>({title:t.type,status:'',evidence:[],summary:rich`판정 이슈 ${num(t.n+'건')}, 대상 ${num(t.targets+'곳')}${t.worse>0&&rich`, 악화 ${bad(t.worse+'건')}`}${t.ongoing>0&&rich`, 지속 ${num(t.ongoing+'건')}`}${t.resolved>0&&rich`, 해결 ${num(t.resolved+'건')}`}.`,targets:[]}));
+ const watch=[dir!==null&&rich`다음 주 이행률(이번 주 ${num(k.rateWeek+'%')})`,k.overdue>0&&rich`기한 초과 조치 ${num(k.overdue+'건')}의 변화`,j.attention.length>0&&rich`위험·주의 대상 ${num(j.attention.length+'곳')}의 다음 판정`].filter(Boolean) as Rich[];
+ const cheer=d.audience==='leader'?rich`실무자에게 전할 사실: 완료 ${num(k.completed+'회차')}, 일정 없는 필요 방문 ${num(k.gap+'회차')}.`:rich`이번 기간 완료 ${num(k.completed+'회차')}${k.gap>0&&rich`, 일정을 잡으면 되는 필요 방문 ${num(k.gap+'회차')}`}.`;
+ return {headline,cheer,themes,flow,strengths,focus,story,judgment:[],watch,confidence:'rule'};
 }
 export async function requestBrief(d:BriefDigest,demo:boolean):Promise<{result:AiBriefResult;model:string;generatedAt:string}>{
  if(demo)return {result:ruleBrief(d),model:'데모 규칙 브리핑',generatedAt:new Date().toISOString()};
@@ -140,7 +132,8 @@ export async function requestBrief(d:BriefDigest,demo:boolean):Promise<{result:A
  catch(e){return {result:ruleBrief(d),model:`규칙 브리핑 · AI 연결 안 됨(${(e as Error).message.replace(/[.\s]+$/,'')})`,generatedAt:new Date().toISOString()}}
 }
 type Cached={key:string;result:AiBriefResult;model:string;generatedAt:string};
-function toneOf(d:BriefDigest){const k=d.kpi;if(k.rate===null)return {cls:'plain',label:'산정 전'};if(k.rate<50||k.gapShare>=50)return {cls:'bad',label:'위험'};if(k.rate<80||k.overdue>0)return {cls:'warn',label:'주의'};return {cls:'good',label:'양호'}}
+// 머리 칩: 저장된 판정의 지금 상태(대상별 최근 판정)만 쓴다. 이행률로 위험·주의를 정하지 않는다.
+function toneOf(d:BriefDigest){const l=d.judged.latest;if(l['위험'])return {cls:'bad',label:`위험 ${l['위험']}곳`};if(l['주의'])return {cls:'warn',label:`주의 ${l['주의']}곳`};if(l['정상']||l['관찰'])return {cls:'good',label:'위험·주의 없음'};return {cls:'plain',label:'미판정'}}
 // 옛 저장본(문자열 문장)도 조각 배열로 바꿔 읽는다
 const readCache=(id:string):Cached|null=>{try{const v=JSON.parse(localStorage.getItem(CACHE_KEY+':'+id)||'null');return v?{...v,result:normalizeBrief(v.result)}:null}catch{return null}};
 const writeCache=(id:string,v:Cached)=>{try{localStorage.setItem(CACHE_KEY+':'+id,JSON.stringify(v))}catch{}};

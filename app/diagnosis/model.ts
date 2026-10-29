@@ -1,7 +1,7 @@
 import {shift} from '../lib/model';
 import {weekRanges} from '../briefing/model';
 export type DxTarget={id:string;type:'site'|'store';siteId:string;name:string;siteName:string};
-export type DxIssue={id:string;targetId:string;siteId:string;visitId:string|null;ownerId:string;type:string;content:string;state:string;dueDate:string;createdDate:string|null;completedDate:string|null;urgent?:boolean};
+export type DxIssue={id:string;targetId:string;siteId:string;visitId:string|null;ownerId:string;type:string;content:string;state:string;dueDate:string;createdDate:string|null;completedDate:string|null;urgent?:boolean;repeat?:boolean};
 export type DxVisit={id:string;targetId:string;siteId:string;visitorId:string;plannedDate:string|null;actualDate:string|null;status:string;purpose:string};
 export type DxInput={targets:DxTarget[];issues:DxIssue[];visits:DxVisit[];owners:Set<string>};
 export type DxIssueRow=DxIssue&{open:boolean;late:number;repeat:boolean;unassigned:boolean;urgentFlag:boolean};
@@ -9,18 +9,16 @@ export type DxSite={siteId:string;siteName:string;own:number;stores:number;issue
 export type DxFlag='urgent'|'overdue'|'repeat'|'unassigned';
 export type DxSummary={totalOpen:number;urgent:number|null;overdue:number;repeat:number;unassigned:number};
 export type Diagnosis={state:'no-target'|'no-data'|'clear'|'issues';issues:DxIssueRow[];open:DxIssueRow[];summary:DxSummary;sites:DxSite[]};
-export const REPEAT_DAYS=90;
 const days=(a:string,b:string)=>Math.round((Date.parse(b+'T12:00:00Z')-Date.parse(a+'T12:00:00Z'))/86400000);
 const within=(d:string|null,a:string,b:string)=>!!d&&d>=a&&d<=b;
 const unique=<T extends {id:string}>(rows:T[])=>[...new Map(rows.map(r=>[r.id,r])).values()];
 // 같은 입력은 한 번만 정규화한다(진단·주차 진단·상세가 같은 입력으로 여러 번 부른다).
 const normalized=new WeakMap<DxInput,{targets:DxInput['targets'];issues:DxInput['issues'];visits:DxInput['visits']}>();
 export function normalize(input:DxInput){const hit=normalized.get(input);if(hit)return hit;const ids=new Set(input.targets.map(t=>t.id));const out={targets:unique(input.targets),issues:unique(input.issues).filter(a=>ids.has(a.targetId)),visits:unique(input.visits).filter(v=>ids.has(v.targetId))};normalized.set(input,out);return out}
+// 긴급·반복은 저장된 종합 판정에서 온 값(urgent·repeat)만 쓴다. 기간·유형 일치로 추정하지 않는다(DC-JUDGMENT).
 export function flagIssues(issues:DxIssue[],owners:Set<string>,now:string):DxIssueRow[]{
- const groups=new Map<string,DxIssue[]>();for(const a of issues){const key=a.targetId+'|'+a.type;groups.set(key,[...(groups.get(key)||[]),a])}
- return issues.map(a=>{const open=a.state!=='완료',peers=groups.get(a.targetId+'|'+a.type)!.filter(b=>b.id!==a.id);
-  const repeat=!!a.createdDate&&peers.some(b=>!!b.createdDate&&Math.abs(days(b.createdDate,a.createdDate!))<=REPEAT_DAYS);
-  return{...a,open,late:open&&!!a.dueDate&&a.dueDate<now?days(a.dueDate,now):0,repeat,unassigned:open&&(!a.ownerId||!owners.has(a.ownerId)),urgentFlag:open&&a.urgent===true}});
+ return issues.map(a=>{const open=a.state!=='완료';
+  return{...a,open,late:open&&!!a.dueDate&&a.dueDate<now?days(a.dueDate,now):0,repeat:a.repeat===true,unassigned:open&&(!a.ownerId||!owners.has(a.ownerId)),urgentFlag:open&&a.urgent===true}});
 }
 const rank=(a:DxIssueRow,b:DxIssueRow)=>+b.urgentFlag-+a.urgentFlag||+(b.late>0)-+(a.late>0)||b.late-a.late||+b.repeat-+a.repeat||+b.unassigned-+a.unassigned||(a.dueDate||'9').localeCompare(b.dueDate||'9')||a.id.localeCompare(b.id);
 export const hasFlag=(a:DxIssueRow,f:DxFlag)=>f==='urgent'?a.urgentFlag:f==='overdue'?a.late>0:f==='repeat'?a.open&&a.repeat:a.unassigned;

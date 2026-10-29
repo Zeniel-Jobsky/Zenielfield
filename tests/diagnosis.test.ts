@@ -11,9 +11,9 @@ const issue=(id:string,targetId:string,siteId:string,o:Partial<DxIssue>={}):DxIs
 const visit=(id:string,targetId:string,siteId:string,o:Partial<DxVisit>={}):DxVisit=>({id,targetId,siteId,visitorId:'m1',plannedDate:'2026-10-20',actualDate:'2026-10-20',status:'completed',purpose:'점검',...o});
 const owners=new Set(['m1','m2']);
 const base:DxInput={owners,targets:[t('a','a'),t('a1','a','store'),t('b','b'),t('c','c')],visits:[visit('v1','a','a')],issues:[
- issue('late','a','a',{dueDate:'2026-10-24'}),
+ issue('late','a','a',{dueDate:'2026-10-24',repeat:true}),
  issue('store','a1','a',{type:'고객'}),
- issue('dup','a','a',{dueDate:'2026-10-24'}),
+ issue('dup','a','a',{dueDate:'2026-10-24',repeat:true}),
  issue('none','c','c',{ownerId:'',type:'안전'}),
  issue('ghost','c','c',{ownerId:'gone',type:'근태',dueDate:'2026-11-09'}),
  issue('done','b','b',{state:'완료',completedDate:'2026-10-26'}),
@@ -32,7 +32,7 @@ eq(d.sites[1].reasons.includes('담당 미지정'),true);
 // 긴급은 건수가 적어도 먼저 노출
 const urgent=diagnose({...base,issues:[...base.issues,issue('u','c','c',{urgent:true,type:'노무'}),issue('n','a','a',{urgent:false,type:'기타'})]},NOW);
 eq(urgent.summary.urgent,1);eq(urgent.sites[0].siteId,'c');eq(urgent.sites[0].top.id,'u');
-// 반복: 90일 밖이거나 등록일을 모르면 반복이 아니다
+// 반복은 저장된 판정(repeat)만: 같은 유형이 가까운 날짜에 있어도 판정이 없으면 반복이 아니다
 eq(diagnose({...base,issues:[issue('p','a','a',{createdDate:'2026-05-01'}),issue('q','a','a',{createdDate:'2026-10-20'})]},NOW).summary.repeat,0);
 eq(diagnose({...base,issues:[issue('p','a','a',{createdDate:null}),issue('q','a','a')]},NOW).summary.repeat,0);
 // 빈 상태 구분

@@ -3,12 +3,17 @@ import type {VisitJudgment} from './judgment';
 export type TargetType='site'|'store';
 export type Rule={period:'week'|'month'|'manual';count:number};
 export type Geo={lat:number;lng:number};
-export type FieldSite=Site&{division:string;region:string;managerIds:string[];rule:Rule;lat?:number|null;lng?:number|null};
-export type Store={id:string;siteId:string;code:string;name:string;address:string;region:string;managerIds:string[];status:string;startDate:string;rule:Rule;version:number;lat?:number|null;lng?:number|null};
+// 필요 시(rule.period='manual') 근거: 사유 코드와 지정자·지정일·재검토일(서버가 붙임). 근거가 없으면 정기 의무를 면제하지 않는다.
+export const MANUAL_REASONS=['고객사 요청 시에만 방문','상주 인력이 별도 관리','계약상 방문 의무 없음','운영 축소·종료 예정','기타'] as const;
+export type ManualBasis={reason:typeof MANUAL_REASONS[number];note:string;by:string;at:string;review:string};
+// 배정 이력: 회차를 그 시점 담당자에게 귀속한다. end=null이면 현재 담당.
+export type Assignment={targetType:TargetType;siteId:string;storeId:string|null;targetId:string;userId:string;start:string;end:string|null};
+export type FieldSite=Site&{division:string;region:string;managerIds:string[];rule:Rule;manual?:ManualBasis|null;lat?:number|null;lng?:number|null};
+export type Store={id:string;siteId:string;code:string;name:string;address:string;region:string;managerIds:string[];status:string;startDate:string;rule:Rule;manual?:ManualBasis|null;version:number;lat?:number|null;lng?:number|null};
 export const aiFields=['purpose','detail','notes','result'] as const;export type AiField=typeof aiFields[number];
-export const aiCategories=['인력','시설·안전','고객 요청','민원','운영'],aiUrgencies=['낮음','보통','높음'],aiConfidences=['low','medium','high'];
+export const aiConfidences=['low','medium','high'];
 // AI 간편 등록 기록: 원문(input)·AI 초안(draft)·사람이 고친 칸(edited)을 함께 보존. 직접 입력(entry='manual')에는 ai가 없음.
-export type AiEntry={input:{text:string;imageCount:number};draft:Record<AiField,string>;summary:string;category:string[];urgency:string;confidence:string;model:string;generatedAt:string;edited:AiField[]};
+export type AiEntry={input:{text:string;imageCount:number};draft:Record<AiField,string>;summary:string;confidence:string;model:string;generatedAt:string;edited:AiField[]};
 // AI 정리 기록: 이미 입력된 결과를 AI가 다듬은 제안(proposed)과 사람이 실제로 반영한 칸(applied). 직접 입력·AI 등록 기록 모두 가질 수 있으며 entry는 바뀌지 않는다.
 export type AiEdit={model:string;generatedAt:string;appliedAt:string;byId:string;before:Record<AiField,string>;proposed:Record<AiField,string>;applied:AiField[]};
 export type FieldVisit=Visit&{targetType:TargetType;storeId:string|null;requirementId:string|null;actualTime:string;notes:string;entry?:'manual'|'ai';ai?:AiEntry;aiEdits?:AiEdit[];geo?:VisitGeo;judgment?:VisitJudgment|null};
@@ -18,10 +23,10 @@ export const entryOf=(v:{entry?:string})=>v.entry==='ai'?'ai':'manual';
 export type FieldAction=Action&{targetType:TargetType;storeId:string|null;createdDate:string};
 // 관리 도메인: 멤버가 관리하는 업무 영역. 현장은 도메인 필수, 매장은 상위 현장 상속.
 export type Domain={id:string;code:string;name:string;active:number;version:number};
-export type PlatformData={users:User[];sites:FieldSite[];stores:Store[];visits:FieldVisit[];actions:FieldAction[];audit:Audit[];domains:Domain[]};
+export type PlatformData={users:User[];sites:FieldSite[];stores:Store[];visits:FieldVisit[];actions:FieldAction[];audit:Audit[];domains:Domain[];assignments?:Assignment[]};
 export const managesDomain=(me:User,domain:string)=>['admin','director'].includes(me.role)||!!domain&&(me.domains||[]).includes(domain);
 export const domainName=(data:{domains:Domain[]},id:string|undefined)=>data.domains.find(d=>d.id===id)?.name||'';
-export type Target={id:string;type:TargetType;siteId:string;storeId:string|null;name:string;siteName:string;team:string;part:string;division:string;domain:string;region:string;address:string;managerIds:string[];rule:Rule;status:string;startDate:string;lat:number|null;lng:number|null};
+export type Target={id:string;type:TargetType;siteId:string;storeId:string|null;name:string;siteName:string;team:string;part:string;division:string;domain:string;region:string;address:string;managerIds:string[];rule:Rule;manual?:ManualBasis|null;status:string;startDate:string;lat:number|null;lng:number|null};
 export type Requirement={id:string;targetId:string;targetType:TargetType;siteId:string;storeId:string|null;windowStart:string;windowEnd:string;dueDate:string;ordinal:number};
 export type Occurrence=Requirement&{state:'completed'|'planned'|'delayed'|'unplanned';visitId:string|null;overdue:boolean};
 export type Metrics={slots:Occurrence[];required:number;completed:number;planned:number;delayed:number;unplanned:number;targets:number;rate:number|null;completedTargets:number;extraCompleted:number;manualTargets:number};
@@ -30,7 +35,7 @@ export const ruleName=(rule:Rule)=>rule.period==='manual'?'수동 관리':`${rul
 export const dayShift=(day:string,n:number)=>{const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
 export const between=(d:string|null,a:string,b:string)=>!!d&&d>=a&&d<=b;
 export const targetOf=(v:{siteId:string;targetType:TargetType;storeId:string|null})=>v.targetType==='store'?v.storeId||'missing-store':v.siteId;
-export function targetsOf(data:PlatformData):Target[]{return [...data.sites.map(s=>({id:s.id,type:'site' as const,siteId:s.id,storeId:null,name:s.name,siteName:s.name,team:s.team,part:s.part,division:s.division,domain:s.domain||'',region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,status:s.status,startDate:s.startDate,lat:s.lat??null,lng:s.lng??null})),...data.stores.map(s=>{const p=data.sites.find(p=>p.id===s.siteId)!;return{id:s.id,type:'store' as const,siteId:s.siteId,storeId:s.id,name:s.name,siteName:p?.name||'미연결 현장',team:p?.team||'',part:p?.part||'',division:p?.division||'',domain:p?.domain||'',region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,status:s.status,startDate:s.startDate,lat:s.lat??null,lng:s.lng??null}})]}
+export function targetsOf(data:PlatformData):Target[]{return [...data.sites.map(s=>({id:s.id,type:'site' as const,siteId:s.id,storeId:null,name:s.name,siteName:s.name,team:s.team,part:s.part,division:s.division,domain:s.domain||'',region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,manual:s.manual??null,status:s.status,startDate:s.startDate,lat:s.lat??null,lng:s.lng??null})),...data.stores.map(s=>{const p=data.sites.find(p=>p.id===s.siteId)!;return{id:s.id,type:'store' as const,siteId:s.siteId,storeId:s.id,name:s.name,siteName:p?.name||'미연결 현장',team:p?.team||'',part:p?.part||'',division:p?.division||'',domain:p?.domain||'',region:s.region,address:s.address,managerIds:s.managerIds,rule:s.rule,manual:s.manual??null,status:s.status,startDate:s.startDate,lat:s.lat??null,lng:s.lng??null}})]}
 export function requirements(targets:Target[],start:string,end:string):Requirement[]{
  if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||start>end)return [];
  const out:Requirement[]=[];

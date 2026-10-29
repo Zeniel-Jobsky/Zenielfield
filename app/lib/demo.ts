@@ -9,6 +9,6 @@ export function demoData(me?:User):Data{
  const visits=sites.slice(0,10).map((s,i)=>({...base,id:'demo-visit-'+i,siteId:s.id,visitorId:users[1+i%4].id,plannedDate:shift(now,i<3?-3+i:i<6?i-3:i-6),purpose:['현장 정기점검','고객사 담당자 미팅','근로자 관리 및 면담'][i%3],actualDate:i>=6?shift(now,i-6):null,status:i>=6?'completed':'planned',result:i>=6?'후속 조치 필요':'',detail:i>=6?'[가상 시연] 현장 운영 현황과 인력 배치 확인. 담당자 요청사항을 후속 조치로 등록했습니다.':''}));
  // Completed demo visits never occur in the future.
  visits.forEach((v,i)=>{if(i>=6){v.actualDate=shift(now,-(i-6));v.plannedDate=v.actualDate}});
- const actions=sites.slice(0,5).map((s,i)=>({id:'demo-action-'+i,siteId:s.id,visitId:null,type:['인력 충원','고객사 요청','운영환경 개선'][i%3],content:['주말 운영 인력 2명 충원 검토','고객사 요청사항 확인 및 회신','휴게공간 운영 안내 보완','현장 안전교육 일정 조율','신규 투입 인력 안내자료 전달'][i],ownerId:users[1+i%4].id,dueDate:shift(now,i-2),state:i===4?'완료':i%2?'처리 중':'조치 예정',completedDate:i===4?now:null,version:1}));
+ const actions=sites.slice(0,5).map((s,i)=>({id:'demo-action-'+i,siteId:s.id,visitId:null,type:['채용·인력충원','고객사 미팅·요청','운영 변경·계약 협의'][i%3],content:['주말 운영 인력 2명 충원 검토','고객사 요청사항 확인 및 회신','휴게공간 운영 안내 보완','현장 안전교육 일정 조율','신규 투입 인력 안내자료 전달'][i],ownerId:users[1+i%4].id,dueDate:shift(now,i-2),state:i===4?'완료':i%2?'처리 중':'조치 예정',completedDate:i===4?now:null,version:1}));
  return {me:admin,users,sites,assignments,visits,actions,audit:[]};
 }
