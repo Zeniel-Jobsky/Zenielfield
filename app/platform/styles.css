@@ -679,11 +679,8 @@
 .status-pie-list{display:flex;flex-direction:column;gap:10px;min-width:0}
 .status-pie-row{display:grid;grid-template-columns:16px minmax(0,1fr) auto 44px;gap:10px;align-items:center;border:0;background:none;padding:2px 0;cursor:pointer;font-size:12px;color:#59645f;text-align:left}
 .status-pie-row:hover .hbar-label{text-decoration:underline}
-.status-pie-row .swatch{display:block;width:12px;height:12px;border-radius:2px}
-.status-pie-row .swatch.hatch{background:repeating-linear-gradient(45deg,#65726b 0 2px,#fff 2px 5px);border:1px solid #65726b}
-.status-pie-row .swatch.pale{background:#cfd9d3;border:1px solid #8a9f93}
+.status-pie-row .swatch{display:block;width:12px;height:12px;border-radius:2px;border:1px solid transparent}
 .status-pie-row .swatch.line{height:3px;width:16px;border-radius:2px;border:0}
-.status-pie-row .swatch.hatch.line{background:repeating-linear-gradient(90deg,#65726b 0 4px,transparent 4px 7px)}
 .status-pie-svg .pie-label.dk{fill:#36443e;stroke:#fff;stroke-width:3;paint-order:stroke}
 @media(max-width:760px){.status-pie{grid-template-columns:minmax(0,1fr);justify-items:stretch}.status-pie-svg{margin:0 auto}.status-pie-row{min-height:44px;padding:0}.status-pie-list{gap:0}}
 .warn-text{color:#8a4b00}

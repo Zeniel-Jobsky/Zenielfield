@@ -17,6 +17,15 @@
   --zf-text-secondary: #59645f;
   --zf-text-muted: #65726b;
   --zf-border: #e3e9e6;
+  --zf-chart-age-mid: #2f8466;
+  --zf-chart-nodata: #6d5a8a;
+  --zf-chart-sand: #d1a574;
+  --zf-chart-sand-edge: #b98a58;
+  --zf-heat-1: #f4ddd8;
+  --zf-heat-2: #e8b5ab;
+  --zf-heat-3: #d98777;
+  --zf-heat-4: #c8533f;
+  --zf-heat-5: #b42318;
   --zf-control-border: #cfd9d3;
   --zf-control-border-hover: #8a9f93;
   --zf-control-icon: #65756c;

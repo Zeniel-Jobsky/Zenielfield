@@ -9,7 +9,10 @@ import {ChartPanel} from './charts';
 import {aggregate,dayShift,lastTargetVisit,targetOf,targetStatus,typeName,weeklyTrend,type Target,SLOT_LABEL,NO_HISTORY,NO_REQUIRED} from './model';
 import {ISSUE_TYPES} from './judgment';
 // 의사결정용 차트: 보는 사람의 포지션(사업부 → 팀 → 파트 → 잡매니저 → 담당 대상)에 맞춰 비교 단위가 바뀐다.
-const tone={ok:'#003c33',plan:'#516e8a',late:'#b42318',miss:'#8a4b00',gray:'#65726b',dark:'#59645f'};
+const tone={ok:'#003c33',plan:'#516e8a',late:'#b42318',miss:'#8a4b00',gray:'#65726b',dark:'#59645f',
+ sand:'#d1a574',sandEdge:'#b98a58',
+ // 완료·예정·지연·미등록 밖의 색(2026-10-29): 신선→경과는 초록 계열(완료 딥그린→중간 초록), 기록·요구가 없는 상태는 보라 계열(이력 없음/미확인 진한 보라, 필요 방문 없음 옅은 라일락).
+ mid:'#2f8466',none:'#6d5a8a'};
 const pct=(a:number,b:number)=>b?Math.round(a/b*100):0;
 export function scopeUnits(c:Context){
  const level=c.manager?'target':c.part||c.me.role==='partlead'?'manager':c.team||c.me.role==='lead'?'part':c.me.role==='manager'?'target':'team';
@@ -50,7 +53,7 @@ const statusOrder=[[SLOT_LABEL.delayed,tone.late,'delayed'],[SLOT_LABEL.unplanne
 // 원그래프(사용자 요청 2026-10-29): 상태별 대상 수 비율. 0개 상태는 조각이 없으므로 경계에 선으로 그리고 목록에 0개·0%를 쓴다.
 const PIE={cx:130,cy:128,r:80};
 // 회색 계열 3개(이력 미확인·예정·필요 방문 없음)가 비슷해 보이지 않도록 질감·밝기로 나눈다: 이력 미확인=빗금, 예정=파랑, 필요 방문 없음=옅은 회색.
-const pieLook=(key:string,color:string)=>key==="stale"?{fill:"url(#pie-hatch)",edge:tone.gray,dash:"4 3",dark:true,swatch:" hatch"}:key===""?{fill:"#cfd9d3",edge:"#8a9f93",dash:undefined,dark:true,swatch:" pale"}:{fill:color,edge:color,dash:undefined,dark:false,swatch:""};
+const pieLook=(key:string,color:string)=>key==="stale"?{fill:tone.none,edge:tone.none,dark:false}:key==="planned"?{fill:tone.sand,edge:tone.sandEdge,dark:true}:key===""?{fill:"#cfd9d3",edge:"#8a9f93",dark:true}:{fill:color,edge:color,dark:false};
 export function StoreStatusChart({c}:{c:Context}){
  const targets=useMemo(()=>c.scope.filter(t=>t.type===c.type&&t.status==="운영 중"),[c.scope,c.type]);
  const counts=useMemo(()=>{const m=new Map<string,number>();for(const t of targets){const status=targetStatus(t,c.visits,c.allMetrics);m.set(status,(m.get(status)||0)+1)}return m},[targets,c.visits,c.allMetrics]);
@@ -62,13 +65,13 @@ export function StoreStatusChart({c}:{c:Context}){
  const summary=segs.map(g=>`${g.label} ${g.v}개 ${pct(g.v,total)}%`).join(", ");
  return <ChartPanel title={`${typeName(c.type).replace(" 방문","")} 운영 상태`} sub={`운영 중 ${total.toLocaleString()}개 · 조회 기간 회차 기준 · 원그래프 조각은 대상 수 비율`}>
   {total>0?<div className="status-pie">
-   <svg viewBox="0 0 260 256" className="status-pie-svg" role="img" aria-label={`운영 상태 비율: ${summary}`}><defs><pattern id="pie-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fff"/><line x1="0" y1="0" x2="0" y2="6" stroke="#65726b" strokeWidth="2.5"/></pattern></defs>
+   <svg viewBox="0 0 260 256" className="status-pie-svg" role="img" aria-label={`운영 상태 비율: ${summary}`}>
     {segs.map(g=>{if(!g.v)return null;if(g.frac>=.9999)return <circle key={g.label} cx={PIE.cx} cy={PIE.cy} r={PIE.r} fill={pieLook(g.key,g.color).fill} stroke={pieLook(g.key,g.color).edge} onClick={()=>go(g.key)}/>;const [x1,y1]=pt(g.start,PIE.r),[x2,y2]=pt(g.end,PIE.r);return <path key={g.label} d={`M${PIE.cx} ${PIE.cy} L${x1} ${y1} A${PIE.r} ${PIE.r} 0 ${g.frac>.5?1:0} 1 ${x2} ${y2} Z`} fill={pieLook(g.key,g.color).fill} stroke={pieLook(g.key,g.color).dark?pieLook(g.key,g.color).edge:"#fff"} strokeWidth={pieLook(g.key,g.color).dark?1.5:2} className="pie-slice" onClick={()=>go(g.key)}><title>{`${g.label} ${g.v}개 ${pct(g.v,total)}%`}</title></path>})}
-    {segs.map(g=>{if(g.v)return null;const ang=g.start+(g.zi-1)*.07,[x1,y1]=pt(ang,PIE.r*.45),[x2,y2]=pt(ang,PIE.r+9);return <line key={"z"+g.label} x1={x1} y1={y1} x2={x2} y2={y2} stroke={pieLook(g.key,g.color).edge} strokeDasharray={pieLook(g.key,g.color).dash} strokeWidth="2.5" strokeLinecap="round"><title>{`${g.label} 0개 0%`}</title></line>})}
+    {segs.map(g=>{if(g.v)return null;const ang=g.start+(g.zi-1)*.07,[x1,y1]=pt(ang,PIE.r*.45),[x2,y2]=pt(ang,PIE.r+9);return <line key={"z"+g.label} x1={x1} y1={y1} x2={x2} y2={y2} stroke={pieLook(g.key,g.color).edge} strokeWidth="2.5" strokeLinecap="round"><title>{`${g.label} 0개 0%`}</title></line>})}
     {outs.map(o=><text key={"o"+o.g.label} x={o.lx} y={o.ly+4} textAnchor={o.cos>.3?"start":o.cos<-.3?"end":"middle"} className="pie-out" style={{fill:o.g.v?"#36443e":"#59645f"}}>{o.g.v.toLocaleString()}개 {pct(o.g.v,total)}%</text>)}
     {segs.map(g=>{if(g.frac<.12)return null;const [tx,ty]=g.frac>=.9999?[PIE.cx,PIE.cy]:pt(g.mid,PIE.r*.6);return <text key={"t"+g.label} x={tx} y={ty-2} textAnchor="middle" className={"pie-label"+(pieLook(g.key,g.color).dark?" dk":"")}><tspan x={tx}>{g.v.toLocaleString()}개</tspan><tspan x={tx} dy="15">{pct(g.v,total)}%</tspan></text>})}
    </svg>
-   <div className="status-pie-list">{segs.map(g=><button key={g.label} className="status-pie-row" aria-label={`${g.label} ${g.v.toLocaleString()}개, ${pct(g.v,total)}%`} onClick={()=>go(g.key)}><i className={"swatch"+pieLook(g.key,g.color).swatch+(g.v?"":" line")} style={g.key==="stale"||g.key===""?{borderColor:pieLook(g.key,g.color).edge,...(g.v?{}:{background:pieLook(g.key,g.color).edge})}:{background:g.color}}/><span className="hbar-label">{g.label}</span><b className="status-hbar-count">{g.v.toLocaleString()}<span>개</span></b><span className="status-hbar-percent">{pct(g.v,total)}%</span></button>)}</div>
+   <div className="status-pie-list">{segs.map(g=><button key={g.label} className="status-pie-row" aria-label={`${g.label} ${g.v.toLocaleString()}개, ${pct(g.v,total)}%`} onClick={()=>go(g.key)}><i className={"swatch"+(g.v?"":" line")} style={{background:g.v?pieLook(g.key,g.color).fill:pieLook(g.key,g.color).edge,borderColor:pieLook(g.key,g.color).edge}}/><span className="hbar-label">{g.label}</span><b className="status-hbar-count">{g.v.toLocaleString()}<span>개</span></b><span className="status-hbar-percent">{pct(g.v,total)}%</span></button>)}</div>
   </div>:<p className="chart-empty">조회 범위에 운영 중인 {typeName(c.type).replace(" 방문","")}이 없습니다.</p>}
  </ChartPanel>
 }
@@ -77,7 +80,7 @@ export function IssueTypeChart({c}:{c:Context}){
  const rows=useMemo(()=>[...new Set([...issueTypes,...c.actions.map(a=>a.type)])].map(t=>{const all=c.actions.filter(a=>a.type===t);return{t,overdue:all.filter(a=>a.state!=='완료'&&a.dueDate<c.now).length,open:all.filter(a=>a.state!=='완료'&&a.dueDate>=c.now).length,done:all.filter(a=>a.state==='완료').length}}).filter(r=>r.overdue+r.open+r.done>0).sort((a,b)=>b.overdue-a.overdue||b.open-a.open).slice(0,8),[c.actions,c.now]);
  return <ChartPanel title="이슈 유형별 처리 현황" sub="기한 초과 많은 순 · 막대 안 숫자는 건수, 오른쪽은 미완료(기한 초과+진행 중) / 전체 · 막대를 누르면 이슈 목록" legend={<div className="chart-legend"><span><i style={{background:tone.late}}/>기한 초과</span><span><i style={{background:tone.plan}}/>진행 중</span><span><i style={{background:tone.ok}}/>완료</span></div>}><div className="hbar-list wide-value">{rows.map(r=><button key={r.t} className="hbar" onClick={()=>c.go('actions',r.overdue?'기한 초과':'미처리')}><span className="hbar-label">{r.t}</span><span className="hbar-track stacked">{r.overdue>0&&<i style={{width:pct(r.overdue,r.overdue+r.open+r.done)+'%',background:tone.late}}><span>{r.overdue}</span></i>}{r.open>0&&<i style={{width:pct(r.open,r.overdue+r.open+r.done)+'%',background:tone.plan}}><span>{r.open}</span></i>}{r.done>0&&<i style={{width:pct(r.done,r.overdue+r.open+r.done)+'%',background:tone.ok}}><span>{r.done}</span></i>}</span><b><span className="hbar-open">미완료 {r.overdue+r.open}</span><small>/ 전체 {r.overdue+r.open+r.done}건 ({pct(r.overdue+r.open,r.overdue+r.open+r.done)}%)</small></b></button>)}{!rows.length&&<p className="chart-empty">등록된 이슈가 없습니다.</p>}</div></ChartPanel>
 }
-const ageBins=[['0–7일',0,7,tone.ok],['8–14일',8,14,'#166534'],['15–30일',15,30,tone.plan],['31–60일',31,60,tone.miss],['60일+',61,99999,tone.miss],['이력 없음',-1,-1,tone.gray]] as const;
+const ageBins=[['0–7일',0,7,tone.ok],['8–14일',8,14,tone.mid],['15–30일',15,30,tone.plan],['31–60일',31,60,tone.miss],['60일+',61,99999,tone.miss],['이력 없음',-1,-1,tone.none]] as const;
 export function VisitAgeChart({c}:{c:Context}){
  const targets=c.scope.filter(t=>t.type===c.type&&t.status==='운영 중');
  const bins=useMemo(()=>ageBins.map(([label,a,b,color])=>({label,color,n:targets.filter(t=>{const d=days(lastTargetVisit(t.id,c.visits),c.now);return a<0?d===null:d!==null&&d>=a&&d<=b}).length})),[targets,c.visits,c.now]);
