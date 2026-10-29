@@ -16,7 +16,6 @@
 .ai-images{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}.ai-images span{position:relative}.ai-images img{width:64px;height:64px;object-fit:cover;border-radius:10px}.ai-images span button{position:absolute;top:2px;right:2px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;color:#fff;background:#0009;border:0}
 .ai-result{display:grid;gap:8px;padding:12px 14px;border-radius:10px;background:#eef2f6;border:1px solid #eef2f6;font-size:13px;color:#36443e}.ai-result>p:first-child{display:flex;gap:6px;align-items:center}.ai-tags{display:flex;flex-wrap:wrap;gap:6px}.ai-tags span{padding:2px 8px;border-radius:99px;background:#fff;border:1px solid #eef2f6;font-size:11px}.ai-tags .warn{color:#8a4b00;background:#fdf4e7;border-color:#8a4b00}.ai-actions{display:grid;gap:6px}.ai-actions small{color:#65726b}
 .record-form [data-ai="1"]{border-color:#cfd9d3!important;background:#eef2f6!important;box-shadow:inset 3px 0 0 #516e8a}
-.btn.ai-entry{color:#516e8a;border-color:#cfd9d3;background:#eef2f6}
 
 .email-login{margin:20px 0}.email-login label{font-size:13px;color:#65726b;font-weight:600}.email-login input{width:100%;padding:12px;border:1px solid #cfd9d3;border-radius:8px;font:inherit;background:#fff}.email-login input:focus{outline:2px solid #516e8a;outline-offset:2px}.email-login input:disabled{background:#f8faf9}.email-login .btn{margin:6px 0}.email-login p{margin:0;font-size:12px;line-height:1.7}.email-login .notice{margin:0}.email-login button:disabled{opacity:.6;cursor:wait}
 .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -452,11 +451,6 @@
 .ai-brief-cheer{margin:0;padding:8px 12px;border-radius:6px;background:var(--zf-info-soft,#eef2f6);font-size:13px;line-height:1.6;color:#36443e}
 .panel.coach{padding:16px}
 .coach h3{margin:14px 0 6px;font-size:13px;font-weight:650;color:#36443e}
-.coach-msgs{display:grid;gap:6px;margin:0;padding:0;list-style:none}
-.coach-msgs li{display:flex;gap:8px;align-items:flex-start;padding:8px 12px;border-radius:6px;font-size:13px;line-height:1.6}
-.coach-msgs li svg{flex:none;margin-top:2px}
-.coach-msgs li.cheer{background:#edf6f1;color:#003c33}
-.coach-msgs li.nudge{background:var(--zf-warning-soft,#fdf4e7);color:#36443e}.coach-msgs li.nudge svg{color:#8a4b00}
 .coach-picks{display:grid;gap:0;margin:0;padding:0;list-style:none}
 .coach-picks li{display:grid;grid-template-columns:minmax(140px,220px) 1fr auto;gap:8px 12px;align-items:center;padding:8px 0;border-top:1px solid #e3e9e6;font-size:13px}
 .coach-picks .link{display:inline-flex;align-items:center;font-weight:600;min-height:44px}

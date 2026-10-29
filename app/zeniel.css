@@ -388,11 +388,6 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .field input,.app-shell .field select {min-height:42px}
 .app-shell .form-hint,.app-shell .privacy-note {font-size:12px;line-height:1.8;color:var(--zf-text-muted)}
 .app-shell .form-footer {padding:18px 28px;background:white;border-top:1px solid var(--zf-border)}
-
-
-
-
-.app-shell .btn.ai-entry {color:var(--zf-action);background:transparent;border-color:var(--zf-control-border)}
 .app-shell .ai-composer {border:1px solid var(--zf-control-border);border-radius:12px;background:var(--zf-surface-muted);box-shadow:none;padding:14px}
 .app-shell .ai-composer:focus-within {border-color:var(--zf-action);outline:1px solid var(--zf-action);box-shadow:none}
 .app-shell .ai-send {background:var(--zf-action)}
