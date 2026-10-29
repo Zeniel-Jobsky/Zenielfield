@@ -6,11 +6,26 @@ import {isCurrentJudgment,type VisitJudgment} from './judgment';
 export const LEVEL_ORDER:Record<string,number>={위험:2,주의:1};
 export type TargetFacts={target:Target;judgment:VisitJudgment|null;judgedAt:string|null;delayed:Occurrence[];unplanned:Occurrence[];openActions:number;lateActions:number;firstDue:string|null;lastVisit:string|null;upcoming:string|null};
 
+// 판정 색인: 현재 형식 판정이 붙은 완료 방문을 대상별로 실제 방문일 오름차순으로 한 번만 묶는다.
+// "최근 판정"·"그날 기준 판정"은 모두 이 색인으로 찾는다(화면마다 다시 거르고 정렬하지 않는다).
+export type JudgedIndex={byTarget:Map<string,FieldVisit[]>;byId:Map<string,FieldVisit>};
+const judgedCache=new WeakMap<FieldVisit[],JudgedIndex>();
+export function judgedIndex(visits:FieldVisit[]):JudgedIndex{
+ const hit=judgedCache.get(visits);if(hit)return hit;
+ const byTarget=new Map<string,FieldVisit[]>(),byId=new Map<string,FieldVisit>();
+ for(const v of visits){if(v.status!=='completed'||!isCurrentJudgment(v.judgment))continue;byId.set(v.id,v);const id=targetOf(v),a=byTarget.get(id);if(a)a.push(v);else byTarget.set(id,[v])}
+ for(const a of byTarget.values())a.sort((x,y)=>(x.actualDate||'').localeCompare(y.actualDate||''));
+ const ix={byTarget,byId};judgedCache.set(visits,ix);return ix;
+}
+// 그 대상의 판정: visitId가 판정된 방문이면 그 방문, 아니면 asOf(없으면 전체) 이전 가장 최근 판정
+export function judgmentAt(ix:JudgedIndex,targetId:string,asOf?:string|null,visitId?:string|null):FieldVisit|undefined{
+ const own=visitId?ix.byId.get(visitId):undefined;if(own)return own;
+ const a=ix.byTarget.get(targetId);if(!a)return undefined;if(!asOf)return a[a.length-1];
+ for(let i=a.length-1;i>=0;i--)if((a[i].actualDate||'')<=asOf)return a[i];return undefined;
+}
 // 대상별 가장 최근 판정이 붙은 완료 방문
 export function latestJudgments(visits:FieldVisit[],ids?:Set<string>){
- const last=new Map<string,FieldVisit>();
- for(const v of visits){const id=targetOf(v);if(v.status!=='completed'||(ids&&!ids.has(id))||!isCurrentJudgment(v.judgment))continue;const p=last.get(id);if(!p||(p.actualDate||'')<=(v.actualDate||''))last.set(id,v)}
- return last;
+ const last=new Map<string,FieldVisit>();for(const [id,a] of judgedIndex(visits).byTarget)if(!ids||ids.has(id))last.set(id,a[a.length-1]);return last;
 }
 
 // 대상별 사실 묶음. slots는 aggregate()의 회차(같은 기간 계산을 화면마다 다시 하지 않는다).
