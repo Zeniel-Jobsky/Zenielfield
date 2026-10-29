@@ -49,11 +49,6 @@ export function attentionOf(facts:Iterable<TargetFacts>){
   .sort((a,b)=>(LEVEL_ORDER[b.judgment?.level||'']||0)-(LEVEL_ORDER[a.judgment?.level||'']||0)||(a.firstDue||'9999').localeCompare(b.firstDue||'9999'));
 }
 
-// 본인 방문 흐름(주 단위 완료 수): 독려 문장은 다른 사람과 비교하지 않고 본인 지난주와만 비교한다.
-export function selfWeeks(visits:FieldVisit[],userId:string,now:string){
- const wk=weekOf(now),prev=dayShift(wk,-7),done=(a:string,b:string)=>visits.filter(v=>v.visitorId===userId&&v.status==='completed'&&!!v.actualDate&&v.actualDate>=a&&v.actualDate<=b).length;
- return {thisWeek:done(wk,now),lastWeek:done(prev,dayShift(wk,-1))};
-}
 
 // 장기 미방문 기준(일). 지표·차트·브리핑·목록이 같은 값을 쓴다.
 export const STALE_DAYS=60;

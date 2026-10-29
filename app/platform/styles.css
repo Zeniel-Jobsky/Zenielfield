@@ -48,12 +48,6 @@
 .heatmap{display:grid;gap:3px;font-size:11px;align-items:center}
 .heat-line{display:contents}
 .heat-cell{display:flex;align-items:center;justify-content:center;height:24px;border-radius:3px;color:white;font-weight:700}
-.mini-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
-.mini-week button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;border:1px solid #f1f6f3;border-radius:7px;background:white;cursor:pointer;color:#59645f}
-.mini-week button.today{border-color:#516e8a;background:#eef2f6}
-.mini-week small{font-size:11px;color:#65726b}
-.mini-week span{display:flex;gap:2px;min-height:6px;flex-wrap:wrap;justify-content:center}
-.mini-week i{width:6px;height:6px;border-radius:50%}
 .pair-bars{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;align-items:end;height:150px}
 .pair-bars>div{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
 .pair{display:flex;align-items:flex-end;gap:2px;flex:1;width:100%;justify-content:center}
