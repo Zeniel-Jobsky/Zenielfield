@@ -130,9 +130,9 @@ export function ruleBrief(d:BriefDigest):AiBriefResult{
  // 직급별 초점: 잡매니저는 판정 위험·주의 대상, 그 위는 하위 단위(파트장=잡매니저, 팀장=파트, 사업부장=팀) 중 일정 잡을 회차가 있는 곳(많은 순)
  const focus=d.role==='manager'?j.attention.slice(0,4).map(a=>({name:a.target,reason:rich`${wk(a.date)} 판정 ${a.level==='위험'?bad(a.level):a.level}${a.assessment?' — '+a.assessment:''}`})):
   [...d.units].filter(u=>u.gap>0||u.overdue>0).sort((a,b)=>b.gap-a.gap||b.overdue-a.overdue).slice(0,4).map(u=>({name:u.label,reason:rich`일정 잡을 회차 ${num(u.gap+'회차')}${u.overdue?rich` · 기한 넘긴 조치 ${bad(u.overdue+'건')}`:''}${u.stale?rich` · 60일+ 미방문 매장 ${num(u.stale+'곳')}`:''}`}));
- const story=join([j.byType.length>0&&rich`판정에 나온 이슈 유형: ${j.byType.slice(0,4).map(t=>`${t.type} ${t.n}건(대상 ${t.targets}곳${t.urgent?`, 긴급 ${t.urgent}`:''}${t.worse?`, 악화 ${t.worse}`:''}${t.resolved?`, 해결 ${t.resolved}`:''})`).join(' · ')}.`,
-  d.issueTypes[0]&&rich`후속 조치 유형별: ${d.issueTypes.slice(0,3).map(t=>`${t.type} 진행 ${t.open}·기한 초과 ${t.overdue}·완료 ${t.done}`).join(' / ')}.`,
-  k.stale>0&&rich`60일 넘게 방문 기록이 없는 매장 ${num(k.stale+'곳')}(${num(k.staleShare+'%')}).`]);
+ // 무슨 일이 벌어지고 있나(규칙): 문제 지도에서 앞의 3곳을 '팀 › 담당 › 대상: 무엇' 문장으로(숫자 나열 없이 사실만)
+ const what=(p:BriefDigest['problems'][number])=>[p.판정!=='미판정'?`판정 ${p.판정}${p.판단?'('+p.판단+')':''}`:'',...p.방문상태,p.기한넘긴조치[0]?'기한 넘긴 조치 '+p.기한넘긴조치[0]:''].filter(Boolean).join(', ');
+ const story=join(d.problems.slice(0,3).map(p=>rich`${[p.부서,p.매니저&&p.매니저+' 담당',p.대상].filter(Boolean).join(' › ')}: ${what(p)}.`));
  const themes:BriefTheme[]=j.byType.slice(0,3).map(t=>({title:t.type,status:'',evidence:[],summary:rich`판정 이슈 ${num(t.n+'건')}, 대상 ${num(t.targets+'곳')}${t.worse>0&&rich`, 악화 ${bad(t.worse+'건')}`}${t.ongoing>0&&rich`, 지속 ${num(t.ongoing+'건')}`}${t.resolved>0&&rich`, 해결 ${num(t.resolved+'건')}`}.`,targets:[]}));
  const watch=[dir!==null&&rich`다음 주 이행률(이번 주 ${num(k.rateWeek+'%')})`,k.overdue>0&&rich`기한 초과 조치 ${num(k.overdue+'건')}의 변화`,j.attention.length>0&&rich`위험·주의 대상 ${num(j.attention.length+'곳')}의 다음 판정`].filter(Boolean) as Rich[];
  const cheer=d.role!=='manager'?rich`${CHEER_TO[d.role]}: 완료 ${num(k.completed+'회차')}, 일정 없는 필요 방문 ${num(k.gap+'회차')}.`:rich`이번 기간 완료 ${num(k.completed+'회차')}${k.gap>0&&rich`, 일정을 잡으면 되는 필요 방문 ${num(k.gap+'회차')}`}.`;
@@ -188,59 +188,52 @@ function ReportSite({name,themes,jump,canJump}:{name:string;themes:BriefTheme[];
   </section>)}</div>
  </li>;
 }
+// 브리핑 표시: 늘 보이는 것 = 현황 한 줄 → 무슨 일이 벌어지고 있나(가장 눈에 띄게) → 먼저 챙길 곳(누르면 이동).
+// 세부(보고 주제·판단 ①②·전할 말·다음 주·지표 변화·근거)는 보고 싶은 사람만 펼친다.
 function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;digest:BriefDigest;stale:boolean;jump:(name:string)=>void;targetNames:Set<string>}){
- const [reportsOpen,setReportsOpen]=useState(false),[detailsOpen,setDetailsOpen]=useState(false),id=useId();
- const r=out.result,k=digest.kpi,tone=toneOf(digest),remainingWatch=r.judgment[0]?.length?r.watch:r.watch.slice(1);
- const sites=useMemo(()=>{
-  const groups=new Map<string,BriefTheme[]>();
-  for(const t of r.themes)for(const name of new Set(t.targets.length?t.targets:['현장 미지정'])){const list=groups.get(name)||[];list.push(t);groups.set(name,list)}
-  return [...groups];
- },[r.themes]);
+ const [detailsOpen,setDetailsOpen]=useState(false),id=useId();
+ const r=out.result,k=digest.kpi,tone=toneOf(digest);
+ const sites=useMemo(()=>{const groups=new Map<string,BriefTheme[]>();for(const t of r.themes)for(const name of new Set(t.targets.length?t.targets:['현장 미지정'])){const list=groups.get(name)||[];list.push(t);groups.set(name,list)}return [...groups]},[r.themes]);
+ const peek=[sites.length&&'보고 주제',r.judgment.length&&'판단',r.cheer.length&&CHEER_TO[digest.role],r.watch.length&&'다음 주 볼 것'].filter(Boolean).join(' · ');
  return <div className={'ai-brief-out'+(stale?' stale':'')}>
-  <div className="ai-brief-overview">
-   <section className="ai-brief-summary"><div className="ai-brief-overview-label"><h3>요약</h3><span className={'ai-brief-tone '+tone.cls}>{tone.label}</span></div><p className="ai-brief-head"><RichText r={r.headline}/></p></section>
-   <section className="ai-brief-proposal"><h3>제안</h3><p>{r.judgment[0]?.length?<RichText r={r.judgment[0]}/>:r.watch[0]?.length?<RichText r={r.watch[0]}/>:'추가 제안이 없어요. 자세한 현황을 확인해 주세요.'}</p></section>
-  </div>
-  <div className="ai-brief-actions">
-   {sites.length>0&&<button type="button" className="brief-disclosure" aria-expanded={reportsOpen} aria-controls={id+'-reports'} onClick={()=>setReportsOpen(!reportsOpen)}>보고 내용에서 보이는 것 <span>{reportsOpen?'접기':'더 보기'}</span>{reportsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>}
-   <button type="button" className="brief-disclosure" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>브리핑 {detailsOpen?'간략히 보기':'자세히 보기'}{!detailsOpen&&r.focus.length>0&&<small className="brief-disclosure-peek"> · 먼저 챙길 곳: {r.focus[0].name}{r.focus.length>1?` 외 ${r.focus.length-1}곳`:''}</small>}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
-  </div>
-  <div id={id+'-reports'} className="ai-brief-reports" hidden={!reportsOpen}>
-   <p className="ai-brief-report-note">{digest.reports.length}곳 보고 {digest.reportTotal}건{digest.reportTotal>digest.reportSent&&` 중 대상별 최근 ${digest.reportSent}건`} 기준 · 현장별 더 보기에서 보고 근거를 확인하세요.</p>
-   <ul className="ai-brief-sites">{reportsOpen&&sites.map(([name,themes])=><ReportSite key={name} name={name} themes={themes} jump={jump} canJump={targetNames.has(name)}/>)}</ul>
-  </div>
+  <p className="ai-brief-head"><span className={'ai-brief-tone '+tone.cls}>{tone.label}</span><RichText r={r.headline}/></p>
+  <section className="ai-brief-story"><h3>무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>
+  <section className="ai-brief-focus"><h3>먼저 챙길 곳</h3><ol>{r.focus.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}>{a.name}<ChevronRight size={14}/></button><span><RichText r={a.reason}/></span></li>)}{!r.focus.length&&<li><span>{digest.role==='manager'?'판정 위험·주의로 남은 곳이 없어요(저장된 판정 기준).':'일정 잡을 회차나 기한 넘긴 조치가 있는 곳이 없어요.'}</span></li>}</ol></section>
+  <button type="button" className="brief-disclosure" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>{detailsOpen?'세부 내용 접기':'세부 내용 보기'}{!detailsOpen&&peek&&<small className="brief-disclosure-peek"> · {peek}</small>}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
   <div id={id+'-details'} className="ai-brief-details" hidden={!detailsOpen}>
+   {sites.length>0&&<section className="ai-brief-reports"><h3>보고 내용에서 보이는 것</h3><ul className="ai-brief-sites">{detailsOpen&&sites.map(([name,themes])=><ReportSite key={name} name={name} themes={themes} jump={jump} canJump={targetNames.has(name)}/>)}</ul></section>}
+   {r.judgment.length>0&&<section><h3>판단</h3><ul className="ai-brief-decide">{r.judgment.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></section>}
+   {r.cheer.length>0&&<section className="ai-brief-cheer"><h3>{CHEER_TO[digest.role]}</h3><p><RichText r={r.cheer}/></p></section>}
+   {r.watch.length>0&&<section><h3>다음 주 볼 것</h3><ul>{r.watch.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></section>}
    <div className="ai-brief-lead">
     {k.rateWeek!==null&&k.rateWeekPrev!==null&&<span className={'ai-brief-delta '+(k.rateWeek>k.rateWeekPrev?'up':k.rateWeek<k.rateWeekPrev?'down':'')}>{k.rateWeek>k.rateWeekPrev?'▲':k.rateWeek<k.rateWeekPrev?'▼':'–'} 주간 이행률 {k.rateWeek}% <small>전주 {k.rateWeekPrev}%</small></span>}
     {k.resolved>0&&<span className="ai-brief-delta up">✓ 조치 완료 {k.resolved}건</span>}
     {k.overdue>0&&<span className={'ai-brief-delta '+(k.overdue>k.overduePrev?'down':'up')}>{k.overdue>k.overduePrev?'▲':k.overdue<k.overduePrev?'▼':'–'} 기한 초과 {k.overdue}건 <small>전주 {k.overduePrev}건</small></span>}
    </div>
-   {r.flow.length>0&&<section className="ai-brief-flow"><h3>흐름</h3><p><RichText r={r.flow}/></p></section>}
-   <div className="ai-brief-grid">
-    <section className="ai-brief-good"><h3>잘 되고 있는 것</h3><ul>{r.strengths.map((p,i)=><li key={i}><RichText r={p}/></li>)}{!r.strengths.length&&<li>이번 기간 완료·해결로 바뀐 것이 없어요.</li>}</ul></section>
-    <section className="ai-brief-focus"><h3>먼저 챙길 곳</h3><ol>{r.focus.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}>{a.name}<ChevronRight size={14}/></button><span><RichText r={a.reason}/></span></li>)}{!r.focus.length&&<li><span>{digest.role==='manager'?'판정 위험·주의로 남은 곳이 없어요(저장된 판정 기준).':'일정 잡을 회차나 기한 넘긴 조치가 있는 곳이 없어요.'}</span></li>}</ol></section>
-    <section><h3>무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'두드러진 현상이 없습니다.'}</p></section>
-    <section>{r.judgment.length>1&&<><h3>추가 선택지와 판단</h3><ul className="ai-brief-decide">{r.judgment.slice(1).map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></>}{remainingWatch.length>0&&<><h3>다음에 볼 것</h3><ul>{remainingWatch.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></>}</section>
-   </div>
-   {r.cheer.length>0&&<section className="ai-brief-cheer"><h3>{CHEER_TO[digest.role]}</h3><p><RichText r={r.cheer}/></p></section>}
-   <p className="ai-brief-meta">{out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} 작성 · {digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 근거: 보고 {digest.reportTotal}건(판정 {digest.judged.reports-digest.judged.unjudged}건) · 담당자 이름·연락처 미전송 · 조건 변경 시 자동 갱신</p>
+   <p className="ai-brief-meta">{out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} 작성 · {digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 근거: 보고 {digest.reportTotal}건(판정 {digest.judged.reports-digest.judged.unjudged}건) · 연락처 미전송 · 조건 변경 시 자동 갱신</p>
   </div>
   {(out.model.includes('규칙')||r.confidence==='low'||stale)&&<p className="ai-brief-source">{[out.model.includes('규칙')&&out.model,r.confidence==='low'&&'확신 낮음',stale&&'조건이 바뀌어 다시 쓰는 중'].filter(Boolean).join(' · ')}</p>}
  </div>;
 }
 
 // weekly: 주차별 화면용. 조회 기간 안의 주차 또는 조회 기간 전체를 골라 그 기간으로 브리핑한다.
+// 만드는 동안 단계 표시: 데이터 모으기 → 보고 읽고 분석하기(AI) → 정리하기, 경과 초와 진행 막대(보통 10초, 최대 20초)
+function BriefProgress({startedAt,demo}:{startedAt:number;demo:boolean}){
+ const [now,setNow]=useState(Date.now());useEffect(()=>{const h=setInterval(()=>setNow(Date.now()),250);return()=>clearInterval(h)},[]);
+ const sec=Math.max(0,(now-startedAt)/1000),steps=['조회 범위 데이터 모으기','보고 읽고 분석하기','브리핑 정리하기'],at=demo?2:sec<1?0:sec<9?1:2;
+ return <div className="ai-brief-progress" role="status" aria-live="polite"><ol>{steps.map((s,i)=><li key={s} className={i<at?'done':i===at?'on':''}>{s}</li>)}</ol><div className="ai-brief-progress-bar" aria-hidden="true"><i style={{width:Math.min(95,sec/10*100)+'%'}}/></div><small>{sec.toFixed(0)}초 · 보통 10초 안팎</small></div>;
+}
 export function AiBrief({c,weekly=false}:{c:Context;weekly?:boolean}){
  const weeks=useMemo(()=>weekly?weekRanges(c.start,c.end):[],[weekly,c.start,c.end]);
  const [pick,setPick]=useState('');
  const range:BriefRange|undefined=useMemo(()=>{if(!weekly)return undefined;const w=weeks.find(x=>x.start===pick)||weeks.find(x=>x.start<=c.now&&x.end>=c.now)||weeks.at(-1);if(pick==='all'||!w)return {start:c.start,end:c.end,label:'조회 기간 전체'};return {start:w.from,end:w.to,label:`${w.start.slice(0,4)}년 ${weekTitle(w.start)}`}},[weekly,weeks,pick,c.start,c.end,c.now]);
  const cacheId=c.me.id+(weekly?':w:'+(range?.start||'')+':'+(range?.end||''):'');
- const [factors,setFactors]=useState<BriefFactors>(defaultFactors),[busy,setBusy]=useState(false),[error,setError]=useState(''),[out,setOut]=useState<Cached|null>(null),[ready,setReady]=useState(false);
+ const [factors,setFactors]=useState<BriefFactors>(defaultFactors),[busy,setBusy]=useState(false),[startedAt,setStartedAt]=useState(0),[error,setError]=useState(''),[out,setOut]=useState<Cached|null>(null),[ready,setReady]=useState(false);
  useEffect(()=>{setFactors(loadFactors());setOut(readCache(cacheId));setReady(true)},[cacheId]);
  const digest=useMemo(()=>buildDigest(c,factors,range),[c.scope,c.visits,c.actions,c.start,c.end,c.now,c.type,c.team,c.part,c.manager,c.siteId,c.storeId,c.metrics,factors,range]);
  const key=useMemo(()=>digestKey(digest),[digest]);
  const timer=useRef<ReturnType<typeof setTimeout>|null>(null),inflight=useRef('');
- async function run(force=false){if(inflight.current===key&&!force)return;inflight.current=key;setBusy(true);setError('');
+ async function run(force=false){if(inflight.current===key&&!force)return;inflight.current=key;setBusy(true);setStartedAt(Date.now());setError('');
   try{const r=await requestBrief(digest,c.demo!==false);const v={...r,key};setOut(v);writeCache(cacheId,v)}catch(e){setError((e as Error).message)}finally{setBusy(false);inflight.current=''}}
  useEffect(()=>{if(!ready||out?.key===key)return;if(timer.current)clearTimeout(timer.current);timer.current=setTimeout(()=>run(),700);return()=>{if(timer.current)clearTimeout(timer.current)}},[ready,key,out?.key]);
  const jump=(name:string)=>{const s=scopeUnits(c),u=s.units.find(x=>x.label===name);if(u){s.drill(u.key);return}const t=c.scope.find(t=>t.name===name||name.endsWith(t.name));if(t)c.showTarget(t.id)};
@@ -252,7 +245,8 @@ export function AiBrief({c,weekly=false}:{c:Context;weekly?:boolean}){
     {busy?<span className="ai-brief-busy" role="status"><Loader2 size={14} className="spin"/>{out?'새 조건으로 다시 쓰는 중':'브리핑 작성 중'}</span>:out&&<button type="button" className="textbtn" onClick={()=>run(true)} title="같은 조건으로 다시 생성"><RefreshCw size={14}/>다시 쓰기</button>}</div></div>
   <div className="chart-body">
    {error&&<p className="form-error" role="alert">{error} <button type="button" className="textbtn" onClick={()=>run(true)}>다시 시도</button></p>}
-   {!r&&!error&&<div role="status"><span className="sr-only">브리핑을 준비하고 있어요.</span><div className="ai-brief-skeleton" aria-hidden="true"><i/><i/><i/></div></div>}
+   {busy&&<BriefProgress startedAt={startedAt} demo={c.demo!==false}/>}
+   {!r&&!error&&!busy&&<div role="status"><span className="sr-only">브리핑을 준비하고 있어요.</span><div className="ai-brief-skeleton" aria-hidden="true"><i/><i/><i/></div></div>}
    {out&&r&&<BriefPresentation key={cacheId+':'+key+':'+out.generatedAt} out={out} digest={digest} stale={stale} jump={jump} targetNames={targetNames}/>}
   </div>
  </section>;

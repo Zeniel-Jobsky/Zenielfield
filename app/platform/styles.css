@@ -603,3 +603,26 @@
 .account-panel [role=menuitem].danger{color:#b42318}
 .account-panel [role=menuitem] svg{color:var(--zf-text-secondary)}.account-panel [role=menuitem].danger svg{color:#b42318}
 @media(max-width:760px){.account-panel{position:fixed;left:auto;right:12px;top:56px;width:min(280px,calc(100vw - 24px))}}
+/* AI 브리핑(맨 위): 현황 한 줄(본문 크기) → 무슨 일이 벌어지고 있나(가장 눈에 띄게) → 먼저 챙길 곳 → 세부는 펼쳐서 */
+.app-shell .ai-brief-out .ai-brief-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin:0 0 12px;font-size:15px;font-weight:600;line-height:1.6;color:var(--zf-text)}
+.app-shell .ai-brief-out .ai-brief-head .ai-brief-tone{flex:none}
+.ai-brief-story{margin:0 0 14px;padding:14px 16px;border-radius:8px;background:var(--zf-info-soft)}
+.ai-brief-story h3,.ai-brief-out .ai-brief-focus h3{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--zf-text-secondary)}
+.ai-brief-story p{margin:0;font-size:16px;line-height:1.7;color:var(--zf-text)}
+.ai-brief-out .ai-brief-focus{margin:0 0 10px}
+.ai-brief-out .ai-brief-focus ol{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.ai-brief-out .ai-brief-focus li{display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:4px 12px;align-items:baseline;font-size:13px;line-height:1.6}
+.ai-brief-out .ai-brief-focus .link{display:inline-flex;align-items:center;min-height:44px;font-weight:600}
+.ai-brief-details>section{margin-top:12px}
+.ai-brief-details h3{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--zf-text-secondary)}
+/* 만드는 동안 단계 표시 */
+.ai-brief-progress{display:grid;gap:8px;padding:12px 0}
+.ai-brief-progress ol{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0;padding:0;list-style:none;font-size:13px;color:var(--zf-text-secondary)}
+.ai-brief-progress li::before{content:'○ ';color:var(--zf-border)}
+.ai-brief-progress li.on{color:var(--zf-text);font-weight:600}.ai-brief-progress li.on::before{content:'● ';color:#003c33}
+.ai-brief-progress li.done{color:#003c33}.ai-brief-progress li.done::before{content:'✓ ';color:#003c33}
+.ai-brief-progress-bar{height:4px;border-radius:2px;background:var(--zf-border);overflow:hidden}
+.ai-brief-progress-bar i{display:block;height:100%;background:#003c33;transition:width .25s linear}
+.ai-brief-progress small{font-size:12px;color:var(--zf-text-secondary)}
+@media(max-width:760px){.ai-brief-out .ai-brief-focus li{grid-template-columns:1fr}.ai-brief-story p{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.ai-brief-progress-bar i{transition:none}}
