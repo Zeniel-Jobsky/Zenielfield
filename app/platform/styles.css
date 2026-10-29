@@ -590,6 +590,16 @@
 .suggest-list li.on svg{color:#003c33}
 /* 브리핑 펼치기 미리보기: 안에 든 내용 수를 버튼에 적는다 */
 .brief-disclosure-peek{font-size:12px;font-weight:400;color:var(--zf-text-secondary)}
-/* 운영 띠: 새로고침·로그아웃은 '운영' 표시 바로 옆(왼쪽 정렬) */
-.platform-live-banner{justify-content:flex-start}
-@media(min-width:761px){.platform-live-banner .live-mode-actions{display:inline-flex;align-items:center;gap:12px}}
+/* 사용자(세션) 메뉴: 오른쪽 위 아바타 → 메뉴(이름·역할·소속, 새로고침, 설정, 로그아웃/로그인) */
+.account-menu{position:relative}
+.account-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:80;width:260px;padding:6px;border:1px solid var(--zf-border);border-radius:8px;background:var(--zf-surface);box-shadow:0 8px 24px rgba(23,23,28,.12)}
+.account-who{display:grid;gap:2px;padding:10px 10px 12px;margin-bottom:4px;border-bottom:1px solid var(--zf-border)}
+.account-who b{font-size:14px;color:var(--zf-text)}
+.account-who small{font-size:12px;color:var(--zf-text-secondary)}
+.account-mode{justify-self:start;margin-top:6px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.account-mode.live{background:var(--zf-selected);color:#003c33}.account-mode.demo{background:var(--zf-warning-soft);color:#8a4b00}
+.account-panel [role=menuitem]{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 10px;border-radius:6px;font-size:13px;color:var(--zf-text);text-align:left}
+.account-panel [role=menuitem]:hover{background:var(--zf-surface-hover)}
+.account-panel [role=menuitem].danger{color:#b42318}
+.account-panel [role=menuitem] svg{color:var(--zf-text-secondary)}.account-panel [role=menuitem].danger svg{color:#b42318}
+@media(max-width:760px){.account-panel{position:fixed;left:auto;right:12px;top:56px;width:min(280px,calc(100vw - 24px))}}
