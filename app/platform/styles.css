@@ -433,7 +433,6 @@
 @media(max-width:760px){.update-notice{bottom:84px;left:16px;right:16px;transform:none;max-width:none}.update-notice .btn{min-height:44px}}
 
 .ai-fallback-note{padding:8px 10px;border-radius:6px;background:#fdf4e7;color:#8a4b00}
-/* 보고 주제 상태: 목록 구분선은 현장 행에만 적용한다. */
 /* AI 브리핑 독려 한마디 · 잡매니저 방문 코치 */
 .panel.coach{padding:16px}
 .coach h3{margin:14px 0 6px;font-size:13px;font-weight:650;color:#36443e}
@@ -574,8 +573,6 @@
 .suggest-list li small{font-size:11px;color:var(--zf-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .suggest-list li.on{background:var(--zf-selected)}
 .suggest-list li.on svg{color:#003c33}
-/* 브리핑 펼치기 미리보기: 안에 든 내용 수를 버튼에 적는다 */
-.brief-disclosure-peek{font-size:12px;font-weight:400;color:var(--zf-text-secondary)}
 /* 사용자(세션) 메뉴: 오른쪽 위 아바타 → 메뉴(이름·역할·소속, 새로고침, 설정, 로그아웃/로그인) */
 .account-menu{position:relative}
 .account-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:80;width:260px;padding:6px;border:1px solid var(--zf-border);border-radius:8px;background:var(--zf-surface);box-shadow:0 8px 24px rgba(23,23,28,.12)}
@@ -676,7 +673,6 @@
  .ai-brief-out .ai-brief-focus li,.ai-brief-guide ul li{grid-template-columns:1fr;gap:0}
  .ai-brief-out .ai-brief-focus .link,.ai-brief-guide .link{min-height:36px}
  .ai-brief-steps li{align-items:flex-start}.ai-brief-steps b{margin-top:2px}
- .brief-disclosure-peek{display:none}
 }
 /* 먼저 챙길 곳: 본문은 중립, AI가 태깅한 핵심 상태 조각만 색(기한 넘김 앰버·완료 딥그린·상태 굵게) */
 .ai-brief-out .ai-brief-focus li span{color:var(--zf-text-body)}
