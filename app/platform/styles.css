@@ -575,3 +575,29 @@
  .app-shell .platform-filters .filterbar-period{justify-content:flex-start}
  .app-shell .platform-filters .date-range{flex:1;max-width:360px;justify-content:space-between}
 }
+/* 조회 기간 선택(지침 7절): [◀ 기간 이름 ▶] + 누르면 빠른 선택 창. 날짜 칸은 '직접 선택'에서만 */
+.period-picker{position:relative;display:inline-flex;align-items:stretch;border:1px solid var(--zf-control-border);border-radius:8px;background:var(--zf-surface)}
+.period-picker .period-step{display:grid;place-items:center;width:36px;min-height:36px;color:var(--zf-text-secondary)}
+.period-picker .period-step:hover,.period-picker .period-label:hover{background:var(--zf-surface-hover)}
+.period-picker .period-label{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:150px;min-height:36px;padding:0 10px;border-left:1px solid var(--zf-border);border-right:1px solid var(--zf-border);font-size:13px;font-weight:600;color:var(--zf-text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.period-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:60;width:320px;max-width:calc(100vw - 32px);padding:12px;border:1px solid var(--zf-border);border-radius:8px;background:var(--zf-surface);box-shadow:0 8px 24px rgba(23,23,28,.12)}
+.period-quick{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.period-quick button{display:grid;gap:2px;justify-items:start;min-height:44px;padding:6px 10px;border:1px solid var(--zf-border);border-radius:6px;text-align:left;font-size:13px;font-weight:600;color:var(--zf-text)}
+.period-quick button small{font-size:11px;font-weight:400;color:var(--zf-text-secondary)}
+.period-quick button.on{border-color:#003c33;background:var(--zf-selected);color:#003c33}
+.period-quick button>span{display:inline-flex;align-items:center;gap:4px}
+.period-quick button:hover{background:var(--zf-surface-hover)}
+.period-custom{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--zf-border)}
+.period-custom label{display:grid;gap:4px;font-size:12px;color:var(--zf-text-secondary)}
+.period-custom input{min-height:40px;padding:0 8px;border:1px solid var(--zf-control-border);border-radius:6px;font-size:14px;color:var(--zf-text)}
+.period-custom .btn{grid-column:1/-1;min-height:44px}
+.period-custom p{grid-column:1/-1;font-size:11px;color:var(--zf-text-secondary)}
+@media(max-width:760px){.period-picker .period-step{width:40px;min-height:44px}.period-picker .period-label{min-width:0;flex:1;min-height:44px}.app-shell .platform-filters .filterbar-period{flex:1 1 auto;min-width:0}.period-picker{width:100%}.period-panel{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-radius:12px 12px 0 0}}
+/* 운영 화면 조회 필터 배치(760px 이하): [범위 버튼][초기화] / [◀ 기간 ▶] 전체 폭 / 펼친 선택 상자 */
+@media(max-width:760px){
+ .app-shell .platform-filters .filterbar-primary{display:grid;grid-template-columns:minmax(0,1fr) 44px;grid-template-areas:"scope reset" "period period" "selects selects";align-items:center;gap:8px}
+ .app-shell .platform-filters .scope-toggle{grid-area:scope;min-height:44px}
+ .app-shell .platform-filters .filterbar-period{grid-area:period;display:flex;width:100%;margin:0}
+ .app-shell .platform-filters .reset-button{grid-area:reset;width:44px;min-width:44px;min-height:44px}
+ .app-shell .platform-filters.filterbar-open #workspace-filters{grid-area:selects;}
+}
