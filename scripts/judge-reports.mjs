@@ -3,7 +3,7 @@
 // 사용: node --env-file=.env scripts/judge-reports.mjs [입력 JSON=data/hrbiz-demo.json] [판정 파일=data/hrbiz-judgments.json] [--redo] [--targets N] [--ids 파일]
 // 보내는 것: 목적·결과 칸·상세·특이사항·조치 내용과 날짜·상태만(사람 이름·담당자 ID 미전송, 전화·메일 가림). 판정은 by='ai', 사람 확정 전(confirmedBy=null).
 import fs from 'node:fs';
-import {judgePrompt,judgeSchema,cleanJudgment,buildJudgeInput} from '../app/platform/judgment.ts';
+import {judgePrompt,judgeSchema,cleanJudgment,buildJudgeInput,isCurrentJudgment} from '../app/platform/judgment.ts';
 const args=process.argv.slice(2),flag=n=>{const i=args.indexOf(n);return i<0?null:args.splice(i,2)[1]};
 const maxTargets=Number(flag('--targets')||0),idsFile=flag('--ids'),redo=args.includes('--redo');const pos=args.filter(a=>!a.startsWith('--'));
 const input=pos[0]||'data/hrbiz-demo.json',out=pos[1]||'data/hrbiz-judgments.json';
@@ -11,7 +11,9 @@ const key=process.env.OPENAI_API_KEY||'',model=process.env.OPENAI_MODEL||'gpt-6-
 const REPORTS_PER_CALL=30,PARALLEL=4;
 const data=JSON.parse(fs.readFileSync(input,'utf8'));
 const actionsOf=new Map();for(const a of data.actions||[])if(a.visitId){const v=data.visits.find(x=>x.id===a.visitId);if(v){const t=v.storeId||v.siteId;actionsOf.set(t,[...(actionsOf.get(t)||[]),a])}}
-const saved=fs.existsSync(out)?JSON.parse(fs.readFileSync(out,'utf8')):{model:'',judgments:{}};
+// 현재 형식 판정만 이어받는다. 옛 형식(has/items)은 버리고, --redo면 전부 새로 판정한다.
+const prev=fs.existsSync(out)&&!redo?JSON.parse(fs.readFileSync(out,'utf8')).judgments||{}:{};
+const saved={model:'',judgments:Object.fromEntries(Object.entries(prev).filter(([,j])=>isCurrentJudgment(j)).map(([id,j])=>[id,cleanJudgment(j)]))};
 const only=idsFile?new Set(fs.readFileSync(idsFile,'utf8').split(/\s+/).filter(Boolean)):null;
 // 대상별 타임라인. 판정이 하나라도 빠진 대상은 타임라인 전체를 다시 보낸다(맥락 유지).
 const byTarget=new Map();for(const v of data.visits.filter(v=>v.status==='completed'&&v.actualDate)){const t=v.storeId||v.siteId;byTarget.set(t,[...(byTarget.get(t)||[]),v])}

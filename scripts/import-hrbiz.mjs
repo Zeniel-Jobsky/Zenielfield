@@ -2,9 +2,10 @@
 // 시트: 잡매니저_30명 · 현장_100개 · 매장_500개 · 방문기록_DB · 후속조치_DB. 브리핑·문구·코드북 시트는 파생 자료라 읽지 않는다.
 import fs from 'node:fs';
 import {createRequire} from 'node:module';
+import {cleanJudgment,isCurrentJudgment} from '../app/platform/judgment.ts';
 const require=createRequire(import.meta.url);
 const [input,...flags]=process.argv.slice(2);if(!input){console.error('xlsx 경로가 필요합니다.');process.exit(1)}
-let XLSX;try{XLSX=require('xlsx')}catch{XLSX=require(process.env.XLSX_MODULE||'xlsx')}
+const XLSX=require('xlsx');
 const wb=XLSX.readFile(input),sheet=n=>{if(!wb.Sheets[n])throw Error('시트 없음: '+n);return XLSX.utils.sheet_to_json(wb.Sheets[n],{defval:''})};
 const day=v=>typeof v==='number'?new Date(Math.round((v-25569)*86400000)).toISOString().slice(0,10):/^\d{4}-\d{2}-\d{2}/.test(String(v))?String(v).slice(0,10):null;
 const rule=t=>({'월 1회':{period:'month',count:1},'월 2회':{period:'month',count:2},'격주 1회':{period:'month',count:2},'주 1회':{period:'week',count:1},'필요 시':{period:'manual',count:1}})[String(t).trim()]||{period:'manual',count:1};
@@ -27,7 +28,10 @@ const stores=T.map(t=>({id:idOf('store',t['매장ID']),siteId:sid[t['현장ID']]
 const stid=Object.fromEntries(T.map(t=>[t['매장ID'],idOf('store',t['매장ID'])]));
 const visits=V.map(v=>{const store=v['매장ID']?stid[v['매장ID']]:null,d=day(v['방문일']);return{id:idOf('visit',v['방문ID']),targetType:store?'store':'site',siteId:sid[v['현장ID']],storeId:store,visitorId:uid[v['잡매니저ID']],plannedDate:d,time:'',purpose:String(v['방문목적']||v['활동유형']),precheck:'',status:'completed',actualDate:d,actualTime:'',detail:String(v['주요활동내역']),notes:String(v['특이사항']),result:v['후속조치필요']==='Y'?'후속 조치 필요':'특이사항 없음',cancelReason:'',requirementId:null,entry:'manual',version:1,activityType:String(v['활동유형']),priority:String(v['우선순위']),template:String(v['문구템플릿ID']),registeredDate:day(v['방문계획등록일'])}});
 // 문제 판정: scripts/judge-reports.mjs가 만든 판정 파일이 있으면 방문 ID로 붙인다(다시 생성해도 AI를 또 부르지 않음).
-const judged=fs.existsSync('data/hrbiz-judgments.json')?JSON.parse(fs.readFileSync('data/hrbiz-judgments.json','utf8')).judgments:{};let judgedN=0;for(const v of visits){const j=judged[v.id];if(j){v.judgment=j;judgedN++}}
+const judged=fs.existsSync('data/hrbiz-judgments.json')?JSON.parse(fs.readFileSync('data/hrbiz-judgments.json','utf8')).judgments:{};let judgedN=0,staleN=0;
+// 현재 형식 판정만 cleanJudgment로 정리해 붙인다. 옛 형식(has/items)은 붙이지 않는다.
+for(const v of visits){const j=judged[v.id];if(!j)continue;if(!isCurrentJudgment(j)){staleN++;continue}v.judgment=cleanJudgment(j);judgedN++}
+if(staleN)console.warn(`옛 형식 판정 ${staleN}건은 붙이지 않음 — scripts/judge-reports.mjs --redo로 다시 판정`);
 const vid=new Set(visits.map(v=>v.id));
 const actions=A.map(a=>{const store=a['매장ID']?stid[a['매장ID']]:null,visit=idOf('visit',a['연결방문ID']);return{id:idOf('action',a['조치ID']),targetType:store?'store':'site',siteId:sid[a['현장ID']],storeId:store,visitId:vid.has(visit)?visit:null,type:String(a['활동유형']),content:String(a['후속조치 내용']),issue:String(a['접수된 특이사항']),ownerId:uid[a['담당자ID']],createdDate:day(a['방문일']),dueDate:day(a['조치기한']),state:states[String(a['조치상태']).trim()]||'조치 예정',sourceState:String(a['조치상태']),priority:String(a['우선순위']),completedDate:day(a['완료일']),version:1}});
 // 좌표 이어받기: 다시 만들면 기존 data/hrbiz-demo.json의 매장 좌표·주소를 매장 코드로 그대로 옮긴다(외부 API 호출 없음).

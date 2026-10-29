@@ -36,6 +36,8 @@ export function cleanIssues(x:unknown):JudgedIssue[]{
  return x.slice(0,8).flatMap(i=>{if(!i||typeof i!=='object')return [];const o=i as Record<string,unknown>,summary=str(o.summary,120);if(!summary)return [];
   return [{type:pick(ISSUE_TYPES,o.type,'기타'),summary,severity:pick(SEVERITIES,o.severity,'보통'),flow:pick(FLOWS,o.flow,'신규'),customerRequest:o.customerRequest===true}]});
 }
+// 현재 형식(level·issues 배열)인가. 옛 있음/없음 형식(has/items)을 걸러 낼 때 쓴다.
+export const isCurrentJudgment=(x:unknown):x is VisitJudgment=>!!x&&typeof x==='object'&&(LEVELS as readonly string[]).includes((x as Record<string,unknown>).level as string)&&Array.isArray((x as Record<string,unknown>).issues);
 export function cleanJudgment(x:unknown):VisitJudgment|null{
  if(!x||typeof x!=='object')return null;const o=x as Record<string,unknown>,issues=cleanIssues(o.issues),assessment=str(o.assessment,200);
  if(!assessment&&!issues.length&&!(LEVELS as readonly string[]).includes(o.level as string))return null;
