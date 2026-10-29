@@ -29,8 +29,8 @@ export function BriefingPage({data,now,start,end,onVisit,initialSite=''}:BriefPr
  const sites=useMemo(()=>[...new Map(data.targets.map(t=>[t.siteId,t.siteName])).entries()],[data.targets]);
  const weeks=weekRanges(start,end),latest=weeks.find(w=>w.start<=now)?.start||weeks[0]?.start;
  const visits=useMemo(()=>data.visits.filter(v=>v.status==='completed'&&!!v.actualDate&&v.actualDate<=now&&(!site||v.siteId===site)),[data.visits,now,site]);
- return <section className="briefing-page" aria-label="주차별 업무 기록">
-  <div className="brief-section-heading"><h2 id={id+'-t'}>주차별 업무 기록</h2><label className="brief-site-filter"><span className="sr-only">현장 선택</span><select aria-label="현장 선택" value={site} onChange={e=>setSite(e.target.value)}><option value="">전체 현장</option>{sites.map(([k,n])=><option value={k} key={k}>{n}</option>)}</select></label></div>
+ return <section className="briefing-page" aria-label="날짜별 방문">
+  <div className="brief-section-heading"><h2 id={id+'-t'}>날짜별 방문</h2><label className="brief-site-filter"><span className="sr-only">현장 선택</span><select aria-label="현장 선택" value={site} onChange={e=>setSite(e.target.value)}><option value="">전체 현장</option>{sites.map(([k,n])=><option value={k} key={k}>{n}</option>)}</select></label></div>
   <div className="brief-weeks">{weeks.slice(0,more.weeks?undefined:4).map(w=>{
    const inWeek=visits.filter(v=>v.actualDate!>=w.from&&v.actualDate!<=w.to).sort((a,b)=>b.actualDate!.localeCompare(a.actualDate!)||(a.actualTime||'').localeCompare(b.actualTime||''));
    const byDay=new Map<string,BriefVisit[]>();for(const v of inWeek){const l=byDay.get(v.actualDate!)||[];l.push(v);byDay.set(v.actualDate!,l)}const siteCount=new Set(inWeek.map(v=>v.siteId)).size;

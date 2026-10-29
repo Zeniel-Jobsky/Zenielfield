@@ -4,7 +4,7 @@
 import {useEffect,useId,useRef,useState,type ReactNode} from 'react';
 import {ChevronDown,RefreshCw,Settings,LogOut,LogIn} from 'lucide-react';
 
-export function AccountMenu({name,role,org,avatar,live,refreshing,onRefresh,onSettings,onLogout,onLogin}:{name:string;role:string;org:string;avatar:ReactNode;live:boolean;refreshing?:boolean;onRefresh?:()=>void;onSettings:()=>void;onLogout?:()=>void;onLogin?:()=>void}){
+export function AccountMenu({name,role,org,avatar,live,refreshing,onRefresh,onSettings,onLogout,onLogin}:{name:string;role:string;org:string;avatar:ReactNode;live:boolean;refreshing?:boolean;onRefresh?:()=>void;onSettings?:()=>void;onLogout?:()=>void;onLogin?:()=>void}){
  const [open,setOpen]=useState(false),box=useRef<HTMLDivElement>(null),btn=useRef<HTMLButtonElement>(null),id=useId();
  useEffect(()=>{if(!open)return;const out=(e:PointerEvent)=>{if(!box.current?.contains(e.target as Node))setOpen(false)};const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){setOpen(false);btn.current?.focus()}};
   document.addEventListener('pointerdown',out);document.addEventListener('keydown',key);return()=>{document.removeEventListener('pointerdown',out);document.removeEventListener('keydown',key)}},[open]);
@@ -14,7 +14,7 @@ export function AccountMenu({name,role,org,avatar,live,refreshing,onRefresh,onSe
   {open&&<div className="account-panel" id={id} role="menu" aria-label="계정 메뉴">
    <div className="account-who"><b>{name}</b><small>{role}{org?' · '+org:''}</small><span className={'account-mode '+(live?'live':'demo')}>{live?'운영':'데모'}</span></div>
    {live&&onRefresh&&<button type="button" role="menuitem" onClick={run(onRefresh)} disabled={refreshing}><RefreshCw size={16}/>{refreshing?'불러오는 중':'데이터 새로고침'}</button>}
-   <button type="button" role="menuitem" onClick={run(onSettings)}><Settings size={16}/>설정</button>
+   {onSettings&&<button type="button" role="menuitem" onClick={run(onSettings)}><Settings size={16}/>설정</button>}
    {live?onLogout&&<button type="button" role="menuitem" className="danger" onClick={run(onLogout)}><LogOut size={16}/>로그아웃</button>
     :onLogin&&<button type="button" role="menuitem" onClick={run(onLogin)}><LogIn size={16}/>로그인</button>}
   </div>}
