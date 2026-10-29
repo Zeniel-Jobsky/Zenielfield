@@ -743,3 +743,9 @@
 .copy-btn:hover{background:var(--zf-info-soft)}
 .copy-btn:focus-visible{outline:2px solid #003c33;outline-offset:2px}
 .copy-btn:disabled{opacity:.4;cursor:default}
+
+/* 회의록으로 읽은 입력: 주제·참석 인원·일시 한 줄 + 채운 칸 안내 */
+.ai-meeting{display:grid;gap:4px;padding:12px 14px;background:var(--zf-info-soft);border-radius:6px}
+.ai-meeting p{margin:0;display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px;color:#17171c}
+.ai-meeting b{font-weight:600;color:#003c33}
+.ai-meeting span{min-width:0;overflow-wrap:anywhere}

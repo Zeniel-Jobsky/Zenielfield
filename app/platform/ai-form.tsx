@@ -1,6 +1,6 @@
 'use client';
 import {AiMark} from './ai-mark';
-import {daysBetween} from '../lib/date';
+import {daysBetween,validDay} from '../lib/date';
 import {JudgeCheck,runJudge,judgeKey,confirmed,type JudgeState} from './judge-check';
 import {useState,type FormEvent} from 'react';
 import {Check,MapPin,ClipboardCheck,Sparkles,Info,RotateCcw,PenLine} from 'lucide-react';
@@ -8,7 +8,7 @@ import {Field} from '../ui';
 import {purposes} from '../lib/model';
 import {type TargetType,type AiEntry,type AiField,aiFields,targetOf,typeName,requirements,dayShift} from './model';
 import type {Context} from './context';
-import {AiComposer,type AiUnclear,type AiDraft} from './ai-assist';
+import {AiComposer,type AiUnclear,type AiDraft,type AiMeeting} from './ai-assist';
 import {GeoPick} from './geo';
 import {Permissions} from './permissions';
 import type {VisitGeo,Target,FieldVisit} from './model';
@@ -22,7 +22,11 @@ export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;
  const [ai,setAi]=useState<AiEntry|null>(saved||null),[values,setValues]=useState<Record<AiField,string>>(()=>Object.fromEntries(aiFields.map(k=>[k,r?.[k]||''])) as Record<AiField,string>),[actions,setActions]=useState<AiDraft['actions']>([]),[picked,setPicked]=useState<boolean[]>([]),[judge,setJudge]=useState<JudgeState|null>(null),[judging,setJudging]=useState(false);
  // AI가 판독 못 한 항목: 나열해 두고 후보를 고르거나 직접 적으면 해당 칸에 들어가고 목록에서 빠진다
  const [unclear,setUnclear]=useState<AiUnclear[]>([]);
- const fill=(u:AiUnclear,text:string)=>{if(u.field==='actions'){setActions(a=>[...a,{type:'기타',content:text,dueDate:c.now}]);setPicked(p=>[...p,true])}else{const key=u.field;setValues(v=>({...v,[key]:key==='detail'||key==='notes'?(v[key]?v[key]+' '+text:text):text}))}setUnclear(l=>l.filter(x=>x!==u))};
+ // 회의록으로 읽힌 입력: 대상·방문일·시각을 채운다(사람이 이미 고른 대상·시각은 바꾸지 않는다). 무엇을 채웠는지 한 줄로 보인다.
+ const [meeting,setMeeting]=useState<{m:AiMeeting;filled:string[]}|null>(null);
+ const fill=(u:AiUnclear,text:string)=>{if(u.field==='actions'){setActions(a=>[...a,{type:'기타',content:text,dueDate:c.now}]);setPicked(p=>[...p,true])}else{const key=u.field;setValues(v=>{const cur=v[key]||'';if(key!=='detail'&&key!=='notes')return {...v,[key]:text};
+  // 본문에 이미 들어간 후보(AI가 더 그럴듯하다고 쓴 말)가 있으면 그 자리를 바꾸고, 없으면 뒤에 덧붙인다
+  const hit=u.options.filter(o=>o&&o!==text&&cur.includes(o)).sort((a,b)=>b.length-a.length)[0];return {...v,[key]:hit?cur.replace(hit,text):cur.includes(text)?cur:cur?cur+' '+text:text}})}setUnclear(l=>l.filter(x=>x!==u))};
  const [geo,setGeo]=useState<VisitGeo|null>(null),pick=(t:Target)=>{setType(t.type);setSite(t.siteId);setStore(t.storeId||'')};
  const [actualDate,setActualDate]=useState(r?.actualDate||c.now),[actualTime,setActualTime]=useState(()=>r?.actualTime||new Date().toTimeString().slice(0,5)),[linkId,setLinkId]=useState<string|null>(null);
  const target=c.targets.find(t=>t.id===(type==='store'?store:site)),owners=(target?.managerIds||[]).filter(id=>c.me.role!=='manager'||id===c.me.id),[visitor,setVisitor]=useState(r?.visitorId||c.me.id),owner=r?.visitorId||(owners.includes(visitor)?visitor:owners[0]||'');
@@ -33,7 +37,13 @@ export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;
  const linkable=(v:FieldVisit)=>{if(!v.requirementId||!target)return true;const head=('req:'+target.id+':').length,unit=v.requirementId.slice(head,head+10),req=requirements([target],unit,dayShift(unit,40)).find(q=>q.id===v.requirementId);return !req||req.windowStart<=actualDate};
  const rank=(v:FieldVisit)=>{const d=daysBetween(c.now,v.plannedDate||c.now);return d<=0?-d:100+d};
  const near=(v:{plannedDate:string|null})=>!!v.plannedDate&&Math.abs(daysBetween(c.now,v.plannedDate))<=14,candidates=target?plans.filter(v=>targetOf(v)===target.id&&near(v)&&linkable(v)).sort((a,b)=>rank(a)-rank(b)):[],linked=r||!candidates.length?null:candidates.find(v=>v.id===(linkId??candidates[0].id))||null;
- function draft(d:AiDraft,meta:{text:string;imageCount:number;model:string;generatedAt:string}){const v={purpose:purposes.includes(d.purpose)?d.purpose:'',detail:d.detail,notes:d.notes,result:['후속 조치 필요','특이사항 없음'].includes(d.result)?d.result:''};setValues(v);setActions(d.actions);setPicked(d.actions.map(()=>true));setUnclear((d.unclear||[]).filter(u=>u&&u.what));setAi({input:{text:meta.text,imageCount:meta.imageCount},draft:v,summary:d.extra.summary,confidence:d.confidence,model:meta.model,generatedAt:meta.generatedAt,edited:[]})}
+ function draft(d:AiDraft,meta:{text:string;imageCount:number;model:string;generatedAt:string}){const v={purpose:purposes.includes(d.purpose)?d.purpose:'',detail:d.detail,notes:d.notes,result:['후속 조치 필요','특이사항 없음'].includes(d.result)?d.result:''};setValues(v);setActions(d.actions);setPicked(d.actions.map(()=>true));setUnclear((d.unclear||[]).filter(u=>u&&u.what));applyMeeting(d.meeting);setAi({input:{text:meta.text,imageCount:meta.imageCount},draft:v,summary:d.extra.summary,confidence:d.confidence,model:meta.model,generatedAt:meta.generatedAt,edited:[]})}
+ function applyMeeting(m?:AiMeeting){if(!m?.isMeeting){setMeeting(null);return}const filled:string[]=[];
+  const norm=(x:string)=>x.replace(/\s+/g,''),name=norm(m.target||'');
+  if(name&&!locked&&!target){const hit=c.targets.filter(t=>{const n=norm(t.name);return n.includes(name)||name.includes(n)});if(hit.length===1){pick(hit[0]);filled.push('대상')}}
+  if(validDay(m.date)&&m.date<=c.now&&!r){setActualDate(m.date);filled.push('방문일')}
+  if(/^\d{2}:\d{2}$/.test(m.start)&&!r){setActualTime(m.start);filled.push('시각')}
+  setMeeting({m,filled})}
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!ready||!ai||!target)return;const base=r||linked;
   // 종합 판정: 직접 입력과 같은 기준. 내용이 판정 때와 다르면 먼저 판정해 보여 주고 저장은 다음 클릭에서.
   const pending=actions.filter((_,i)=>picked[i]),rep={purpose:values.purpose,detail:values.detail,notes:values.notes,result:values.result,actualDate};
@@ -47,13 +57,14 @@ export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;
  {!saved&&<AiComposer onDraft={draft} demo={c.demo!==false}/>}
  <div className="form-section wide"><span>02</span>방문 대상</div>
  <GeoPick auto={!saved} targets={c.targets} target={target} onPick={locked?undefined:pick} onGeo={setGeo}/>
- {!r&&target&&(candidates.length?<p className="form-hint wide link-hint"><span>계획 연결</span><b>{linked?`${linked.plannedDate} ${linked.time||''} 예정`.replace(/s+예정$/,' 예정'):'계획 외 방문'}</b>{candidates.length>1&&<select value={linkId??candidates[0].id} onChange={e=>setLinkId(e.target.value)}>{candidates.map(v=><option key={v.id} value={v.id}>{v.plannedDate} {v.time}</option>)}<option value="none">계획 외 방문으로 저장</option></select>}{candidates.length===1&&<button type="button" className="textbtn" onClick={()=>setLinkId(linkId==='none'?null:'none')}>{linkId==='none'?'계획에 연결':'계획 외로 저장'}</button>}</p>:<p className="form-hint wide">이 대상에 오늘 기준 ±14일 안의 미완료 계획이 없어 계획 외 방문으로 저장됩니다.</p>)}
+ {!r&&target&&(candidates.length?<p className="form-hint wide link-hint"><span>계획 연결</span><b>{linked?`${linked.plannedDate} ${linked.time||''} 예정`.replace(/\s+예정$/,' 예정'):'계획 외 방문'}</b>{candidates.length>1&&<select value={linkId??candidates[0].id} onChange={e=>setLinkId(e.target.value)}>{candidates.map(v=><option key={v.id} value={v.id}>{v.plannedDate} {v.time}</option>)}<option value="none">계획 외 방문으로 저장</option></select>}{candidates.length===1&&<button type="button" className="textbtn" onClick={()=>setLinkId(linkId==='none'?null:'none')}>{linkId==='none'?'계획에 연결':'계획 외로 저장'}</button>}</p>:<p className="form-hint wide">이 대상에 오늘 기준 ±14일 안의 미완료 계획이 없어 계획 외 방문으로 저장됩니다.</p>)}
  <div className="target-type-switch wide" role="group" aria-label="방문 대상 유형"><button type="button" className={type==='site'?'active':''} disabled={locked} onClick={()=>{setType('site');setStore('')}}><MapPin size={16}/>현장 방문</button><button type="button" className={type==='store'?'active':''} disabled={locked} onClick={()=>setType('store')}><ClipboardCheck size={16}/>매장 방문</button></div>
  <Field label={type==='site'?'방문 현장 *':'상위 현장 *'} wide><select required value={site} disabled={locked} onChange={e=>{setSite(e.target.value);setStore('')}}><option value="">현장 선택</option>{parents.map(s=><option key={s.id} value={s.id}>{s.name} · {s.client}</option>)}</select></Field>
  {type==='store'&&<Field label="방문 매장 *" wide><select required value={store} disabled={locked} onChange={e=>setStore(e.target.value)}><option value="">소속 매장 선택</option>{stores.map(s=><option key={s.id} value={s.id}>{s.name} · {s.code}</option>)}</select></Field>}
  {owners.length>1&&!r&&<Field label="방문자 *"><select value={owner} onChange={e=>setVisitor(e.target.value)}>{owners.map(id=><option key={id} value={id}>{c.uname(id)}</option>)}</select></Field>}
  {ai&&<><div className="form-section wide"><span>03</span><AiMark/>AI 초안 검토</div>
  <div className="ai-result wide"><p><Sparkles size={14}/><b>AI 요약</b> {ai.summary||'요약 없음'}</p><p className="ai-tags">{ai.confidence==='low'&&<span className="warn">확신 낮음 · 꼭 확인</span>}</p>
+  {meeting&&<div className="ai-meeting wide" role="note"><p><b>회의록으로 읽었어요</b>{meeting.m.topic&&<span>{meeting.m.topic}</span>}{meeting.m.attendeeCount>0&&<span>참석 {meeting.m.attendeeCount}명</span>}{meeting.m.date&&<span>{meeting.m.date.slice(5).replace('-','.')}{meeting.m.start&&' '+meeting.m.start}{meeting.m.end&&'–'+meeting.m.end}</span>}</p>{meeting.filled.length>0&&<p className="form-hint">{meeting.filled.join('·')}을 회의록 내용으로 채웠어요. 다르면 위에서 바꿔 주세요.</p>}{meeting.m.target&&!meeting.filled.includes('대상')&&!target&&<p className="form-hint">‘{meeting.m.target}’에 맞는 대상을 찾지 못했어요. 02 방문 대상에서 골라 주세요.</p>}</div>}
   {unclear.length>0&&<div className="ai-unclear" role="group" aria-label="판독하지 못한 항목"><p className="ai-unclear-title">읽지 못한 항목 {unclear.length}개 — 고르거나 직접 적어 주세요</p><ul>{unclear.map((u,i)=><li key={i}><div className="ai-unclear-what"><b>{u.field==='actions'?'후속 조치':labels[u.field]}</b> {u.what}{u.where&&<small> · {u.where}</small>}</div><div className="ai-unclear-pick">{u.options.map(o=><button type="button" key={o} className="chip" onClick={()=>fill(u,o)}>{o}</button>)}<UnclearInput onSubmit={t=>fill(u,t)}/><button type="button" className="textbtn" onClick={()=>setUnclear(l=>l.filter(x=>x!==u))}>넘기기</button></div></li>)}</ul></div>}{ai.input.text&&<details><summary>입력 원문</summary><p className="ai-source">{ai.input.text}</p></details>}<p className="form-hint">AI 초안을 고친 칸은 &quot;수정됨&quot;으로 표시되고 그대로 기록됩니다.</p></div>
  <details className="optional-field wide"><summary>방문 일시 {actualDate===c.now?'오늘':actualDate} {actualTime} · 바꾸려면 펼치기</summary><div className="form-grid"><Field label="실제 방문일 *"><input type="date" value={actualDate} max={c.now} required onChange={e=>setActualDate(e.target.value)}/></Field><Field label="실제 방문 시간"><input type="time" value={actualTime} onChange={e=>setActualTime(e.target.value)}/></Field></div></details>
  {aiFields.map(k=><Field key={k} label={labels[k]+(k==='detail'?' *':'')+(edited(k)?' · 수정됨':' · AI')} wide={k!=='purpose'&&k!=='result'}>{k==='purpose'?<select data-ai={edited(k)?undefined:'1'} required value={values[k]} onChange={e=>setValues({...values,[k]:e.target.value})}><option value="" disabled>선택해 주세요</option>{purposes.map(p=><option key={p}>{p}</option>)}</select>:k==='result'?<select data-ai={edited(k)?undefined:'1'} required value={values[k]} onChange={e=>setValues({...values,[k]:e.target.value})}><option value="" disabled>선택해 주세요</option><option>특이사항 없음</option><option>후속 조치 필요</option></select>:<textarea data-ai={edited(k)?undefined:'1'} required={k==='detail'} rows={k==='detail'?4:2} maxLength={k==='detail'?3500:1000} value={values[k]} onChange={e=>setValues({...values,[k]:e.target.value})}/>}</Field>)}
