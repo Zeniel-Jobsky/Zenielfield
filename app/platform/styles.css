@@ -557,3 +557,21 @@
 @media(prefers-reduced-motion:reduce){.zf-nudge,.zf-mascot svg,.zf-mascot path,.zf-bubble,.zf-mark{animation:none!important}.zf-burst,.zf-plus,.zf-nudge-bar u{display:none}}
 /* 역할별 필터(지침 7절): 기본은 본인 범위로 이미 선택된 상태라 선택 상자를 접어 두고, 현재 범위 버튼을 누르거나 터치할 때만 펼친다 */
 @media(min-width:761px){.app-shell .platform-filters .scope-toggle{display:inline-flex;align-items:center;gap:8px;grid-column:1;grid-row:1;justify-self:start;align-self:center;width:auto;min-height:44px;padding:0 14px;border:1px solid var(--zf-control-border);border-radius:8px;background:var(--zf-surface);color:var(--zf-text);font-size:14px;font-weight:600}.app-shell .platform-filters:not(.filterbar-open) #workspace-filters{display:none}.app-shell .platform-filters.filterbar-open #workspace-filters{display:grid;grid-column:1/-1;grid-row:2;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;padding:0;border:0;margin:0}}
+/* 운영 화면 조회 필터 배치(761px 이상)는 이 블록이 기준이다. 앞선 filterbar 규칙을 덮어쓰며, 다른 파일에 배치 규칙을 더 만들지 않는다.
+   데스크톱: [범위 버튼] ··· [기간][시작일 – 종료일][초기화] 한 줄 / 태블릿: [범위][초기화] + [기간·날짜] / 펼친 선택 상자는 맨 아래 줄 */
+@media(min-width:761px){
+ .app-shell .platform-filters .filterbar-primary{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"scope . period reset" "selects selects selects selects";align-items:center;gap:8px 12px;flex-wrap:nowrap}
+ .app-shell .platform-filters .filterbar-label{display:none}
+ .app-shell .platform-filters .scope-toggle{grid-area:scope}
+ .app-shell .platform-filters .filterbar-period{grid-area:period;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;margin:0;max-width:none;flex:none}
+ .app-shell .platform-filters .filterbar-period>select{width:112px;max-width:112px;min-height:36px;font-size:13px}
+ .app-shell .platform-filters .date-range{display:flex;align-items:center;gap:6px;width:auto;min-width:0;min-height:36px;padding:0 10px}
+ .app-shell .platform-filters .date-range input{width:122px!important;min-width:0;font-size:13px;padding:4px 0}
+ .app-shell .platform-filters .reset-button{grid-area:reset;display:inline-flex;align-items:center;justify-content:center;width:36px;min-width:36px;min-height:36px;padding:0;margin:0}
+ .app-shell .platform-filters.filterbar-open #workspace-filters{grid-area:selects}
+}
+@media(min-width:761px) and (max-width:1023px){
+ .app-shell .platform-filters .filterbar-primary{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"scope . reset" "period period period" "selects selects selects"}
+ .app-shell .platform-filters .filterbar-period{justify-content:flex-start}
+ .app-shell .platform-filters .date-range{flex:1;max-width:360px;justify-content:space-between}
+}
