@@ -501,9 +501,10 @@
 .judge-check>small{font-size:12px;color:#65726b}
 .judge-note{margin:0;font-size:12px;color:#8a4b00}
 /* 독려 안내(지침 10-A): 흰 표면·상단 1px 선, 도형 캐릭터, 큰 숫자 칸(누르면 목록), 칩(누르면 범위). 한 번 재생 트윈 */
-.zf-nudge{display:flex;gap:12px;align-items:flex-start;padding:16px 0 0;border-top:1px solid var(--zf-border);background:var(--zf-surface);animation:nudge-in .24s ease-out both}
+.zf-nudge{display:grid;gap:12px;padding:16px 0 0;border-top:1px solid var(--zf-border);background:var(--zf-surface);animation:nudge-in .24s ease-out both}
 .zf-nudge-sheet{padding:16px;border:1px solid var(--zf-border)}
-.zf-nudge-body{flex:1;min-width:0;display:grid;gap:12px}
+.zf-nudge-head{display:flex;align-items:center;gap:12px;min-width:0}
+.zf-nudge-body{min-width:0;display:grid;gap:12px}
 /* 캐릭터: 표정·몸짓이 먼저 말한다. 모두 한 번 재생 */
 .zf-mascot{position:relative;flex:none;display:block;isolation:isolate}
 .zf-mascot svg{display:block;overflow:visible}
@@ -517,8 +518,8 @@
 .zf-burst i:nth-child(even){width:8px;height:3px;border-radius:2px;background:#8a4b00}
 .zf-mark{position:absolute;top:-6px;right:-6px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#b42318;color:#fff;font-size:13px;font-weight:700;animation:zf-pop .4s cubic-bezier(.3,1.6,.5,1) .5s 1 both}
 /* 말풍선: 캐릭터가 직접 말한다 */
-.zf-bubble{position:relative;justify-self:start;max-width:100%;padding:10px 14px;border:1px solid var(--zf-border);border-radius:12px;background:var(--zf-surface);font-size:16px;font-weight:700;line-height:1.45;color:var(--zf-text);animation:zf-pop .35s cubic-bezier(.3,1.5,.5,1) .15s 1 both}
-.zf-bubble::before{content:'';position:absolute;left:-7px;top:14px;width:12px;height:12px;background:var(--zf-surface);border-left:1px solid var(--zf-border);border-bottom:1px solid var(--zf-border);transform:rotate(45deg)}
+.zf-bubble{position:relative;flex:0 1 auto;min-width:0;padding:10px 14px;border:1px solid var(--zf-border);border-radius:12px;background:var(--zf-surface);font-size:16px;font-weight:700;line-height:1.45;color:var(--zf-text);animation:zf-pop .35s cubic-bezier(.3,1.5,.5,1) .15s 1 both}
+.zf-bubble::before{content:'';position:absolute;left:-7px;top:50%;margin-top:-6px;width:12px;height:12px;background:var(--zf-surface);border-left:1px solid var(--zf-border);border-bottom:1px solid var(--zf-border);transform:rotate(45deg)}
 .zf-bubble-joy{border-color:#003c33;color:#003c33}.zf-bubble-joy::before{border-color:#003c33}
 .zf-bubble-concern{border-color:#b42318}.zf-bubble-concern::before{border-color:#b42318}
 .zf-nudge-stat-label svg:first-child{color:#003c33}
@@ -531,7 +532,7 @@
 @keyframes zf-arm-r{0%{transform:rotate(-60deg)}40%,100%{transform:rotate(0)}}
 @keyframes zf-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(15deg)}}
 @keyframes zf-lean{0%{transform:rotate(0)}50%{transform:rotate(-8deg)}100%{transform:rotate(-4deg)}}
-@keyframes zf-burst{0%{opacity:1;transform:rotate(var(--a)) translateY(0)}100%{opacity:0;transform:rotate(var(--a)) translateY(-40px)}}
+@keyframes zf-burst{0%{opacity:1;transform:rotate(var(--a)) translateY(0)}100%{opacity:0;transform:rotate(var(--a)) translateY(-26px)}}
 @keyframes zf-pop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
 @keyframes zf-float{0%{opacity:0;transform:translate(48px,6px)}25%{opacity:1}100%{opacity:0;transform:translate(48px,-26px)}}
 @keyframes zf-shine{0%{opacity:0;transform:scale(.4)}40%{opacity:.9;transform:scale(1.4)}100%{opacity:0;transform:scale(1)}}

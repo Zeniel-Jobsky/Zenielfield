@@ -50,9 +50,8 @@ export function NudgeCard({n,c,variant='band',onLeave}:{n:Nudge;c:Context;varian
  const schedule=()=>{// 인정 기간이 이미 지난 회차는 그 회차로 채울 수 없으므로 대상만 채워 연다
  const t=c.target(n.next!.id),s0=n.next!.slot,sl=s0&&s0.windowEnd>=c.now?s0:null;if(!t)return;leave(()=>c.open('visit',undefined,sl?{targetType:t.type,siteId:t.siteId,storeId:t.storeId,date:sl.dueDate<c.now?c.now:sl.windowStart>c.now?sl.windowStart:c.now,requirementId:sl.id,dueDate:sl.dueDate}:{targetType:t.type,siteId:t.siteId,storeId:t.storeId}))};
  return <section className={'zf-nudge zf-nudge-'+variant} aria-label="독려 안내">
-  <Mascot mood={n.mood} size={variant==='sheet'?72:56}/>
+  <div className="zf-nudge-head"><Mascot mood={n.mood} size={variant==='sheet'?56:44}/><p className={'zf-bubble zf-bubble-'+n.mood}><RichText r={n.title}/></p></div>
   <div className="zf-nudge-body">
-   <p className={'zf-bubble zf-bubble-'+n.mood}><RichText r={n.title}/></p>
    {n.stats.length>0&&<div className="zf-nudge-stats">{n.stats.map(s=><Stat key={s.label} s={s} onGo={x=>leave(()=>c.go(x.go.page,x.go.kind))}/>)}</div>}
    {n.chips&&<div className="zf-nudge-chips"><span>{n.chips.title}</span>{n.chips.items.map(x=><button type="button" key={x.key} onClick={()=>drill(x.key)}>{x.label}<b>{x.value}</b></button>)}</div>}
    {n.help&&<p className="zf-nudge-help"><RichText r={n.help}/></p>}
