@@ -21,22 +21,8 @@
   min-height: 52px;
 }
 .app-shell .sidebar .brand-logo {display:block;width:180px;height:auto;max-width:100%}
-.app-shell .sidebar .zeniel-company {
-  padding: 0;
-  border: 0;
-  color: var(--nav-muted);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: .06em;
-  line-height: 1.4;
-}
-.app-shell .sidebar .brand-label {
-  color: var(--nav-ink);
-  font-size: 23px;
-  font-weight: 500;
-  letter-spacing: -.8px;
-  line-height: 1.2;
-}
+
+
 .app-shell .sidebar .organization {
   flex-shrink: 0;
   gap: 10px;
