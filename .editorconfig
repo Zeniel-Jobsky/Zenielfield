@@ -1,0 +1,11 @@
+# 편집기 공통 설정: LF·UTF-8. 저장소 줄바꿈 기준은 .gitattributes(eol=lf)와 같다.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false

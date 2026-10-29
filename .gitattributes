@@ -1,1 +1,15 @@
+# 줄바꿈은 LF 기준(Windows에서도 체크아웃 시 LF). 텍스트 판별은 git 자동, 아래 바이너리는 변환하지 않는다.
+* text=auto eol=lf
 .githooks/* text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.xlsx binary
+*.zip binary
