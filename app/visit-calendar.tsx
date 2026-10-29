@@ -2,7 +2,7 @@
 import {useState} from 'react';
 import {ChevronLeft,ChevronRight,Clock3,MapPin,Plus} from 'lucide-react';
 import {type Visit,today,week,shift,visitState} from './lib/model';
-import {monthRange,inRange} from './lib/ui-model';
+import {monthRange,between as inRange} from './lib/date';
 import {Badge,Empty,nice,short} from './ui';
 type Props={visits:Visit[];start:string;end:string;mode:'week'|'month';setPeriod:(start:string,end:string)=>void;onMode:(mode:'week'|'month')=>void;sname:(id:string)=>string;uname:(id:string)=>string;onVisit:(v:Visit)=>void;onAdd?:(date:string)=>void;compact?:boolean;targetLabel?:(v:Visit)=>string};
 const weekdays=['월','화','수','목','금','토','일'];

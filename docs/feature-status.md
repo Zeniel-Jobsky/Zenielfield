@@ -175,6 +175,7 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 방문 보고 종합 판정(2026-10-28): 보고 본문의 빈도 필터를 없애고 입력·수정·백필 시 같은 기준의 AI 종합 판정을 방문 기록 `judgment`에 저장, 브리핑은 저장된 판정을 집계. 대상별 시간순 종합 판정(수준 정상/관찰/주의/위험·판단·이슈 흐름), 샘플 재판정·반영은 후속 커밋. 운영 DB 이관·백필은 승인 대기. 계획: [visit-nudge-plan](visit-nudge-plan.md) B-2·B-3
 - 판정 데이터 현재 형식 전환(2026-10-29): 옛 있음/없음 판정 1,800건을 종합 판정으로 재판정·재적재, 옛 형식은 이어받기·적재·집계에서 제외. [visit-nudge-plan](visit-nudge-plan.md) B-3
 - 판정 기준 정리·스키마 확장·독려 안내(2026-10-29): DC-JUDGMENT(코드는 사실만, 판정은 저장된 AI 판정), 임의 판정 제거, 공통 현황 `status.ts`, 이관 `20261029100000_assignment_manual_basis.sql`(배정 이력 읽기·필요 시 근거·배정 열린 사용자 이동 차단), 독려 안내(지침 10-A). main 푸시로 CI 이관·번들·Edge·화면 배포.
+- 드리프트·스프롤 정리(2026-10-29): 공통 모듈(`lib/date`·`lib/collections`·`lib/csv`·`platform/status`·`platform/schedule`·`scripts/lib/supabase-sql`), 상태 이름표 단일화, 아이콘 4단계, LF 기준(.gitattributes·.editorconfig). 들어갈 수 없던 예전 화면(field-app·record-form·views·lib/demo·workspace-context)과 D1 경로(api/data·db·drizzle, 의존성 drizzle-orm·drizzle-kit)와 그 테스트(ui-metrics·api-flow) 삭제.
 - 위치 검색 중지(2026-10-28): 마스터 주소·매장 검색과 좌표 입력 숨김(`GEO_SEARCH_ENABLED=false`), `/api/geo` 410, Kakao 호출·키 사용 제거, `scripts/geocode-stores.mjs` 삭제. Kakao 키 폐기 가능
 
 
