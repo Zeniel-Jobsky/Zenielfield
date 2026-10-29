@@ -57,8 +57,8 @@ export function ContactDirectory({c}:{c:Context}){
  const [q,setQ]=useState('');
  const raw=useMemo(()=>new Map<string,any>([...c.data.sites,...c.data.stores].map(x=>[x.id,x])),[c.data.sites,c.data.stores]);
  const rows=useMemo(()=>c.scope.filter(t=>t.status==='운영 중').map(t=>{const x=raw.get(t.id)||{};return {t,phone:String(x.phone||x.contact||''),keyman:[x.keyman,x.keymanTitle].filter(Boolean).join(' '),owners:t.managerIds.map(c.uname).filter(Boolean).join(', ')}}).filter(r=>!q||[r.t.name,r.t.siteName,r.t.address,r.keyman,r.owners].join(' ').includes(q)).sort((a,b)=>a.t.siteName.localeCompare(b.t.siteName,'ko')||(a.t.type===b.t.type?a.t.name.localeCompare(b.t.name,'ko'):a.t.type==='site'?-1:1)),[c.scope,raw,q,c.uname]);
- return <section className="panel"><PanelTitle title="현장·매장 연락처" count={rows.length}><input className="contact-search" type="search" aria-label="연락처 검색" placeholder="이름·주소·키맨 검색" value={q} onChange={e=>setQ(e.target.value)}/></PanelTitle>
-  <div className="contact-list" role="table" aria-label="현장·매장 연락처">
+ return <section className="panel"><PanelTitle title="주소·연락처·키맨" count={rows.length}><input className="contact-search" type="search" aria-label="연락처 검색" placeholder="이름·주소·키맨 검색" value={q} onChange={e=>setQ(e.target.value)}/></PanelTitle>
+  <div className="contact-list" role="table" aria-label="현장 주소록">
    <div className="contact-row contact-head" role="row"><span role="columnheader">현장·매장</span><span role="columnheader">주소</span><span role="columnheader">연락처</span><span role="columnheader">키맨</span><span role="columnheader">담당</span></div>
    {rows.map(({t,phone,keyman,owners})=><div key={t.id} className="contact-row" role="row">
     <span role="cell" className="contact-name"><b className={'zf-ent zf-ent-'+(t.type==='store'?'store':'site')}>{t.type==='store'?t.name:t.siteName}</b>{t.type==='store'&&<small>{t.siteName}</small>}</span>
