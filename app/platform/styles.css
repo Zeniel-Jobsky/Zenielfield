@@ -500,3 +500,36 @@
 .judge-issues em{flex:1 1 200px;min-width:0;font-style:normal;color:#36443e}
 .judge-check>small{font-size:12px;color:#65726b}
 .judge-note{margin:0;font-size:12px;color:#8a4b00}
+/* 독려 안내(지침 10-A): 흰 표면·상단 1px 선, 도형 캐릭터, 큰 숫자 칸(누르면 목록), 칩(누르면 범위). 한 번 재생 트윈 */
+.zf-nudge{display:flex;gap:12px;align-items:flex-start;padding:16px 0 0;border-top:1px solid var(--zf-border);background:var(--zf-surface);animation:nudge-in .24s ease-out both}
+.zf-nudge-sheet{padding:16px;border:1px solid var(--zf-border)}
+.zf-nudge-mascot{flex:none;width:32px;height:32px;margin-top:2px}
+.zf-nudge-body{flex:1;min-width:0;display:grid;gap:12px}
+.zf-nudge-title{font-size:15px;font-weight:600;line-height:1.5;color:var(--zf-text)}
+.zf-nudge-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.zf-nudge-stat{display:grid;gap:4px;align-content:start;min-height:44px;padding:12px;border:1px solid var(--zf-border);background:var(--zf-surface);text-align:left;color:var(--zf-text)}
+.zf-nudge-stat:hover{background:var(--zf-surface-hover)}
+.zf-nudge-stat-label{display:inline-flex;align-items:center;gap:2px;font-size:12px;color:var(--zf-text-secondary)}
+.zf-nudge-stat-value{display:flex;align-items:baseline;gap:4px}
+.zf-nudge-stat-value b{font-size:28px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums}
+.zf-nudge-stat-value small{font-size:13px;color:var(--zf-text-secondary)}
+.zf-nudge-stat.good b{color:#003c33}.zf-nudge-stat.bad b{color:#b42318}.zf-nudge-stat.warn b{color:#8a4b00}
+.zf-nudge-bar{position:relative;display:block;height:6px;margin-top:4px;background:var(--zf-border);border-radius:3px;overflow:hidden}
+.zf-nudge-bar i{position:absolute;left:0;top:0;bottom:0;background:#003c33}
+.zf-nudge-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.zf-nudge-chips>span{font-size:12px;color:var(--zf-text-secondary);margin-right:2px}
+.zf-nudge-chips button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border:1px solid var(--zf-border);border-radius:22px;font-size:13px;color:var(--zf-text-body)}
+.zf-nudge-chips button:hover{background:var(--zf-surface-hover)}
+.zf-nudge-chips b{font-size:15px;color:var(--zf-text);font-variant-numeric:tabular-nums}
+.zf-nudge-help{font-size:13px;color:var(--zf-text-body)}
+.zf-nudge-next{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:13px}
+.zf-nudge-next>span{font-size:12px;color:var(--zf-text-secondary)}
+.zf-nudge-next .link{min-height:44px;font-weight:600}
+.zf-nudge-next small{font-size:12px;color:var(--zf-text-body)}
+.zf-nudge-next .btn{min-height:44px;margin-left:auto}
+.zf-nudge .hi-good{font-style:normal;font-weight:600;color:#003c33}.zf-nudge .hi-bad{font-style:normal;font-weight:600;color:#b42318}.zf-nudge .hi-num{font-weight:700;color:#17171c}
+.zf-saved-nudge{display:grid;gap:16px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+@keyframes nudge-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(max-width:760px){.zf-nudge-mascot{width:28px;height:28px}.zf-nudge-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.zf-nudge-stat-value b{font-size:24px}.zf-nudge-next .btn{margin-left:0}}
+@media(prefers-reduced-motion:reduce){.zf-nudge{animation:none}}
