@@ -11,7 +11,7 @@ import {rich,join,num,bad,good,toRich,RichText,type Rich} from './rich';
 import {collapseRepeats} from '../lib/dedupe-text';
 import {isCurrentJudgment,maskText} from './judgment';
 import {callAssist,aiDownReason} from './ai-assist';
-import {LEVEL_ORDER,latestJudgments,staleStores,overdueAt} from './status';
+import {LEVEL_ORDER,latestJudgments,staleStores,overdueAt,targetFacts,attentionOf} from './status';
 import {nudgeRole,type NudgeRole} from './nudge';
 import {shapeBrief} from './brief-shape';
 // AI 현황 브리핑: 비서가 결정권자에게 보고하듯 균형 있게 쓴다. "지금 상태 → 흐름 → 잘 되고 있는 것 → 챙길 곳 → 무슨 일이 벌어지나 → 선택지와 판단 → 다음에 볼 것".
@@ -36,7 +36,9 @@ export type BriefDigest={asOf:string;period:{start:string;end:string;label:strin
  // role: 보는 사람의 직급(지침 4-4-A). 브리핑 초점과 이름 노출이 다르다(팀장·사업부장은 개인 이름 없음).
  role:NudgeRole;
  // tellTo: 전할 말을 받는 사람(입력으로 정한다, 모델이 쓰지 않는다)
- tellTo:string};
+ tellTo:string;
+ // problems: 확인 대상(공통 현황 attentionOf)마다 조직 경로(부서›파트›매니저›현장·매장)와 방문 상태·저장된 판정·기한 넘긴 조치 내용
+ problems:{부서:string;파트:string;매니저:string;대상:string;구분:string;방문상태:string[];마지막방문:string|null;판정:string;판단:string;이슈:string[];기한넘긴조치:string[]}[]};
 // 보고 묶음: 대상 하나의 이번 기간 보고 수(now)·직전 기간 보고 수(prev)·진행 중 조치 수(open)와 날짜순 보고. prev:true는 직전 기간 보고.
 export type ReportItem={date:string;kind:'방문'|'조치';text:string;prev?:boolean};
 export type ReportGroup={target:string;now:number;prev:number;open:number;items:ReportItem[]};
@@ -49,7 +51,8 @@ export function normalizeBrief(x:any):AiBriefResult{return shapeBrief(x) as AiBr
 // 보고 본문 정리: 연락처를 지우고 반복 말을 줄여 한 건당 길이를 제한한다.
 // 보고 본문 가림은 판정과 같은 규칙(maskText) + 반복 말 정리
 const clean=(s:string)=>collapseRepeats(maskText(s));
-const REPORT_CHARS=220,REPORT_BUDGET=36000,REPORT_GROUPS=80;
+// 보고 원문 예산(직급별): 위로 갈수록 원문보다 판정 집계로 패턴을 본다. 입력이 크면 응답이 느려져 시간 제한을 넘는다.
+const REPORT_CHARS=220,REPORT_LIMIT:Record<string,{budget:number;groups:number}>={manager:{budget:12000,groups:30},partlead:{budget:12000,groups:30},lead:{budget:8000,groups:20},director:{budget:6000,groups:15}};
 // 보고 본문은 거르지 않고 그대로 보낸다. 문제 여부는 방문 기록에 저장된 판정(judgment)을 붙여 보내고, 미판정이면 AI가 내용을 읽고 판단한다(빈도·키워드로 추측하지 않음).
 const judgedText=(j:FieldVisit['judgment'])=>!j||!isCurrentJudgment(j)?'판정: 미판정':`판정: ${j.level} — ${j.assessment}`+(j.issues.length?' / 이슈: '+j.issues.map(i=>`[${i.type}·${i.severity}·${i.flow}${i.customerRequest?'·고객사 요청':''}] ${i.summary}`).join(' / '):'');
 // 판정 집계: levels=보고 시점 수준 분포, latest=대상별 가장 최근 판정의 수준 분포(지금 상태), byType=이슈 유형별 건수·긴급·악화·지속·해결.
@@ -71,12 +74,14 @@ export function reportGroups(c:Context,targets:Context['scope'],start:string,end
   if(d>=start)at(id).now.push({date:d,kind:'방문',text});else at(id).prev.push({date:d,kind:'방문',text,prev:true})}
  for(const a of c.actions){const id=targetOf(a);if(!ids.has(id)||(a.createdDate&&a.createdDate>end)||(a.state==='완료'&&(a.completedDate||'')<start))continue;const g=at(id);if(a.state!=='완료')g.open++;
   g.now.push({date:a.createdDate||a.dueDate,kind:'조치',text:clean(`[${a.type}·${a.state==='완료'?`완료 ${a.completedDate}`:a.dueDate<end?`기한 ${a.dueDate} 초과`:a.state}] ${a.content}`).slice(0,REPORT_CHARS)})}
- const all=[...map].filter(([,g])=>g.now.length>0).sort((a,b)=>b[1].now.length-a[1].now.length||b[1].open-a[1].open).slice(0,REPORT_GROUPS);
+ // 담는 순서: 저장된 최근 판정 위험·주의 대상 먼저 → 보고 많은 순 → 열린 조치 많은 순
+ const lim=REPORT_LIMIT[nudgeRole(c.me.role)],judgedNow=latestJudgments(rows),lv=(id:string)=>LEVEL_ORDER[judgedNow.get(id)?.judgment?.level||'']||0;
+ const all=[...map].filter(([,g])=>g.now.length>0).sort((a,b)=>lv(b[0])-lv(a[0])||b[1].now.length-a[1].now.length||b[1].open-a[1].open).slice(0,lim.groups);
  const total=all.reduce((n,[,g])=>n+g.now.length,0);
  // 대상당 최근 k건(직전 기간은 최대 2건). 예산 안에 들어오는 가장 큰 k를 고른다.
  const build=(k:number)=>all.map(([id,g])=>{const now=[...g.now].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,k),prev=[...g.prev].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,Math.min(2,k));
   return {target:c.target(id)?.name||'',now:g.now.length,prev:g.prev.length,open:g.open,items:[...prev,...now].sort((a,b)=>a.date.localeCompare(b.date))}});
- let groups=build(1);for(const k of [8,6,4,3,2]){const g=build(k);if(JSON.stringify(g).length<=REPORT_BUDGET){groups=g;break}}
+ let groups=build(1);for(const k of [8,6,4,3,2]){const g=build(k);if(JSON.stringify(g).length<=lim.budget){groups=g;break}}
  return {groups,total,sent:groups.reduce((n,g)=>n+g.items.filter(i=>!i.prev).length,0),judged:judgedSummary(rows.filter(v=>v.status==='completed'&&v.actualDate!>=start),id=>c.target(id)?.name||'')};
 }
 export function buildDigest(c:Context,f:BriefFactors=defaultFactors,range?:BriefRange):BriefDigest{
@@ -96,9 +101,9 @@ export function buildDigest(c:Context,f:BriefFactors=defaultFactors,range?:Brief
   kpi:{rate:m.rate,required:m.required,completed:m.completed,planned:m.planned,gap:m.delayed+m.unplanned,gapShare:m.required?Math.round((m.delayed+m.unplanned)/m.required*100):0,overdue:f.issues?overdueAt(c.actions,asOf):0,overduePrev:f.issues?overdueAt(c.actions,dayShift(asOf,-7)):0,resolved:f.issues?resolved:0,stale:stale.length,staleShare:stores.length?Math.round(stale.length/stores.length*100):0,rateWeek:cur?.rate??null,rateWeekPrev:prev?.rate??null},
   units,status:[...status].map(([label,n])=>({label,n})),issueTypes:[...types].map(([type,r])=>({type,...r})).sort((a,b)=>b.overdue-a.overdue||b.open-a.open).slice(0,6),
   trend:trend.map(r=>({week:r.start,rate:r.rate,completed:r.completed,delayed:r.delayed,unplanned:r.unplanned})),
-  topOverdue:f.issues?c.actions.filter(a=>a.dueDate<asOf&&(a.state!=='완료'||(a.completedDate||'')>asOf)).sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).slice(0,5).map(a=>({target:c.label(a),type:a.type,content:a.content.slice(0,60),late:days(a.dueDate,asOf)||0,owner:['lead','director'].includes(nudgeRole(c.me.role))?'':c.uname(a.ownerId)})):[],
+  topOverdue:f.issues?c.actions.filter(a=>a.dueDate<asOf&&(a.state!=='완료'||(a.completedDate||'')>asOf)).sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).slice(0,5).map(a=>({target:c.label(a),type:a.type,content:a.content.slice(0,60),late:days(a.dueDate,asOf)||0,owner:c.uname(a.ownerId)})):[],
   staleTargets:stale.map(x=>({name:x.target.name,days:x.days})).sort((a,b)=>(b.days??9999)-(a.days??9999)).slice(0,5),
-  reports:reports.groups,reportTotal:reports.total,reportSent:reports.sent,judged:reports.judged,audience:c.me.role==='manager'?'manager':'leader',role:nudgeRole(c.me.role),tellTo:CHEER_TO[nudgeRole(c.me.role)]};
+  reports:reports.groups,reportTotal:reports.total,reportSent:reports.sent,judged:reports.judged,audience:c.me.role==='manager'?'manager':'leader',role:nudgeRole(c.me.role),tellTo:CHEER_TO[nudgeRole(c.me.role)],problems:problemMap(c,targets)};
 }
 // 다이제스트 지문: 이 값이 같으면 "변경 없음"으로 보고 저장된 요약을 재사용한다.
 export const digestKey=(d:BriefDigest)=>{const s=JSON.stringify(d);let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return (h>>>0).toString(36)+':'+s.length};
@@ -133,13 +138,34 @@ export function ruleBrief(d:BriefDigest):AiBriefResult{
  const cheer=d.role!=='manager'?rich`${CHEER_TO[d.role]}: 완료 ${num(k.completed+'회차')}, 일정 없는 필요 방문 ${num(k.gap+'회차')}.`:rich`이번 기간 완료 ${num(k.completed+'회차')}${k.gap>0&&rich`, 일정을 잡으면 되는 필요 방문 ${num(k.gap+'회차')}`}.`;
  return {headline,cheer,themes,flow,strengths,focus,story,judgment:[],watch,confidence:'rule'};
 }
+// 문제 지도: 어느 부서·어느 매니저·어느 매장에 무슨 문제가 있는지. 대상 선택·순서는 공통 현황(저장된 판정 → 이른 기한)과 같다.
+function problemMap(c:Context,targets:Context['scope']){
+ const facts=targetFacts(targets,c.visits,c.actions,aggregate(targets,c.visits,c.start,c.end,c.now).slots,c.now);
+ const late=new Map<string,string[]>();for(const a of c.actions){if(a.state==='완료'||a.dueDate>=c.now)continue;const id=targetOf(a),l=late.get(id)||[];if(l.length<2)l.push(`[${a.type}] ${a.content.slice(0,50)}`);late.set(id,l)}
+ return attentionOf(facts.values()).slice(0,25).map(f=>{const t=f.target,j=f.judgment;return {부서:t.team,파트:t.part,매니저:t.managerIds.map(c.uname).filter(Boolean).join('·'),대상:t.name,구분:t.type==='store'?'매장':'현장',
+  방문상태:[f.delayed.length?'필요 방문 기한 지남':'',f.unplanned.length?'필요 방문 일정 없음':'',f.upcoming?'일정 잡힘 '+f.upcoming:''].filter(Boolean),마지막방문:f.lastVisit,
+  판정:j?.level||'미판정',판단:j?.assessment||'',이슈:(j?.issues||[]).map(i=>`${i.type}·${i.flow}${i.severity==='긴급'?'·긴급':''}`),기한넘긴조치:late.get(t.id)||[]}});
+}
+// AI에 보내는 입력: 건수·비율은 지표 카드가 이미 보여 주므로 보내지 않는다(받지 않으면 세지 않는다).
+// 숫자는 방향(늘었음·줄었음·같음)과 있음/없음으로만 바꾸고, 보고 원문 맥락·저장된 판정·단위 이름은 그대로 보낸다.
+const way=(a:number|null|undefined,b:number|null|undefined)=>a==null||b==null?'비교 없음':a>b?'늘었음':a<b?'줄었음':'같음';
+export function aiInput(d:BriefDigest){const k=d.kpi,j=d.judged;
+ return {asOf:d.asOf,period:d.period,scope:{unit:d.scope.unit,type:d.scope.type,filters:d.scope.filters},role:d.role,tellTo:d.tellTo,
+  signals:{방문이행_지난주대비:way(k.rateWeek,k.rateWeekPrev),기한초과조치_지난주대비:way(k.overdue,k.overduePrev),일정잡을회차:k.gap>0?'있음':'없음',기한초과조치:k.overdue>0?'있음':'없음',완료된조치:k.resolved>0?'있음':'없음',장기미방문매장:k.stale>0?'있음':'없음'},
+  units:d.units.map(u=>({이름:u.label,일정잡을회차:u.gap>0?'있음':'없음',기한초과조치:u.overdue>0?'있음':'없음',장기미방문매장:u.stale>0?'있음':'없음'})),
+  issueTypes:d.issueTypes.map(t=>({유형:t.type,기한초과:t.overdue>0?'있음':'없음',진행중:t.open>0?'있음':'없음'})),
+  topOverdue:d.topOverdue.map(o=>({대상:o.target,유형:o.type,내용:o.content,...(o.owner?{담당:o.owner}:{})})),
+  staleTargets:d.staleTargets.map(t=>t.name),
+  judged:{지금상태:Object.keys(j.latest).filter(l=>j.latest[l]>0),주의대상:j.attention.map(a=>({대상:a.target,수준:a.level,판단:a.assessment})),이슈유형:j.byType.map(t=>({유형:t.type,흐름:[t.worse&&'악화',t.ongoing&&'지속',t.resolved&&'해결',t.urgent&&'긴급'].filter(Boolean)}))},
+  problems:d.problems,reports:d.reports}
+}
 export async function requestBrief(d:BriefDigest,demo:boolean):Promise<{result:AiBriefResult;model:string;generatedAt:string}>{
  if(demo)return {result:ruleBrief(d),model:'데모 규칙 브리핑',generatedAt:new Date().toISOString()};
  // AI 호출은 다른 AI 기능과 같은 경로(callAssist): 크레딧·키 문제로 막힌 탭은 10분간 다시 부르지 않고, 오류 문구도 같은 규칙으로 줄인다.
  // AI가 안 되면 사실만 담은 브리핑으로 대신하고 이유를 표기한다.
  const fallback=(why:string)=>({result:ruleBrief(d),model:`규칙 브리핑 · AI 연결 안 됨(${why})`,generatedAt:new Date().toISOString()});
  const down=aiDownReason();if(down)return fallback(down);
- try{const r=await callAssist({text:JSON.stringify(d),images:[],mode:'brief'});return {result:normalizeBrief(r.draft),model:r.model,generatedAt:r.generatedAt}}
+ try{const r=await callAssist({text:JSON.stringify(aiInput(d)),images:[],mode:'brief'});return {result:normalizeBrief(r.draft),model:r.model,generatedAt:r.generatedAt}}
  catch(e){return fallback((e as Error).message)}
 }
 type Cached={key:string;result:AiBriefResult;model:string;generatedAt:string};

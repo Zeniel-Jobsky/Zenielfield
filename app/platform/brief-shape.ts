@@ -5,12 +5,12 @@ export type Seg={v:string;tone?:'num'|'bad'|'good'};
 export type Rich=Seg[];
 const segSchema={type:'object',additionalProperties:false,required:['v','tone'],properties:{v:{type:'string'},tone:{type:'string',enum:['','num','bad','good']}}};
 const rich={type:'array',items:segSchema};
-const option={type:'object',additionalProperties:false,required:['do','gain','check'],properties:{do:rich,gain:rich,check:rich}};
-export const briefOutputSchema={type:'object',additionalProperties:false,required:['headline','cheer','themes','flow','strengths','focus','story','judgment','watch','confidence'],properties:{
+// 출력이 길수록 느리다(초당 약 110토큰): 화면에서 겹치는 칸(흐름·강점·근거 문장)은 받지 않고, 판단은 1개·안마다 {할 일, 좋아지는 점}만
+const option={type:'object',additionalProperties:false,required:['do','gain'],properties:{do:rich,gain:rich}};
+export const briefOutputSchema={type:'object',additionalProperties:false,required:['headline','cheer','story','themes','focus','judgment','watch','confidence'],properties:{
  headline:{type:'object',additionalProperties:false,required:['situation','action'],properties:{situation:rich,action:rich}},
  cheer:{type:'object',additionalProperties:false,required:['praise','ask'],properties:{praise:rich,ask:rich}},
- themes:{type:'array',items:{type:'object',additionalProperties:false,required:['title','status','summary','evidence','targets'],properties:{title:{type:'string'},status:{type:'string',enum:['새로 생김','커짐','계속됨','해결됨','확인 필요']},summary:rich,evidence:{type:'array',items:{type:'string'}},targets:{type:'array',items:{type:'string'}}}}},
- flow:rich,strengths:{type:'array',items:rich},
+ themes:{type:'array',items:{type:'object',additionalProperties:false,required:['title','status','summary','targets'],properties:{title:{type:'string'},status:{type:'string',enum:['새로 생김','커짐','계속됨','해결됨','확인 필요']},summary:rich,targets:{type:'array',items:{type:'string'}}}}},
  focus:{type:'array',items:{type:'object',additionalProperties:false,required:['name','reason'],properties:{name:{type:'string'},reason:rich}}},
  story:rich,
  judgment:{type:'array',items:{type:'object',additionalProperties:false,required:['topic','a','b'],properties:{topic:{type:'string'},a:option,b:option}}},
@@ -33,6 +33,7 @@ export function shapeBrief(x:any){
  const cheer=x?.cheer&&!Array.isArray(x.cheer)&&typeof x.cheer==='object'?join(toRich(x.cheer.praise),noTail(toRich(x.cheer.ask))):toRich(x?.cheer);
  const judgment=(Array.isArray(x?.judgment)?x.judgment:[]).map((j:any)=>j&&typeof j==='object'&&!Array.isArray(j)&&('a' in j||'b' in j)?(()=>{const a=opt(j.a,'①'),b=opt(j.b,'②');return a.length&&b.length?join(j.topic?[{v:String(j.topic).trim()+':'}]:[],a,b):[]})():toRich(j)).filter((r:Rich)=>r.length);
  const list=(v:unknown)=>Array.isArray(v)?v.map(toRich).filter(r=>r.length):[];
- return {headline,cheer:clean(cheer),themes:(Array.isArray(x?.themes)?x.themes:[]).filter((t:any)=>t&&typeof t.title==='string').map((t:any)=>({title:t.title,status:typeof t.status==='string'?t.status:'',summary:toRich(t.summary),evidence:Array.isArray(t.evidence)?t.evidence.filter((e:unknown)=>typeof e==='string').slice(0,3):[],targets:Array.isArray(t.targets)?t.targets.filter((e:unknown)=>typeof e==='string').slice(0,4):[]})),
-  flow:toRich(x?.flow),strengths:list(x?.strengths),focus:(Array.isArray(x?.focus)?x.focus:[]).filter((f:any)=>f&&typeof f.name==='string').map((f:any)=>({name:f.name,reason:toRich(f.reason)})),story:toRich(x?.story),judgment,watch:list(x?.watch),confidence:typeof x?.confidence==='string'?x.confidence:''};
+ // 개수 상한: 주제 3·강점 2·챙길 곳 3·판단 2·다음 주 2(화면 한 번에 읽히는 양)
+ return {headline,cheer:clean(cheer),themes:(Array.isArray(x?.themes)?x.themes:[]).slice(0,2).filter((t:any)=>t&&typeof t.title==='string').map((t:any)=>({title:t.title,status:typeof t.status==='string'?t.status:'',summary:toRich(t.summary),evidence:Array.isArray(t.evidence)?t.evidence.filter((e:unknown)=>typeof e==='string').slice(0,3):[],targets:Array.isArray(t.targets)?t.targets.filter((e:unknown)=>typeof e==='string').slice(0,4):[]})),
+  flow:toRich(x?.flow),strengths:list(x?.strengths).slice(0,2),focus:(Array.isArray(x?.focus)?x.focus:[]).slice(0,3).filter((f:any)=>f&&typeof f.name==='string').map((f:any)=>({name:f.name,reason:toRich(f.reason)})),story:toRich(x?.story),judgment:judgment.slice(0,1),watch:list(x?.watch).slice(0,2),confidence:typeof x?.confidence==='string'?x.confidence:''};
 }
