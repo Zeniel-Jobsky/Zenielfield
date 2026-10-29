@@ -1,5 +1,5 @@
 'use client';
-// 독려 안내 화면(지침 10-A): 도형 캐릭터 + 큰 숫자 칸(누르면 해당 목록) + 칩(누르면 그 범위) + 다음 대상 일정 잡기.
+// 독려 안내 화면(지침 10-A): 메시지별 업무 아이콘 + 큰 숫자 칸(누르면 해당 목록) + 칩(누르면 그 범위) + 다음 대상 일정 잡기.
 // 한 번 재생 트윈(막대 600ms·정수 카운트업 600ms·등장 240ms). 반복 없음, 같은 값이면 재생 안 함, reduced-motion이면 최종 상태.
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {CalendarPlus,ChevronRight,CheckCircle2,CalendarClock,AlertTriangle,AlertCircle} from 'lucide-react';
@@ -17,22 +17,31 @@ function useTween(target:number,from=0,ms=600){
   raf=requestAnimationFrame(step);return()=>cancelAnimationFrame(raf)},[target,from,ms]);
  return v;
 }
-// 도형 캐릭터: 딥그린 선·흰 채움. 표정과 몸짓이 먼저 말한다(한 번 재생).
-// joy=웃는 눈·두 팔 올림·두 번 통통 + 반짝이 터짐, cheer=점 눈·한 손 흔들기, concern=걱정 눈썹·기울기 + 느낌표.
+// Reference SVG language: 64px canvas, rounded 2.5-unit strokes and a quiet tile.
+// Keep the public class/mood API; the adjacent message carries the accessible meaning.
 export function Mascot({mood,size}:{mood:'joy'|'cheer'|'concern';size:number}){
- const g='#003c33';
  return <span className={'zf-mascot zf-mascot-'+mood} style={{width:size,height:size}} aria-hidden="true">
-  <svg viewBox="0 0 64 64" width={size} height={size} focusable="false">
-   {mood==='joy'?<><path className="zf-arm-l" d="M14 38 L5 22" stroke={g} strokeWidth="3.5" strokeLinecap="round"/><path className="zf-arm-r" d="M50 38 L59 22" stroke={g} strokeWidth="3.5" strokeLinecap="round"/></>
-    :mood==='cheer'?<><path d="M14 40 L7 48" stroke={g} strokeWidth="3.5" strokeLinecap="round"/><path className="zf-arm-wave" d="M50 38 L58 24" stroke={g} strokeWidth="3.5" strokeLinecap="round"/></>
-    :<><path d="M14 40 L8 48" stroke={g} strokeWidth="3.5" strokeLinecap="round"/><path d="M50 40 L56 48" stroke={g} strokeWidth="3.5" strokeLinecap="round"/></>}
-   <circle cx="32" cy="36" r="20" fill="#fff" stroke={g} strokeWidth="3.5"/>
-   {mood==='joy'?<><path d="M22 33q3-4 6 0M36 33q3-4 6 0" fill="none" stroke={g} strokeWidth="3" strokeLinecap="round"/><path d="M23 40q9 10 18 0z" fill={g}/></>
-    :mood==='cheer'?<><circle cx="25" cy="33" r="2.6" fill={g}/><circle cx="39" cy="33" r="2.6" fill={g}/><path d="M25 42q7 5 14 0" fill="none" stroke={g} strokeWidth="3" strokeLinecap="round"/></>
-    :<><path d="M21 27l7 2M43 27l-7 2" stroke={g} strokeWidth="2.6" strokeLinecap="round"/><circle cx="25" cy="34" r="2.4" fill={g}/><circle cx="39" cy="34" r="2.4" fill={g}/><path d="M26 45q6-4 12 0" fill="none" stroke={g} strokeWidth="3" strokeLinecap="round"/></>}
+  <svg viewBox="0 0 64 64" width={size} height={size} fill="none" focusable="false" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+   <rect width="64" height="64" rx="14" fill="var(--zf-surface-muted)"/>
+   {mood==='joy'?<>
+    <path d="M20 14h17l10 10v24a3 3 0 0 1-3 3H20a3 3 0 0 1-3-3V17a3 3 0 0 1 3-3Z" fill="var(--zf-selected)" stroke="currentColor"/>
+    <path d="M37 14v10h10M24 31h12M24 37h8M24 43h6" stroke="currentColor"/>
+    <circle cx="46" cy="45" r="11" fill="currentColor"/>
+    <path d="m40.5 45 3.5 3.5 7-7.5" stroke="var(--zf-on-action)"/>
+   </>:mood==='cheer'?<>
+    <rect x="14" y="17" width="35" height="33" rx="4" fill="var(--zf-selected)" stroke="currentColor"/>
+    <path d="M14 27h35M23 13v9M40 13v9" stroke="currentColor"/>
+    <path d="M22 34h4M32 34h4M22 41h4" stroke="currentColor"/>
+    <circle cx="46" cy="46" r="11" fill="currentColor"/>
+    <path d="M40 46h12m-5-5 5 5-5 5" stroke="var(--zf-on-action)"/>
+   </>:<>
+    <rect x="18" y="15" width="27" height="36" rx="3" fill="var(--zf-selected)" stroke="currentColor"/>
+    <path d="M13 51h38M26 23h3M35 23h3M26 31h3M35 31h3M27 51V40h8v11" stroke="currentColor"/>
+    <circle cx="46" cy="44" r="11" fill="var(--zf-surface)" stroke="var(--zf-danger)"/>
+    <path d="M46 38v7" stroke="var(--zf-danger)"/>
+    <circle cx="46" cy="49" r="1.5" fill="var(--zf-danger)"/>
+   </>}
   </svg>
-  {mood==='joy'&&<span className="zf-burst">{[0,1,2,3,4,5,6,7].map(i=><i key={i} style={{'--a':i*45+'deg'} as React.CSSProperties}/>)}</span>}
-  {mood==='concern'&&<span className="zf-mark">!</span>}
  </span>;
 }
 const ICONS={done:CheckCircle2,plan:CalendarClock,risk:AlertTriangle,caution:AlertCircle};

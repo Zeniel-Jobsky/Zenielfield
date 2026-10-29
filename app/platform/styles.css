@@ -488,40 +488,21 @@
 .judge-issues em{flex:1 1 200px;min-width:0;font-style:normal;color:#36443e}
 .judge-check>small{font-size:12px;color:#65726b}
 .judge-note{margin:0;font-size:12px;color:#8a4b00}
-/* 독려 안내(지침 10-A): 흰 표면·상단 1px 선, 도형 캐릭터, 큰 숫자 칸(누르면 목록), 칩(누르면 범위). 한 번 재생 트윈 */
+/* 독려 안내(지침 10-A): 흰 표면·상단 1px 선, 메시지별 업무 아이콘, 큰 숫자 칸(누르면 목록), 칩(누르면 범위). 한 번 재생 트윈 */
 .zf-nudge{display:grid;gap:12px;padding:16px 0 0;border-top:1px solid var(--zf-border);background:var(--zf-surface);animation:nudge-in .24s ease-out both}
 .zf-nudge-sheet{padding:16px;border:1px solid var(--zf-border)}
-.zf-nudge-head{display:flex;align-items:center;gap:12px;min-width:0}
+.zf-nudge-head{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px;min-width:0}
 .zf-nudge-body{min-width:0;display:grid;gap:12px}
-/* 캐릭터: 표정·몸짓이 먼저 말한다. 모두 한 번 재생 */
-.zf-mascot{position:relative;flex:none;display:block;isolation:isolate}
-.zf-mascot svg{display:block;overflow:visible}
-.zf-mascot-joy svg{animation:zf-hop .9s cubic-bezier(.3,.7,.4,1) .1s 1 both}
-.zf-mascot-joy .zf-arm-l{transform-origin:14px 38px;animation:zf-arm-l .9s ease-out .1s 1 both}
-.zf-mascot-joy .zf-arm-r{transform-origin:50px 38px;animation:zf-arm-r .9s ease-out .1s 1 both}
-.zf-mascot-cheer .zf-arm-wave{transform-origin:50px 38px;animation:zf-wave 1.2s ease-in-out .2s 1 both}
-.zf-mascot-concern svg{transform-origin:50% 90%;animation:zf-lean .8s ease-out .1s 1 both}
-.zf-burst{position:absolute;inset:0;pointer-events:none;z-index:-1}
-.zf-burst i{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#003c33;opacity:0;transform:rotate(var(--a)) translateY(0);animation:zf-burst .8s ease-out .35s 1 both}
-.zf-burst i:nth-child(even){width:8px;height:3px;border-radius:2px;background:#8a4b00}
-.zf-mark{position:absolute;top:-6px;right:-6px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#b42318;color:#fff;font-size:13px;font-weight:700;animation:zf-pop .4s cubic-bezier(.3,1.6,.5,1) .5s 1 both}
-/* 말풍선: 캐릭터가 직접 말한다 */
-.zf-bubble{position:relative;flex:0 1 auto;min-width:0;padding:10px 14px;border:1px solid var(--zf-border);border-radius:12px;background:var(--zf-surface);font-size:16px;font-weight:700;line-height:1.45;color:var(--zf-text);animation:zf-pop .35s cubic-bezier(.3,1.5,.5,1) .15s 1 both}
-.zf-bubble::before{content:'';position:absolute;left:-7px;top:50%;margin-top:-6px;width:12px;height:12px;background:var(--zf-surface);border-left:1px solid var(--zf-border);border-bottom:1px solid var(--zf-border);transform:rotate(45deg)}
-.zf-bubble-joy{border-color:#003c33;color:#003c33}.zf-bubble-joy::before{border-color:#003c33}
-.zf-bubble-concern{border-color:#b42318}.zf-bubble-concern::before{border-color:#b42318}
+/* Message icons: static, contained SVG objects in the same visual family. */
+.zf-mascot{display:block;flex:none;color:var(--zf-action)}
+.zf-mascot svg{display:block;width:100%;height:100%;overflow:hidden}
+/* The icon introduces a regular heading, without a character speech bubble. */
+.zf-bubble{min-width:0;margin:0;padding:0;font-size:16px;font-weight:600;line-height:1.6;color:var(--zf-text);overflow-wrap:anywhere}
 .zf-nudge-stat-label svg:first-child{color:#003c33}
 .zf-nudge-stat.bad .zf-nudge-stat-label svg:first-child{color:#b42318}.zf-nudge-stat.warn .zf-nudge-stat-label svg:first-child{color:#8a4b00}
 .zf-nudge-stat-value{position:relative}
 .zf-plus{position:absolute;left:0;top:-4px;font-style:normal;font-size:15px;font-weight:700;color:#003c33;animation:zf-float 1.1s ease-out .5s 1 both}
 .zf-nudge-bar u{position:absolute;top:-3px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#003c33;opacity:0;animation:zf-shine .7s ease-out .65s 1 both}
-@keyframes zf-hop{0%{transform:translateY(0)}20%{transform:translateY(-12px)}40%{transform:translateY(0)}58%{transform:translateY(-6px)}75%,100%{transform:translateY(0)}}
-@keyframes zf-arm-l{0%{transform:rotate(60deg)}40%,100%{transform:rotate(0)}}
-@keyframes zf-arm-r{0%{transform:rotate(-60deg)}40%,100%{transform:rotate(0)}}
-@keyframes zf-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(15deg)}}
-@keyframes zf-lean{0%{transform:rotate(0)}50%{transform:rotate(-8deg)}100%{transform:rotate(-4deg)}}
-@keyframes zf-burst{0%{opacity:1;transform:rotate(var(--a)) translateY(0)}100%{opacity:0;transform:rotate(var(--a)) translateY(-26px)}}
-@keyframes zf-pop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
 @keyframes zf-float{0%{opacity:0;transform:translate(48px,6px)}25%{opacity:1}100%{opacity:0;transform:translate(48px,-26px)}}
 @keyframes zf-shine{0%{opacity:0;transform:scale(.4)}40%{opacity:.9;transform:scale(1.4)}100%{opacity:0;transform:scale(1)}}
 .zf-nudge-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
@@ -550,7 +531,7 @@
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 @keyframes nudge-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media(max-width:760px){.zf-bubble{font-size:15px}.zf-nudge-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.zf-nudge-stat-value b{font-size:24px}.zf-nudge-next .btn{margin-left:0}}
-@media(prefers-reduced-motion:reduce){.zf-nudge,.zf-mascot svg,.zf-mascot path,.zf-bubble,.zf-mark{animation:none!important}.zf-burst,.zf-plus,.zf-nudge-bar u{display:none}}
+@media(prefers-reduced-motion:reduce){.zf-nudge{animation:none!important}.zf-plus,.zf-nudge-bar u{display:none}}
 /* 역할별 필터(지침 7절): 기본은 본인 범위로 이미 선택된 상태라 선택 상자를 접어 두고, 현재 범위 버튼을 누르거나 터치할 때만 펼친다 */
 @media(min-width:761px){.app-shell .platform-filters .scope-toggle{display:inline-flex;align-items:center;gap:8px;grid-column:1;grid-row:1;justify-self:start;align-self:center;width:auto;min-height:44px;padding:0 14px;border:1px solid var(--zf-control-border);border-radius:8px;background:var(--zf-surface);color:var(--zf-text);font-size:14px;font-weight:600}.app-shell .platform-filters:not(.filterbar-open) #workspace-filters{display:none}.app-shell .platform-filters.filterbar-open #workspace-filters{display:grid;grid-column:1/-1;grid-row:2;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;padding:0;border:0;margin:0}}
 /* 운영 화면 조회 필터 배치(761px 이상)는 이 블록이 기준이다. 앞선 filterbar 규칙을 덮어쓰며, 다른 파일에 배치 규칙을 더 만들지 않는다.
