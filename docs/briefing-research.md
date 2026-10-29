@@ -26,3 +26,14 @@
 ## 확인하지 못한 참고(근거로 쓰지 않음)
 
 리서치 초안에 있었으나 이번에 원문을 확인하지 못한 것: 피라미드 원칙(Minto), Eckerson 운영·전술·전략 대시보드, Few 대시보드 설계, Healey & Enns 전주의 속성, Amabile 진전 원리, Gollwitzer 실행 의도, NN/g 점진 공개. 반영하기 전에 원문을 확인한다.
+
+## 추가 확인 근거 (2026-10-29, 대시보드 꼬리표·순위)
+
+| 근거 | 핵심 | 반영 |
+|---|---|---|
+| Keasey, Moon & Duxbury 2000, Accounting and Business Research 30(4) ([요약](https://ideas.repec.org/a/taf/acctbr/v30y2000i4p275-286.html)) | 순위표를 보이면 관리자가 순위 자리에 집착하는 기능 장애("measure fixation") | 조직 표 순위 정렬 삭제, 조직 순서·사실만 |
+| Bevan & Hood 2006, Public Administration 84(3) ([LSE eprints](https://eprints.lse.ac.uk/16211)) | 목표·순위 압박은 지표만 맞추는 게이밍을 낳음 | 이행률로 줄 세우지 않음 |
+| 경보 피로 문헌 고찰 ([2022](https://frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2022.843747/text), [2025](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12181921/)) | 행동으로 이어지지 않는 경보가 잦으면 둔감해지고 시스템을 믿지 않게 됨 | 빨강은 기한 넘긴 사실에만, '위험' 칩·제목 삭제 |
+| Kluger & DeNisi 1996 (위) | 주의가 사람으로 향하면 역효과 | '사업장 문제 진단' → '먼저 확인할 사업장', '미해결 이슈' → '열린 조치' |
+
+프로젝트 룰 `DC-FEEDBACK`에 기준으로 고정(2026-10-29).
