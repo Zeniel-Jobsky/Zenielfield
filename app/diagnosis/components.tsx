@@ -1,9 +1,10 @@
 'use client';
 import {dayShift as addDays} from '../lib/date';
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useState,useId} from 'react';
 import {AlertTriangle,RefreshCw,ChevronRight,ShieldOff,CalendarClock,Info,Inbox} from 'lucide-react';
 import {PanelTitle,Badge,short,nice} from '../ui';
 import {weekRanges,weekTitle} from '../briefing/model';
+import {BriefDisclosure} from '../briefing/disclosure';
 import type {PlatformData,FieldAction,Target} from '../platform/model';
 import {diagnose,sitesWith,weekDiagnosis,defaultWeek,kstStamp,reasonsOf,type DxInput,type DxFlag,type DxIssueRow,type Diagnosis} from './model';
 import {scopeInput} from './adapters';
@@ -38,17 +39,18 @@ export function SiteDiagnosis({input,now,status='ready',onRetry,onOpen,uname,com
  </>}</>}</section>
 }
 export function WeeklyDiagnosis({input,now,start,end,status='ready',onRetry,onOpen,onActions,uname}:StateProps&{input:DxInput;now:string;start:string;end:string;onOpen:(siteId:string,issueId?:string)=>void;onActions:()=>void;uname:(id:string)=>string}){
- const weeks=weekRanges(start,end),[picked,setPicked]=useState(''),[more,setMore]=useState(false);
+ const weeks=weekRanges(start,end),[picked,setPicked]=useState(''),[more,setMore]=useState(false),[morePlans,setMorePlans]=useState(false),id=useId();
  const current=weeks.some(w=>w.start===picked)?picked:defaultWeek(start,end,now),w=weeks.find(x=>x.start===current);
  const d=useMemo(()=>w?weekDiagnosis(input,w.start,w.end,now,{from:w.from,to:w.to}):null,[input,now,w?.start,w?.end,w?.from,w?.to]);
  const names=useMemo(()=>new Map(input.targets.map(t=>[t.id,t])),[input]),place=(id:string)=>{const t=names.get(id);return t?(t.type==='store'?t.siteName+' · '+t.name:t.siteName):'대상 미확인'};
  const title=w?`${w.start.slice(0,4)}년 ${weekTitle(w.start)}`:'';const isNow=d?.phase==='current';
+ useEffect(()=>{setMore(false);setMorePlans(false)},[current,start,end,input]);
  return <section className="panel dx-panel dx-weekly" aria-label="주차별 사업장 문제 진단"><PanelTitle title={isNow?'이번 주 사업장 문제 진단':(w?weekTitle(w.start)+' 사업장 문제 진단':'사업장 문제 진단')} sub={w?`${short(w.start)}~${short(w.end)} · ${d?.phase==='current'?'현재까지 잠정 집계':d?.phase==='past'?'집계 완료':'아직 시작하지 않은 주차'}`:'조회기간에 해당하는 주차가 없습니다'}>{weeks.length>0&&<label className="dx-week-select"><span className="sr-only">진단 주차</span><select aria-label="진단 주차 선택" value={current} onChange={e=>{setPicked(e.target.value);setMore(false)}}>{weeks.map(x=><option key={x.start} value={x.start}>{x.start.slice(0,4)}년 {weekTitle(x.start)}</option>)}</select></label>}</PanelTitle>
  {status!=='ready'?<Placeholder status={status} onRetry={onRetry} title="주차별 사업장 문제 진단"/>:!w||!d?<div className="dx-state"><Inbox size={22}/><b>선택할 주차가 없습니다</b><p>상단 조회기간을 확인해 주세요.</p></div>:<>
  <div className="dx-chips three" role="group" aria-label={title+' 지표'}><div className="dx-chip new"><span>신규</span><b>{d.newIssues.length}<small>건</small></b></div><div className="dx-chip done"><span>해결</span><b>{d.resolved.length}<small>건</small></b></div><div className="dx-chip open"><span>{isNow?'현재 미해결':'주말 기준 미해결'}</span><b>{isNow?d.openNow:'—'}{isNow&&<small>건</small>}</b>{!isNow&&<em>{d.phase==='future'?'시작 전':'상태 이력 없음'}</em>}</div></div>
  <p className="dx-note">{d.delta?<><b className={d.delta.value>0?'up':d.delta.value<0?'down':''}>{d.delta.label} 대비 신규 {d.delta.value>0?'+':''}{d.delta.value}건</b></>:d.phase==='future'?'아직 시작하지 않은 주차입니다.':'비교 가능한 지난주 기록이 없어 증감을 표시하지 않습니다.'}{d.unknownCreated>0&&<> · 등록일 미확인 {d.unknownCreated}건은 신규에서 제외</>}</p>
- <div className="dx-block"><h3>{isNow?'이번 주':'이 주차'} 주목할 변화</h3>{d.changes.length?<><ul className="dx-changes">{(more?d.changes:d.changes.slice(0,5)).map(c=><li key={c.kind+c.issue.id}><span className={'dx-kind '+c.kind}>{c.kind}</span><div><b>{place(c.issue.targetId)}</b><span>{c.issue.content}</span></div><button className="dx-link" onClick={()=>onOpen(c.issue.siteId,c.issue.id)}>관련 방문·원문 보기<ChevronRight size={13}/></button></li>)}</ul>{d.changes.length>5&&<button className="dx-more" aria-expanded={more} onClick={()=>setMore(!more)}>{more?'접기':`변화 ${d.changes.length-5}건 더 보기`}</button>}</>:<p className="dx-empty-line">{d.phase==='future'?'아직 집계할 변화가 없습니다.':'이 주차에 등록되거나 해결된 이슈가 없습니다.'}</p>}</div>
- <div className="dx-block"><h3><CalendarClock size={14}/>다음 주 조치 예정 <small>{short(addDays(w.end,1))}~{short(addDays(w.end,7))}</small></h3>{d.upcoming.length?<ul className="dx-plans">{d.upcoming.slice(0,5).map(p=><li key={p.key}><b>{p.kind==='조치'?'조치 · ':'방문 · '}{place(p.targetId)}</b><span>{p.text}</span><time dateTime={p.date}>{short(p.date)}</time><small>{p.ownerId?uname(p.ownerId):'담당 미지정'}</small></li>)}</ul>:<p className="dx-empty-line">등록된 기한·방문 일정이 없습니다.</p>}{d.upcoming.length>5&&<p className="dx-empty-line">외 {d.upcoming.length-5}건 · 기한 조치를 먼저, 이어서 예정 방문을 날짜순으로 표시합니다. 전체는 후속 조치·방문 일정에서 확인하세요.</p>}<div className="dx-actions"><button className="dx-link strong" onClick={onActions}>연결된 조치 보기<ChevronRight size={13}/></button></div></div></>}</section>
+ <div className="dx-block"><h3>{isNow?'이번 주':'이 주차'} 주목할 변화</h3>{d.changes.length?<><ul className="dx-changes" id={id+'-changes'}>{(more?d.changes:d.changes.slice(0,3)).map(c=><li key={c.kind+c.issue.id}><span className={'dx-kind '+c.kind}>{c.kind}</span><div><b>{place(c.issue.targetId)}</b><span>{c.issue.content}</span></div><button className="dx-link" onClick={()=>onOpen(c.issue.siteId,c.issue.id)}>관련 방문·원문 보기<ChevronRight size={13}/></button></li>)}</ul>{d.changes.length>3&&<BriefDisclosure open={more} controls={id+'-changes'} onClick={()=>setMore(!more)}>{more?'변화 접기':`변화 ${d.changes.length-3}건 더 보기`}</BriefDisclosure>}</>:<p className="dx-empty-line">{d.phase==='future'?'아직 집계할 변화가 없습니다.':'이 주차에 등록되거나 해결된 이슈가 없습니다.'}</p>}</div>
+ <div className="dx-block"><h3><CalendarClock size={14}/>다음 주 조치 예정 <small>{short(addDays(w.end,1))}~{short(addDays(w.end,7))}</small></h3>{d.upcoming.length?<ul className="dx-plans" id={id+'-plans'}>{d.upcoming.slice(0,morePlans?undefined:3).map(p=><li key={p.key}><b>{p.kind==='조치'?'조치 · ':'방문 · '}{place(p.targetId)}</b><span>{p.text}</span><time dateTime={p.date}>{short(p.date)}</time><small>{p.ownerId?uname(p.ownerId):'담당 미지정'}</small></li>)}</ul>:<p className="dx-empty-line">등록된 기한·방문 일정이 없습니다.</p>}{d.upcoming.length>3&&<BriefDisclosure open={morePlans} controls={id+'-plans'} onClick={()=>setMorePlans(!morePlans)}>{morePlans?'예정 일정 접기':`예정 일정 ${d.upcoming.length-3}건 더 보기`}</BriefDisclosure>}<div className="dx-actions"><button className="dx-link strong" onClick={onActions}>연결된 조치 보기<ChevronRight size={13}/></button></div></div></>}</section>
 }
 
 const stateText=(a:DxIssueRow)=>a.open?a.state:'완료'+(a.completedDate?' · '+short(a.completedDate):'');

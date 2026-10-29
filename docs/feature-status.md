@@ -1,5 +1,9 @@
 # 기능 현황 및 개선 과제
 
+## 2026-10-29 주차별 활동 요약 디자인 개선
+
+주차별 AI 요약·문제 진단·활동 흐름·조회·주차 기록을 그룹 시작의 1px 구분선·제목 크기·32/24px 여백으로 구분했다. 반복 목록·주차 목록 기본 노출은 3개, 방문 본문은 개별 펼침이다. 상세 콘텐츠 그룹에도 시작 구분선을 두되 항목별 반복선은 제거했다. 제목·본문·버튼의 좌측 기준선과 아이콘 격자를 정리했다. 디자인 지침9.1·AGENTS 현재 디자인 결정·프로젝트 룰 DC-DESIGN-DETAIL을 함께 갱신했다. 로컬 390/820/1280px 화면·640 CSS px 재배치, 펼침·검색·원본 이동·키보드·44px 조작 영역을 확인하고 타입·전체 테스트·디자인 검사·빌드를 통과했다(`0.1.6`). [개선 기록과 검증 범위](weekly-activity-design-plan.md).
+
 ## 2026-10-29 Cloudflare 배포 자격증명 원격 관리
 
 Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN` Secret에서 관리한다. 로컬 `.env`·키체인에 의존하지 않는다. 기존 Secret 존재·환경 중복 없음·원격 배포 성공을 확인했다. `ci:deploy`·`deploy:cloudflare`는 로컬 Secret 등록·빌드·직접 배포 대신 원격 main 워크플로만 요청하도록 변경했다. CI는 배포 토큰 누락을 먼저 확인한다. 앱 실행용 비밀값은 기존 Cloudflare Worker Secrets를 유지한다. 상세: [원격 배포 자격증명](cloudflare-credentials-plan.md).
