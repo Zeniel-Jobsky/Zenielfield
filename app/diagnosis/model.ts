@@ -1,3 +1,4 @@
+import {uniqueById as unique} from '../lib/collections';
 import {daysBetween as days,between as within} from '../lib/date';
 import {shift} from '../lib/model';
 import {weekRanges} from '../briefing/model';
@@ -10,7 +11,6 @@ export type DxSite={siteId:string;siteName:string;own:number;stores:number;issue
 export type DxFlag='urgent'|'overdue'|'repeat'|'unassigned';
 export type DxSummary={totalOpen:number;urgent:number|null;overdue:number;repeat:number;unassigned:number};
 export type Diagnosis={state:'no-target'|'no-data'|'clear'|'issues';issues:DxIssueRow[];open:DxIssueRow[];summary:DxSummary;sites:DxSite[]};
-const unique=<T extends {id:string}>(rows:T[])=>[...new Map(rows.map(r=>[r.id,r])).values()];
 // 같은 입력은 한 번만 정규화한다(진단·주차 진단·상세가 같은 입력으로 여러 번 부른다).
 const normalized=new WeakMap<DxInput,{targets:DxInput['targets'];issues:DxInput['issues'];visits:DxInput['visits']}>();
 export function normalize(input:DxInput){const hit=normalized.get(input);if(hit)return hit;const ids=new Set(input.targets.map(t=>t.id));const out={targets:unique(input.targets),issues:unique(input.issues).filter(a=>ids.has(a.targetId)),visits:unique(input.visits).filter(v=>ids.has(v.targetId))};normalized.set(input,out);return out}

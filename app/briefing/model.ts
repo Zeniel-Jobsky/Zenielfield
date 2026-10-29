@@ -1,3 +1,4 @@
+import {uniqueById as unique} from '../lib/collections';
 import {between as within} from '../lib/date';
 import {shift,week} from '../lib/model';
 import {isCurrentJudgment} from '../platform/judgment';
@@ -15,7 +16,7 @@ export function filterBriefData(data:BriefData,kind:string,query:string){const q
 // 조치·지연 건수로 순위를 매기지 않는다(DC-JUDGMENT).
 const judgedPriority=(vs:BriefVisit[])=>{let last:BriefVisit|undefined;for(const v of vs)if(isCurrentJudgment(v.judgment)&&(!last||(last.actualDate||'')<(v.actualDate||'')))last=v;return last?LEVEL_ORDER[(last.judgment as {level:string}).level]||0:0};
 export function weeklyCards(data:BriefData,start:string,end:string,now:string):BriefCard[]{
- const ids=new Set(data.targets.map(t=>t.id));const unique=<T extends {id:string}>(rows:T[])=>[...new Map(rows.map(r=>[r.id,r])).values()];
+ const ids=new Set(data.targets.map(t=>t.id));
  const allVisits=unique(data.visits); // 사이트마다 다시 중복 제거하지 않도록 한 번만
  const visits=allVisits.filter(v=>ids.has(v.targetId)&&v.status==='completed'&&within(v.actualDate,start,end)&&v.actualDate!<=now).sort((a,b)=>(b.actualDate!+b.actualTime).localeCompare(a.actualDate!+a.actualTime)||a.id.localeCompare(b.id));
  const issues=unique(data.issues).filter(a=>ids.has(a.targetId));const sites=[...new Set(visits.map(v=>v.siteId))];
