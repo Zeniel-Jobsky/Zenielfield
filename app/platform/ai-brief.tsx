@@ -11,7 +11,7 @@ import {rich,join,num,bad,good,toRich,RichText,type Rich} from './rich';
 import {collapseRepeats} from '../lib/dedupe-text';
 import {isCurrentJudgment,maskText} from './judgment';
 import {callAssist,aiDownReason} from './ai-assist';
-import {LEVEL_ORDER,latestJudgments} from './status';
+import {LEVEL_ORDER,latestJudgments,staleStores,overdueAt} from './status';
 // AI 현황 브리핑: 비서가 결정권자에게 보고하듯 균형 있게 쓴다. "지금 상태 → 흐름 → 잘 되고 있는 것 → 챙길 곳 → 무슨 일이 벌어지나 → 선택지와 판단 → 다음에 볼 것".
 // 버튼 없이 자동이다. 화면 집계(다이제스트)의 지문이 같으면 저장본을 쓰고, 바뀌면 다시 만들고, 없으면 만든다.
 // 기간은 대시보드(조회 기간) 또는 주차별 화면(선택 주차·조회 기간 전체)처럼 비정형이라 DB에 저장하지 않고, 브라우저에 지문별로만 보관한다.
@@ -76,23 +76,22 @@ export function reportGroups(c:Context,targets:Context['scope'],start:string,end
 export function buildDigest(c:Context,f:BriefFactors=defaultFactors,range?:BriefRange):BriefDigest{
  const start=range?.start||c.start,end=range?.end||c.end,asOf=end<c.now?end:c.now;
  const s=scopeUnits(c),targets=c.scope.filter(t=>t.type===c.type),m=range?aggregate(targets,c.visits,start,end,c.now):c.metrics,stores=c.storeScope.filter(t=>t.status==='운영 중');
- const overdueAt=(day:string)=>c.actions.filter(a=>a.dueDate<day&&(a.state!=='완료'||(a.completedDate||'')>day)).length;
  const resolved=c.actions.filter(a=>a.state==='완료'&&a.completedDate&&a.completedDate>=start&&a.completedDate<=end).length;
- const units=f.units?s.units.map(u=>{const mm=aggregate(u.targets.filter(t=>t.type===c.type),c.visits,start,end,c.now),ids=new Set(u.targets.map(t=>t.id));return{label:u.label,rate:mm.rate,required:mm.required,completed:mm.completed,gap:mm.delayed+mm.unplanned,overdue:c.actions.filter(a=>ids.has(targetOf(a))&&a.dueDate<asOf&&(a.state!=='완료'||(a.completedDate||'')>asOf)).length,stale:u.targets.filter(t=>t.type==='store'&&t.status==='운영 중'&&(days(lastTargetVisit(t.id,c.visits),asOf)??999)>60).length}}).filter(r=>r.required>0||r.overdue>0).sort((a,b)=>(a.rate??-1)-(b.rate??-1)).slice(0,8):[];
+ const units=f.units?s.units.map(u=>{const mm=aggregate(u.targets.filter(t=>t.type===c.type),c.visits,start,end,c.now),ids=new Set(u.targets.map(t=>t.id));return{label:u.label,rate:mm.rate,required:mm.required,completed:mm.completed,gap:mm.delayed+mm.unplanned,overdue:overdueAt(c.actions,asOf,ids),stale:staleStores(u.targets,c.visits,asOf).length}}).filter(r=>r.required>0||r.overdue>0).sort((a,b)=>(a.rate??-1)-(b.rate??-1)).slice(0,8):[];
  const status=new Map<string,number>();for(const t of targets.filter(t=>t.status==='운영 중')){const k=targetStatus(t,c.visits,c.allMetrics);status.set(k,(status.get(k)||0)+1)}
  const types=new Map<string,{overdue:number;open:number;done:number}>();if(f.types)for(const a of c.actions){if(a.createdDate&&a.createdDate>end)continue;const r=types.get(a.type)||{overdue:0,open:0,done:0};if(a.state==='완료'&&(a.completedDate||'')<=end)r.done++;else if(a.dueDate<asOf)r.overdue++;else r.open++;types.set(a.type,r)}
  const filters=[c.team&&`팀 ${c.team}`,c.part&&`파트 ${c.part}`,c.manager&&`담당 ${c.uname(c.manager)}`,c.siteId&&`현장 ${c.target(c.siteId)?.name||''}`,c.storeId&&`매장 ${c.target(c.storeId)?.name||''}`].filter(Boolean) as string[];
- const stale=f.stale?stores.filter(t=>(days(lastTargetVisit(t.id,c.visits),asOf)??999)>60):[];
+ const stale=f.stale?staleStores(stores,c.visits,asOf):[];
  // 보고 내용: 현장·매장별로 묶은 보고 타임라인. 이번 기간 방문 보고 + 기간에 걸친 후속 조치 + 직전 같은 길이 기간의 보고(새로 생김/계속됨/해결됨 판단용).
  // 최근 것만 자르면 보고가 많은 현장 몇 곳에 쏠리므로, 대상마다 최근 몇 건씩 고르게 담고 전체가 예산을 넘으면 대상당 건수를 줄인다.
  const reports=f.reports?reportGroups(c,targets,start,end):{groups:[],total:0,sent:0,judged:judgedSummary([])};
  const trend=f.trend?weeklyTrend(targets,c.visits,end<c.now?end:c.now,c.now,8).rows:[],cur=trend.at(-1),prev=trend.at(-2);
  return {asOf,period:{start,end,label:range?.label||'조회 기간'},scope:{unit:s.title,type:typeName(c.type),targets:targets.length,filters},
-  kpi:{rate:m.rate,required:m.required,completed:m.completed,planned:m.planned,gap:m.delayed+m.unplanned,gapShare:m.required?Math.round((m.delayed+m.unplanned)/m.required*100):0,overdue:f.issues?overdueAt(asOf):0,overduePrev:f.issues?overdueAt(dayShift(asOf,-7)):0,resolved:f.issues?resolved:0,stale:stale.length,staleShare:stores.length?Math.round(stale.length/stores.length*100):0,rateWeek:cur?.rate??null,rateWeekPrev:prev?.rate??null},
+  kpi:{rate:m.rate,required:m.required,completed:m.completed,planned:m.planned,gap:m.delayed+m.unplanned,gapShare:m.required?Math.round((m.delayed+m.unplanned)/m.required*100):0,overdue:f.issues?overdueAt(c.actions,asOf):0,overduePrev:f.issues?overdueAt(c.actions,dayShift(asOf,-7)):0,resolved:f.issues?resolved:0,stale:stale.length,staleShare:stores.length?Math.round(stale.length/stores.length*100):0,rateWeek:cur?.rate??null,rateWeekPrev:prev?.rate??null},
   units,status:[...status].map(([label,n])=>({label,n})),issueTypes:[...types].map(([type,r])=>({type,...r})).sort((a,b)=>b.overdue-a.overdue||b.open-a.open).slice(0,6),
   trend:trend.map(r=>({week:r.start,rate:r.rate,completed:r.completed,delayed:r.delayed,unplanned:r.unplanned})),
   topOverdue:f.issues?c.actions.filter(a=>a.dueDate<asOf&&(a.state!=='완료'||(a.completedDate||'')>asOf)).sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).slice(0,5).map(a=>({target:c.label(a),type:a.type,content:a.content.slice(0,60),late:days(a.dueDate,asOf)||0,owner:c.uname(a.ownerId)})):[],
-  staleTargets:stale.map(t=>({name:t.name,days:days(lastTargetVisit(t.id,c.visits),asOf)})).sort((a,b)=>(b.days??9999)-(a.days??9999)).slice(0,5),
+  staleTargets:stale.map(x=>({name:x.target.name,days:x.days})).sort((a,b)=>(b.days??9999)-(a.days??9999)).slice(0,5),
   reports:reports.groups,reportTotal:reports.total,reportSent:reports.sent,judged:reports.judged,audience:c.me.role==='manager'?'manager':'leader'};
 }
 // 다이제스트 지문: 이 값이 같으면 "변경 없음"으로 보고 저장된 요약을 재사용한다.

@@ -1,4 +1,5 @@
 'use client';
+import {staleStores,overdueAt} from './status';
 import {daysBetween as days} from '../lib/date';
 import {useEffect,useMemo,useState} from 'react';
 import {TrendingUp,TrendingDown,Minus,AlertTriangle,Clock3,Store as StoreIcon,BarChart3} from 'lucide-react';
@@ -22,9 +23,9 @@ function Delta({now,prev,unit='',invert=false}:{now:number|null;prev:number|null
 export function DecisionStrip({c}:{c:Context}){
  const k=useMemo(()=>{
   const targets=c.scope.filter(t=>t.type===c.type),trend=weeklyTrend(targets,c.visits,c.now,c.now,2).rows,[prev,cur]=trend;
-  const m=c.metrics,overdueAt=(day:string)=>c.actions.filter(a=>a.dueDate<day&&(a.state!=='완료'||(a.completedDate||'')>day)).length;
-  const stale=c.storeScope.filter(t=>t.status==='운영 중'&&(days(lastTargetVisit(t.id,c.visits),c.now)??999)>60).length;
-  return {rate:m.rate,rateWeek:cur?.rate??null,rateWeekPrev:prev?.rate??null,gap:m.delayed+m.unplanned,gapWeek:cur?cur.delayed+cur.unplanned:null,gapWeekPrev:prev?prev.delayed+prev.unplanned:null,overdue:overdueAt(c.now),overduePrev:overdueAt(dayShift(c.now,-7)),stale};
+  const m=c.metrics;
+  const stale=staleStores(c.storeScope,c.visits,c.now).length;
+  return {rate:m.rate,rateWeek:cur?.rate??null,rateWeekPrev:prev?.rate??null,gap:m.delayed+m.unplanned,gapWeek:cur?cur.delayed+cur.unplanned:null,gapWeekPrev:prev?prev.delayed+prev.unplanned:null,overdue:overdueAt(c.actions,c.now),overduePrev:overdueAt(c.actions,dayShift(c.now,-7)),stale};
  },[c.scope,c.visits,c.actions,c.now,c.type,c.metrics,c.storeScope]);
  const cards=[
   {label:'방문 이행률',value:k.rate===null?'—':k.rate+'%',note:`${typeName(c.type)} · 완료 ÷ 필요 회차`,tone:'primary',icon:BarChart3,delta:<Delta now={k.rateWeek} prev={k.rateWeekPrev} unit="%p"/>,go:()=>c.go('requirements','required')},
@@ -36,7 +37,7 @@ export function DecisionStrip({c}:{c:Context}){
 }
 export function ScopeRisk({c}:{c:Context}){
  const s=scopeUnits(c);
- const rows=useMemo(()=>s.units.map(u=>{const m=aggregate(u.targets.filter(t=>t.type===c.type),c.visits,c.start,c.end,c.now),ids=new Set(u.targets.map(t=>t.id));return{...u,m,overdue:c.actions.filter(a=>ids.has(targetOf(a))&&a.state!=='완료'&&a.dueDate<c.now).length,stale:u.targets.filter(t=>t.type==='store'&&t.status==='운영 중'&&(days(lastTargetVisit(t.id,c.visits),c.now)??999)>60).length}}).filter(r=>r.m.required>0||r.overdue>0).sort((a,b)=>(a.m.rate??-1)-(b.m.rate??-1)),[s.units,c.visits,c.actions,c.start,c.end,c.now,c.type]);
+ const rows=useMemo(()=>s.units.map(u=>{const m=aggregate(u.targets.filter(t=>t.type===c.type),c.visits,c.start,c.end,c.now),ids=new Set(u.targets.map(t=>t.id));return{...u,m,overdue:overdueAt(c.actions,c.now,ids),stale:staleStores(u.targets,c.visits,c.now).length}}).filter(r=>r.m.required>0||r.overdue>0).sort((a,b)=>(a.m.rate??-1)-(b.m.rate??-1)),[s.units,c.visits,c.actions,c.start,c.end,c.now,c.type]);
  const maxGap=Math.max(1,...rows.map(r=>r.m.delayed+r.m.unplanned)),maxIssue=Math.max(1,...rows.map(r=>r.overdue));
  return <ChartPanel title={`${s.title}별 운영 위험`} sub="이행률 낮은 순 · 행을 누르면 하위로 이동 · 전체 표는 통계·보고서"><div className="risk-table"><div className="risk-head"><span>{s.title}</span><span>이행률</span><span>지연·미등록</span><span title="기한 초과 이슈">초과 이슈</span><span title="60일 넘게 방문하지 않은 매장">60일+</span></div>
   {rows.slice(0,8).map(r=>{const rate=r.m.rate??0;return <button key={r.key} className="risk-row" onClick={()=>s.drill(r.key)}><span className="risk-name">{r.label}</span><span className="risk-bar"><i style={{width:rate+'%',background:tone.ok}}/><b>{r.m.rate??'—'}%</b></span><span className="risk-bar"><i style={{width:pct(r.m.delayed+r.m.unplanned,maxGap)+'%',background:tone.ok}}/><b>{r.m.delayed+r.m.unplanned}</b></span><span className="risk-bar"><i style={{width:pct(r.overdue,maxIssue)+'%',background:tone.ok}}/><b>{r.overdue}</b></span><span className={'risk-num'+(r.stale?' red-text':'')}>{r.stale}</span></button>})}

@@ -1,5 +1,6 @@
 // 화면 공통 현황: 방문 코치·대시보드 브리핑·현황표·주차별 브리핑·독려 안내가 같은 사실과 같은 판정을 읽는다.
 // 코드는 사실만 계산하고(필요 회차·조치 기한·마지막 방문일), 상태 이름과 순서는 저장된 종합 판정에서만 온다(DC-JUDGMENT).
+import {daysBetween} from '../lib/date';
 import {dayShift,weekOf,lastTargetVisit,targetOf,type FieldAction,type FieldVisit,type Occurrence,type Target} from './model';
 import {isCurrentJudgment,type VisitJudgment} from './judgment';
 
@@ -52,4 +53,15 @@ export function attentionOf(facts:Iterable<TargetFacts>){
 export function selfWeeks(visits:FieldVisit[],userId:string,now:string){
  const wk=weekOf(now),prev=dayShift(wk,-7),done=(a:string,b:string)=>visits.filter(v=>v.visitorId===userId&&v.status==='completed'&&!!v.actualDate&&v.actualDate>=a&&v.actualDate<=b).length;
  return {thisWeek:done(wk,now),lastWeek:done(prev,dayShift(wk,-1))};
+}
+
+// 장기 미방문 기준(일). 지표·차트·브리핑·목록이 같은 값을 쓴다.
+export const STALE_DAYS=60;
+// 운영 중 매장 중 기준일까지 STALE_DAYS일 넘게 방문이 없거나 방문 기록이 없는 곳(days=null)
+export function staleStores(targets:Target[],visits:FieldVisit[],asOf:string){
+ return targets.filter(t=>t.type==='store'&&t.status==='운영 중').map(t=>({target:t,days:daysBetween(lastTargetVisit(t.id,visits),asOf)})).filter(x=>x.days===null||x.days>STALE_DAYS);
+}
+// 기준일에 기한을 넘긴 조치 수(그날 이후 완료한 조치도 그날엔 초과). ids가 있으면 그 대상만
+export function overdueAt(actions:FieldAction[],day:string,ids?:Set<string>){
+ let n=0;for(const a of actions)if((!ids||ids.has(targetOf(a)))&&a.dueDate<day&&(a.state!=='완료'||(a.completedDate||'')>day))n++;return n;
 }

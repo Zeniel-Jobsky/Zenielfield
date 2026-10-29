@@ -1,4 +1,5 @@
 'use client';
+import {staleStores} from './status';
 import {SearchSuggest,type Suggestion} from './search-suggest';
 import {PeriodPicker} from './period';
 import {daysBetween} from '../lib/date';
@@ -108,7 +109,8 @@ export default function PlatformApp({initialData,liveMode=false,onSaveLive,onDem
  const filterSites=data.sites.filter(s=>orgScope.some(t=>t.siteId===s.id));const filterStores=data.stores.filter(s=>(!siteId||s.siteId===siteId)&&orgScope.some(t=>t.id===s.id));
  const scope=useMemo(()=>orgScope.filter(t=>(!siteId||t.siteId===siteId)&&(!storeId||t.id===storeId)&&(!search||[t.name,t.siteName,t.address,t.region,...t.managerIds.map(uname),data.sites.find(s=>s.id===t.siteId)?.client].join(' ').toLowerCase().includes(search.toLowerCase()))),[orgScope,siteId,storeId,search,data]);
  const ids=useMemo(()=>new Set(scope.map(t=>t.id)),[scope]);const scopedVisits=useMemo(()=>data.visits.filter(v=>ids.has(targetOf(v))),[data,ids]);const scopedActions=useMemo(()=>data.actions.filter(a=>ids.has(targetOf(a))),[data,ids]);
- const storeScope=scope.filter(t=>t.type==='store'&&(page!=='sites'||kind!=='stale'||(t.status==='운영 중'&&!(lastTargetVisit(t.id,data.visits)&&lastTargetVisit(t.id,data.visits)!>=dayShift(now,-60))))),siteScope=allTargets.filter(t=>t.type==='site'&&(page==='sites'&&kind==='stale'?storeScope.some(s=>s.siteId===t.id):scope.some(s=>s.siteId===t.id)));
+ const staleIds=new Set(staleStores(scope,data.visits,now).map(x=>x.target.id));
+ const storeScope=scope.filter(t=>t.type==='store'&&(page!=='sites'||kind!=='stale'||staleIds.has(t.id))),siteScope=allTargets.filter(t=>t.type==='site'&&(page==='sites'&&kind==='stale'?storeScope.some(s=>s.siteId===t.id):scope.some(s=>s.siteId===t.id)));
  const metrics=useMemo(()=>aggregate(scope.filter(t=>t.type===type),scopedVisits.filter(v=>v.targetType===type),start,end,now),[scope,scopedVisits,type,start,end,now]);
  const allMetrics=useMemo(()=>aggregate(scope,scopedVisits,start,end,now),[scope,scopedVisits,start,end,now]);
  const targetById=useMemo(()=>new Map(targets.map(t=>[t.id,t])),[targets]),allById=useMemo(()=>new Map(allTargets.map(t=>[t.id,t])),[allTargets]);
