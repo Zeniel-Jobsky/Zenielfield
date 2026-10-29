@@ -618,3 +618,12 @@
 .my-day:not(:disabled):hover{background:var(--zf-surface-hover)}
 .my-day small.times{white-space:normal}.my-day small.count{justify-self:start;font-weight:600;color:#003c33}.my-day .md-short{display:none}
 @media(max-width:760px){.my-days{gap:4px}.my-day{min-height:56px;padding:4px;justify-items:center;text-align:center}.my-day .md-full{display:none}.my-day .md-short{display:inline}.my-day small.times,.my-day small.free{display:none}}
+/* 통합 검색 자동완성: 입력 아래 목록(담당자·현장·매장), 선택 줄 딥그린 옅은 배경 */
+.search-suggest{position:relative}
+.suggest-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:70;max-height:360px;overflow:auto;margin:0;padding:4px;list-style:none;border:1px solid var(--zf-border);border-radius:8px;background:var(--zf-surface);box-shadow:0 8px 24px rgba(23,23,28,.12)}
+.suggest-list li{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 10px;border-radius:6px;cursor:pointer;color:var(--zf-text-secondary)}
+.suggest-list li span{display:grid;min-width:0}
+.suggest-list li b{font-size:13px;font-weight:600;color:var(--zf-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.suggest-list li small{font-size:11px;color:var(--zf-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.suggest-list li.on{background:var(--zf-selected)}
+.suggest-list li.on svg{color:#003c33}
