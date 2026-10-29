@@ -50,7 +50,7 @@ brand_colors:
 - [공통 토큰·본문 스타일](../app/zeniel.css), [좌측 메뉴 스타일](../app/sidebar.css)
 - [대시보드·운영 화면](../app/platform/app.tsx), [지표·목록](../app/platform/views.tsx)
 - [브리핑 구성](../app/briefing/components.tsx), [브리핑 집계](../app/briefing/model.ts), [필요 회차 집계](../app/platform/model.ts)
-- [숫자 폰트](../public/fonts/space-grotesk-regular.ttf), [폰트 라이선스](../public/fonts/OFL-Space-Grotesk.txt)
+- 글꼴: Pretendard Variable(npm `pretendard`, OFL), 숫자도 같은 글꼴 + tabular-nums
 
 ## 1. 핵심 원칙
 
@@ -119,7 +119,7 @@ sRGB 단색 계산 기준: 흰색/딥그린 약 12.40:1, 강조 보조 글자/�
 
 **아이콘 배율 (2026-10-29):** 4단계만 쓴다 — `--zf-icon-xs` 14px(11–13px 글자 옆·링크 화살표·표 안) · `--zf-icon-sm` 16px(본문·버튼·입력·칩·탭) · `--zf-icon-md` 20px(메뉴·상단 동작·아이콘 버튼) · `--zf-icon-lg` 24px(빈 상태). 선 굵기 1.75 고정(`svg.lucide`), 글자와 함께 있으면 기준선 정렬. 컴포넌트 `size`는 14·16·20·24만, CSS에서 아이콘 크기를 px로 다시 정하지 않고 토큰을 쓴다. 이 배율은 일반 UI 아이콘(Lucide)에 적용한다. 메시지를 설명하는 장식 SVG는 10-A의 44/56px·64캔버스 기준을 별도로 따른다.
 
-한글 기본 스택은 `Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif`다. Pretendard가 설치·제공되어 있다고 가정하지 않는다. 숫자·짧은 영문에는 로컬 `Space Grotesk` Regular를 사용하고, 한글은 기본 스택으로 폴백한다. 현재 제공 자산은 400 굵기이므로 숫자를 임의의 합성 굵기로 만들지 않는다.
+한글 기본 스택은 `'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif`다. Pretendard가 설치·제공되어 있다고 가정하지 않는다. 숫자·짧은 영문에는 로컬 `Space Grotesk` Regular를 사용하고, 한글은 기본 스택으로 폴백한다. 현재 제공 자산은 400 굵기이므로 숫자를 임의의 합성 굵기로 만들지 않는다.
 
 | 역할 | 데스크톱 기준 | 모바일 기준 / 비고 |
 |---|---|---|
@@ -131,8 +131,8 @@ sRGB 단색 계산 기준: 흰색/딥그린 약 12.40:1, 강조 보조 글자/�
 | 폼 입력값 | 13px / 1.7 | 16px / 1.7, 확대·입력 가독성 확보 |
 | 필터·축·범례·설명 | 12px / 1.6–1.8, 400 | 차트 축·범례는 12px 유지 |
 | 제한적인 메타·배지 | 11px / 1.5–1.8 | 필수 수치·주요 안내의 축소 수단으로 쓰지 않음 |
-| 관리 대상 요약 수치 | Space Grotesk 36px / 1.25, 400 | 30px |
-| 이행 현황 KPI | Space Grotesk 32px / 1.2, 400 | 30px |
+| 관리 대상 요약 수치 | Pretendard 36px tabular-nums / 1.25, 400 | 30px |
+| 이행 현황 KPI | Pretendard 32px tabular-nums / 1.2, 400 | 30px |
 
 - `font-variant-numeric: tabular-nums`를 사용한다. 숫자에는 자릿수 구분을 적용하되 한글 본문 전체를 숫자 폰트로 바꾸지 않는다.
 - 간격은 4 / 8 / 12 / 16 / 20 / 24 / 32px를 기본으로 한다. 현재 페이지 상단·좌우는 34px / 32px, 중간 폭 좌우 24px, 모바일 상단·좌우는 25px / 20px이다.
@@ -259,7 +259,7 @@ sRGB 단색 계산 기준: 흰색/딥그린 약 12.40:1, 강조 보조 글자/�
 | 축 레이블 영역 | Y축 40–56px, X축 28–36px에서 실제 단위 길이에 맞춤 | Y축 36–48px을 시작값으로 하되 `1,000` 등이 잘리면 확장 |
 | 제목 | 한글 기본 폰트 17px/1.4, 500 | 16px/1.4, 500 |
 | 축·범례 | 12px/1.6, 400, `text-secondary` | 12px 유지 |
-| 수치·데이터 레이블 | Space Grotesk 12–13px/1.5, 400 + 한글 폴백 | 동일 |
+| 수치·데이터 레이블 | Pretendard 12–13px/1.5, 400 tabular-nums | 동일 |
 | 툴팁 | 13px/1.6 본문, 12px 보조; 수치는 400 | 동일 |
 | 출처·기준 | 12px/1.8, `text-muted` | 동일; 여러 줄 허용 |
 
@@ -621,7 +621,7 @@ sRGB 단색 계산 기준: 흰색/딥그린 약 12.40:1, 강조 보조 글자/�
   --zf-chart-area: rgb(0 60 51 / .06);
   --zf-chart-axis-text: var(--zf-text-secondary);
   --zf-chart-surface: var(--zf-surface);
-  --zf-chart-font-numeric: 'Space Grotesk', Pretendard, -apple-system,
+  --zf-chart-font-numeric: 'Pretendard Variable', Pretendard, -apple-system,
     BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
 }
 ```
