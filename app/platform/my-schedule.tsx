@@ -1,20 +1,16 @@
 'use client';
-// 일정 잡기 전 내 일정 확인: 이번 주·다음 주 2주에 방문자 본인의 잡힌 방문(시간·대상)을 날짜별로 보여 준다.
-// 날짜를 누르면 그 날짜를 AI 입력에 먼저 넣어, 비어 있는 날에 맞춰 일정을 말하게 한다. 필요 회차의 인정 기간은 테두리로 표시.
+// 일정 잡기 전 빈 날 확인: 오늘부터 7일을 칩 한 줄로(날짜 + 내 방문 n건 / 비어 있음). 누르면 그 날짜를 AI 입력에 먼저 넣는다.
+// 필요 회차 기간 안의 날은 딥그린 테두리. 방문 목록 전체는 방문 일정 화면의 달력에서 본다(여기서 반복하지 않는다).
 import {useMemo} from 'react';
 import type {Context} from './context';
-import {dayShift,weekOf,mmdd,between} from '../lib/date';
-import {targetOf} from './model';
+import {dayShift,mmdd,between} from '../lib/date';
 
-const DOW=['월','화','수','목','금','토','일'];
+const DOW=['일','월','화','수','목','금','토'];
+const dowOf=(d:string)=>DOW[new Date(d+'T12:00:00Z').getUTCDay()];
 export function MySchedule({c,visitor,window,picked,onPick}:{c:Context;visitor:string;window?:{start:string;end:string}|null;picked:string;onPick:(day:string)=>void}){
- const start=weekOf(c.now),days=Array.from({length:14},(_,i)=>dayShift(start,i));
- const byDay=useMemo(()=>{const m=new Map<string,{time:string;name:string}[]>();for(const v of c.visits){if(v.visitorId!==visitor||v.status!=='planned'||!v.plannedDate||v.plannedDate<start||v.plannedDate>days[13])continue;const a=m.get(v.plannedDate)||[];a.push({time:v.time||'',name:c.target(targetOf(v))?.name||''});m.set(v.plannedDate,a)}for(const a of m.values())a.sort((x,y)=>(x.time||'99').localeCompare(y.time||'99'));return m},[c.visits,visitor,start]);
- return <div className="my-schedule wide" role="group" aria-label="내 방문 일정 2주">
-  {[0,1].map(w=><div key={w} className="my-week"><span className="my-week-label">{w?'다음 주':'이번 주'}</span><div className="my-days">{days.slice(w*7,w*7+7).map((d,i)=>{const items=byDay.get(d)||[],past=d<c.now,inWin=!!window&&between(d,window.start,window.end);
-   return <button type="button" key={d} disabled={past} className={'my-day'+(d===c.now?' today':'')+(d===picked?' on':'')+(inWin?' window':'')+(items.length?' busy':'')} aria-pressed={d===picked} title={items.map(x=>`${x.time||'시간 미정'} ${x.name}`).join(', ')||undefined} aria-label={`${mmdd(d)}(${DOW[i]}) ${items.length?'방문 '+items.length+'건: '+items.map(x=>`${x.time||'시간 미정'} ${x.name}`).join(', '):'비어 있음'}${inWin?' · 필요 회차 기간':''}`} onClick={()=>onPick(d)}>
-    <b><span className="md-full">{DOW[i]} {mmdd(d)}</span><span className="md-short">{DOW[i]} {Number(d.slice(8))}</span></b>{items.length?<><small className="times">{items.slice(0,3).map(x=>x.time||'미정').join(' · ')}{items.length>3?' …':''}</small><small className="count">{items.length}건</small></>:<small className="free">{past?'':'비어 있음'}</small>}
-   </button>})}</div></div>)}
-  <p className="form-hint">날짜를 누르면 AI 입력에 먼저 들어갑니다.{window?' 테두리는 이번 필요 회차 기간입니다.':''}</p>
- </div>;
+ const days=Array.from({length:7},(_,i)=>dayShift(c.now,i));
+ const count=useMemo(()=>{const m=new Map<string,number>();for(const v of c.visits)if(v.visitorId===visitor&&v.status==='planned'&&v.plannedDate&&v.plannedDate>=days[0]&&v.plannedDate<=days[6])m.set(v.plannedDate,(m.get(v.plannedDate)||0)+1);return m},[c.visits,visitor,days[0]]);
+ return <div className="my-days wide" role="group" aria-label="앞으로 7일 내 방문 일정">{days.map(d=>{const n=count.get(d)||0,inWin=!!window&&between(d,window.start,window.end);
+  return <button type="button" key={d} className={'my-day'+(d===picked?' on':'')+(inWin?' window':'')+(n?' busy':'')} aria-pressed={d===picked} aria-label={`${mmdd(d)}(${dowOf(d)}) ${n?'방문 '+n+'건':'비어 있음'}${inWin?' · 필요 회차 기간':''}`} onClick={()=>onPick(d)}>
+   <b>{d===c.now?'오늘':dowOf(d)} {mmdd(d)}</b><small>{n?n+'건':'비어 있음'}</small></button>})}</div>;
 }

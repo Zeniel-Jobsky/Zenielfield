@@ -601,23 +601,15 @@
  .app-shell .platform-filters .reset-button{grid-area:reset;width:44px;min-width:44px;min-height:44px}
  .app-shell .platform-filters.filterbar-open #workspace-filters{grid-area:selects;}
 }
-/* 일정 잡기 전 내 일정 확인: 이번 주·다음 주 날짜 칸(누르면 AI 입력에 날짜), 필요 회차 기간은 딥그린 테두리 */
-.my-schedule{display:grid;gap:10px}
-.my-week{display:grid;gap:6px}
-.my-week-label{font-size:12px;color:var(--zf-text-secondary)}
-.my-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
-.my-day{display:grid;align-content:start;gap:2px;min-height:72px;padding:6px;border:1px solid var(--zf-border);border-radius:6px;background:var(--zf-surface);text-align:left;color:var(--zf-text);overflow:hidden}
+/* 일정 잡기 전 빈 날 확인: 앞으로 7일 칩 한 줄(누르면 AI 입력에 날짜), 필요 회차 기간 딥그린 테두리 */
+.my-days{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.my-day{display:grid;gap:1px;flex:1 0 76px;min-height:48px;padding:6px 8px;border:1px solid var(--zf-border);border-radius:8px;background:var(--zf-surface);text-align:left;color:var(--zf-text)}
 .my-day b{font-size:12px;font-weight:600;white-space:nowrap}
-.my-day small{font-size:11px;line-height:1.35;color:var(--zf-text-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.my-day small.free{color:var(--zf-text-secondary)}
-.my-day.busy{background:var(--zf-info-soft)}
-.my-day.today b{color:#003c33}
+.my-day small{font-size:11px;color:var(--zf-text-secondary)}
+.my-day.busy small{font-weight:600;color:var(--zf-text-body)}
 .my-day.window{border-color:#003c33}
-.my-day.on{outline:2px solid #003c33;outline-offset:1px}
-.my-day:disabled{opacity:.45;cursor:default}
-.my-day:not(:disabled):hover{background:var(--zf-surface-hover)}
-.my-day small.times{white-space:normal}.my-day small.count{justify-self:start;font-weight:600;color:#003c33}.my-day .md-short{display:none}
-@media(max-width:760px){.my-days{gap:4px}.my-day{min-height:56px;padding:4px;justify-items:center;text-align:center}.my-day .md-full{display:none}.my-day .md-short{display:inline}.my-day small.times,.my-day small.free{display:none}}
+.my-day.on{outline:2px solid #003c33;outline-offset:1px;background:var(--zf-selected)}
+.my-day:hover{background:var(--zf-surface-hover)}
 /* 통합 검색 자동완성: 입력 아래 목록(담당자·현장·매장), 선택 줄 딥그린 옅은 배경 */
 .search-suggest{position:relative}
 .suggest-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:70;max-height:360px;overflow:auto;margin:0;padding:4px;list-style:none;border:1px solid var(--zf-border);border-radius:8px;background:var(--zf-surface);box-shadow:0 8px 24px rgba(23,23,28,.12)}

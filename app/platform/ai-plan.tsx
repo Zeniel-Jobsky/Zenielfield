@@ -25,7 +25,7 @@ export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;e
  return <form className="record-form ai-form" onSubmit={submit}><div className="form-scroll"><div className="notice slim ai-notice"><Sparkles size={16}/><span><b>AI 입력</b> 언제·어디·무엇을 말하면 AI가 일정을 채웁니다.</span><button type="button" className="textbtn" onClick={()=>c.open('visit',undefined,{...modal,ai:false,manual:true})}><PenLine size={13}/>직접 입력</button></div>
  <fieldset className="form-grid" disabled={!c.editable||c.saving}>
  <Permissions/>
- <div className="form-section first wide"><span>00</span>내 일정 확인</div>
+ <div className="form-section first wide"><span>00</span>방문할 날 고르기</div>
  <MySchedule c={c} visitor={owner||c.me.id} window={modal.requirementId&&modal.dueDate?{start:c.now,end:modal.dueDate}:null} picked={pickedDay} onPick={d=>{setPickedDay(d);setSeed(`${Number(d.slice(5,7))}월 ${Number(d.slice(8))}일`)}}/>
  <div className="form-section wide"><span>01</span>말·글로 일정 입력</div>
  <AiComposer mode="plan" seed={seed} demo={c.demo!==false} onDraft={d=>draft(d as unknown as AiPlanDraft)}/>
