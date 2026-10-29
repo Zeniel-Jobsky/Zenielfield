@@ -654,8 +654,20 @@
 .ai-brief-steps b{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#003c33;color:#fff;font-size:12px}
 .weekly-content .ai-brief .panel-heading h2>svg{display:inline-block}
 @media(max-width:760px){.ai-brief-guide ul li{grid-template-columns:1fr}}
-.zf-ai-mark{flex:none;margin-right:4px;color:#003c33;vertical-align:-2px}
+.zf-ai-mark{display:inline-block;flex:none;object-fit:contain;margin-right:4px;vertical-align:middle}
 .ai-badge .zf-ai-mark{margin-right:3px}
+.zeni-working{display:flex;align-items:center;gap:16px;min-width:0;padding:12px 0}
+.zeni-working-character{display:flex;flex:none;flex-direction:column;align-items:center;gap:4px}
+.zeni-working-character .zf-ai-mark{margin:0;animation:zeni-work 1.8s ease-in-out infinite;transform-origin:50% 80%}
+.zeni-working-character b{font-size:12px;line-height:1.4;color:var(--zf-text)}
+.zeni-working-bubble{position:relative;min-width:0;margin:0;padding:12px 16px;border:1px solid var(--zf-border);border-radius:8px;background:var(--zf-surface);color:var(--zf-text);font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.zeni-working-bubble::before{content:'';position:absolute;left:-6px;top:20px;width:10px;height:10px;background:var(--zf-surface);border-left:1px solid var(--zf-border);border-bottom:1px solid var(--zf-border);transform:rotate(45deg)}
+.zeni-working-dots{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+.zeni-working-dots i{width:3px;height:3px;border-radius:50%;background:currentColor;animation:zeni-dot 1.2s ease-in-out infinite}
+.zeni-working-dots i:nth-child(2){animation-delay:.2s}.zeni-working-dots i:nth-child(3){animation-delay:.4s}
+@keyframes zeni-work{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+@keyframes zeni-dot{0%,80%,100%{opacity:.35}40%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.zeni-working-character .zf-ai-mark,.zeni-working-dots i{animation:none;transform:none;opacity:1}}
 /* 브리핑 펼친 내용: 항목 이름 | 내용 한 형식, 13px, 1px 구분선(칸별 배경 없음) */
 .ai-brief-details{margin-top:8px}
 .ai-brief-dl{margin:0;border-top:1px solid var(--zf-border)}
@@ -748,3 +760,22 @@
 
 /* 회의록으로 입력한 방문 표시: 중립 알약 */
 .meeting-tag{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:999px;background:var(--zf-info-soft);color:#516e8a;font-size:12px;white-space:nowrap}
+/* 브리핑 상태 칩 한 자리 + 작성 중 가림막(제니에리가 아래에서 올라와 현황 사실을 말함) */
+.ai-brief-state{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 10px;border-radius:14px;font-size:12px;font-weight:600;background:var(--zf-info-soft);color:#516e8a}
+.ai-brief-state.done{background:var(--zf-selected);color:#003c33}
+.ai-brief-stage{position:relative}
+.ai-brief-stage.covered{min-height:220px}
+.ai-brief-stage.covered>.ai-brief-out{opacity:.35;pointer-events:none}
+.ai-brief-curtain{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:20px;border-radius:8px;background:rgba(238,242,246,.94);overflow:hidden}
+.zenieri{display:flex;align-items:center;gap:10px;animation:zf-rise .5s cubic-bezier(.2,.8,.2,1) both}
+.zenieri b{font-size:14px;color:#003c33}
+.zenieri-mark{display:inline-flex;flex:none;width:44px;height:44px;align-items:center;justify-content:center}
+.zenieri-mark .zf-ai-mark{margin:0}
+.ai-brief .ai-brief-curtain .zenieri-say{position:relative;align-self:flex-start;max-width:100%;margin:0;padding:12px 16px;border-radius:8px;background:#fff;border:1px solid var(--zf-border);font-size:15px;line-height:1.6;color:var(--zf-text);overflow-wrap:anywhere;animation:zf-say .24s ease-out both}
+.ai-brief .ai-brief-curtain .zenieri-say::before{content:'';position:absolute;left:18px;top:-7px;width:12px;height:12px;background:#fff;border-left:1px solid var(--zf-border);border-top:1px solid var(--zf-border);transform:rotate(45deg)}
+@keyframes zf-rise{from{transform:translateY(120%);opacity:0}to{transform:none;opacity:1}}
+@keyframes zf-say{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(max-width:760px){.ai-brief-curtain{padding:16px}.zenieri-say{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.zenieri,.zenieri-say,.zenieri-mark svg{animation:none}}
+/* 메뉴 이름은 H1 한 곳만: 상단 경로 글자 숨김 */
+.header-context>b,.header-context>span,.header-context>svg{display:none}

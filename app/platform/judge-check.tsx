@@ -1,6 +1,5 @@
 'use client';
-import {AiMark} from './ai-mark';
-import {Loader2} from 'lucide-react';
+import {AiMark,AiWorking} from './ai-mark';
 import type {Context} from './context';
 import {targetOf} from './model';
 import {buildJudgeInput,cleanJudgment,LEVELS,type JudgeAction,type Level,type VisitJudgment,levelLabel} from './judgment';
@@ -27,7 +26,7 @@ export async function runJudge(c:Context,targetId:string,visitId:string|null,r:R
 export const confirmed=(s:JudgeState|null):VisitJudgment|null=>s?.judgment?{...s.judgment,by:'ai+person'}:null;
 const levelClass:Record<Level,string>={정상:'ok',관찰:'watch',주의:'watch',위험:'warn'};
 export function JudgeCheck({state,busy,onLevel}:{state:JudgeState|null;busy:boolean;onLevel:(l:Level)=>void}){
- if(busy)return <div className="judge-check wide" role="status"><Loader2 size={14} className="spin"/>이 대상의 이전 보고·조치와 함께 판정하는 중…</div>;
+ if(busy)return <div className="judge-check wide"><AiWorking message="이전 보고와 후속 조치를 함께 살펴보고 있어요"/></div>;
  if(!state)return null;
  const j=state.judgment;
  if(!j)return <div className="judge-check wide"><p className="judge-note" role="status">{state.note}</p></div>;

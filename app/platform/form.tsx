@@ -1,5 +1,5 @@
 'use client';
-import {AiMark} from './ai-mark';
+import {AiMark,AiWorking} from './ai-mark';
 import {CopyButton} from './copy-button';
 import {JudgeCheck,runJudge,judgeKey,confirmed,type JudgeState} from './judge-check';
 import {useEffect,useRef,useState,type FormEvent} from 'react';
@@ -32,6 +32,7 @@ function AiTidy({c,formRef,tidy,onChange,history}:{c:Context;formRef:React.RefOb
    {!offer&&!tidy&&<button type="button" className="btn small" disabled={busy||c.saving} onClick={ask}>{busy?<Loader2 size={14} className="spin"/>:<Sparkles size={14}/>}{busy?'정리하는 중…':'AI로 문장 정리'}</button>}
    {tidy&&<><span className="ai-badge"><AiMark/>AI 정리 반영됨 · 저장 시 기록</span><button type="button" className="textbtn" onClick={revert}><RotateCcw size={14}/>되돌리기</button></>}
    <small>위 활동 내용·특이사항을 다듬어 제안합니다. 사실은 그대로 두고, 반영한 칸만 기록됩니다.{history>0&&` (지금까지 ${history}회 반영)`}</small></div>
+  {busy&&<AiWorking message="활동 내용과 특이사항의 문장을 다듬고 있어요"/>}
   {offer&&<div className="ai-tidy-offer" role="group" aria-label="AI 정리 제안"><p className="form-hint">바뀌는 칸만 보입니다. 체크한 칸만 반영됩니다.{offer.model.startsWith('데모')&&' 데모에서는 AI를 부르지 않고 공백·문장부호만 정리합니다.'}</p>
    {changed.map(k=><label key={k} className="ai-tidy-row"><input type="checkbox" checked={!!pick[k]} onChange={e=>setPick({...pick,[k]:e.target.checked})}/><span><b>{tidyLabel[k]}</b><em>현재</em><s>{offer.before[k]||'(비어 있음)'}</s><em>제안</em><span className="ai-tidy-proposed"><ins>{offer.proposed[k]||'(비움)'}</ins><CopyButton text={offer.proposed[k]||''} label={`${tidyLabel[k]} 제안 복사`}/></span></span></label>)}
    <div className="ai-tidy-actions"><button type="button" className="btn small primary" onClick={apply}>선택한 칸 반영</button><button type="button" className="btn small" onClick={()=>setOffer(null)}>제안 닫기</button></div></div>}

@@ -1,4 +1,5 @@
 'use client';
+import {AiWorking} from './ai-mark';
 import {kstDay} from '../lib/date';
 import {useEffect,useRef,useState} from 'react';
 import type {AiField} from './model';
@@ -74,6 +75,7 @@ export function AiComposer({onDraft,mode='result',demo=false,seed=''}:{onDraft:(
   try{const d=await callAssist({text:text0,images,mode});onDraft(d.draft,{text:text0,imageCount:images.length,model:d.model,generatedAt:d.generatedAt})}catch(e){fallback((e as Error).message)}finally{setBusy(false)}}
  const ready=!busy&&(text.trim().length>0||images.length>0);
  return <div className="ai-composer-wrap wide">
+  {busy&&<AiWorking message={mode==='plan'?'입력한 내용을 읽고 방문 일정을 정리하고 있어요':images.length?'방문 내용과 사진을 읽고 초안을 정리하고 있어요':'방문 내용을 읽고 초안을 정리하고 있어요'}/>}
   <div className={'ai-composer'+(listening?' listening':'')}>
    {images.length>0&&<div className="ai-images">{images.map((src,i)=><span key={i}><img src={src} alt={`첨부 ${i+1}`}/><button type="button" aria-label="사진 삭제" onClick={()=>setImages(images.filter((_,j)=>j!==i))}><X size={14}/></button></span>)}</div>}
    <textarea ref={box} rows={1} maxLength={3000} value={listening&&interim?(text?text+' ':'')+interim:text} readOnly={listening} onChange={e=>setText(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(ready)send()}}} placeholder={listening?'듣고 있어요… 말을 마치면 ■ 를 누르세요':mode==='plan'?'예: 다음주 화요일 오후 2시 이마트 양재점 정기점검':'방문 내용을 말하거나 적어 주세요. 사진도 함께 올릴 수 있어요.'}/>

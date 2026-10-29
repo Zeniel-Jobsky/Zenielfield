@@ -1,3 +1,4 @@
-// AI 표시: AI가 만들거나 다룬 내용(브리핑·판정·초안·정리·AI 작성 배지)에는 모두 같은 반짝이 하나를 붙인다.
-import {Sparkles} from 'lucide-react';
-export const AiMark=({size=14}:{size?:number})=><Sparkles size={size} className="zf-ai-mark" aria-hidden="true"/>;
+// AI 표시와 작성 중 캐릭터는 제니에리 자산을 공유한다.
+export const AiMark=({size=24}:{size?:number})=><img src="/brand/jerieri-chatbot.png" width={Math.max(20,size)} height={Math.max(20,size)} className="zf-ai-mark" alt="" aria-hidden="true" draggable={false}/>;
+
+export function AiWorking({message}:{message:string}){return <div className="zeni-working" role="status"><span className="zeni-working-character"><AiMark size={44}/><b>제니에리</b></span><p className="zeni-working-bubble">{message}<span className="zeni-working-dots" aria-hidden="true"><i/><i/><i/></span></p></div>}
