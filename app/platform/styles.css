@@ -641,3 +641,14 @@
 @media(max-width:760px){.ai-brief-guide ul li{grid-template-columns:1fr}}
 .zf-ai-mark{flex:none;margin-right:4px;color:#003c33;vertical-align:-2px}
 .ai-badge .zf-ai-mark,.ai-brief-tone .zf-ai-mark{margin-right:3px}
+/* 브리핑 펼친 내용: 항목 이름 | 내용 한 형식, 13px, 1px 구분선(칸별 배경 없음) */
+.ai-brief-details{margin-top:8px}
+.ai-brief-dl{margin:0;border-top:1px solid var(--zf-border)}
+.ai-brief-dl>div{display:grid;grid-template-columns:140px minmax(0,1fr);gap:4px 16px;padding:10px 0;border-bottom:1px solid var(--zf-border)}
+.ai-brief-dl dt{font-size:12px;font-weight:600;color:var(--zf-text-secondary);padding-top:1px}
+.ai-brief-dl dd{margin:0;font-size:13px;line-height:1.6;color:var(--zf-text)}
+.ai-brief-dl dd ul{margin:0;padding-left:16px}
+.ai-brief-dl dd.ai-brief-lead{display:flex;flex-wrap:wrap;gap:6px 12px;margin:0}
+.ai-brief-dl dd.ai-brief-meta{font-size:12px;color:var(--zf-text-secondary)}
+.ai-brief-dl .ai-brief-sites{padding-left:0;list-style:none}
+@media(max-width:760px){.ai-brief-dl>div{grid-template-columns:1fr}}
