@@ -2,6 +2,7 @@
 //   node scripts/seed.mjs build              → seed/out/seed.json, seed.sql, purge.sql
 //   node --env-file=.env scripts/seed.mjs apply   → purge + seed 를 한 트랜잭션으로 원격 적용
 //   node --env-file=.env scripts/seed.mjs purge   → 데모 행만 삭제
+import {supabaseSql} from './lib/supabase-sql.mjs';
 import {kstToday} from '../app/lib/date.ts';
 import fs from 'node:fs';
 import esbuild from '../node_modules/.pnpm/esbuild@0.28.0/node_modules/esbuild/lib/main.js';
@@ -17,5 +18,4 @@ console.log(`${base?'HR-biz 가상 DB('+base.importedAt+')':'가상 생성기'} 
 if(cmd==='build')process.exit(0);
 const token=process.env.SUPABASE_ACCESS_TOKEN;if(!token){console.error('SUPABASE_ACCESS_TOKEN 필요');process.exit(1)}
 const query=cmd==='purge'?`begin;\n${purge}\ncommit;`:cmd==='apply'?`begin;\n${purge}\n${seed}\ncommit;`:null;if(!query){console.error('build | apply | purge');process.exit(1)}
-const r=await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({query})});
-console.log(r.status,(await r.text()).slice(0,500));process.exit(r.ok?0:1);
+try{const out=await supabaseSql({ref,token})(query);console.log(200,JSON.stringify(out).slice(0,500));process.exit(0)}catch(e){console.log(e.message.slice(0,500));process.exit(1)}

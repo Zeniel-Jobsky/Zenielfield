@@ -3,6 +3,7 @@
 //  - 사용자 등록은 기존 관리자 이름으로 zf_write(감사 기록 남음), 비밀번호는 Edge operator-set-password 로 한다.
 //  - 잡매니저는 가상 담당자(jm-001 등)의 이메일만 바꿔 배정된 현장·방문을 그대로 쓴다.
 //  - 비밀번호는 무작위로 만들고 git 제외 파일 work/accounts.local.csv 에만 쓴다(화면·커밋에 남기지 않음). 다시 실행하면 비밀번호를 새로 만든다.
+import {supabaseSql} from './lib/supabase-sql.mjs';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {randomInt} from 'node:crypto';
 const args=process.argv.slice(2),dry=args.includes('--dry-run'),ai=args.indexOf('--admin');
@@ -23,7 +24,7 @@ const accounts=[
 ];
 // 잡매니저: 기존 가상 담당자 이메일을 바꿔 배정을 이어받는다
 const managers=[['jm-001@example.test',`zf.jm001@${D}`],['jm-018@example.test',`zf.jm018@${D}`],['jm-021@example.test',`zf.jm021@${D}`]];
-const sqlq=async(query)=>{const r=await fetch(`https://api.supabase.com/v1/projects/${project}/database/query`,{method:'POST',headers:{Authorization:'Bearer '+access,'Content-Type':'application/json'},body:JSON.stringify({query})});const t=await r.text();if(!r.ok)throw Error(`SQL ${r.status} ${t.slice(0,300)}`);return JSON.parse(t)};
+const sqlq=supabaseSql({ref:project,token:access});
 const lit=(s)=>"'"+String(s).replace(/'/g,"''")+"'";
 const pw=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';let s='';for(let i=0;i<14;i++)s+=a[randomInt(a.length)];return s.slice(0,4)+'-'+s.slice(4,9)+'-'+s.slice(9)+randomInt(10)};
 const [adm]=await sqlq(`select subject,email from public.zf_users where email=${lit(adminEmail)} and role='admin' and active=1`);

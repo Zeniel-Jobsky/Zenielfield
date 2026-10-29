@@ -1,5 +1,6 @@
 // Creates only uniquely named disposable fixtures, then removes those exact fixtures.
 // Run from the checkout that owns the ignored .env with Supabase management access.
+import {supabaseSql} from './lib/supabase-sql.mjs';
 import {kstToday} from '../app/lib/date.ts';
 import assert from 'node:assert/strict';
 import {randomUUID,randomBytes} from 'node:crypto';
@@ -9,7 +10,7 @@ const url=env.ZENIFIELD_SUPABASE_URL,ref=new URL(url).hostname.split('.')[0];
 const app='https://zenifield.jobsky.workers.dev';
 const run=randomUUID(),qaId='qa-cf-'+run,qaEmail='qa-cf-'+run+'@example.invalid',managerEmail='qa-cf-manager-'+run+'@example.invalid';
 const managementHeaders={Authorization:'Bearer '+env.SUPABASE_ACCESS_TOKEN,'Content-Type':'application/json'};
-async function sql(query){const r=await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`,{method:'POST',headers:managementHeaders,body:JSON.stringify({query})});if(!r.ok)throw Error('Fixture SQL failed '+r.status);return r.json();}
+const sql=supabaseSql({ref,token:env.SUPABASE_ACCESS_TOKEN});
 const keys=await (await fetch(`https://api.supabase.com/v1/projects/${ref}/api-keys`,{headers:managementHeaders})).json();
 const key=keys.find(k=>k.name==='service_role').api_key;
 const authHeaders={apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'};

@@ -5,6 +5,7 @@
 //  - 각 파일은 하나의 트랜잭션(begin … commit)으로 실행한다. 실패하면 그 파일에서 멈추고 이력에 남기지 않는다.
 //  - --mark-applied: 이미 손으로 적용한 이관을 실행하지 않고 이력에만 기록한다(최초 도입 시 기준선 잡기).
 //  - --dry-run: 아무것도 쓰지 않는다(이력 표도 만들지 않음). 이력 표가 없으면 전부 미적용으로 표시된다.
+import {supabaseSql} from './lib/supabase-sql.mjs';
 import {readFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
@@ -13,10 +14,7 @@ const mark=mk>=0?(args[mk+1]||'').split(',').filter(Boolean):[];
 const project=(at>=0?args[at+1]:'')||process.env.SUPABASE_PROJECT_REF||'nhywssfwtnonytbkufyy',token=process.env.SUPABASE_ACCESS_TOKEN||'';
 const dir=resolve(process.cwd(),'supabase/migrations');
 const files=readdirSync(dir).filter(f=>/^\d{14}_.+\.sql$/.test(f)).sort();
-async function query(sql){
- const r=await fetch(`https://api.supabase.com/v1/projects/${project}/database/query`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({query:sql})});
- const text=await r.text();if(!r.ok)throw new Error(`HTTP ${r.status} ${text.slice(0,400)}`);try{return JSON.parse(text)}catch{return text}
-}
+const query=supabaseSql({ref:project,token});
 const ledger=`create table if not exists public.zf_schema_migrations(name text primary key,checksum text not null,applied_at timestamptz not null default now());
 alter table public.zf_schema_migrations enable row level security;`;
 if(!files.length){console.log('적용할 이관 파일이 없습니다.');process.exit(0)}
