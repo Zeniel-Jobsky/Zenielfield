@@ -1,6 +1,6 @@
 # 중복 표현 정리 · 브리핑 상태 표시 계획
 
-2026-10-30 · 근거: DC-FEEDBACK ⑧ 한 화면 한 번, 지침 6.1-A · 상태: 분석 완료, 구현 전
+2026-10-30 · 근거: DC-FEEDBACK ⑧ 한 화면 한 번, 지침 6.1-A · 상태: 2026-10-30 구현 (아래 F)
 
 ## 근거(웹 조사)
 
@@ -65,3 +65,11 @@
 - 지침 6.1-A·9-B 갱신 → AGENTS.md "현재 디자인 결정" · DC-DESIGN-NOW 동시 갱신(DC-DESIGN)
 - 구현: `app/platform/ai-brief.tsx`, `app/platform/app.tsx`, `charts.tsx`, `decision.tsx`
 - 390/820/1280 실화면 확인 후 완료 처리
+
+## F. 구현 내역 (2026-10-30)
+
+- 삭제: 대시보드 `SiteDiagnosis`·`BriefingPreview`, 보고서 `VisitMetrics`, 상단 경로 글자
+- `TeamBars` 순위 정렬 제거
+- 브리핑: 제목 하나, 칸 제목 반짝이 제거, 상태 칩 `BriefState`, 가림막 `BriefCurtain` + `curtainLines`
+- 미반영: 지표 칸↔차트 숫자 겹침(B표)은 숫자+분포로 질문이 달라 유지
+- 확인: tsc, run-platform 95, run-briefing 45, 390/820/1280 가림막·완료 칩·가로 넘침 없음
