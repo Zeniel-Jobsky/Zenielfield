@@ -52,5 +52,6 @@ const ownVisit=fixture.visits.find(v=>v.visitorId===manager.id)!;const moved=str
  judgment:[{topic:'A 현장',a:{do:[{v:'완료일 재지정'}],gain:[{v:'지연 정리'}],check:[{v:'담당자'}]},b:{do:[{v:'② 현장 동행'}],gain:[{v:'원인 확인'}],check:[{v:'다른 일정'}]}},{topic:'반쪽',a:{do:[{v:'x'}],gain:[],check:[]},b:{do:[],gain:[],check:[]}}],themes:[],focus:[],strengths:[],watch:[],flow:[],story:[],confidence:'medium'});
  const txt=(r:any[])=>r.map(x=>x.v).join('');
  eq(txt(out.headline),'A 현장 조치 2건 기한 지남. 이번 주 완료일을 정해요.');eq(txt(out.cheer).startsWith('채용 일정을 세웠어요.'),true);eq(txt(out.cheer).includes('좋겠습니다'),false);
- eq(out.judgment.length,1);eq(txt(out.judgment[0]),'A 현장: ① 완료일 재지정 → 지연 정리 (확인: 담당자) ② 현장 동행 → 원인 확인 (확인: 다른 일정)')}
+ eq(out.judgment.length,1);
+ const sp=shapeBrief({story:[{v:'제한적이에요.'},{v:'반면 A는 완료했어요.B도 좋아요.',tone:'good'}]});eq(txt(sp.story),'제한적이에요. 반면 A는 완료했어요. B도 좋아요.');eq(txt(shapeBrief({story:[{v:'조치 '},{v:'2건',tone:'num'},{v:'이 남아요.'}]}).story),'조치 2건이 남아요.');eq(txt(out.judgment[0]),'A 현장: ① 완료일 재지정 → 지연 정리 (확인: 담당자) ② 현장 동행 → 원인 확인 (확인: 다른 일정)')}
 console.log(`${count} briefing assertions passed: week boundaries, deduplication, independent targets, actual visitors, access scope and legacy data reuse and current-format judgment counts.`);

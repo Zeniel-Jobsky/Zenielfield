@@ -542,11 +542,6 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  .app-shell .brief-week-summary {padding-left:38px}
  .app-shell .brief-selection-summary {font-size:11px;line-height:1.8}
 }
-@media (max-width:760px) {
- .app-shell .platform-demo-banner:has(.live-mode-actions)>div:first-child>span:nth-child(2) {display:none}
- .app-shell .platform-demo-banner .live-mode-actions {flex-shrink:0;align-items:center;gap:10px}
- .app-shell .live-mode-actions button {min-height:44px;white-space:nowrap}
-}
 
 /* Mobile navigation and query controls: keyboard focus and 44px touch targets. */
 .app-shell .mobile-sidebar-close {display:none}
@@ -610,52 +605,22 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 
 /* AI briefing: summary first, supporting evidence only on request. */
 .app-shell .ai-brief .ai-brief-out {gap:24px}
-.ai-brief-overview {display:grid;gap:24px;min-width:0}
-.ai-brief-overview>section {min-width:0}
-.ai-brief-overview h3 {font-size:14px;font-weight:600;line-height:1.5;color:var(--zf-text-secondary);margin:0 0 12px}
-.ai-brief-overview-label {display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.ai-brief-overview-label h3 {margin:0}
-.ai-brief-out .ai-brief-summary>p {font-size:var(--zf-brief-summary-size);font-weight:500;line-height:1.7;color:var(--zf-text);margin:0;word-break:keep-all;overflow-wrap:anywhere}
-.ai-brief-out .ai-brief-proposal>p {font-size:var(--zf-brief-proposal-size);line-height:1.7;color:var(--zf-text-body);margin:0;word-break:keep-all;overflow-wrap:anywhere}
 .ai-brief-tools .textbtn {display:inline-flex;align-items:center;min-height:44px}
-.ai-brief-actions {display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .ai-brief .brief-disclosure {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;max-width:100%;padding:8px 12px;border:1px solid var(--zf-control-border);border-radius:6px;background:var(--zf-surface);color:var(--zf-text-secondary);font-size:13px;font-weight:500;line-height:1.6;text-align:left;white-space:normal}
 .ai-brief .brief-disclosure>span {color:var(--zf-text-muted);white-space:nowrap;font-weight:400}
 .ai-brief .brief-disclosure:hover {background:var(--zf-surface-muted);border-color:var(--zf-control-border-hover);color:var(--zf-text)}
 .ai-brief .brief-disclosure:active {background:var(--zf-surface-hover)}
 .ai-brief .brief-disclosure[aria-expanded=true] {color:var(--zf-action)}
 .ai-brief .brief-disclosure:focus-visible {outline:2px solid var(--zf-focus);outline-offset:2px}
-.ai-brief-report-note,.ai-brief-source {font-size:12px;line-height:1.7;color:var(--zf-text-muted);margin:0;overflow-wrap:anywhere}
-.ai-brief-sites {list-style:none;margin:12px 0 0;padding:0}
-.ai-brief-site {padding:20px 0}
-.ai-brief-site+.ai-brief-site {border-top:1px solid var(--zf-border)}
-.ai-brief-site-heading {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:16px}
-.ai-brief-site-heading h4 {font-size:16px;font-weight:600;color:var(--zf-text);line-height:1.5;overflow-wrap:anywhere}
-.ai-brief-site-heading h4>.link {display:inline-flex;align-items:center;gap:4px;min-height:44px;text-align:left;max-width:100%;font:inherit;color:var(--zf-action)}
-.ai-brief-site-heading p {font-size:13px;line-height:1.7;color:var(--zf-text-muted);margin:4px 0 0;overflow-wrap:anywhere}
-.ai-brief-site-detail {display:grid;gap:24px;padding-top:16px}
-.ai-brief-site-detail>section {display:grid;gap:8px;min-width:0}
-.ai-brief-topic-heading {display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.ai-brief-topic-heading h5 {font-size:14px;font-weight:600;color:var(--zf-text);line-height:1.5}
-.ai-brief-out .ai-brief-shared {font-size:12px;color:var(--zf-text-muted)}
-.ai-brief-evidence h6 {font-size:12px;font-weight:500;color:var(--zf-text-secondary);margin:0 0 4px}
-.ai-brief-evidence ul {display:grid;gap:8px;margin:0;padding-left:16px;font-size:12px;color:var(--zf-text-muted);line-height:1.7}
-.ai-brief-evidence li {padding:0;border:0;overflow-wrap:anywhere}
+.ai-brief-source {font-size:12px;line-height:1.7;color:var(--zf-text-muted);margin:0;overflow-wrap:anywhere}
 .ai-brief-details {display:grid;gap:24px}
 .ai-brief-details h3 {font-size:14px;font-weight:600;line-height:1.5;margin:0 0 8px}
-.ai-brief-details .ai-brief-grid {gap:24px}
-.ai-brief-details .ai-brief-decide {margin-top:0!important;padding-top:0;border:0}
-.ai-brief-details .ai-brief-cheer {padding:16px;background:var(--zf-surface-muted)}
-.ai-brief-details .ai-brief-flow {padding:16px;background:var(--zf-surface-muted)}
-.ai-brief-reports[hidden],.ai-brief-site-detail[hidden],.ai-brief-details[hidden] {display:none}
-@media(min-width:1024px) {.ai-brief-overview {grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:32px}}
+.ai-brief-details[hidden] {display:none}
 @media(max-width:760px) {
  .ai-brief {--zf-brief-summary-size:18px;--zf-brief-proposal-size:16px}
- .app-shell .ai-brief .ai-brief-out,.ai-brief-overview {gap:20px}
- .ai-brief-actions {gap:8px}
+ .app-shell .ai-brief .ai-brief-out {gap:20px}
  .ai-brief:not(.ai-brief-weekly) .panel-heading {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px}
  .ai-brief:not(.ai-brief-weekly) .ai-brief-tools {width:auto;align-self:start;justify-content:flex-end}
- .ai-brief-site-heading {gap:8px}
 }
 
 /* Equal chart pairs: share heading, legend and body rows without fixed heights. */
@@ -668,7 +633,6 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .dashboard-chart-pair .chart-panel-legend {grid-row:2;min-width:0}
 .app-shell .dashboard-chart-pair .chart-legend {margin:0 0 12px;font-size:12px}
 .app-shell .dashboard-chart-pair .chart-body {grid-row:3;min-width:0;min-height:0;height:auto;overflow:visible}
-.app-shell .dashboard-chart-pair .chart-fold {min-width:44px;min-height:44px}
 .app-shell .dashboard-chart-pair .trend .axis-text {font-size:inherit}
 @media(max-width:1023px) {
  .app-shell .dashboard-chart-pair {grid-template-columns:minmax(0,1fr);grid-template-rows:none;row-gap:var(--zf-dashboard-group-gap)}

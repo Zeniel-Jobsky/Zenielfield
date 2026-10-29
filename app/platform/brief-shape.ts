@@ -23,15 +23,21 @@ const ADDRESSEE=/^\s*(실무자|잡매니저|파트장|팀장|사업부장|담�
 const RECOMMEND=/\s*(먼저|우선)?[^.。!?]*(편이|것이)\s*(좋겠|낫겠|바람직)[^.。!?]*[.。]?\s*$/;
 const clean=(r:Rich,first=true):Rich=>{const out=r.filter(s=>s&&typeof s.v==='string').map(s=>({v:s.v,...(s.tone==='num'||s.tone==='bad'||s.tone==='good'?{tone:s.tone}:{})}));
  if(first&&out.length)out[0]={...out[0],v:out[0].v.replace(ADDRESSEE,'')};return out.filter(s=>s.v.length)};
+// 이유 앞의 경로('부서 › 매니저 › ' 또는 '부서 › 매니저 › 대상: ')는 화면이 이름을 보이므로 뗀다
+const stripPath=(r:Rich):Rich=>{if(!r.length)return r;const v=r[0].v.replace(/^(?:[^›:]{1,40}›s*){1,3}/,'');return v===r[0].v?r:[{...r[0],v},...r.slice(1)].filter(s=>s.v.trim())};
 const noTail=(r:Rich):Rich=>{if(!r.length)return r;const last=r[r.length-1],v=last.v.replace(RECOMMEND,'');return v===last.v?r:[...r.slice(0,-1),{...last,v}].filter(s=>s.v.trim())};
-const toRich=(x:unknown):Rich=>typeof x==='string'?(x?[{v:x}]:[]):Array.isArray(x)?clean(x as Rich):[];
+// 문장 사이 띄어쓰기: 마침표·물음표·느낌표 바로 뒤에 글자가 붙으면 한 칸 띄운다(조각 경계 포함). 조사 자리는 건드리지 않는다.
+const spaceSentences=(r:Rich):Rich=>r.map((s,i)=>{let v=s.v.replace(/([.!?,])(?=[가-힣A-Za-z(])/g,'$1 ');const next=r[i+1];if(next&&/[.!?]$/.test(v)&&/^[가-힣A-Za-z0-9(]/.test(next.v))v+=' ';return v===s.v?s:{...s,v}});
+const toRich=(x:unknown):Rich=>typeof x==='string'?(x?spaceSentences([{v:x}]):[]):Array.isArray(x)?spaceSentences(clean(x as Rich)):[];
 const join=(...parts:Rich[]):Rich=>parts.filter(p=>p.length).flatMap((p,i)=>i?[{v:' '},...p]:p);
 // 칸 안에 모델이 다시 쓴 번호(①②·1.·가.)는 뗀다: 번호는 구조가 붙인다
 const noMark=(r:Rich):Rich=>r.length?[{...r[0],v:r[0].v.replace(/^\s*([①②③④]|\(?[0-9가나]\)|[0-9]\.)\s*/,'')},...r.slice(1)].filter(x=>x.v):r;
 const opt=(o:any,mark:string):Rich=>{if(!o)return [];const d=noMark(noTail(toRich(o.do))),g=noTail(toRich(o.gain)),c=noTail(toRich(o.check));if(!d.length)return [];return join([{v:mark}],d,g.length?join([{v:'→'}],g):[],c.length?[{v:'(확인: '},...c,{v:')'}]:[])};
 // 모델 출력(새 구조) → 화면 표시 형식. 옛 구조(문장 하나)도 받는다.
 export function shapeBrief(x:any){
- const directive=(Array.isArray(x?.directive)?x.directive:[]).filter((d:any)=>d&&typeof d.to==='string'&&d.to.trim()).map((d:any)=>({to:d.to.trim(),say:noTail(toRich(d.say))})).filter((d:any)=>d.say.length).slice(0,3);
+ // 받는 사람이 뭉뚱그려진 지시('세 팀 담당자'·'각 팀'·'담당자들')는 버린다
+ const vague=/(담당자들|각 팀|각 파트|세 팀|전체|모든|여러)/;
+ const directive=(Array.isArray(x?.directive)?x.directive:[]).filter((d:any)=>d&&typeof d.to==='string'&&d.to.trim()&&!vague.test(d.to)).map((d:any)=>({to:d.to.trim(),say:noTail(toRich(d.say))})).filter((d:any)=>d.say.length).slice(0,3);
  const steps=(Array.isArray(x?.steps)?x.steps:[]).map((s:any)=>noMark(noTail(toRich(s)))).filter((r:Rich)=>r.length).slice(0,3);
  const headline=x?.headline&&!Array.isArray(x.headline)&&typeof x.headline==='object'?join(toRich(x.headline.situation),toRich(x.headline.action)):toRich(x?.headline);
  const cheer=x?.cheer&&!Array.isArray(x.cheer)&&typeof x.cheer==='object'?join(toRich(x.cheer.praise),noTail(toRich(x.cheer.ask))):toRich(x?.cheer);
@@ -39,5 +45,5 @@ export function shapeBrief(x:any){
  const list=(v:unknown)=>Array.isArray(v)?v.map(toRich).filter(r=>r.length):[];
  // 개수 상한: 주제 3·강점 2·챙길 곳 3·판단 2·다음 주 2(화면 한 번에 읽히는 양)
  return {headline,cheer:clean(cheer),themes:(Array.isArray(x?.themes)?x.themes:[]).slice(0,2).filter((t:any)=>t&&typeof t.title==='string').map((t:any)=>({title:t.title,status:typeof t.status==='string'?t.status:'',summary:toRich(t.summary),evidence:Array.isArray(t.evidence)?t.evidence.filter((e:unknown)=>typeof e==='string').slice(0,3):[],targets:Array.isArray(t.targets)?t.targets.filter((e:unknown)=>typeof e==='string').slice(0,4):[]})),
-  flow:toRich(x?.flow),strengths:list(x?.strengths).slice(0,2),focus:(Array.isArray(x?.focus)?x.focus:[]).slice(0,3).filter((f:any)=>f&&typeof f.name==='string').map((f:any)=>({name:f.name,reason:toRich(f.reason)})),story:toRich(x?.story),judgment:judgment.slice(0,1),directive,steps,watch:list(x?.watch).slice(0,2),confidence:typeof x?.confidence==='string'?x.confidence:''};
+  flow:toRich(x?.flow),strengths:list(x?.strengths).slice(0,2),focus:(Array.isArray(x?.focus)?x.focus:[]).slice(0,3).filter((f:any)=>f&&typeof f.name==='string').map((f:any)=>({name:f.name,reason:stripPath(toRich(f.reason))})),story:toRich(x?.story),judgment:judgment.slice(0,1),directive,steps,watch:list(x?.watch).slice(0,2),confidence:typeof x?.confidence==='string'?x.confidence:''};
 }

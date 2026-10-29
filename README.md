@@ -1,5 +1,172 @@
 # ZeniField · 현장·매장 운영관리
 
+현장·매장 방문계획 → 방문 기록 → 후속 조치 → 주차별 활동 요약을 연결하는 반응형 업무 앱입니다.
+
+2026-10-29 · 원격 main **475280d**의 소스·문서를 기준으로 정리했습니다. 원격 최신 변경을 반영한 문서 전용 작업이며 실제 로그인·DB 저장·외부 AI·공개 서버는 이번에 재검증하지 않았습니다.
+
+## 목차
+
+- [프로젝트 소개 및 현재 구현 현황](#프로젝트-소개-및-현재-구현-현황)
+- [개발 환경 및 필수 설치 프로그램](#개발-환경-및-필수-설치-프로그램)
+- [로컬 설치 및 실행](#로컬-설치-및-실행)
+- [사용자 가이드](#사용자-가이드)
+- [개발자 가이드 및 프로젝트 구조](#개발자-가이드-및-프로젝트-구조)
+- [환경변수 및 설정](#환경변수-및-설정)
+- [테스트 및 문제 해결](#테스트-및-문제-해결)
+- [관련 문서 인덱스](#관련-문서-인덱스)
+- [확인이 필요한 문서](#확인이-필요한-문서)
+- [과거 README 기록](#과거-readme-기록)
+
+처음 실행할 때는 [로컬 개발 가이드](docs/local-development.md), 업무 사용법은 [메뉴별 사용자 가이드](docs/user-guide.md), 관리자 업무는 [관리자 가이드](docs/admin-guide.md), 현황은 [기능 현황](docs/feature-status.md), 오래된 내용은 [문서 점검 보고서](docs/documentation-audit-2026-10-29.md)를 확인하세요.
+
+## 프로젝트 소개 및 현재 구현 현황
+
+| 구분 | 소스에서 확인한 내용 |
+| --- | --- |
+| 운영 | 등록 사용자 인증·Supabase 서버 게이트웨이·권한·현장/매장·방문·후속 조치 저장 경로 |
+| 데모 | 가상 데이터로 화면·입력을 체험. 메모리 변경은 새로고침 시 초기화, 운영 DB 자동 복사 없음 |
+| 분석 | 회차 실적·조직 비교·우선 확인 현장·AI 핵심 요약·저장된 방문 종합 판정 |
+| 입력 | AI 초안·문장 정리·판정 검토·직접 입력·연결 조치. 외부 서비스와 설정 의존 |
+| 현재 중지 | GPS 자동 선택·위치 기록·주소/매장 검색 UI. GPS_ENABLED/GEO_SEARCH_ENABLED=false, Kakao 키 미사용 |
+| 제거된 경로 | 기존 D1 화면·API·DB/Drizzle 파일은 최신 소스에서 제거됨. 실제 기존 자료의 이관 여부는 별도 확인 |
+| 내보내기·후속 | CSV·화면 인쇄 경로 있음. 정식 XLSX·첨부 원본 보관·업무 알림·그룹웨어 등은 후속 범위 |
+
+현장과 매장은 독립 방문 대상입니다. 본사 방문으로 모든 매장이 완료되지 않고 예정일 경과로 자동 완료되지 않습니다. 회차 이행률과 실제 방문 건수는 구분합니다. 주간 활동은 실제 완료 방문을 한국시간 월–일로 집계합니다. AI 브리핑은 별도 생성·브라우저 보관 경로가 있으며 원본 발췌만 제공하던 과거 버전과 다릅니다.
+
+## 개발 환경 및 필수 설치 프로그램
+
+Node.js **22.13.0 이상**(npm 포함), pnpm **11.25.0**, Git, 브라우저가 필요합니다. Git·브라우저의 버전 하한은 저장소에서 정하지 않았습니다. 에디터는 자유롭게 선택합니다. 일반 로컬 데모에는 배포 계정이나 Supabase CLI가 필요하지 않습니다.
+
+React 19·Next.js 16 API 구조를 Vinext/Vite·Cloudflare Workers로 실행합니다. 정확한 의존성은 [package.json](package.json)과 [pnpm 잠금 파일](pnpm-lock.yaml)을 따릅니다.
+
+## 로컬 설치 및 실행
+
+저장소 최상위 폴더에서 실행합니다.
+
+```bash
+npm run setup
+pnpm dev
+```
+
+setup은 Node 검사·고정 pnpm 설치·의존성 설치·공유 Git 훅 연결·환경 예시 복사를 수행합니다. 기존 .env는 덮어쓰지 않습니다. 일반 portable 프로필은 http://127.0.0.1:5173, 데모는 같은 주소의 /?mode=demo 또는 로그인 화면 ‘로그인 없이 체험하기’에서 엽니다. 직접 실행 종료는 Ctrl+C입니다.
+
+백그라운드 개발 서버는 npm start / npm stop / npm restart / npm run status로 관리합니다. 기존 포트 프로세스를 종료할 수 있으므로 [상세 가이드](docs/local-development.md)를 먼저 읽으세요. 로컬 서버도 설정에 따라 공용 자원에 연결되며 데모 선택이 서버 전체 격리를 뜻하지 않습니다. 새 PC 설치는 이번에 시험하지 않았습니다.
+
+## 사용자 가이드
+
+[app/platform/app.tsx](app/platform/app.tsx)의 기본 메뉴 이름·순서를 따릅니다. 메뉴는 앱 내부 상태로 이동하며 독립 URL이 아닐 수 있습니다.
+
+| 메뉴 | 업무와 사용법 |
+| --- | --- |
+| 로그인·공통 도구 | [시작하기](docs/user-guide.md#시작하기): 인증·데모·조회 범위·아바타 계정 메뉴 |
+| 운영 현황 | [역할별 홈·지표·AI 핵심 요약](docs/user-guide.md#운영-현황) |
+| 현장·매장 관리 | [계층 목록·등록·수정·대상 상세](docs/user-guide.md#현장매장-관리) |
+| 방문 일정 | [월/주/목록·등록·상태·필요 회차](docs/user-guide.md#방문-일정) |
+| 방문 기록 | [결과·초안·문장 정리·판정 검토](docs/user-guide.md#방문-기록) |
+| 후속 조치 | [담당·기한·상태·관련 방문](docs/user-guide.md#후속-조치) |
+| 주차별 활동 요약 | [주간 비교·타임라인·원본 이동](docs/user-guide.md#주차별-활동-요약) |
+| 통계·보고서 | [조직별 실적·CSV·인쇄](docs/user-guide.md#통계보고서) |
+| 설정 | [사용자·도메인·권한·AI 요소](docs/user-guide.md#설정) |
+
+## 개발자 가이드 및 프로젝트 구조
+
+| 경로 | 역할 |
+| --- | --- |
+| app/platform/ | 운영/데모 UI·권한·회차·저장 검증·AI·일정·상태 공통 모듈 |
+| app/briefing/ · app/diagnosis/ | 주간 활동·문제 진단의 모델/어댑터/화면 |
+| app/api/ · lib/ · worker/ | API·인증/커넥터 어댑터·Worker 진입 |
+| app/lib/ · components/ · hooks/ | 공통 날짜·CSV·목록·모델·UI·훅 |
+| supabase/ | 신규 설치 스키마·추가 이관·Edge 함수 |
+| data/ · seed/ | 원본/가공 자료·시드 생성. 앱 메모리 데모와 원격 적재는 별도 |
+| scripts/ · tests/ | 설치·실행·번들·운영 도구·검증 |
+| docs/ · docs/specs/ · docs/plans/ | 가이드·현황·원문·구현 계획·요구사항 추적 |
+| public/ · vendor/ · examples/ | 정적 자산·라이선스·예제(오래된 D1 예제 포함) |
+| .github/ · .githooks/ · .vscode/ · .openai/ | CI·공유 훅·편집기·Sites 설정 |
+
+[AGENTS](AGENTS.md) → [프로젝트 룰](PROJECT_RULE.md) → [디자인 지침](docs/DESIGN-zenielfield.md)을 먼저 읽고 [개발 계획 v2](docs/repo-dev-plan-v2.md)를 따릅니다. 공통 로직의 기준 위치는 DC-COMMON에 있습니다. 생성물 dist/·Edge logic.js·hrbiz-demo.json·seed/out/은 프로젝트 룰의 생성 규칙을 따릅니다. node_modules/·.sites-runtime/·.wrangler/·.next/·.vinext/는 의존성·로컬 실행 상태입니다.
+
+## 환경변수 및 설정
+
+[.env.example](.env.example)의 ZENIFIELD_SUPABASE_URL·ZENIFIELD_GATEWAY_TOKEN은 운영 연결, ZENIFIELD_AUTH_PROVIDER는 인증 선택, OPENAI_API_KEY·OPENAI_MODEL은 AI에 사용합니다. 회사 계정은 supabase-email, 비우면 Sites 인증입니다. 실제 비밀값은 문서·커밋에 넣지 않습니다.
+
+개인 주소·HTTPS는 git 제외 vite.config.local.mjs에 두며 [예시](vite.config.local.example.mjs)를 검토합니다. [변수별 용도](docs/local-development.md#환경변수와-개인-설정) · [운영 인계](docs/supabase-setup.md)
+
+## 테스트 및 문제 해결
+
+```bash
+pnpm typecheck
+pnpm test
+```
+
+기본 test는 플랫폼·브리핑·진단·Supabase·기존 로직·반복 말 정리·차트 렌더링·후속 조치 정렬의 8개 실행기입니다. pnpm build는 패치 버전을 올리고 빌드하므로 문서만 바꿀 때는 필요하지 않습니다. [검사·빌드 상세](docs/local-development.md#테스트와-빌드) · [문제 해결](docs/local-development.md#문제-해결)
+
+[verify CI](.github/workflows/verify.yml)는 타입·기본 테스트를 실행합니다. **main 푸시는 별도 [supabase-deploy](.github/workflows/supabase-deploy.yml)의 운영 배포를 유발합니다.** 문서만 원격 보관하고 배포하지 않을 때는 문서 브랜치를 사용합니다. 이번 작업은 운영 배포를 요청하지 않습니다.
+
+## 관련 문서 인덱스
+
+기존 파일은 삭제·이동하지 않았습니다. 계획·과거 검증 기록은 현재 완료 판정과 구분합니다.
+
+| 분류 | 문서 |
+| --- | --- |
+| 개발·디자인 기준 | [🎨 ZeniField UI 작업 지침](AGENTS.md) |
+| 개발·디자인 기준 | [Project Rules](PROJECT_RULE.md) |
+| 개발·디자인 기준 | [ZeniField — Claude Code](CLAUDE.md) |
+| 기능 명세·개선 계획 | [AI 브리핑 정보 위계와 단계적 공개](docs/ai-brief-disclosure-plan.md) |
+| 기능 명세·개선 계획 | [AI 간편 등록 · 직접 입력 분리 스키마](docs/ai-entry-schema.md) |
+| 기능 명세·개선 계획 | [방문 등록 기본 = AI 입력](docs/ai-input-default.md) |
+| 기능 명세·개선 계획 | [AI 간편등록 개발 계획 (방문결과 · 주간 브리핑)](docs/ai-quick-entry-plan.md) |
+| 기능 명세·개선 계획 | [브리핑 노출 방식 근거와 반영 (2026-10-29)](docs/briefing-research.md) |
+| 운영·데이터 | [Cloudflare 회사 계정 이관](docs/cloudflare-account-migration-plan.md) |
+| 운영·데이터 | [Cloudflare 원격 배포 자격증명](docs/cloudflare-credentials-plan.md) |
+| 기능 명세·개선 계획 | [대시보드 차트 그리드 정렬](docs/dashboard-grid-plan.md) |
+| 기능 명세·개선 계획 | [통합 대시보드 제목과 그룹 구분](docs/dashboard-hierarchy-plan.md) |
+| 기능 명세·개선 계획 | [대시보드 개선 계획](docs/dashboard-plan.md) |
+| 사용 | [ZeniField 개선 보고 및 시연 안내](docs/demo-walkthrough.md) |
+| 개발·디자인 기준 | [ZeniField 디자인 지침](docs/DESIGN-zenielfield.md) |
+| 현황·검증 | [문서 허브 정리 및 원격 정합 점검](docs/documentation-audit-2026-10-29.md) |
+| 기능 명세·개선 계획 | [관리 도메인](docs/domain-plan.md) |
+| 현황·검증 | [기능 현황 및 개선 과제](docs/feature-status.md) |
+| 기능 명세·개선 계획 | [GPS 지점 자동 선택](docs/gps-plan.md) |
+| 기능 명세·개선 계획 | [최신 소스 기반 테스트 계획](docs/latest-source-test-plan.md) |
+| 현황·검증 | [최신 소스 기반 테스트 결과 (자동 검사 회차)](docs/latest-source-test-result-2026-10-29.md) |
+| 설치·실행·설정·검사 | [로컬 설치·실행·설정·검증 가이드](docs/local-development.md) |
+| 기능 명세·개선 계획 | [메뉴·레이블 개선 검토안](docs/navigation-label-plan.md) |
+| 기능 명세·개선 계획 | [운영 현황 메시지 아이콘 개선](docs/nudge-icon-design-plan.md) |
+| 기능 명세·개선 계획 | [001. 사업장 문제 진단 개발 계획](docs/plans/001-site-problem-diagnosis.md) |
+| 기능 명세·개선 계획 | [ZeniField 현장·매장 플랫폼: 연결 및 후속 개발 명세](docs/platform-integration.md) |
+| 기능 명세·개선 계획 | [로컬 프로그램 테스트 계획](docs/program-test-plan.md) |
+| 개발·디자인 기준 | [저장소 기반 개발 계획 v2 (보완)](docs/repo-dev-plan-v2.md) |
+| 운영·데이터 | [데모 데이터 주입 파이프라인](docs/seed-pipeline.md) |
+| 요구사항 원문 | [사업장 문제 진단 기획안](docs/specs/site-problem-diagnosis.md) |
+| 운영·데이터 | [Supabase 연결 및 운영 인계](docs/supabase-setup.md) |
+| 사용 | [메뉴별 사용자 가이드](docs/user-guide.md) |
+| 운영·계정 | [관리자 가이드](docs/admin-guide.md) |
+| 기능 명세·개선 계획 | [담당 지역 미방문 독려 보강 계획](docs/visit-nudge-plan.md) |
+| 기능 명세·개선 계획 | [방문·일지 워크플로](docs/visit-workflow.md) |
+| 기능 명세·개선 계획 | [주차별 활동 요약 디자인 개선](docs/weekly-activity-design-plan.md) |
+| 기능 명세·개선 계획 | [주간 활동 브리핑 구현](docs/weekly-briefing.md) |
+| 기능 명세·개선 계획 | [주차별 활동 타임라인 공간·흐름 개선](docs/weekly-timeline-plan.md) |
+| 라이선스 | [shadcn-tailwind-4.13.0.LICENSE.md](vendor/shadcn-tailwind-4.13.0.LICENSE.md) |
+| 기능 명세·개선 계획 | [사이드바 탐색 개선](docs/sidebar-navigation-plan.md) |
+| 운영·계정 | [Git 작업 계정 설정 기록](docs/git-account-plan.md) |
+| 기능 명세·개선 계획 | [운영 현황 차트 비율 개선](docs/status-chart-ratio-plan.md) |
+
+| 기능 명세·개선 계획 | [후속 조치 정렬](docs/overdue-action-order.md) |
+| 기능 명세·개선 계획 | [기간 필터 배치](docs/results-filter-layout.md) |
+
+## 확인이 필요한 문서
+
+기존 README의 D1 보존·AI 미사용·이전 명령/배포 주소, 과거 시연 안내의 GPS/수동 AI 요약 안내, 디자인 지침의 차트 미구현 표시, 초기 AI 저장안은 최신 코드와 다릅니다. [점검 보고서](docs/documentation-audit-2026-10-29.md)에 근거·확인 과제를 기록했습니다. 운영 이관 상태·현재 계정·외부 서비스·현재 공개 리비전은 임의로 확정하지 않습니다.
+
+## 과거 README 기록
+
+<details>
+<summary>정리 전 원격 README 원문 (과거 안내이며 현재 사용 절차가 아님)</summary>
+
+아래는 삭제하지 않고 보존한 원문입니다. 과거 인증·D1·GPS·AI·배포 주소·테스트 명령·수치는 위의 현재 안내와 구분하세요.
+
+# ZeniField · 현장·매장 운영관리
+
 현장 방문계획 → 방문 결과 → 후속 조치 → 주간 활동 브리핑을 연결하는 반응형 B2B 웹 애플리케이션입니다.
 
 ## 현재 구성
@@ -138,3 +305,6 @@ PR과 `main` 푸시마다 GitHub Actions(`.github/workflows/verify.yml`)가 같�
 `Zeniel-Jobsky/Zenielfield`의 main `d394460`을 클론해 현재 작업 폴더의 기준으로 가져왔습니다. 최신 AI 입력·음성 입력·사이드바 스크롤 개선에 기존 화면·입력 보호 개선과 Cloudflare/Supabase 연결을 통합했습니다. 작업 브랜치는 `work/upstream-cloudflare-supabase`, 이전 로컬 소스 백업은 `backup/pre-upstream-import`입니다. `.env`는 로컬에 보존하며 배포용 비밀값은 Cloudflare/Supabase의 기존 secret 설정을 사용합니다.
 
 Cloudflare의 `/api/assist`는 Supabase에서 검증한 등록 사용자 세션으로만 호출합니다. AI는 입력 초안만 반환하며 저장은 기존 입력 검토·저장 흐름을 따릅니다. 서버의 `OPENAI_API_KEY`/`OPENAI_MODEL` 설정이 필요합니다. 실제 AI 호출 없이 모의 응답으로 인증 경계를 검증했습니다. 사용자의 실제 Supabase 이메일 로그인 성공은 확인했습니다.
+
+
+</details>
