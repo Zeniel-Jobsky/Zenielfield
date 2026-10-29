@@ -1,7 +1,6 @@
 // app/platform/model.ts
+var MANUAL_REASONS = ["\uACE0\uAC1D\uC0AC \uC694\uCCAD \uC2DC\uC5D0\uB9CC \uBC29\uBB38", "\uC0C1\uC8FC \uC778\uB825\uC774 \uBCC4\uB3C4 \uAD00\uB9AC", "\uACC4\uC57D\uC0C1 \uBC29\uBB38 \uC758\uBB34 \uC5C6\uC74C", "\uC6B4\uC601 \uCD95\uC18C\xB7\uC885\uB8CC \uC608\uC815", "\uAE30\uD0C0"];
 var aiFields = ["purpose", "detail", "notes", "result"];
-var aiCategories = ["\uC778\uB825", "\uC2DC\uC124\xB7\uC548\uC804", "\uACE0\uAC1D \uC694\uCCAD", "\uBBFC\uC6D0", "\uC6B4\uC601"];
-var aiUrgencies = ["\uB0AE\uC74C", "\uBCF4\uD1B5", "\uB192\uC74C"];
 var aiConfidences = ["low", "medium", "high"];
 var entryOf = (v) => v.entry === "ai" ? "ai" : "manual";
 var managesDomain = (me, domain) => ["admin", "director"].includes(me.role) || !!domain && (me.domains || []).includes(domain);
@@ -13,9 +12,9 @@ var dayShift = (day, n) => {
 };
 var targetOf = (v) => v.targetType === "store" ? v.storeId || "missing-store" : v.siteId;
 function targetsOf(data) {
-  return [...data.sites.map((s) => ({ id: s.id, type: "site", siteId: s.id, storeId: null, name: s.name, siteName: s.name, team: s.team, part: s.part, division: s.division, domain: s.domain || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null })), ...data.stores.map((s) => {
+  return [...data.sites.map((s) => ({ id: s.id, type: "site", siteId: s.id, storeId: null, name: s.name, siteName: s.name, team: s.team, part: s.part, division: s.division, domain: s.domain || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, manual: s.manual ?? null, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null })), ...data.stores.map((s) => {
     const p = data.sites.find((p2) => p2.id === s.siteId);
-    return { id: s.id, type: "store", siteId: s.siteId, storeId: s.id, name: s.name, siteName: p?.name || "\uBBF8\uC5F0\uACB0 \uD604\uC7A5", team: p?.team || "", part: p?.part || "", division: p?.division || "", domain: p?.domain || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null };
+    return { id: s.id, type: "store", siteId: s.siteId, storeId: s.id, name: s.name, siteName: p?.name || "\uBBF8\uC5F0\uACB0 \uD604\uC7A5", team: p?.team || "", part: p?.part || "", division: p?.division || "", domain: p?.domain || "", region: s.region, address: s.address, managerIds: s.managerIds, rule: s.rule, manual: s.manual ?? null, status: s.status, startDate: s.startDate, lat: s.lat ?? null, lng: s.lng ?? null };
   })];
 }
 function requirements(targets, start, end) {
@@ -88,7 +87,7 @@ function aiEntryOf(raw) {
   if (!Number.isInteger(imageCount) || imageCount < 0 || imageCount > 3) throw Error("AI \uC785\uB825 \uC0AC\uC9C4 \uC218\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
   if (!text.trim() && !imageCount) throw Error("AI \uC785\uB825 \uC6D0\uBB38(\uBA54\uBAA8 \uB610\uB294 \uC0AC\uC9C4)\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.");
   const draft = Object.fromEntries(aiFields.map((k) => [k, str2(raw.draft?.[k], 3500)])), edited = Array.isArray(raw.edited) ? [...new Set(raw.edited)].filter((k) => aiFields.includes(k)) : [];
-  return { input: { text, imageCount }, draft, summary: str2(raw.summary, 200), category: (Array.isArray(raw.category) ? raw.category : []).filter((c) => aiCategories.includes(c)), urgency: aiUrgencies.includes(raw.urgency) ? raw.urgency : "", confidence: aiConfidences.includes(raw.confidence) ? raw.confidence : "", model: str2(raw.model, 80), generatedAt: str2(raw.generatedAt, 40), edited };
+  return { input: { text, imageCount }, draft, summary: str2(raw.summary, 200), confidence: aiConfidences.includes(raw.confidence) ? raw.confidence : "", model: str2(raw.model, 80), generatedAt: str2(raw.generatedAt, 40), edited };
 }
 function newId() {
   return typeof crypto.randomUUID === "function" ? crypto.randomUUID() : "demo-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
@@ -116,6 +115,10 @@ function updateDemo(data, entity, values, record, actor, now) {
     const domains = [...new Set((Array.isArray(item.domains) ? item.domains : []).filter((d) => typeof d === "string"))];
     if (domains.some((d) => !next.domains.some((x) => x.id === d && x.active))) throw Error("\uD65C\uC131 \uAD00\uB9AC \uB3C4\uBA54\uC778\uB9CC \uC9C0\uC815\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
     if (record?.id === actor.id && (item.role !== "admin" || Number(item.active) !== 1)) throw Error("\uBCF8\uC778\uC758 \uAD00\uB9AC\uC790 \uAD8C\uD55C\uC740 \uD574\uC81C\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.");
+    if (record && (record.active && !Number(item.active) || record.team !== String(item.team).trim() || record.part !== String(item.part).trim())) {
+      const open = [...data.sites, ...data.stores].filter((t) => t.managerIds.includes(record.id)).length;
+      if (open) throw Error(`\uB2F4\uB2F9 \uC911\uC778 \uD604\uC7A5\xB7\uB9E4\uC7A5 ${open}\uACF3\uC744 \uBA3C\uC800 \uB2E4\uB978 \uB2F4\uB2F9\uC790\uC5D0\uAC8C \uBC30\uC815\uD574 \uC8FC\uC138\uC694.`);
+    }
     item = { id, email: String(item.email).trim().toLowerCase(), name: item.name.trim(), role: item.role, team: item.team.trim(), part: item.part.trim(), active: Number(item.active) ? 1 : 0, domains, version: item.version };
     array = next.users;
   } else if (entity === "site" || entity === "store") {
@@ -150,6 +153,15 @@ function updateDemo(data, entity, values, record, actor, now) {
     if (actor.role === "lead" && team !== actor.team || actor.role === "partlead" && (team !== actor.team || part !== actor.part)) throw Error("\uC18C\uC18D \uC870\uC9C1 \uBC94\uC704\uC5D0\uC11C\uB9CC \uB4F1\uB85D\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
     if (!item.managerIds?.length || item.managerIds.some((u) => !data.users.some((x) => x.id === u && x.active && x.team === team && x.part === part))) throw Error("\uB300\uC0C1\uACFC \uAC19\uC740 \uD300\xB7\uD30C\uD2B8\uC758 \uB2F4\uB2F9\uC790\uB97C 1\uBA85 \uC774\uC0C1 \uC120\uD0DD\uD574 \uC8FC\uC138\uC694.");
     if (!["week", "month", "manual"].includes(item.rule?.period) || !Number.isInteger(item.rule?.count) || item.rule.count < 1 || item.rule.count > 8 || item.rule.period === "week" && item.rule.count > 7) throw Error("\uC8FC\uAC04 1~7\uD68C, \uC6D4\uAC04 1~8\uD68C \uBC94\uC704\uC758 \uBC29\uBB38 \uD68C\uCC28\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
+    if (item.rule.period === "manual") {
+      const m = item.manual, old = record?.manual;
+      if (!m?.reason && record && record.rule?.period === "manual" && !old) delete item.manual;
+      else if (!MANUAL_REASONS.includes(m?.reason) || m.reason === "\uAE30\uD0C0" && !String(m.note || "").trim()) throw Error("\uD544\uC694 \uC2DC\uB85C \uB450\uB824\uBA74 \uADFC\uAC70\uB97C \uC120\uD0DD\uD574 \uC8FC\uC138\uC694(\uAE30\uD0C0\uB294 \uC124\uBA85 \uD544\uC218).");
+      else if (!old || record.rule?.period !== "manual" || old.reason !== m.reason || (old.note || "") !== String(m.note || "").trim()) {
+        if (!["admin", "lead"].includes(actor.role)) throw Error("\uD544\uC694 \uC2DC \uC9C0\uC815\xB7\uBCC0\uACBD\uC740 \uD300\uC7A5 \uC774\uC0C1 \uAD8C\uD55C\uC785\uB2C8\uB2E4.");
+        item.manual = { reason: m.reason, note: String(m.note || "").trim().slice(0, 200), by: actor.id, at: now, review: dayShift(now, 90) };
+      } else item.manual = old;
+    } else delete item.manual;
     array = entity === "site" ? next.sites : next.stores;
     if (array.some((t) => t.code === item.code && t.id !== id)) throw Error("\uC774\uBBF8 \uC0AC\uC6A9 \uC911\uC778 \uCF54\uB4DC\uC785\uB2C8\uB2E4.");
     if (entity === "site") item = { ...item, client: item.client || "\uAC00\uC0C1 \uACE0\uAC1D\uC0AC", division: item.division || "\uC720\uD1B5\uC0AC\uC5C5\uBD80", cycle: item.rule.period === "week" ? "weekly" : item.rule.period === "manual" ? "manual" : "monthly" };
