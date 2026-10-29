@@ -35,5 +35,5 @@ export function buildNudge(c:Context,before?:number):Nudge{
  // 관리자 역할: 하위 단위(파트장=잡매니저, 팀장=파트, 사업부장=팀) 중 일정 잡을 회차가 있는 곳만 칩으로. 팀장부터는 개인 이름 없음(단위가 파트·팀).
  const s=scopeUnits(c),withGap=s.units.map(u=>{const mm=aggregate(u.targets.filter(t=>t.type===c.type),c.visits,c.start,c.end,c.now);return {key:u.key,label:u.label,value:mm.delayed+mm.unplanned}}).filter(r=>r.value>0).sort((a,b)=>b.value-a.value||a.label.localeCompare(b.label));
  const help=!withGap.length?null:role==='partlead'?rich`① 이번 주 일정 함께 잡기 ② 동행 방문`:role==='lead'?rich`파트장과 이번 주 일정 확인`:null;
- return {role,mood,title,stats,chips:withGap.length?{title:`일정 잡을 ${s.title}`,items:withGap.slice(0,6)}:null,help,next:null};
+ return {role,mood,title,stats,chips:null,help:null,next:null};// 하위 단위 칩·도울 방법은 브리핑 지시 가이드가 맡는다(같은 목록 두 번 두지 않음)
 }

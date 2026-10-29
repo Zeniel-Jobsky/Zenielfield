@@ -180,42 +180,23 @@ export async function requestBrief(d:BriefDigest,demo:boolean):Promise<{result:A
  catch(e){return fallback((e as Error).message)}
 }
 type Cached={key:string;result:AiBriefResult;model:string;generatedAt:string};
-// 머리 칩: 저장된 판정의 지금 상태(대상별 최근 판정)만 쓴다. 이행률로 위험·주의를 정하지 않는다.
-function toneOf(d:BriefDigest){const l=d.judged.latest;if(l['위험'])return {cls:'warn',label:`바로 확인 ${l['위험']}곳`};if(l['주의'])return {cls:'plain',label:`조치 필요 ${l['주의']}곳`};if(l['정상']||l['관찰'])return {cls:'good',label:'바로 확인할 곳 없음'};return {cls:'plain',label:'미판정'}}
 // 옛 저장본(문자열 문장)도 조각 배열로 바꿔 읽는다
 const readCache=(id:string):Cached|null=>{try{const v=JSON.parse(localStorage.getItem(CACHE_KEY+':'+id)||'null');return v?{...v,result:normalizeBrief(v.result)}:null}catch{return null}};
 const writeCache=(id:string,v:Cached)=>{try{localStorage.setItem(CACHE_KEY+':'+id,JSON.stringify(v))}catch{}};
-// 생성 결과는 유지하고 화면에서만 단계적으로 공개한다. 현장 간 공통 근거는 따로 표시한다.
-function ReportSite({name,themes,jump,canJump}:{name:string;themes:BriefTheme[];jump:(name:string)=>void;canJump:boolean}){
- const [open,setOpen]=useState(false),id=useId();
- return <li className="ai-brief-site">
-  <div className="ai-brief-site-heading"><div><h4>{canJump?<button type="button" className="link" onClick={()=>jump(name)}>{name}<ChevronRight size={14}/></button>:name}</h4><p>{themes.map(t=>t.title).join(' · ')}</p></div>
-   <button type="button" className="brief-disclosure" aria-expanded={open} aria-controls={id} aria-label={`${name} ${open?'간략히 보기':'더 보기'}`} onClick={()=>setOpen(!open)}>{open?'간략히 보기':'더 보기'}{open?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button></div>
-  <div id={id} className="ai-brief-site-detail" hidden={!open}>{themes.map((t,i)=><section key={i}>
-   <div className="ai-brief-topic-heading"><h5>{t.title}</h5>{t.status&&<span className={'ai-brief-theme-status '+(t.status==='해결됨'?'good':t.status==='새로 생김'||t.status==='커짐'?'bad':'')}>{t.status}</span>}</div>
-   {t.targets.length>1&&<p className="ai-brief-shared">여러 현장 공통 주제 · {t.targets.join(' · ')}</p>}
-   <p><RichText r={t.summary}/></p>
-   {t.evidence.length>0&&<div className="ai-brief-evidence"><h6>{t.targets.length>1?'주제 공통 근거':'보고 근거'}</h6><ul>{t.evidence.map((e,j)=><li key={j}>{e}</li>)}</ul></div>}
-  </section>)}</div>
- </li>;
-}
-// 브리핑 표시: 늘 보이는 것 = 현황 한 줄 → 무슨 일이 벌어지고 있나(가장 눈에 띄게) → 먼저 챙길 곳(누르면 이동).
-// 세부(AI 해석 더 보기: 반복되는 주제·전할 말·다음 주·근거 — 카드·아래 목록에 없는 것만)는 보고 싶은 사람만 펼친다.
 const FOLD_KEY='zf-ai-brief-folded';
 function BriefPresentation({out,digest,stale,busy=false,jump,targetNames}:{out:Cached;digest:BriefDigest;stale:boolean;busy?:boolean;jump:(name:string)=>void;targetNames:Set<string>}){
  const [detailsOpen,setDetailsOpen]=useState(false),[folded,setFoldedState]=useState(false),id=useId();
  // 브리핑 접기: 다 본 뒤 접으면 '무슨 일이 벌어지고 있나'만 남긴다(이 브라우저에 기억)
  useEffect(()=>{try{setFoldedState(localStorage.getItem(FOLD_KEY)==='1')}catch{}},[]);
  const setFolded=(v:boolean)=>{setFoldedState(v);try{localStorage.setItem(FOLD_KEY,v?'1':'0')}catch{}};
- const r=out.result,k=digest.kpi,tone=toneOf(digest),ai=!out.model.includes('규칙');
- const sites=useMemo(()=>{const groups=new Map<string,BriefTheme[]>();for(const t of r.themes)for(const name of new Set(t.targets.length?t.targets:['현장 미지정'])){const list=groups.get(name)||[];list.push(t);groups.set(name,list)}return [...groups]},[r.themes]);
+ const r=out.result,ai=!out.model.includes('규칙');
  // 세부 내용 = AI가 해석한 것 중 위쪽·아래 목록에 없는 것만(지표 숫자는 카드에 있으므로 넣지 않는다)
- const peek=[r.cheer.length&&CHEER_TO[digest.role],r.watch.length&&'다음 주 볼 것',sites.length&&'반복되는 주제'].filter(Boolean).join(' · ');
+ const peek=[r.cheer.length&&CHEER_TO[digest.role],r.watch.length&&'다음 주 볼 것'].filter(Boolean).join(' · ');
  const story=<section className="ai-brief-story"><h3>{ai&&<Sparkles size={14}/>}무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>;
  if(busy)return null;
  if(folded)return <div className={'ai-brief-out folded'+(stale?' stale':'')}>{story}<button type="button" className="brief-fold" aria-expanded="false" onClick={()=>setFolded(false)}>브리핑 펼치기<ChevronDown size={14}/></button></div>;
  return <div className={'ai-brief-out'+(stale?' stale':'')}>
-  <p className="ai-brief-head"><span className={'ai-brief-tone '+tone.cls}><AiMark size={12}/>{tone.label}</span><RichText r={r.headline}/></p>
+  <p className="ai-brief-head"><RichText r={r.headline}/></p>
   {story}
   <section className="ai-brief-focus"><h3>{ai&&<Sparkles size={14}/>}먼저 챙길 곳</h3><ol>{r.focus.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}>{a.name}<ChevronRight size={14}/></button><span><RichText r={a.reason}/></span></li>)}{!r.focus.length&&<li><span>{digest.role==='manager'?'바로 확인·조치 필요로 남은 곳이 없어요(저장된 판정 기준).':'일정 잡을 회차나 기한 넘긴 조치가 있는 곳이 없어요.'}</span></li>}</ol></section>
   {(r.directive?.length||0)>0&&<section className="ai-brief-guide"><h3>{ai&&<Sparkles size={14}/>}지시 가이드 <small>누구에게 무엇을</small></h3><ul>{r.directive!.map((x,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(x.to)}>{x.to}<ChevronRight size={14}/></button><span><RichText r={x.say}/></span></li>)}</ul></section>}
@@ -223,7 +204,6 @@ function BriefPresentation({out,digest,stale,busy=false,jump,targetNames}:{out:C
   <button type="button" className="brief-disclosure" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>{detailsOpen?'AI 해석 더 보기 접기':'AI 해석 더 보기'}{!detailsOpen&&peek&&<small className="brief-disclosure-peek"> · {peek}</small>}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
   <div id={id+'-details'} className="ai-brief-details" hidden={!detailsOpen}>
    <dl className="ai-brief-dl">
-    {sites.length>0&&<div><dt>보고에서 반복되는 주제</dt><dd><ul className="ai-brief-sites">{detailsOpen&&sites.map(([name,themes])=><ReportSite key={name} name={name} themes={themes} jump={jump} canJump={targetNames.has(name)}/>)}</ul></dd></div>}
     {r.cheer.length>0&&<div><dt>{CHEER_TO[digest.role]}</dt><dd><RichText r={r.cheer}/></dd></div>}
     {r.watch.length>0&&<div><dt>다음 주 볼 것</dt><dd><ul>{r.watch.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></dd></div>}
     <div><dt>근거</dt><dd className="ai-brief-meta">{digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 보고 {digest.reportTotal}건(판정 {digest.judged.reports-digest.judged.unjudged}건) · {out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} · 연락처 미전송</dd></div>
