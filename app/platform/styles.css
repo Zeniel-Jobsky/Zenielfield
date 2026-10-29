@@ -381,7 +381,7 @@
 .ai-tidy-row{display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;padding:8px 0;border-top:1px solid #e3e9e6;font-size:13px;cursor:pointer}
 .ai-tidy-row:first-of-type{border-top:0}
 .ai-tidy-row input{margin-top:3px;width:18px;height:18px}
-.ai-tidy-row span{display:grid;grid-template-columns:34px 1fr;gap:4px 8px;min-width:0}
+.ai-tidy-row>span{display:grid;grid-template-columns:34px 1fr;gap:4px 8px;min-width:0}
 .ai-tidy-row b{grid-column:1/-1;font-weight:600;color:#17171c}
 .ai-tidy-row em{font-style:normal;font-size:11px;color:#65726b;padding-top:2px}
 .ai-tidy-row s{text-decoration:none;color:#65726b;white-space:pre-wrap;word-break:break-word}
@@ -736,3 +736,10 @@
 .ai-unclear-pick .chip:hover{border-color:#003c33;color:#003c33}
 .ai-unclear-input{display:inline-flex;gap:4px}.ai-unclear-input input{min-height:36px;width:160px;padding:0 10px;border:1px solid var(--zf-control-border);border-radius:6px;font-size:13px}
 .ai-unclear-input .btn.small{min-height:36px}
+
+/* 제안 복사 버튼: 제안 문장 오른쪽, 44px 조작 영역 */
+.ai-tidy-row .ai-tidy-proposed{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}
+.copy-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:44px;min-height:44px;margin:-12px -8px -12px 0;padding:0 8px;border:0;background:none;color:#516e8a;border-radius:6px;cursor:pointer;font-size:12px}
+.copy-btn:hover{background:var(--zf-info-soft)}
+.copy-btn:focus-visible{outline:2px solid #003c33;outline-offset:2px}
+.copy-btn:disabled{opacity:.4;cursor:default}
