@@ -81,9 +81,7 @@ small {font-size:13px}
 .sidebar nav button.selected {background:var(--zf-selected);color:var(--zf-action);box-shadow:inset 3px 0 var(--zf-brand-green)}
 .sidebar nav button.selected em,.platform-filter-chip {background:var(--zf-selected);color:var(--zf-action)}
 .help-box {background:var(--zf-surface-muted);border-color:var(--zf-border)}
-.btn,.btn.small {min-height:40px;padding:8px 12px;font-size:14px;border-radius:6px;box-shadow:none}
 .btn.primary {background:var(--zf-action);border-color:var(--zf-action);color:white;box-shadow:none}
-.btn.primary:hover {background:var(--zf-action-hover);border-color:var(--zf-action-hover)}
 .btn.primary:active {background:var(--zf-action-pressed)}
 .iconbtn {min-width:36px;min-height:36px}
 .textbtn,.person.link {color:var(--zf-text)}
@@ -159,7 +157,7 @@ input::placeholder,textarea::placeholder {color:var(--zf-text-muted)}
 .metric.orange .metric-value {color:var(--zf-warning)}
 .target-tabs>button,.target-tabs>button>span,.tabs>button,.tabs>button>span {color:var(--zf-text-secondary)}
 .target-tabs>button>span,.tabs>button>span {background:var(--zf-surface-muted)}
-.target-tabs>button.active,.tabs>button.active {color:var(--zf-action);border-color:var(--zf-brand-green)}
+.target-tabs>button.active,.tabs>button.active {color:var(--zf-action)}
 .sidebar nav button>svg {color:var(--zf-text-muted)}
 .sidebar nav button.selected>svg {color:var(--zf-action)}
 .btn:hover {color:var(--zf-text);background:var(--zf-surface-muted);border-color:var(--zf-control-border-hover)}
@@ -414,7 +412,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 @media (max-width:1023px) {
  .app-shell .workspace-content {padding-inline:24px}
  .app-shell .topbar {padding-inline:24px}
- .app-shell .brief-dashboard-split {grid-template-columns:minmax(0,3fr) minmax(290px,2fr);gap:24px}
+ .app-shell .brief-dashboard-split {gap:24px}
 }
 @media (max-width:1023px) {
  .app-shell .brief-dashboard-split {grid-template-columns:1fr}
@@ -443,7 +441,6 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  .app-shell .filterbar {margin-bottom:22px;border-radius:6px}
  .app-shell .filterbar-primary {padding:10px 12px;gap:8px}
  .app-shell .mobile-search {margin:0 12px 12px;background:white;border-color:var(--zf-control-border)}
- .app-shell .mobile-search input {font-size:13px}
  .app-shell .capacity-grid {gap:0;margin-bottom:24px}
  .app-shell .capacity-card,.app-shell .capacity-card:first-child {padding:15px 12px}
  .app-shell .capacity-card:first-child {padding-left:0}
