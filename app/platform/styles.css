@@ -182,7 +182,7 @@
 .status-hbar-head{color:var(--zf-text-muted);padding-bottom:8px}
 .status-hbar-head>span:nth-last-child(-n+2){text-align:right}
 .status-scale{display:flex;justify-content:space-between;gap:8px}
-.hbar.status-hbar{min-height:44px;padding:8px 0}
+.hbar.status-hbar{min-height:24px;padding:2px 0}
 .hbar.status-hbar .hbar-label{white-space:normal;overflow:visible;overflow-wrap:anywhere}
 .hbar.status-hbar .hbar-track{min-width:0;background:var(--zf-surface-hover)}
 .hbar.status-hbar .hbar-track>i{flex-shrink:0}
