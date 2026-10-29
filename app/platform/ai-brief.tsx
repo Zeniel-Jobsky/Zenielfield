@@ -182,7 +182,7 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
    {r.flow.length>0&&<section className="ai-brief-flow"><h3>흐름</h3><p><RichText r={r.flow}/></p></section>}
    <div className="ai-brief-grid">
     <section className="ai-brief-good"><h3>잘 되고 있는 것</h3><ul>{r.strengths.map((p,i)=><li key={i}><RichText r={p}/></li>)}{!r.strengths.length&&<li>이번 기간 두드러진 개선은 없습니다.</li>}</ul></section>
-    <section className="ai-brief-focus"><h3>먼저 챙길 곳</h3><ol>{r.focus.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}>{a.name}<ChevronRight size={12}/></button><span><RichText r={a.reason}/></span></li>)}{!r.focus.length&&<li><span>특별히 두드러진 곳이 없습니다.</span></li>}</ol></section>
+    <section className="ai-brief-focus"><h3>먼저 챙길 곳</h3><ol>{r.focus.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}>{a.name}<ChevronRight size={14}/></button><span><RichText r={a.reason}/></span></li>)}{!r.focus.length&&<li><span>특별히 두드러진 곳이 없습니다.</span></li>}</ol></section>
     <section><h3>무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'두드러진 현상이 없습니다.'}</p></section>
     <section>{r.judgment.length>1&&<><h3>추가 선택지와 판단</h3><ul className="ai-brief-decide">{r.judgment.slice(1).map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></>}{remainingWatch.length>0&&<><h3>다음에 볼 것</h3><ul>{remainingWatch.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></>}</section>
    </div>
@@ -213,7 +213,7 @@ export function AiBrief({c,weekly=false}:{c:Context;weekly?:boolean}){
  return <section className={'panel ai-brief'+(weekly?' ai-brief-weekly':'')} aria-busy={busy||(!r&&!error)} aria-label={weekly?'주차별 AI 핵심요약':'AI 핵심 요약'}>
   <div className="panel-heading"><div><h2><Sparkles size={16}/>{weekly?'주차별 AI 핵심요약':'AI 핵심 요약'}</h2><p>{weekly?'선택한 주차 또는 조회 기간 전체 기준':'현재 조회 조건 기준'} · 요약과 제안 · 참고용</p></div>
    <div className="ai-brief-tools">{weekly&&weeks.length>0&&<select aria-label="브리핑 기간" value={pick||range?.start&&weeks.find(w=>w.from===range.start)?.start||'all'} onChange={e=>setPick(e.target.value)}>{weeks.map(w=><option key={w.start} value={w.start}>{weekTitle(w.start)} ({wk(w.from)}–{wk(w.to)})</option>)}<option value="all">조회 기간 전체</option></select>}
-    {busy?<span className="ai-brief-busy" role="status"><Loader2 size={14} className="spin"/>{out?'새 조건으로 다시 쓰는 중':'브리핑 작성 중'}</span>:out&&<button type="button" className="textbtn" onClick={()=>run(true)} title="같은 조건으로 다시 생성"><RefreshCw size={13}/>다시 쓰기</button>}</div></div>
+    {busy?<span className="ai-brief-busy" role="status"><Loader2 size={14} className="spin"/>{out?'새 조건으로 다시 쓰는 중':'브리핑 작성 중'}</span>:out&&<button type="button" className="textbtn" onClick={()=>run(true)} title="같은 조건으로 다시 생성"><RefreshCw size={14}/>다시 쓰기</button>}</div></div>
   <div className="chart-body">
    {error&&<p className="form-error" role="alert">{error} <button type="button" className="textbtn" onClick={()=>run(true)}>다시 시도</button></p>}
    {!r&&!error&&<div role="status"><span className="sr-only">브리핑을 준비하고 있습니다.</span><div className="ai-brief-skeleton" aria-hidden="true"><i/><i/><i/></div></div>}

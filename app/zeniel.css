@@ -259,7 +259,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .page-heading p {margin-top:8px;font-size:13px;line-height:1.7;color:var(--zf-text-secondary)}
 .btn,.btn.small {font-size:13px;font-weight:500;min-height:40px;border-radius:6px;padding:9px 14px;box-shadow:none}
 .btn.primary {border-radius:99px;padding-inline:18px}
-.btn>svg,.btn.small>svg {width:15px;height:15px;stroke-width:1.6}
+.btn>svg,.btn.small>svg {width:var(--zf-icon-sm);height:var(--zf-icon-sm)}
 .app-shell .platform-demo-banner {padding:11px 0;margin-bottom:14px;background:transparent;border:0;border-block:1px solid var(--zf-border);border-radius:0;gap:18px}
 .app-shell .platform-demo-banner>div {font-size:12px;gap:12px}
 .app-shell .platform-demo-banner small {font-size:12px;color:var(--zf-text-muted)}
@@ -288,7 +288,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .capacity-card b {display:block;margin:5px 0;font-family:'Space Grotesk',Arial,sans-serif;font-size:36px!important;font-weight:400!important;line-height:1.25}
 .app-shell .capacity-card b small {font-family:inherit;font-size:12px;font-weight:400;letter-spacing:0;margin-left:6px;color:var(--zf-text-secondary)}
 .app-shell .capacity-card div>span {font-size:12px;line-height:1.6}
-.app-shell .capacity-card>svg {position:absolute;right:18px;top:23px;width:13px;height:13px;color:var(--zf-text-muted)}
+.app-shell .capacity-card>svg {position:absolute;right:18px;top:23px;width:var(--zf-icon-xs);height:var(--zf-icon-xs);color:var(--zf-text-muted)}
 .app-shell .visit-metric-grid {gap:0;background:white}
 .app-shell .metric {min-width:0;border:0;border-bottom:1px solid var(--zf-border);border-radius:0;box-shadow:none;background:transparent;padding:19px 16px;text-align:left}
 .app-shell .metric:hover {background:var(--zf-surface-hover);box-shadow:none;transform:none}
@@ -296,7 +296,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .metric-icon {display:none}
 .app-shell .metric-value {margin-block:8px;font-family:'Space Grotesk',Arial,sans-serif;font-size:32px!important;font-weight:400!important;line-height:1.2}
 .app-shell .metric-value small {font-size:12px;font-weight:400;letter-spacing:0;color:var(--zf-text-muted);margin-left:5px}
-.app-shell .metric-value>svg {width:12px;height:12px;opacity:.5}
+.app-shell .metric-value>svg {width:var(--zf-icon-xs);height:var(--zf-icon-xs);opacity:.5}
 .app-shell .metric>p {font-size:12px;line-height:1.7}
 /* One strong data highlight anchors the otherwise white workspace. */
 .app-shell .visit-metric-grid .metric:last-child {background:var(--zf-action);border-bottom-color:var(--zf-action)}
@@ -308,7 +308,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .target-tabs {gap:24px;border-bottom:1px solid var(--zf-border);margin-bottom:0}
 .app-shell .target-tabs>button {padding:13px 0;font-size:12px;gap:8px;font-weight:400;border-width:1px}
 .app-shell .target-tabs>button.active {font-weight:600;color:var(--zf-action);border-bottom-width:2px}
-.app-shell .target-tabs>button>svg {width:15px;height:15px}
+.app-shell .target-tabs>button>svg {width:var(--zf-icon-sm);height:var(--zf-icon-sm)}
 .app-shell .target-tabs>button>span {background:transparent;font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;padding:0}
 .app-shell .target-tabs-note {font-size:11px}
 .app-shell .brief-dashboard-split {gap:32px;grid-template-columns:minmax(0,3fr) minmax(320px,2fr);margin-bottom:32px}
@@ -382,7 +382,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .issue-kpis .metric:last-child {border-right:0}
 .app-shell .empty {min-height:200px;padding:32px 18px;color:var(--zf-text-secondary)}
 .app-shell .empty-icon {width:28px;height:28px;background:transparent;border-radius:0;color:#65726b;margin-bottom:12px}
-.app-shell .empty-icon svg {width:22px;height:22px}
+.app-shell .empty-icon svg {width:var(--zf-icon-lg);height:var(--zf-icon-lg)}
 .app-shell .empty>b {font-size:14px;font-weight:400;color:var(--zf-text)}
 .app-shell .empty>p {font-size:12px;line-height:1.8;max-width:280px;margin-inline:auto}
 .app-shell .pagination {padding:16px 0;font-size:12px;border:0}
@@ -698,3 +698,9 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
  .app-shell .dashboard-chart-pair {grid-template-columns:minmax(0,1fr);grid-template-rows:none;row-gap:var(--zf-dashboard-group-gap)}
  .app-shell .dashboard-chart-pair>.chart-panel {display:flex;flex-direction:column;grid-row:auto}
 }
+
+/* 아이콘 배율(지침 4절): 4단계만 쓴다. xs 14 = 11–13px 글자 옆·링크 화살표·표 / sm 16 = 본문·버튼·입력·칩·탭 / md 20 = 메뉴·상단 동작·아이콘 버튼 / lg 24 = 빈 상태.
+   선 굵기 1.75 고정, 글자 기준선에 맞춰 정렬. 컴포넌트에서 size는 14·16·20·24만 쓴다. */
+:root{--zf-icon-xs:14px;--zf-icon-sm:16px;--zf-icon-md:20px;--zf-icon-lg:24px}
+svg.lucide{stroke-width:1.75;flex-shrink:0}
+:where(p,span,small,b,a,button,label,h1,h2,h3,li,td,th)>svg.lucide:not(:only-child){vertical-align:-.15em}

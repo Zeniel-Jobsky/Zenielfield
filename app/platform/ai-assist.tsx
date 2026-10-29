@@ -66,13 +66,13 @@ export function AiComposer({onDraft,mode='result',demo=false,seed=''}:{onDraft:(
  const ready=!busy&&(text.trim().length>0||images.length>0);
  return <div className="ai-composer-wrap wide">
   <div className={'ai-composer'+(listening?' listening':'')}>
-   {images.length>0&&<div className="ai-images">{images.map((src,i)=><span key={i}><img src={src} alt={`첨부 ${i+1}`}/><button type="button" aria-label="사진 삭제" onClick={()=>setImages(images.filter((_,j)=>j!==i))}><X size={12}/></button></span>)}</div>}
+   {images.length>0&&<div className="ai-images">{images.map((src,i)=><span key={i}><img src={src} alt={`첨부 ${i+1}`}/><button type="button" aria-label="사진 삭제" onClick={()=>setImages(images.filter((_,j)=>j!==i))}><X size={14}/></button></span>)}</div>}
    <textarea ref={box} rows={1} maxLength={3000} value={listening&&interim?(text?text+' ':'')+interim:text} readOnly={listening} onChange={e=>setText(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();if(ready)send()}}} placeholder={listening?'듣고 있어요… 말을 마치면 ■ 를 누르세요':mode==='plan'?'예: 다음주 화요일 오후 2시 이마트 양재점 정기점검':'방문 내용을 말하거나 적어 주세요. 사진도 함께 올릴 수 있어요.'}/>
    <div className="ai-bar">
-    <label className={'ai-icon'+(images.length>=3?' disabled':'')} aria-label="카메라로 촬영" title="카메라로 촬영 (최대 3장)"><Camera size={18}/><input hidden type="file" accept="image/*" capture="environment" disabled={images.length>=3} onChange={e=>{addImages(e.target.files);e.target.value=''}}/></label><label className={'ai-icon'+(images.length>=3?' disabled':'')} aria-label="앨범에서 사진 추가" title="앨범에서 사진 추가 (최대 3장)"><Plus size={18}/><input hidden type="file" accept="image/*" multiple disabled={images.length>=3} onChange={e=>{addImages(e.target.files);e.target.value=''}}/></label>
+    <label className={'ai-icon'+(images.length>=3?' disabled':'')} aria-label="카메라로 촬영" title="카메라로 촬영 (최대 3장)"><Camera size={20}/><input hidden type="file" accept="image/*" capture="environment" disabled={images.length>=3} onChange={e=>{addImages(e.target.files);e.target.value=''}}/></label><label className={'ai-icon'+(images.length>=3?' disabled':'')} aria-label="앨범에서 사진 추가" title="앨범에서 사진 추가 (최대 3장)"><Plus size={20}/><input hidden type="file" accept="image/*" multiple disabled={images.length>=3} onChange={e=>{addImages(e.target.files);e.target.value=''}}/></label>
     <span className="ai-bar-hint">{busy?'AI가 정리하는 중…':listening?'음성 인식 중':'Enter 전송 · Shift+Enter 줄바꿈'}</span>
-    <button type="button" className={'ai-icon'+(listening?' rec':'')} aria-label={listening?'음성 입력 끝':'음성 입력'} onClick={toggleVoice} disabled={busy}>{listening?<Square size={14} fill="currentColor"/>:<Mic size={18}/>}</button>
-    <button type="button" className="ai-send" aria-label="AI로 작성" onClick={send} disabled={!ready}>{busy?<Loader2 size={18} className="spin"/>:<ArrowUp size={18}/>}</button>
+    <button type="button" className={'ai-icon'+(listening?' rec':'')} aria-label={listening?'음성 입력 끝':'음성 입력'} onClick={toggleVoice} disabled={busy}>{listening?<Square size={14} fill="currentColor"/>:<Mic size={20}/>}</button>
+    <button type="button" className="ai-send" aria-label="AI로 작성" onClick={send} disabled={!ready}>{busy?<Loader2 size={20} className="spin"/>:<ArrowUp size={20}/>}</button>
    </div>
   </div>
   {demo&&<p className="form-hint">데모에서는 AI를 부르지 않고 입력한 내용을 그대로 옮깁니다. 목적·결과는 직접 골라 주세요.</p>}

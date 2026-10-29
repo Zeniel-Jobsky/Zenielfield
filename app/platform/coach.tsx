@@ -37,6 +37,6 @@ export function ManagerCoach({c}:{c:Context}){
  const plan=(x:CoachPick)=>{const t=x.target,s=x.slot&&x.slot.windowEnd>=c.now?x.slot:null;c.open('visit',undefined,s?{targetType:t.type,siteId:t.siteId,storeId:t.storeId,date:s.dueDate<c.now?c.now:s.windowStart>c.now?s.windowStart:c.now,requirementId:s.id,dueDate:s.dueDate}:{targetType:t.type,siteId:t.siteId,storeId:t.storeId})};
  return <section className="panel coach" aria-label="오늘의 방문 코치">
   <ul className="coach-msgs">{p.msgs.slice(0,4).map((m,i)=><li key={i} className={m.tone}>{m.tone==='cheer'?<PartyPopper size={16}/>:<Footprints size={16}/>}<span><RichText r={m.text}/></span></li>)}</ul>
-  {p.picks.length>0&&<><h3>먼저 가 보면 좋은 곳</h3><ol className="coach-picks">{p.picks.map(x=><li key={x.target.id}><button type="button" className="link" onClick={()=>c.showTarget(x.target.id)}>{x.target.name}<ChevronRight size={12}/></button><span><RichText r={x.why}/></span>{c.editable&&<button type="button" className="btn small" onClick={()=>plan(x)}><CalendarPlus size={14}/>일정 잡기</button>}</li>)}</ol></>}
+  {p.picks.length>0&&<><h3>먼저 가 보면 좋은 곳</h3><ol className="coach-picks">{p.picks.map(x=><li key={x.target.id}><button type="button" className="link" onClick={()=>c.showTarget(x.target.id)}>{x.target.name}<ChevronRight size={14}/></button><span><RichText r={x.why}/></span>{c.editable&&<button type="button" className="btn small" onClick={()=>plan(x)}><CalendarPlus size={14}/>일정 잡기</button>}</li>)}</ol></>}
  </section>;
 }

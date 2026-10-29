@@ -19,7 +19,7 @@ export function Permissions(){
  useEffect(()=>{setSecure(window.isSecureContext);request()},[]);
  if(kinds.every(k=>states[k.key]==='granted'))return <div className="permission-ok wide"><CheckCircle2 size={14}/>위치·마이크·카메라 사용 준비됨</div>;
  return <section className="permission-card wide" aria-label="기기 권한 요청"><header><ShieldCheck size={16}/><b>AI 입력에 쓸 기기 권한</b><button type="button" className="btn small" disabled={busy||!secure} onClick={request}>{busy?'요청 중…':'권한 허용하기'}</button></header>
-  <ul>{kinds.map(k=><li key={k.key} className={states[k.key]}><k.icon size={15}/><span><b>{k.label}</b><small>{k.why}</small></span><em>{word[states[k.key]]}</em></li>)}</ul>
+  <ul>{kinds.map(k=><li key={k.key} className={states[k.key]}><k.icon size={14}/><span><b>{k.label}</b><small>{k.why}</small></span><em>{word[states[k.key]]}</em></li>)}</ul>
   <p>{!secure?'https 주소에서만 권한을 요청할 수 있습니다. 직접 선택·입력은 계속할 수 있습니다.':kinds.some(k=>states[k.key]==='denied')?'거부한 권한은 주소창 왼쪽 자물쇠 → 사이트 설정에서 허용할 수 있습니다. 허용하지 않아도 직접 선택·입력은 됩니다.':'브라우저 알림창에서 "허용"을 눌러 주세요. 위치는 저장할 때 방문 기록에만 남깁니다.'}</p>
  </section>
 }

@@ -115,6 +115,8 @@ sRGB 단색 계산 기준: 흰색/딥그린 약 12.40:1, 강조 보조 글자/�
 
 ## 4. 타이포그래피·간격·표면
 
+**아이콘 배율 (2026-10-29):** 4단계만 쓴다 — `--zf-icon-xs` 14px(11–13px 글자 옆·링크 화살표·표 안) · `--zf-icon-sm` 16px(본문·버튼·입력·칩·탭) · `--zf-icon-md` 20px(메뉴·상단 동작·아이콘 버튼) · `--zf-icon-lg` 24px(빈 상태). 선 굵기 1.75 고정(`svg.lucide`), 글자와 함께 있으면 기준선 정렬. 컴포넌트 `size`는 14·16·20·24만, CSS에서 아이콘 크기를 px로 다시 정하지 않고 토큰을 쓴다.
+
 한글 기본 스택은 `Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif`다. Pretendard가 설치·제공되어 있다고 가정하지 않는다. 숫자·짧은 영문에는 로컬 `Space Grotesk` Regular를 사용하고, 한글은 기본 스택으로 폴백한다. 현재 제공 자산은 400 굵기이므로 숫자를 임의의 합성 굵기로 만들지 않는다.
 
 | 역할 | 데스크톱 기준 | 모바일 기준 / 비고 |

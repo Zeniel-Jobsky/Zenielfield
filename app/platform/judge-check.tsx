@@ -31,7 +31,7 @@ export function JudgeCheck({state,busy,onLevel}:{state:JudgeState|null;busy:bool
  const j=state.judgment;
  if(!j)return <div className="judge-check wide"><p className="judge-note" role="status">{state.note}</p></div>;
  return <div className="judge-check wide" role="group" aria-label="AI 종합 판정">
-  <div className="judge-head"><Scale size={15}/><b>AI 종합 판정</b><span className={'judge-level '+levelClass[j.level]}>{j.level}</span>
+  <div className="judge-head"><Scale size={14}/><b>AI 종합 판정</b><span className={'judge-level '+levelClass[j.level]}>{j.level}</span>
    <label className="judge-pick"><span>수준</span><select value={j.level} onChange={e=>onLevel(e.target.value as Level)}>{LEVELS.map(l=><option key={l}>{l}</option>)}</select></label></div>
   <p className="judge-text">{j.assessment}</p>
   {j.issues.length>0&&<ul className="judge-issues">{j.issues.map((i,n)=><li key={n}><span>{i.type}</span><span>{i.severity}</span><span className={i.flow==='악화'?'risk':i.flow==='해결'?'ok':''}>{i.flow}</span>{i.customerRequest&&<span>고객사 요청</span>}<em>{i.summary}</em></li>)}</ul>}

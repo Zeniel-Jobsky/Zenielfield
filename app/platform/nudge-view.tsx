@@ -39,7 +39,7 @@ const ICONS={done:CheckCircle2,plan:CalendarClock,risk:AlertTriangle,caution:Ale
 function Stat({s,onGo}:{s:NudgeStat;onGo:(s:NudgeStat)=>void}){
  const v=useTween(s.value,s.from??0),pct=s.max?Math.min(100,v/s.max*100):0;
  return <button type="button" className={'zf-nudge-stat'+(s.tone?' '+s.tone:'')} onClick={()=>onGo(s)} aria-label={`${s.label} ${s.value}${s.unit} — 목록 보기`}>
-  <span className="zf-nudge-stat-label">{(()=>{const I=ICONS[s.icon];return <I size={16}/>})()}{s.label}<ChevronRight size={12}/></span>
+  <span className="zf-nudge-stat-label">{(()=>{const I=ICONS[s.icon];return <I size={16}/>})()}{s.label}<ChevronRight size={14}/></span>
   <span className="zf-nudge-stat-value"><b>{Math.round(v)}</b><small>{s.unit}</small>{s.from!==undefined&&s.value>s.from&&<em className="zf-plus">+{s.value-s.from}</em>}</span>
   {s.max?<span className="zf-nudge-bar" aria-hidden="true"><i style={{width:pct+'%'}}/>{s.from!==undefined&&<u style={{left:pct+'%'}}/>}</span>:null}
  </button>;

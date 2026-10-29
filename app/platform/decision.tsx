@@ -19,7 +19,7 @@ export function scopeUnits(c:Context){
  const drill=(key:string)=>{if(level==='team')c.setTeam(key);else if(level==='part')c.setPart(key);else if(level==='manager')c.setManager(key);else c.showTarget(key)};
  return {level,title:({team:'팀',part:'파트',manager:'잡매니저',target:'현장·매장'} as const)[level],units,drill};
 }
-function Delta({now,prev,unit='',invert=false}:{now:number|null;prev:number|null;unit?:string;invert?:boolean}){if(now===null||prev===null)return <small className="kpi-delta flat"><Minus size={11}/>전주 비교 불가</small>;const d=now-prev,good=invert?d<0:d>0;return <small className={'kpi-delta '+(d===0?'flat':good?'good':'bad')}>{d===0?<Minus size={11}/>:d>0?<TrendingUp size={11}/>:<TrendingDown size={11}/>}{d>0?'+':''}{d}{unit} 전주 대비</small>}
+function Delta({now,prev,unit='',invert=false}:{now:number|null;prev:number|null;unit?:string;invert?:boolean}){if(now===null||prev===null)return <small className="kpi-delta flat"><Minus size={14}/>전주 비교 불가</small>;const d=now-prev,good=invert?d<0:d>0;return <small className={'kpi-delta '+(d===0?'flat':good?'good':'bad')}>{d===0?<Minus size={14}/>:d>0?<TrendingUp size={14}/>:<TrendingDown size={14}/>}{d>0?'+':''}{d}{unit} 전주 대비</small>}
 export function DecisionStrip({c}:{c:Context}){
  const k=useMemo(()=>{
   const targets=c.scope.filter(t=>t.type===c.type),trend=weeklyTrend(targets,c.visits,c.now,c.now,2).rows,[prev,cur]=trend;
@@ -33,7 +33,7 @@ export function DecisionStrip({c}:{c:Context}){
   {label:'기한 초과 이슈',value:k.overdue,note:'건 · 미완료 후속 조치',tone:'',icon:AlertTriangle,delta:<Delta now={k.overdue} prev={k.overduePrev} invert/>,go:()=>c.go('actions','기한 초과')},
   {label:'60일+ 미방문 매장',value:k.stale,note:`개 · 운영 중 매장 ${c.storeScope.filter(t=>t.status==='운영 중').length}개 중`,tone:'',icon:StoreIcon,delta:<small className="kpi-delta flat">마지막 완료 방문 기준</small>,go:()=>c.go('sites','stale')},
  ];
- return <div className="decision-strip">{cards.map(x=><button key={x.label} className={'decision-kpi '+x.tone} onClick={x.go}><span className="decision-kpi-top"><x.icon size={15}/>{x.label}</span><b>{x.value}</b><span className="decision-kpi-note">{x.note}</span>{x.delta}</button>)}</div>
+ return <div className="decision-strip">{cards.map(x=><button key={x.label} className={'decision-kpi '+x.tone} onClick={x.go}><span className="decision-kpi-top"><x.icon size={14}/>{x.label}</span><b>{x.value}</b><span className="decision-kpi-note">{x.note}</span>{x.delta}</button>)}</div>
 }
 export function ScopeRisk({c}:{c:Context}){
  const s=scopeUnits(c);

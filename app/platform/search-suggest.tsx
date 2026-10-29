@@ -25,7 +25,7 @@ export function SearchSuggest({value,onChange,options,onPick,label,className}:{v
   <input ref={input} role="combobox" aria-label={label} aria-expanded={show} aria-controls={id} aria-autocomplete="list" aria-activedescendant={show?`${id}-${active}`:undefined} placeholder="현장, 매장, 담당자 검색" value={value}
    onChange={e=>{onChange(e.target.value);setOpen(true);setActive(0)}} onFocus={()=>setOpen(true)} onBlur={()=>setTimeout(()=>setOpen(false),120)}
    onKeyDown={e=>{if(!show)return;if(e.key==='ArrowDown'){e.preventDefault();setActive((active+1)%list.length)}else if(e.key==='ArrowUp'){e.preventDefault();setActive((active-1+list.length)%list.length)}else if(e.key==='Enter'&&!e.nativeEvent.isComposing){e.preventDefault();pick(list[active])}else if(e.key==='Escape')setOpen(false)}}/>
-  {value&&<button type="button" className="iconbtn" aria-label="검색 지우기" onClick={()=>{onChange('');input.current?.focus()}}><X size={13}/></button>}
+  {value&&<button type="button" className="iconbtn" aria-label="검색 지우기" onClick={()=>{onChange('');input.current?.focus()}}><X size={14}/></button>}
   {show&&<ul className="suggest-list" id={id} role="listbox" aria-label="검색 추천">{list.map((s,i)=>{const I=ICON[s.kind];return <li key={s.kind+s.id} id={`${id}-${i}`} role="option" aria-selected={i===active} className={i===active?'on':''} onMouseDown={e=>{e.preventDefault();pick(s)}} onMouseEnter={()=>setActive(i)}><I size={14}/><span><b>{s.label}</b><small>{KIND[s.kind]} · {s.sub}</small></span></li>})}</ul>}
  </label>;
 }

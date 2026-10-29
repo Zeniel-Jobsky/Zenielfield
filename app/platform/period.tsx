@@ -35,10 +35,10 @@ export function PeriodPicker({start,end,now,onChange}:{start:string;end:string;n
  const label=periodLabel(start,end,now);
  return <div className="period-picker" ref={box}>
   <button type="button" className="period-step" aria-label="이전 기간" onClick={()=>go(-1)}><ChevronLeft size={16}/></button>
-  <button type="button" ref={btn} className="period-label" aria-haspopup="dialog" aria-expanded={open} aria-controls={panelId} aria-label={`조회 기간 ${label} — 바꾸기`} onClick={()=>{setOpen(!open);setCustom(false)}}><span>{label}</span><ChevronDown size={13}/></button>
+  <button type="button" ref={btn} className="period-label" aria-haspopup="dialog" aria-expanded={open} aria-controls={panelId} aria-label={`조회 기간 ${label} — 바꾸기`} onClick={()=>{setOpen(!open);setCustom(false)}}><span>{label}</span><ChevronDown size={14}/></button>
   <button type="button" className="period-step" aria-label="다음 기간" onClick={()=>go(1)}><ChevronRight size={16}/></button>
   {open&&<div className="period-panel" id={panelId} role="dialog" aria-label="조회 기간 고르기">
-   <div className="period-quick">{quick.map(([name,[x,y]])=>{const on=x===start&&y===end;return <button type="button" key={name} className={on?'on':''} aria-pressed={on} onClick={()=>pick(x,y)}><span>{on&&<Check size={13}/>}{name}</span><small>{periodLabel(x,y,now).replace(/^(오늘|어제|이번 주|지난주) /,'')}</small></button>})}
+   <div className="period-quick">{quick.map(([name,[x,y]])=>{const on=x===start&&y===end;return <button type="button" key={name} className={on?'on':''} aria-pressed={on} onClick={()=>pick(x,y)}><span>{on&&<Check size={14}/>}{name}</span><small>{periodLabel(x,y,now).replace(/^(오늘|어제|이번 주|지난주) /,'')}</small></button>})}
     <button type="button" className={custom?'on':''} aria-expanded={custom} onClick={()=>setCustom(!custom)}><span>직접 선택</span><small>시작일·종료일</small></button></div>
    {custom&&<form className="period-custom" onSubmit={e=>{e.preventDefault();if(a&&b&&a<=b)pick(a,b)}}>
     <label>시작일<input type="date" value={a} max={b||undefined} onChange={e=>setA(e.target.value)} required/></label>
