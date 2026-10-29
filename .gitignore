@@ -63,3 +63,4 @@ yarn-error.log*
 /.preview.log
 /.build.log
 .brief-*.json
+work/
