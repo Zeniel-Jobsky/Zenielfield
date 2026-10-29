@@ -798,3 +798,18 @@
 .zf-ent-store{color:var(--zf-domain-se)}
 .zf-ent-region{color:var(--zf-text);text-decoration:underline dotted 1px;text-underline-offset:3px}
 @media(max-width:760px){.app-shell .ai-brief:not(.ai-brief-weekly) .panel-heading,.app-shell .ai-brief .panel-heading{display:grid;grid-template-columns:1fr;gap:8px}.ai-brief .panel-heading h2{font-size:16px}}
+.ai-switch{display:flex;justify-content:flex-end;margin:0 0 4px}
+.ai-dot{display:inline-flex;align-items:center;vertical-align:middle}
+.ai-dot .zf-ai-mark{margin:0}
+/* 직급별 주간 달력: 행=하위 단위, 열=요일 */
+.unit-cal-nav{display:flex;align-items:center;gap:8px;margin:0 0 12px}.unit-cal-nav b{font-size:14px}
+.unit-cal-scroll{overflow-x:auto}
+.unit-cal-table{width:100%;min-width:640px;border-collapse:collapse;font-size:13px}
+.unit-cal-table th,.unit-cal-table td{padding:6px 4px;border-bottom:1px solid var(--zf-border);text-align:center;vertical-align:middle}
+.unit-cal-table thead th{font-size:12px;font-weight:600;color:var(--zf-text-secondary)}.unit-cal-table thead small{display:block;font-weight:400}
+.unit-cal-table th[scope=row]{text-align:left;min-width:120px}.unit-cal-table th[scope=row] .link{min-height:44px;font-weight:600}
+.unit-cal-table .today{background:var(--zf-selected)}
+.unit-cal-table td>button{display:grid;place-items:center;width:100%;min-height:44px;border:0;background:transparent;font:inherit;cursor:pointer;border-radius:6px}
+.unit-cal-table td>button:hover{background:var(--zf-info-soft)}.unit-cal-table td>button:focus-visible{outline:2px solid #003c33}
+.unit-cal-table td b{font-size:15px;color:var(--zf-text)}.unit-cal-table td small{font-size:11px;color:#003c33}.unit-cal-table td em{font-style:normal;font-size:11px;font-weight:600;color:#b42318}
+.unit-cal-table td>span{color:var(--zf-border)}

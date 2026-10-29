@@ -23,7 +23,7 @@ export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;e
  // 초안(AI·데모)은 빈칸만 채운다. 사람이 고른 값이 항상 우선: 내 일정에서 고른 날짜, 일정 잡기로 정해진 대상(locked), 이미 고른 대상·목적.
  function draft(d:AiPlanDraft){setPlan(d);const valid=(x:string)=>/^\d{4}-\d{2}-\d{2}$/.test(x);setValues({plannedDate:pickedDay||(valid(d.plannedDate)?d.plannedDate:values.plannedDate),time:/^\d{2}:\d{2}$/.test(d.time)?d.time:values.time,purpose:values.purpose!==purposes[0]?values.purpose:purposes.includes(d.purpose)?d.purpose:purposes[0],precheck:values.precheck||d.precheck});setHint(d.target);const t=!locked&&!target&&matchTarget(c.targets,d.target);if(t)pick(t)}
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!ready)return;onSave('visit',{entry:'manual',...values,targetType:type,siteId:site,storeId:type==='store'?store:null,visitorId:owner,status:'planned',actualDate:null,actualTime:'',detail:'',notes:'',result:'',cancelReason:'',requirementId:modal.requirementId||pickedReq||null})}
- return <form className="record-form ai-form" onSubmit={submit}><div className="form-scroll"><div className="notice slim ai-notice"><Sparkles size={16}/><span><b>AI 입력</b> 언제·어디·무엇을 말하면 제니에리가 일정을 채워 드려요.</span><button type="button" className="textbtn" onClick={()=>c.open('visit',undefined,{...modal,ai:false,manual:true})}><PenLine size={14}/>직접 입력</button></div>
+ return <form className="record-form ai-form" onSubmit={submit}><div className="form-scroll"><div className="ai-switch"><button type="button" className="textbtn" onClick={()=>c.open('visit',undefined,{...modal,ai:false,manual:true})}><PenLine size={14}/>직접 입력</button></div>
  <fieldset className="form-grid" disabled={!c.editable||c.saving}>
  <Permissions need={['microphone']}/>
  <div className="form-section first wide"><span>00</span>방문할 날 고르기</div>
@@ -33,7 +33,7 @@ export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;e
  <AiComposer mode="plan" seed={seed} demo={c.demo!==false} onDraft={d=>draft(d as unknown as AiPlanDraft)}/>
  <div className="form-section wide"><span>02</span>방문 대상</div>
  <GeoPick auto targets={c.targets} target={target} onPick={locked?undefined:pick} onGeo={()=>{}}/>
- {plan&&hint&&<p className="form-hint wide">제니에리가 들은 대상: <b>{hint}</b>{target?' → '+target.name:' → 일치하는 대상 없음, 직접 선택해 주세요'}</p>}
+ {plan&&hint&&<p className="form-hint wide">들은 대상: <b>{hint}</b>{target?' → '+target.name:' → 일치하는 대상 없음, 직접 선택해 주세요'}</p>}
  <div className="target-type-switch wide" role="group" aria-label="방문 대상 유형"><button type="button" className={type==='site'?'active':''} disabled={locked} onClick={()=>{setType('site');setStore('')}}><MapPin size={16}/>현장 방문</button><button type="button" className={type==='store'?'active':''} disabled={locked} onClick={()=>setType('store')}><ClipboardCheck size={16}/>매장 방문</button></div>
  <Field label={type==='site'?'방문 현장 *':'상위 현장 *'} wide><select required value={site} disabled={locked} onChange={e=>{setSite(e.target.value);setStore('')}}><option value="">현장 선택</option>{parents.map(s=><option key={s.id} value={s.id}>{s.name} · {s.client}</option>)}</select></Field>
  {type==='store'&&<Field label="방문 매장 *" wide><select required value={store} disabled={locked} onChange={e=>setStore(e.target.value)}><option value="">소속 매장 선택</option>{stores.map(s=><option key={s.id} value={s.id}>{s.name} · {s.code}</option>)}</select></Field>}
@@ -42,6 +42,6 @@ export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;e
  <Field label="방문 예정일 *"><input type="date" required value={values.plannedDate} onChange={e=>setValues({...values,plannedDate:e.target.value})}/></Field><Field label="예정 시간"><input type="time" value={values.time} onChange={e=>setValues({...values,time:e.target.value})}/></Field>
  <Field label="방문 목적 *" wide><select value={values.purpose} onChange={e=>setValues({...values,purpose:e.target.value})}>{purposes.map(p=><option key={p}>{p}</option>)}</select></Field>
  <Field label="사전 확인사항" wide><textarea rows={2} maxLength={1500} value={values.precheck} onChange={e=>setValues({...values,precheck:e.target.value})}/></Field>
- {plan?.confidence==='low'&&<p className="form-hint wide warn">제니에리가 확신하지 못했어요. 날짜와 대상을 꼭 확인해 주세요.</p>}</>}
+ {plan?.confidence==='low'&&<p className="form-hint wide warn">확신이 낮아요. 날짜와 대상을 꼭 확인해 주세요.</p>}</>}
  </fieldset>{error&&<p className="form-error" role="alert">{error}</p>}<p className="privacy-note">개인정보 및 고객사 민감정보를 입력하지 마세요.</p></div><div className="form-footer"><button type="button" className="btn" onClick={onClose}>취소</button>{c.editable&&<button className="btn primary" type="submit" disabled={c.saving||!ready}><Check size={16}/>{c.saving?'저장 중':'일정 등록'}</button>}</div></form>
 }

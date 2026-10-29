@@ -13,14 +13,14 @@ const NEW='__new';
 export async function runJudge(c:Context,targetId:string,visitId:string|null,r:Report,pending:{type:string;content:string;dueDate:string}[]=[]):Promise<JudgeState>{
  const key=judgeKey(r);
  if(c.demo!==false)return {key,judgment:null,note:'데모에서는 AI 판정을 하지 않습니다. 판정 없이 저장됩니다.'};
- const down=aiDownReason();if(down)return {key,judgment:null,note:`제니에리가 판정하지 못했어요(${down}). 판정 없이 저장되고 나중에 다시 판정합니다.`};
+ const down=aiDownReason();if(down)return {key,judgment:null,note:`판정하지 못했어요(${down}). 판정 없이 저장되고 나중에 다시 판정합니다.`};
  const visits=[...c.data.visits.filter(v=>v.status==='completed'&&v.id!==visitId&&targetOf(v)===targetId),{id:NEW,...r}];
  const actions:JudgeAction[]=[...c.data.actions.filter(a=>targetOf(a)===targetId).map(a=>({...a,visitId:a.visitId===visitId?NEW:a.visitId})),...pending.map(p=>({...p,visitId:NEW,createdDate:c.now,completedDate:null}))];
  const {payload,refs}=buildJudgeInput([{visits,actions}],c.now);const ref=[...refs].find(([,id])=>id===NEW)?.[0];
  try{const d=await callAssist({text:JSON.stringify(payload),images:[],mode:'judge'});
   const hit=(d.draft?.results||[]).find((x:{ref:string})=>x.ref===ref),j=hit&&cleanJudgment({...hit,by:'ai',model:d.model,at:d.generatedAt});
   return j?{key,judgment:j,note:''}:{key,judgment:null,note:'AI 판정 응답에 이번 보고가 없습니다. 판정 없이 저장되고 나중에 다시 판정합니다.'}}
- catch(e){return {key,judgment:null,note:`제니에리가 판정하지 못했어요(${(e as Error).message}). 판정 없이 저장되고 나중에 다시 판정합니다.`}}
+ catch(e){return {key,judgment:null,note:`판정하지 못했어요(${(e as Error).message}). 판정 없이 저장되고 나중에 다시 판정합니다.`}}
 }
 // 저장할 판정: 입력자가 보고 저장했으므로 확정(ai+person). 수준을 바꿨으면 바꾼 값.
 export const confirmed=(s:JudgeState|null):VisitJudgment|null=>s?.judgment?{...s.judgment,by:'ai+person'}:null;

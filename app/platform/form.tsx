@@ -29,7 +29,7 @@ function AiTidy({c,formRef,tidy,onChange,history}:{c:Context;formRef:React.RefOb
  const changed=offer?aiFields.filter(k=>offer.proposed[k]!==offer.before[k]):[];
  return <div className="ai-tidy wide">
   <div className="ai-tidy-head">
-   {!offer&&!tidy&&<button type="button" className="btn small" disabled={busy||c.saving} onClick={ask}>{busy?<Loader2 size={14} className="spin"/>:<Sparkles size={14}/>}{busy?'정리하는 중…':'제니에리가 문장 정리'}</button>}
+   {!offer&&!tidy&&<button type="button" className="btn small" disabled={busy||c.saving} onClick={ask}>{busy?<Loader2 size={14} className="spin"/>:<Sparkles size={14}/>}{busy?'정리하는 중…':'문장 다듬기'}</button>}
    {tidy&&<><span className="ai-badge"><AiMark/>AI 정리 반영됨 · 저장 시 기록</span><button type="button" className="textbtn" onClick={revert}><RotateCcw size={14}/>되돌리기</button></>}
    <small>위 활동 내용·특이사항을 다듬어 제안합니다. 사실은 그대로 두고, 반영한 칸만 기록됩니다.{history>0&&` (지금까지 ${history}회 반영)`}</small></div>
   {busy&&<AiWorking message="활동 내용과 특이사항의 문장을 다듬고 있어요"/>}
