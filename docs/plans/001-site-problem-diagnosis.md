@@ -1,7 +1,7 @@
 # 001. 사업장 문제 진단 개발 계획
 
 - 근거: [docs/specs/site-problem-diagnosis.md](../specs/site-problem-diagnosis.md) (`사업장문제진단추가기힉.pdf` 전사)
-- 상태: 1차 구현 완료, 검증·보완 진행 (코드가 먼저 작성되었고 이 문서는 사후에 정리함. [v1](../repo-dev-plan-v1-current.md) 참고)
+- 상태: 1차 구현 완료, 검증·보완 진행 (코드가 먼저 작성되었고 이 문서는 사후에 정리함. v1 원본 파일 repo-dev-plan-v1-current.md는 현재 저장소에 없음)
 - 상위 계획: [저장소 기반 개발 계획 v2](../repo-dev-plan-v2.md) Phase 2~4
 
 소스: `app/diagnosis/` (`model.ts` 집계, `adapters.ts` 입력 변환, `components.tsx` 화면, `styles.css`). 연결 지점은 `app/platform/app.tsx`. 검증은 `pnpm test` 또는 `node tests/run-diagnosis.mjs`.
