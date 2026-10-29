@@ -29,6 +29,13 @@ active=false;equal((await edge(request({operation:'read',accessToken:'valid'})))
 equal((await edge(request({operation:'request-link',email:'unregistered@example.com'}))).status,200);equal(calls.some(x=>x.path==='/auth/v1/otp'),false);active=true;
 r=await edge(request({operation:'read',accessToken:'expired',refreshToken:'old-refresh'}));equal((await r.json()).session.refresh_token,'rotated');
 r=await edge(request({operation:'request-link',email:actor.email,codeChallenge:'a'.repeat(43),redirectTo:'https://evil.example/'}));equal(r.status,400);
+// 새 계정과 기존 콜백만 통과하며 비슷한 외부 주소/추가 쿼리는 거부한다.
+for(const redirectTo of ['https://zenifield.jobsky.workers.dev/auth/callback','https://zenifield.ugen-kwon.workers.dev/auth/callback']){
+ calls=[];r=await edge(request({operation:'request-link',email:actor.email,codeChallenge:'a'.repeat(43),redirectTo}));equal(r.status,200);equal(calls.find(x=>x.path==='/auth/v1/otp').body.code_challenge,'a'.repeat(43));
+}
+for(const redirectTo of ['https://zenifield.jobsky.workers.dev.evil.example/auth/callback','http://zenifield.jobsky.workers.dev/auth/callback','https://zenifield.jobsky.workers.dev/auth/callback?next=https://evil.example']){
+ calls=[];r=await edge(request({operation:'request-link',email:actor.email,codeChallenge:'a'.repeat(43),redirectTo}));equal(r.status,400);equal(calls.some(x=>x.path==='/auth/v1/otp'),false);
+}
 const env={ZENIFIELD_SUPABASE_URL:'https://project.supabase.co',ZENIFIELD_GATEWAY_TOKEN:token};
 const wr=(path,init={})=>new Request('https://app.example'+path,init);
 equal((await worker(wr('/api/platform',{headers:{'oai-authenticated-user-id':'forged'}}),env)).status,401);

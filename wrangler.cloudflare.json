@@ -1,18 +1,20 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "zenifield",
-  "account_id": "2c2e34cc73de9b1edcf70d42fff5c49b",
+  "account_id": "d50191f54ac6859d1ecedddf26094351",
   "main": "worker/index.ts",
   "compatibility_date": "2026-05-15",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "workers_dev": true,
   "preview_urls": false,
-  "vars": { "ZENIFIELD_AUTH_PROVIDER": "supabase-email" },
-  "d1_databases": [{
-    "binding": "DB",
-    "database_name": "zenifield-test",
-    "database_id": "2a52f884-639c-4ce3-b719-c403df345b99",
-    "migrations_dir": "drizzle"
-  }],
-  "observability": { "enabled": true }
+  "vars": {
+    "ZENIFIELD_AUTH_PROVIDER": "supabase-email"
+  },
+  "d1_databases": [],
+  "observability": {
+    "enabled": true
+  },
+  "r2_buckets": []
 }

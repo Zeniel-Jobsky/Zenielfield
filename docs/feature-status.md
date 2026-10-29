@@ -184,3 +184,11 @@
 - 디자인 지침 6.1·6.1-A, `AGENTS.md` 현재 결정, `PROJECT_RULE.md` 그리드 규칙을 동기화했다.
 - 390/820/1024/1280/1440px·640 CSS px, 접기·조직 이동·빈 결과·잡매니저·통계 보고서 확인. 타입·전체 테스트·Cloudflare 인증 2종·Cloudflare 빌드·디자인 검사 통과, 버전 `0.1.3`.
 - AI 브리핑 커밋 `27b883f`와 함께 원격 main 반영. 사용자 요청에 따라 자동 배포와 공개 URL 확인은 생략. 상세: [차트 그리드 개선 기록](dashboard-grid-plan.md).
+
+
+## Cloudflare 회사 계정 전환 준비 (2026-10-29)
+
+- 새 대상: `jobsky@zeniel.co.kr`·Worker `zenifield`·https://zenifield.jobsky.workers.dev. 단일 Worker Editor 토큰을 사용자가 발급했고 기존 로그인·AI 비밀값 복사를 승인했다.
+- 새 Worker 비밀값 등록, Supabase 콜백 추가(기존 목록·Site URL 보존) 완료. 배포 계정 고정·D1/R2 제거·Edge 콜백 허용과 CI 공개 커밋 검사를 준비했다.
+- 버전 `0.1.4`, 타입·전체 테스트·Cloudflare 경계 13개·Supabase 경계 61개·배포 검사 11개·회사 대상 빌드 통과.
+- GitHub secret 교체 완료(암호화 업로드), production 환경의 동명 덮어쓰기 없음 확인. 자동 배포·공개 화면 확인은 진행 중. [상세 이관 기록](cloudflare-account-migration-plan.md).

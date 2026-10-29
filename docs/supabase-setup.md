@@ -84,3 +84,17 @@
 - 처음 켤 때 기준선: `supabase/migrations/APPLIED_BASELINE`에 적힌 파일(손으로 이미 적용한 `visit_entry`, `domains`)은 이력 표가 비어 있는 첫 실행에서 실행하지 않고 적용됨으로만 기록된다. 사람이 따로 할 일은 없다. 필요하면 `--mark-applied`로 수동 지정도 된다.
 - 시크릿 등록: `npm run ci:secrets` (= `node scripts/set-ci-secrets.mjs`), 등록+즉시 실행은 `npm run ci:deploy` (cmd·PowerShell·macOS 공통, `.env` 값을 출력 없이 `gh`로 넘김). 등록 뒤 `gh workflow run supabase-deploy`로 즉시 실행한다.
 - 작성 규칙: 이관은 두 번 실행해도 안전하게 쓴다(`create … if not exists`, `drop function if exists`, 제약은 `pg_constraint` 확인 후 추가).
+
+
+## 회사 Cloudflare 계정 전환 (2026-10-29)
+
+현재 배포 대상은 `jobsky@zeniel.co.kr` 계정의 `zenifield` Worker다. 주소는 https://zenifield.jobsky.workers.dev 이며 계정 ID는 `d50191f54ac6859d1ecedddf26094351`이다. 위의 개인 계정 호스팅 항목은 이전 이력이다.
+
+- GitHub `production` 환경과 `main` 자동 배포 순서를 유지한다. 저장소 `CLOUDFLARE_API_TOKEN`은 사용자가 발급한 회사 계정의 단일 `zenifield` Worker `Individual Workers Editor` 토큰으로 교체한다. 계정 전체 관리 권한·D1 권한은 필요 없다.
+- 배포 설정과 CI 계정 ID를 함께 고정하고 `prepare-cloudflare-deploy.mjs`가 다른 계정·D1/R2 바인딩을 거부한다. 새 Worker는 Supabase 전용이며 기존 개인 계정의 D1 데이터는 삭제·초기화하지 않는다.
+- Worker 비밀값은 승인된 기존 `ZENIFIELD_GATEWAY_TOKEN`, `OPENAI_API_KEY`와 기존 Supabase URL·AI 모델을 등록한다. CI는 런타임 secret을 소스에 넣거나 덮어쓰지 않는다.
+- Supabase 인증 허용 목록에 정확한 `https://zenifield.jobsky.workers.dev/auth/callback`을 추가했다. 기존 허용 목록·기본 Site URL은 유지한다. Edge 함수도 새/기존 정확한 두 콜백만 허용한다. DB 스키마 변경·사용자 생성·비밀번호 변경은 없다.
+- 새 도메인에서는 기존 회사 계정으로 다시 로그인한다. 기존 도메인의 호스트 전용 로그인 쿠키는 새 도메인에 전달되지 않는다.
+- 배포 후 `check-cloudflare-deployment.mjs`가 새 공개 주소의 커밋·Supabase 로그인 설정·비로그인 차단·기존 D1 API 차단을 확인한다.
+
+세부 기록: [Cloudflare 회사 계정 이관](cloudflare-account-migration-plan.md).
