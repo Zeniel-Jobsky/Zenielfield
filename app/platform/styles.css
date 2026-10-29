@@ -663,3 +663,4 @@
 .ai-brief-dl dd.ai-brief-meta{font-size:12px;color:var(--zf-text-secondary)}
 .ai-brief-dl .ai-brief-sites{padding-left:0;list-style:none}
 @media(max-width:760px){.ai-brief-dl>div{grid-template-columns:1fr}}
+.warn-text{color:#8a4b00}

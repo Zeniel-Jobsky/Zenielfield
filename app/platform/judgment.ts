@@ -9,6 +9,9 @@ export type IssueType=typeof ISSUE_TYPES[number];
 export type Severity=typeof SEVERITIES[number];
 export type Flow=typeof FLOWS[number];
 export type Level=typeof LEVELS[number];
+// 화면 이름(저장값은 그대로): 경보·질책 대신 할 일로 읽히게 한다. 순위·빨강은 쓰지 않는다(빨강은 기한 초과 사실에만).
+export const LEVEL_LABEL:Record<string,string>={정상:'정상',관찰:'지켜보기',주의:'조치 필요',위험:'바로 확인'};
+export const levelLabel=(l:string)=>LEVEL_LABEL[l]||l;
 export type JudgedIssue={type:IssueType;summary:string;severity:Severity;flow:Flow;customerRequest:boolean};
 // level: 이 방문 시점의 대상 상황 종합 수준. assessment: 근거를 담은 종합 판단 한 문장. issues: 판단의 근거가 된 이슈(해결된 것도 flow='해결'로 남김).
 export type VisitJudgment={level:Level;assessment:string;issues:JudgedIssue[];by:'ai'|'person'|'ai+person';model:string;at:string;confirmedBy:string|null};
