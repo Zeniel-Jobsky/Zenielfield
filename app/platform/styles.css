@@ -68,7 +68,6 @@
 .ai-stats button{display:flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid #f1f6f3;border-radius:8px;background:white;font-size:12px;color:#65726b;cursor:pointer}
 .ai-stats button b{color:#36443e}
 .ai-stats button.active{border-color:#516e8a;background:#eef2f6}
-.ai-source{white-space:pre-wrap;font-size:12px;color:#65726b}
 .geo-search{flex:1;min-width:180px;padding:8px 10px;border:1px solid #e3e9e6;border-radius:7px;font-size:13px}
 
 
@@ -381,7 +380,7 @@
 .ai-tidy-row{display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;padding:8px 0;border-top:1px solid #e3e9e6;font-size:13px;cursor:pointer}
 .ai-tidy-row:first-of-type{border-top:0}
 .ai-tidy-row input{margin-top:3px;width:18px;height:18px}
-.ai-tidy-row span{display:grid;grid-template-columns:34px 1fr;gap:4px 8px;min-width:0}
+.ai-tidy-row>span{display:grid;grid-template-columns:34px 1fr;gap:4px 8px;min-width:0}
 .ai-tidy-row b{grid-column:1/-1;font-weight:600;color:#17171c}
 .ai-tidy-row em{font-style:normal;font-size:11px;color:#65726b;padding-top:2px}
 .ai-tidy-row s{text-decoration:none;color:#65726b;white-space:pre-wrap;word-break:break-word}
@@ -723,3 +722,29 @@
 .ai-brief-out .ai-brief-focus li span{display:grid;gap:2px}
 .ai-brief-do{font-style:normal;color:var(--zf-text)}
 .ai-brief-do b{font-weight:600;color:#003c33}
+/* AI 초안에서 판독 못 한 항목: 나열 → 후보 칩 고르기 또는 직접 입력 → 해당 칸에 반영 */
+.ai-unclear{grid-column:1/-1;padding:12px 14px;border-radius:8px;background:var(--zf-warning-soft)}
+.ai-unclear-title{margin:0 0 8px;font-size:13px;font-weight:600;color:#8a4b00}
+.ai-unclear ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.ai-unclear-what{font-size:13px;color:var(--zf-text)}.ai-unclear-what b{margin-right:4px}.ai-unclear-what small{color:var(--zf-text-secondary)}
+.ai-unclear-pick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
+.ai-unclear-pick .chip{min-height:36px;padding:0 12px;border:1px solid var(--zf-control-border);border-radius:18px;background:var(--zf-surface);font-size:13px;color:var(--zf-text)}
+.ai-unclear-pick .chip:hover{border-color:#003c33;color:#003c33}
+.ai-unclear-input{display:inline-flex;gap:4px}.ai-unclear-input input{min-height:36px;width:160px;padding:0 10px;border:1px solid var(--zf-control-border);border-radius:6px;font-size:13px}
+.ai-unclear-input .btn.small{min-height:36px}
+
+/* 제안 복사 버튼: 제안 문장 오른쪽, 44px 조작 영역 */
+.ai-tidy-row .ai-tidy-proposed{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}
+.copy-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:44px;min-height:44px;margin:-12px -8px -12px 0;padding:0 8px;border:0;background:none;color:#516e8a;border-radius:6px;cursor:pointer;font-size:12px}
+.copy-btn:hover{background:var(--zf-info-soft)}
+.copy-btn:focus-visible{outline:2px solid #003c33;outline-offset:2px}
+.copy-btn:disabled{opacity:.4;cursor:default}
+
+/* 회의록으로 읽은 입력: 주제·참석 인원·일시 한 줄 + 채운 칸 안내 */
+.ai-meeting{display:grid;gap:4px;padding:12px 14px;background:var(--zf-info-soft);border-radius:6px}
+.ai-meeting p{margin:0;display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px;color:#17171c}
+.ai-meeting b{font-weight:600;color:#003c33}
+.ai-meeting span{min-width:0;overflow-wrap:anywhere}
+
+/* 회의록으로 입력한 방문 표시: 중립 알약 */
+.meeting-tag{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:999px;background:var(--zf-info-soft);color:#516e8a;font-size:12px;white-space:nowrap}

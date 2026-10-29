@@ -23,12 +23,19 @@
 .brief-site-group{margin-top:14px;padding-top:12px;border-top:1px solid var(--zf-border)}
 .brief-site-group h4{margin:0 0 6px;font-size:13px;font-weight:600}.brief-site-group h4 small{margin-left:6px;font-weight:400;color:var(--zf-text-secondary)}
 .brief-visits{margin:0;padding:0;list-style:none}
-.brief-visit{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 12px;padding:8px 0;border-top:1px solid var(--zf-surface-muted)}
+.brief-visit{display:block;border-top:1px solid var(--zf-surface-muted)}
 .brief-visit time{font-size:12px;color:var(--zf-text-secondary);font-variant-numeric:tabular-nums}
 .brief-visit-head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0;font-size:13px}
 .brief-visit-head svg{color:var(--zf-text-secondary)}.brief-visit-head span{color:var(--zf-text-secondary)}
 .brief-visit-line{margin:2px 0 0;font-size:13px;line-height:1.55;color:var(--zf-text-body)}
-.brief-visit-full{margin-top:6px;padding:10px 12px;border-radius:6px;background:var(--zf-surface-muted);font-size:13px;line-height:1.6}
-.brief-visit-full p{margin:0 0 6px}
 .brief-no-activity{margin:10px 0 0;font-size:13px;color:var(--zf-text-secondary)}
-@media(max-width:760px){.brief-preview-row{grid-template-columns:minmax(0,1fr) auto}.brief-preview-line{grid-column:1/-1;white-space:normal}.brief-visit{grid-template-columns:1fr}}
+@media(max-width:760px){.brief-preview-row{grid-template-columns:minmax(0,1fr) auto}.brief-preview-line{grid-column:1/-1;white-space:normal}}
+
+/* 방문 줄 전체가 방문 결과로 가는 버튼: 날짜 · 본문 · 화살표 */
+.brief-visit-open{display:grid;grid-template-columns:84px minmax(0,1fr) 16px;gap:4px 12px;align-items:start;width:100%;min-height:44px;padding:8px 0;border:0;background:none;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.brief-visit-open:hover .brief-visit-line{color:#17171c}
+.brief-visit-open:focus-visible{outline:2px solid #003c33;outline-offset:2px}
+.brief-visit-open .brief-visit-body,.brief-visit-open .brief-visit-head,.brief-visit-open .brief-visit-line{display:block}
+.brief-visit-open .brief-visit-head{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.brief-visit-open>svg{margin-top:4px;color:#65726b}
+@media(max-width:760px){.brief-visit-open{grid-template-columns:minmax(0,1fr) 16px;gap:4px 12px}.brief-visit-open time{grid-column:1/-1}}

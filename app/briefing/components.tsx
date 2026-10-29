@@ -24,16 +24,14 @@ export function BriefingPreview({data,now,onAll}:{data:BriefData;now:string;demo
 }
 
 function Visit({visit:v,target:t,onVisit}:{visit:BriefVisit;target?:BriefTarget;onVisit:(id:string)=>void}){
- const [open,setOpen]=useState(false),id=useId();
- return <li className="brief-visit">
+ return <li className="brief-visit"><button type="button" className="brief-visit-open" onClick={()=>onVisit(v.id)} aria-label={`${short(v.actualDate)} ${t?.name||''} 방문 결과 열기`}>
   <time dateTime={v.actualDate!}>{short(v.actualDate)}{v.actualTime&&<small> {v.actualTime}</small>}</time>
-  <div className="brief-visit-body">
-   <p className="brief-visit-head">{t?.type==='store'?<Store size={14} aria-hidden="true"/>:<Building2 size={14} aria-hidden="true"/>}<b>{t?(t.type==='store'?t.name:'현장 자체'):'대상 미확인'}</b><span>{v.visitorName}</span><span>{v.purpose}</span></p>
-   <p className="brief-visit-line">{v.detail?clip(v.detail,140):'활동 내용 미입력'}</p>
-   {(v.detail.length>140||v.notes)&&<><BriefDisclosure open={open} controls={id} onClick={()=>setOpen(!open)}>{open?'접기':'원문'}</BriefDisclosure>
-   <div id={id} hidden={!open} className="brief-visit-full"><p>{v.detail}</p>{v.notes&&<p><b>특이사항</b> {v.notes}</p>}<button type="button" className="textbtn" onClick={()=>onVisit(v.id)}>방문 결과 열기<ChevronRight size={14} aria-hidden="true"/></button></div></>}
-  </div>
- </li>;
+  <span className="brief-visit-body">
+   <span className="brief-visit-head">{t?.type==='store'?<Store size={14} aria-hidden="true"/>:<Building2 size={14} aria-hidden="true"/>}<b>{t?(t.type==='store'?t.name:'현장 자체'):'대상 미확인'}</b><span>{v.visitorName}</span><span>{v.purpose}</span></span>
+   <span className="brief-visit-line">{v.detail?clip(v.detail,140):'활동 내용 미입력'}</span>
+  </span>
+  <ChevronRight size={16} aria-hidden="true"/>
+ </button></li>;
 }
 
 export function BriefingPage({data,now,start,end,onVisit,initialSite=''}:BriefProps&{start:string;end:string;setPeriod:(a:string,b:string)=>void;initialSite?:string}){

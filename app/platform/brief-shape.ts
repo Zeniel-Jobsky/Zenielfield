@@ -24,7 +24,7 @@ const RECOMMEND=/\s*(먼저|우선)?[^.。!?]*(편이|것이)\s*(좋겠|낫겠|�
 const clean=(r:Rich,first=true):Rich=>{const out=r.filter(s=>s&&typeof s.v==='string').map(s=>({v:s.v,...(s.tone==='num'||s.tone==='bad'||s.tone==='good'?{tone:s.tone}:{})}));
  if(first&&out.length)out[0]={...out[0],v:out[0].v.replace(ADDRESSEE,'')};return out.filter(s=>s.v.length)};
 // 이유 앞의 경로('부서 › 매니저 › ' 또는 '부서 › 매니저 › 대상: ')는 화면이 이름을 보이므로 뗀다
-const stripPath=(r:Rich):Rich=>{if(!r.length)return r;const v=r[0].v.replace(/^(?:[^›:]{1,40}›s*){1,3}/,'');return v===r[0].v?r:[{...r[0],v},...r.slice(1)].filter(s=>s.v.trim())};
+const stripPath=(r:Rich):Rich=>{if(!r.length)return r;const v=r[0].v.replace(/^(?:[^›:]{1,40}›\s*){1,3}/,'');return v===r[0].v?r:[{...r[0],v},...r.slice(1)].filter(s=>s.v.trim())};
 const noTail=(r:Rich):Rich=>{if(!r.length)return r;const last=r[r.length-1],v=last.v.replace(RECOMMEND,'');return v===last.v?r:[...r.slice(0,-1),{...last,v}].filter(s=>s.v.trim())};
 // 문장 사이 띄어쓰기: 마침표·물음표·느낌표 바로 뒤에 글자가 붙으면 한 칸 띄운다(조각 경계 포함). 조사 자리는 건드리지 않는다.
 const spaceSentences=(r:Rich):Rich=>r.map((s,i)=>{let v=s.v.replace(/([.!?,])(?=[가-힣A-Za-z(])/g,'$1 ');const next=r[i+1];if(next&&/[.!?]$/.test(v)&&/^[가-힣A-Za-z0-9(]/.test(next.v))v+=' ';return v===s.v?s:{...s,v}});
