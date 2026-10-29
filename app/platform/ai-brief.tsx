@@ -209,7 +209,7 @@ function BriefPresentation({out,digest,stale,busy=false,jump,targetNames,who}:{w
     <div><dt>근거</dt><dd className="ai-brief-meta">{digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 보고 {digest.reportTotal}건(판정 {digest.judged.reports-digest.judged.unjudged}건) · {out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} · 연락처 미전송</dd></div>
    </dl>
   </div>
-  <div className="ai-brief-foot"><small>{[ai&&'제니에리(AI)가 작성했어요. 실수가 있을 수 있어요.',out.model.includes('규칙')&&out.model,r.confidence==='low'&&'확신 낮음'].filter(Boolean).join(' · ')}</small><span><button type="button" className="textbtn" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>{detailsOpen?'접기':'더 보기'}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button><button type="button" className="textbtn" aria-expanded="true" onClick={()=>setFolded(true)}>브리핑 접기<ChevronUp size={14}/></button></span></div>
+  <div className="ai-brief-foot"><small>{[ai&&'제니에리(AI)가 작성했어요. 실수가 있을 수 있어요.',out.model.includes('AI 연결 안 됨')&&out.model,r.confidence==='low'&&'확신 낮음'].filter(Boolean).join(' · ')}</small><span><button type="button" className="textbtn" aria-expanded={detailsOpen} aria-controls={id+'-details'} onClick={()=>setDetailsOpen(!detailsOpen)}>{detailsOpen?'접기':'더 보기'}{detailsOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button><button type="button" className="textbtn" aria-expanded="true" onClick={()=>setFolded(true)}>브리핑 접기<ChevronUp size={14}/></button></span></div>
  </div>;
 }
 

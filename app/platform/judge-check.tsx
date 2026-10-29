@@ -12,7 +12,7 @@ export const judgeKey=(r:Report)=>[r.purpose,r.detail,r.notes,r.result,r.actualD
 const NEW='__new';
 export async function runJudge(c:Context,targetId:string,visitId:string|null,r:Report,pending:{type:string;content:string;dueDate:string}[]=[]):Promise<JudgeState>{
  const key=judgeKey(r);
- if(c.demo!==false)return {key,judgment:null,note:'데모에서는 AI 판정을 하지 않습니다. 판정 없이 저장됩니다.'};
+ if(c.demo!==false)return {key,judgment:null,note:'판정 없이 저장돼요.'};
  const down=aiDownReason();if(down)return {key,judgment:null,note:`판정하지 못했어요(${down}). 판정 없이 저장되고 나중에 다시 판정합니다.`};
  const visits=[...c.data.visits.filter(v=>v.status==='completed'&&v.id!==visitId&&targetOf(v)===targetId),{id:NEW,...r}];
  const actions:JudgeAction[]=[...c.data.actions.filter(a=>targetOf(a)===targetId).map(a=>({...a,visitId:a.visitId===visitId?NEW:a.visitId})),...pending.map(p=>({...p,visitId:NEW,createdDate:c.now,completedDate:null}))];

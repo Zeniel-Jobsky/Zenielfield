@@ -236,7 +236,6 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 
 
 /* Cohere editorial utility: one type scale, open sections and quiet data rows. */
-@font-face {font-family:'Space Grotesk';src:url('/fonts/space-grotesk-regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
 .app-shell {background:var(--zf-canvas)}
 .app-shell .topbar {height:64px;padding-inline:32px;background:var(--zf-canvas);border-bottom:1px solid var(--zf-border)}
 .app-shell .header-context {gap:10px;font-size:12px}
@@ -280,7 +279,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .capacity-card:hover {background:var(--zf-surface-hover)}
 .app-shell .capacity-card .capacity-icon {display:none}
 .app-shell .capacity-card p {font-size:12px!important;font-weight:400;color:var(--zf-text-secondary)}
-.app-shell .capacity-card b {display:block;margin:5px 0;font-family:'Space Grotesk',Arial,sans-serif;font-size:36px!important;font-weight:400!important;line-height:1.25}
+.app-shell .capacity-card b {display:block;margin:5px 0;font-family:inherit;font-variant-numeric:tabular-nums;font-size:36px!important;font-weight:400!important;line-height:1.25}
 .app-shell .capacity-card b small {font-family:inherit;font-size:12px;font-weight:400;letter-spacing:0;margin-left:6px;color:var(--zf-text-secondary)}
 .app-shell .capacity-card div>span {font-size:12px;line-height:1.6}
 .app-shell .capacity-card>svg {position:absolute;right:18px;top:23px;width:var(--zf-icon-xs);height:var(--zf-icon-xs);color:var(--zf-text-muted)}
@@ -289,7 +288,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .metric:hover {background:var(--zf-surface-hover);box-shadow:none;transform:none}
 .app-shell .metric-top {font-size:12px!important;font-weight:400}
 .app-shell .metric-icon {display:none}
-.app-shell .metric-value {margin-block:8px;font-family:'Space Grotesk',Arial,sans-serif;font-size:32px!important;font-weight:400!important;line-height:1.2}
+.app-shell .metric-value {margin-block:8px;font-family:inherit;font-variant-numeric:tabular-nums;font-size:32px!important;font-weight:400!important;line-height:1.2}
 .app-shell .metric-value small {font-size:12px;font-weight:400;letter-spacing:0;color:var(--zf-text-muted);margin-left:5px}
 .app-shell .metric-value>svg {width:var(--zf-icon-xs);height:var(--zf-icon-xs);opacity:.5}
 .app-shell .metric>p {font-size:12px;line-height:1.7}
@@ -304,14 +303,14 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .target-tabs>button {padding:13px 0;font-size:12px;gap:8px;font-weight:400;border-width:1px}
 .app-shell .target-tabs>button.active {font-weight:600;color:var(--zf-action);border-bottom-width:2px}
 .app-shell .target-tabs>button>svg {width:var(--zf-icon-sm);height:var(--zf-icon-sm)}
-.app-shell .target-tabs>button>span {background:transparent;font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;padding:0}
+.app-shell .target-tabs>button>span {background:transparent;font-family:inherit;font-variant-numeric:tabular-nums;font-size:12px;padding:0}
 .app-shell .target-tabs-note {font-size:11px}
 .app-shell .brief-dashboard-split {gap:32px;grid-template-columns:minmax(0,3fr) minmax(320px,2fr);margin-bottom:32px}
 .app-shell .panel {background:white;border:0;border-top:1px solid var(--zf-border);border-radius:0;box-shadow:none;margin-bottom:30px}
 .app-shell .panel-heading {padding:20px 0 18px;gap:16px}
 .app-shell .panel-heading h2 {font-size:17px;font-weight:500;letter-spacing:-.3px;line-height:1.4}
 .app-shell .panel-heading p {font-size:12px;line-height:1.7;margin-top:5px}
-.app-shell .count {background:transparent;padding:0;margin-left:10px;font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;font-weight:400;color:var(--zf-text-muted)}
+.app-shell .count {background:transparent;padding:0;margin-left:10px;font-family:inherit;font-variant-numeric:tabular-nums;font-size:12px;font-weight:400;color:var(--zf-text-muted)}
 .app-shell .panel-tools {gap:12px;font-size:12px}
 .app-shell .panel-tools .textbtn {font-size:12px}
 .app-shell .panel-tools .btn {font-size:12px;min-height:34px;padding-block:6px}
@@ -357,7 +356,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .hierarchy-name>span,.app-shell .org-symbol,.app-shell .site-icon {border-radius:5px;background:var(--zf-surface-muted);color:var(--zf-text-secondary)}
 .app-shell .progress-track {height:3px;border-radius:0;background:var(--zf-border)}
 .app-shell .progress-track>div {border-radius:0;background:var(--zf-action)}
-.app-shell .progress-wrap>b {font-family:'Space Grotesk',Arial,sans-serif;font-weight:400;color:var(--zf-text)}
+.app-shell .progress-wrap>b {font-family:inherit;font-variant-numeric:tabular-nums;font-weight:400;color:var(--zf-text)}
 .app-shell .record-type-bar {padding:0 0 14px;background:transparent;border:0;font-size:12px;gap:12px}
 .app-shell .record-type-bar select {font-size:12px;min-height:36px;background-color:white}
 .app-shell .record-type-bar .textbtn {font-size:12px}
@@ -366,7 +365,7 @@ select:not([multiple])[size="1"]:not([data-slot="native-select"]) {
 .app-shell .tabs>button.active {font-weight:600;color:var(--zf-action);border-bottom-width:2px}
 .app-shell .calendar {padding:20px 0}
 .app-shell .calendar h3 {font-size:17px;font-weight:400}
-.app-shell .calendar-date {font-family:'Space Grotesk',Arial,sans-serif;font-size:12px}
+.app-shell .calendar-date {font-family:inherit;font-variant-numeric:tabular-nums;font-size:12px}
 .app-shell .calendar-event {border-radius:3px;font-size:11px;box-shadow:none}
 .app-shell .calendar-event b,.app-shell .calendar-event small {font-size:11px;line-height:1.5}
 .app-shell .calendar-event.completed {background:#f1f6f3;border-left-color:#65726b;color:#003c33}

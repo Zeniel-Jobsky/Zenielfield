@@ -43,7 +43,7 @@ export const tidyText=(t:string)=>{const s=t.replace(/\s+/g,' ').replace(/\s*([.
 export function demoTidy(v:TidyValues):AiDraft{const detail=tidyText(collapseRepeats(v.detail)),notes=tidyText(collapseRepeats(v.notes));
  return {detail,notes,purpose:v.purpose,result:v.result,extra:{summary:detail.slice(0,80)},actions:[],confidence:'low'}}
 export async function requestTidy(v:TidyValues,demo:boolean):Promise<{draft:AiDraft;model:string;generatedAt:string}>{
- if(demo)return {draft:demoTidy(v),model:'데모 예시 정리',generatedAt:new Date().toISOString()};
+ if(demo)return {draft:demoTidy(v),model:'간단 정리',generatedAt:new Date().toISOString()};
  const down=aiDownReason();if(down)return {draft:demoTidy(v),model:`간단 정리 · AI 연결 안 됨(${down})`,generatedAt:new Date().toISOString()};
  const text=`방문 목적: ${v.purpose}\n주요 활동 내용: ${v.detail}\n특이사항: ${v.notes||'(없음)'}\n후속 조치 필요 여부: ${v.result}`;
  try{return await callAssist({text,images:[],mode:'tidy'})}catch(e){return {draft:demoTidy(v),model:`간단 정리 · AI 연결 안 됨(${(e as Error).message})`,generatedAt:new Date().toISOString()}}}
@@ -70,7 +70,7 @@ export function AiComposer({onDraft,mode='result',demo=false,seed=''}:{onDraft:(
   r.onerror=e=>setError(e.error==='not-allowed'||e.error==='service-not-allowed'?'마이크가 허용되지 않았습니다. 브라우저 사이트 설정에서 마이크를 허용하고, 아이폰은 설정 → Siri에서 받아쓰기를 켜 주세요.':e.error==='no-speech'?'음성이 들리지 않았습니다. 다시 눌러 말해 주세요.':'음성 인식이 중단되었습니다 ('+e.error+').');
   r.onend=()=>{setListening(false);setInterim('')};rec.current=r;setError('');r.start();setListening(true)}
  async function addImages(files:FileList|null){if(!files)return;try{const next=await Promise.all([...files].slice(0,3-images.length).map(shrink));setImages([...images,...next])}catch(e){setError((e as Error).message)}}
- async function send(){if(listening)rec.current?.stop();const clean=collapseRepeats(text);if(clean!==text)setText(clean);const text0=clean;if(demo){onDraft(demoDraft(text0,mode) as AiDraft,{text:text0,imageCount:images.length,model:'데모 예시 초안',generatedAt:new Date().toISOString()});return}setBusy(true);setError('');setNote('');const fallback=(why:string)=>{setNote(`AI 연결이 안 돼(${why}) 입력한 내용을 그대로 옮겼습니다. 목적·결과를 직접 골라 주세요.`);onDraft(demoDraft(text0,mode) as AiDraft,{text:text0,imageCount:images.length,model:`간단 정리 · AI 연결 안 됨(${why})`,generatedAt:new Date().toISOString()})};
+ async function send(){if(listening)rec.current?.stop();const clean=collapseRepeats(text);if(clean!==text)setText(clean);const text0=clean;if(demo){onDraft(demoDraft(text0,mode) as AiDraft,{text:text0,imageCount:images.length,model:'간단 초안',generatedAt:new Date().toISOString()});return}setBusy(true);setError('');setNote('');const fallback=(why:string)=>{setNote(`AI 연결이 안 돼(${why}) 입력한 내용을 그대로 옮겼습니다. 목적·결과를 직접 골라 주세요.`);onDraft(demoDraft(text0,mode) as AiDraft,{text:text0,imageCount:images.length,model:`간단 정리 · AI 연결 안 됨(${why})`,generatedAt:new Date().toISOString()})};
   const down=aiDownReason();if(down){fallback(down);setBusy(false);return}
   try{const d=await callAssist({text:text0,images,mode});onDraft(d.draft,{text:text0,imageCount:images.length,model:d.model,generatedAt:d.generatedAt})}catch(e){fallback((e as Error).message)}finally{setBusy(false)}}
  const ready=!busy&&(text.trim().length>0||images.length>0);
@@ -86,7 +86,7 @@ export function AiComposer({onDraft,mode='result',demo=false,seed=''}:{onDraft:(
     <button type="button" className="ai-send" aria-label="AI로 작성" onClick={send} disabled={!ready}>{busy?<Loader2 size={20} className="spin"/>:<ArrowUp size={20}/>}</button>
    </div>
   </div>
-  {demo&&<p className="form-hint">데모에서는 AI를 부르지 않고 입력한 내용을 그대로 옮깁니다. 목적·결과는 직접 골라 주세요.</p>}
+
   <p className="form-hint">사진은 요약에만 쓰고 저장하지 않습니다. 얼굴·연락처·서류가 보이지 않게 찍어 주세요.</p>
   {note&&<p className="form-hint ai-fallback-note" role="status">{note}</p>}
   {error&&<p className="form-error" role="alert">{error} 직접 입력은 방문 결과 등록에서 할 수 있습니다.</p>}

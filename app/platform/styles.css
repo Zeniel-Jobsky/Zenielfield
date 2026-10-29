@@ -321,7 +321,7 @@
 .decision-kpi.primary{background:#003c33;border-top-color:#003c33;color:#d3e9df}
 .decision-kpi.primary .decision-kpi-top,.decision-kpi.primary b{color:#ffffff}
 .decision-kpi.primary .decision-kpi-note,.decision-kpi.primary .kpi-delta{color:#d3e9df}
-.decision-kpi b{font-family:'Space Grotesk',var(--zf-font,sans-serif);font-weight:400;font-size:32px;color:#17171c;font-variant-numeric:tabular-nums}
+.decision-kpi b{font-family:inherit;font-weight:400;font-size:32px;color:#17171c;font-variant-numeric:tabular-nums}
 .decision-kpi-note{font-size:12px;color:#65726b}
 .kpi-delta{font-size:12px}
 .axis-text,.chart-legend,.hbar,.risk-head,.vbar small{font-size:12px}
@@ -813,3 +813,7 @@
 .unit-cal-table td>button:hover{background:var(--zf-info-soft)}.unit-cal-table td>button:focus-visible{outline:2px solid #003c33}
 .unit-cal-table td b{font-size:15px;color:var(--zf-text)}.unit-cal-table td small{font-size:11px;color:#003c33}.unit-cal-table td em{font-style:normal;font-size:11px;font-weight:600;color:#b42318}
 .unit-cal-table td>span{color:var(--zf-border)}
+/* 데모 표시는 이 얇은 띠 하나: 제니에리 아이콘 + 한 줄 + 역할 선택, 반투명 고정 */
+.app-shell .platform-demo-banner.zf-demo-band{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;margin:0 0 16px;padding:4px 12px;min-height:44px;border:0;border-radius:8px;background:rgba(238,242,246,.82);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:13px;color:var(--zf-text-body)}
+.app-shell .zf-demo-band>div{display:flex;align-items:center;gap:6px;margin:0;padding:0;border:0;background:transparent}
+.app-shell .zf-demo-band .persona-bar select{min-height:36px;font-size:13px}

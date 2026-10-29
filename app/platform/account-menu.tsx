@@ -12,7 +12,7 @@ export function AccountMenu({name,role,org,avatar,live,refreshing,onRefresh,onSe
  return <div className="account-menu" ref={box}>
   <button ref={btn} type="button" className="user-menu" aria-haspopup="menu" aria-expanded={open} aria-controls={id} aria-label={`${name} · ${role} · 계정 메뉴`} onClick={()=>setOpen(!open)}>{avatar}<span><b>{name}</b><small>{role}</small></span><ChevronDown size={14}/></button>
   {open&&<div className="account-panel" id={id} role="menu" aria-label="계정 메뉴">
-   <div className="account-who"><b>{name}</b><small>{role}{org?' · '+org:''}</small><span className={'account-mode '+(live?'live':'demo')}>{live?'운영':'데모 · 저장 내용은 DB에 남지 않아요'}</span></div>
+   <div className="account-who"><b>{name}</b><small>{role}{org?' · '+org:''}</small><span className={'account-mode '+(live?'live':'demo')}>{live?'운영':'데모'}</span></div>
    {live&&onRefresh&&<button type="button" role="menuitem" onClick={run(onRefresh)} disabled={refreshing}><RefreshCw size={16}/>{refreshing?'불러오는 중':'데이터 새로고침'}</button>}
    <button type="button" role="menuitem" onClick={run(onSettings)}><Settings size={16}/>설정</button>
    {live?onLogout&&<button type="button" role="menuitem" className="danger" onClick={run(onLogout)}><LogOut size={16}/>로그아웃</button>
