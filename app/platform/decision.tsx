@@ -45,9 +45,15 @@ export function ScopeRisk({c}:{c:Context}){
 }
 const statusOrder=[[SLOT_LABEL.delayed,tone.late,'delayed'],[SLOT_LABEL.unplanned,tone.miss,'unplanned'],[NO_HISTORY,tone.gray,'stale'],[SLOT_LABEL.planned,tone.plan,'planned'],[SLOT_LABEL.completed,tone.ok,'completed'],[NO_REQUIRED,tone.gray,'']] as const;
 export function StoreStatusChart({c}:{c:Context}){
- const targets=c.scope.filter(t=>t.type===c.type&&t.status==='운영 중'),counts=useMemo(()=>{const m=new Map<string,number>();for(const t of targets)m.set(targetStatus(t,c.visits,c.allMetrics),(m.get(targetStatus(t,c.visits,c.allMetrics))||0)+1);return m},[targets,c.visits,c.allMetrics]);
- const total=targets.length,max=Math.max(1,...statusOrder.map(([k])=>counts.get(k)||0));
- return <ChartPanel title={`${typeName(c.type).replace(' 방문','')} 운영 상태`} sub={`운영 중 ${total}개 · 조회 기간 회차 기준`}><div className="hbar-list">{statusOrder.map(([label,color,key])=>{const v=counts.get(label)||0;return <button key={label} className="hbar" onClick={()=>key==='stale'?c.go('sites','stale'):key?c.go('requirements',key):c.go('sites')}><span className="hbar-label">{label}</span><span className="hbar-track"><i style={{width:pct(v,max)+'%',background:color}}/></span><b>{v}<small>{pct(v,total)}%</small></b></button>})}</div></ChartPanel>
+ const targets=useMemo(()=>c.scope.filter(t=>t.type===c.type&&t.status==='운영 중'),[c.scope,c.type]);
+ const counts=useMemo(()=>{const m=new Map<string,number>();for(const t of targets){const status=targetStatus(t,c.visits,c.allMetrics);m.set(status,(m.get(status)||0)+1)}return m},[targets,c.visits,c.allMetrics]);
+ const total=targets.length;
+ return <ChartPanel title={`${typeName(c.type).replace(' 방문','')} 운영 상태`} sub={`운영 중 ${total.toLocaleString()}개 · 조회 기간 회차 기준`}>
+  {total>0?<div className="status-chart">
+   <div className="status-hbar-head" aria-hidden="true"><span>운영 상태</span><span className="status-scale"><span>0%</span><span>100%</span></span><span>대상 수</span><span>비율</span></div>
+   <div className="hbar-list">{statusOrder.map(([label,color,key])=>{const v=counts.get(label)||0,ratio=v/total*100;return <button key={label} className="hbar status-hbar" aria-label={`${label} ${v.toLocaleString()}개, ${pct(v,total)}%`} onClick={()=>key==='stale'?c.go('sites','stale'):key?c.go('requirements',key):c.go('sites')}><span className="hbar-label">{label}</span><span className="hbar-track" aria-hidden="true"><i style={{width:ratio+'%',background:color}}/></span><b className="status-hbar-count">{v.toLocaleString()}<span>개</span></b><span className="status-hbar-percent">{pct(v,total)}%</span></button>})}</div>
+  </div>:<p className="chart-empty">조회 범위에 운영 중인 {typeName(c.type).replace(' 방문','')}이 없습니다.</p>}
+ </ChartPanel>
 }
 const issueTypes=ISSUE_TYPES;
 export function IssueTypeChart({c}:{c:Context}){
