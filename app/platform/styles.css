@@ -637,6 +637,20 @@
 .ai-brief-progress small{font-size:12px;color:var(--zf-text-secondary)}
 @media(max-width:760px){.ai-brief-out .ai-brief-focus li{grid-template-columns:1fr}.ai-brief-story p{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.ai-brief-progress-bar i{transition:none}}
+.action-order-tools{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:12px 0;color:var(--zf-text-secondary);font-size:12px}
+.action-order-tools label{color:var(--zf-text-body)}
+.action-order-tools select{min-height:44px;max-width:100%;padding:8px 32px 8px 12px;border:1px solid var(--zf-control-border);border-radius:5px;background:var(--zf-surface);color:var(--zf-text-body);font:inherit}
+.action-order-tools select:hover{border-color:var(--zf-control-border-hover)}
+.action-order-tools select:focus-visible{outline:2px solid var(--zf-focus);outline-offset:2px}
+@media(max-width:760px){.action-order-tools select{font-size:16px;flex:1;min-width:0}.action-order-tools>span{flex-basis:100%}}
+/* Dashboard and visit records retain the requested left-aligned second row. */
+@media(min-width:761px){
+ .app-shell .platform-filters.stacked-period-filters .filterbar-primary{grid-template-columns:max-content minmax(0,1fr);grid-template-areas:"selects selects" "period reset";justify-content:start}
+ .app-shell .platform-filters.stacked-period-filters .scope-toggle{display:none}
+ .app-shell .platform-filters.stacked-period-filters #workspace-filters{display:grid;grid-area:selects;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+ .app-shell .platform-filters.stacked-period-filters .filterbar-period{justify-self:start;width:auto;justify-content:flex-start}
+ .app-shell .platform-filters.stacked-period-filters .reset-button{justify-self:start}
+}
 /* 지시 가이드(누구에게 무엇을)·이행 가이드(순서대로): 브리핑에서 바로 움직일 내용. AI가 쓴 칸 제목엔 반짝이 */
 .ai-brief-out h3>svg{margin-right:4px;color:#003c33;vertical-align:-2px}
 .ai-brief-guide{margin:0 0 12px}

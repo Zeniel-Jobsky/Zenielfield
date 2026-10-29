@@ -1,6 +1,6 @@
 {
   "name": "zenifield",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -21,7 +21,7 @@
     "preview:dist": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit",
-    "test": "node tests/run-platform.mjs && node tests/run-briefing.mjs && node tests/run-diagnosis.mjs && node tests/run-supabase.mjs && node tests/logic.mjs && node tests/run-dedupe.mjs && node tests/run-chart-render.mjs"
+    "test": "node tests/run-platform.mjs && node tests/run-briefing.mjs && node tests/run-diagnosis.mjs && node tests/run-supabase.mjs && node tests/logic.mjs && node tests/run-dedupe.mjs && node tests/run-chart-render.mjs && node tests/run-action-order.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
