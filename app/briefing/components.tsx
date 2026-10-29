@@ -1,10 +1,10 @@
 'use client';
 import {useState,useEffect,useMemo,useId} from 'react';
 import type {ReactNode} from 'react';
-import {ArrowRight,ChevronDown,ChevronRight,Building2,Store,CalendarDays,FileText,Info,Search,CheckCircle2,AlertCircle} from 'lucide-react';
+import {ArrowRight,ChevronRight,Building2,Store,CalendarDays,FileText,Info,Search,CheckCircle2,AlertCircle} from 'lucide-react';
 import {week,shift} from '../lib/model';
 import {Badge,short,nice,Empty,PanelTitle} from '../ui';
-import {filterBriefData,weeklyCards,weekRanges,weekTitle,weekStats,type BriefData,type BriefCard,type BriefIssue} from './model';
+import {filterBriefData,weeklyCards,weekRanges,weekTitle,weekStats,type BriefData,type BriefCard,type BriefIssue,type BriefVisit,type BriefTarget} from './model';
 import './styles.css';
 import './detail.css';
 import {BriefDisclosure} from './disclosure';
@@ -18,6 +18,19 @@ export function BriefingPreview({data,now,demo,onAll}:{data:BriefData;now:string
 }
 export function BriefingSplit({children,preview}:{children:ReactNode;preview:ReactNode}){return <div className="brief-dashboard-split"><div className="brief-dashboard-left">{children}</div>{preview}</div>}
 function IssueButton({issue,onIssue,label}:{issue:BriefIssue;onIssue:(id:string)=>void;label?:string}){return <button className="brief-issue" onClick={()=>onIssue(issue.id)}><span className={'brief-issue-dot '+(issue.state==='완료'?'done':'')}>{issue.state==='완료'?<CheckCircle2 size={14}/>:<AlertCircle size={14}/>}</span><span><b>{issue.content}</b><small>{label||issue.type} · {issue.ownerName} · {nice(issue.dueDate)} 기한{issue.completedDate?' · 완료 '+short(issue.completedDate):''}</small></span><Badge>{issue.state}</Badge><ChevronRight size={14}/></button>}
+// Keep each record disclosure local so filtering unmounts it and resets its state.
+function TimelineVisit({visit:v,target:t,onVisit}:{visit:BriefVisit;target?:BriefTarget;onVisit:(id:string)=>void}){
+ const [open,setOpen]=useState(false),id=useId(),title=t?(t.type==='store'?t.siteName+' · '+t.name:t.siteName+' · 본사/현장'):'대상 미확인';
+ return <li>
+  <time className="brief-timeline-date" dateTime={v.actualDate!}><span>{short(v.actualDate)}</span>{v.actualTime&&<small>{v.actualTime}</small>}</time>
+  <span className="brief-timeline-track" aria-hidden="true"><span/></span>
+  <div className="brief-timeline-entry">
+   <div className="brief-timeline-overview"><div className="brief-timeline-place"><h5 id={id+'-title'}>{title}</h5><div className="brief-timeline-meta"><span className="brief-target-type">{t?.type==='store'?<Store size={14} aria-hidden="true"/>:<Building2 size={14} aria-hidden="true"/>}{t?.type==='store'?'매장':'현장'}</span><span>방문자 {v.visitorName}</span></div></div><p className="brief-visit-purpose"><span>방문 목적</span>{v.purpose}</p></div>
+   <div className="brief-timeline-action"><BriefDisclosure open={open} controls={id+'-content'} onClick={()=>setOpen(!open)}><span className="sr-only">{title} </span>{open?'활동 내용 접기':'활동 내용'}</BriefDisclosure></div>
+   <div className="brief-record-body" id={id+'-content'} hidden={!open} aria-labelledby={id+'-title'}><p>{v.detail||'활동 내용 미입력'}</p>{v.notes&&<p className="brief-visit-notes"><b>특이사항</b> {v.notes}</p>}<button type="button" className="brief-original-link" onClick={()=>onVisit(v.id)}>원본 방문 결과 보기<ChevronRight size={14} aria-hidden="true"/></button></div>
+  </div>
+ </li>;
+}
 export function BriefingPage({data,now,demo,start,end,setPeriod,onVisit,onIssue,initialSite=''}:BriefProps&{start:string;end:string;setPeriod:(a:string,b:string)=>void;initialSite?:string}){
  const [query,setQuery]=useState(''),[searchKind,setSearchKind]=useState('all'),[site,setSite]=useState(initialSite),[needs,setNeeds]=useState(false);
  const [expanded,setExpanded]=useState<Record<string,boolean>>({}),[more,setMore]=useState<Record<string,boolean>>({});
@@ -79,14 +92,7 @@ export function BriefingPage({data,now,demo,start,end,setPeriod,onVisit,onIssue,
       </section>}
       <section className="brief-detail-group" aria-labelledby={base+'-timeline-title'}>
        <div className="brief-timeline-title"><h4 id={base+'-timeline-title'}>활동 타임라인</h4><span>실제 방문일 오름차순 · {timeline.length}건</span></div>
-       {timeline.length?<><ol className="brief-timeline" id={base+'-timeline'}>{timeline.slice(0,more[w.start]?undefined:3).map(v=>{
-        const t=targetById.get(v.targetId);return <li key={v.id}>
-         <div className="brief-timeline-meta"><time dateTime={v.actualDate!}>{short(v.actualDate)}{v.actualTime?' '+v.actualTime:''}</time><span className="brief-target-type">{t?.type==='store'?<Store size={14} aria-hidden="true"/>:<Building2 size={14} aria-hidden="true"/>}{t?.type==='store'?'매장':'현장'}</span><span>{v.visitorName}</span></div>
-         <h5>{t?(t.type==='store'?t.siteName+' · '+t.name:t.siteName+' · 본사/현장'):'대상 미확인'}</h5>
-         <p className="brief-visit-purpose">{v.purpose}</p>
-         <details className="brief-record-detail"><summary><span className="when-closed">활동 내용 펼쳐보기</span><span className="when-open">활동 내용 접기</span><ChevronDown size={14} aria-hidden="true"/></summary><div><p>{v.detail||'활동 내용 미입력'}</p>{v.notes&&<p className="brief-visit-notes"><b>특이사항</b> {v.notes}</p>}<button type="button" className="brief-original-link" onClick={()=>onVisit(v.id)}>원본 방문 결과 보기<ChevronRight size={14} aria-hidden="true"/></button></div></details>
-        </li>;
-       })}</ol>{timeline.length>3&&<BriefDisclosure open={!!more[w.start]} controls={base+'-timeline'} onClick={()=>toggleMore(w.start)}>{more[w.start]?'타임라인 접기':`활동 ${timeline.length-3}건 더 보기`}</BriefDisclosure>}</>:<div className="brief-no-activity"><FileText size={20} aria-hidden="true"/><p>등록된 활동 내역이 없습니다.</p><small>다른 주차의 기록을 이 주차 활동으로 표시하지 않습니다.</small></div>}
+       {timeline.length?<><ol className="brief-timeline" id={base+'-timeline'}>{timeline.slice(0,more[w.start]?undefined:3).map(v=><TimelineVisit key={v.id} visit={v} target={targetById.get(v.targetId)} onVisit={onVisit}/>)}</ol>{timeline.length>3&&<BriefDisclosure open={!!more[w.start]} controls={base+'-timeline'} onClick={()=>toggleMore(w.start)}>{more[w.start]?'타임라인 접기':`활동 ${timeline.length-3}건 더 보기`}</BriefDisclosure>}</>:<div className="brief-no-activity"><FileText size={20} aria-hidden="true"/><p>등록된 활동 내역이 없습니다.</p><small>다른 주차의 기록을 이 주차 활동으로 표시하지 않습니다.</small></div>}
       </section>
       <section className="brief-detail-group brief-followups" aria-labelledby={base+'-issues-title'}>
        <div className="brief-timeline-title"><h4 id={base+'-issues-title'}>후속 조치</h4><span>현재 미해결 {weekData.openIssues.length}건 · 이 주차 완료 {weekData.doneIssues.length}건</span></div>

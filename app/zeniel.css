@@ -51,6 +51,10 @@
   --zf-detail-group-gap: 32px;
   --zf-detail-content-gap: 16px;
   --zf-detail-heading-inset: 24px;
+  --zf-detail-timeline-date-width: 64px;
+  --zf-detail-timeline-track-width: 16px;
+  --zf-detail-timeline-action-width: 128px;
+  --zf-detail-timeline-action-surface-height: 36px;
   --sidebar: 240px;
   --shadow: none;
 }
