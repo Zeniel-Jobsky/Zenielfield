@@ -52,32 +52,6 @@ export function ScopeRisk({c}:{c:Context}){
   {rows.length>8&&<p className="chart-empty">처음 8개만 표시 · 나머지 {rows.length-8}개는 통계·보고서 표에서 확인</p>}{!rows.length&&<p className="chart-empty">비교할 단위가 없습니다.</p>}</div></ChartPanel>
 
 }
-const statusOrder=[[SLOT_LABEL.delayed,tone.late,'delayed'],[SLOT_LABEL.unplanned,tone.miss,'unplanned'],[NO_HISTORY,tone.gray,'stale'],[SLOT_LABEL.planned,tone.plan,'planned'],[SLOT_LABEL.completed,tone.ok,'completed'],[NO_REQUIRED,tone.gray,'']] as const;
-// 원그래프(사용자 요청 2026-10-29): 상태별 대상 수 비율. 0개 상태는 조각이 없으므로 경계에 선으로 그리고 목록에 0개·0%를 쓴다.
-const PIE={cx:130,cy:128,r:80};
-// 회색 계열 3개(이력 미확인·예정·필요 방문 없음)가 비슷해 보이지 않도록 질감·밝기로 나눈다: 이력 미확인=빗금, 예정=파랑, 필요 방문 없음=옅은 회색.
-const pieLook=(key:string,color:string)=>key==="stale"?{fill:tone.none,edge:tone.none,dark:false}:key==="planned"?{fill:tone.sand,edge:tone.sandEdge,dark:true}:key===""?{fill:"#cfd9d3",edge:"#8a9f93",dark:true}:{fill:color,edge:color,dark:false};
-export function StoreStatusChart({c}:{c:Context}){
- const targets=useMemo(()=>c.scope.filter(t=>t.type===c.type&&t.status==="운영 중"),[c.scope,c.type]);
- const counts=useMemo(()=>{const m=new Map<string,number>();for(const t of targets){const status=targetStatus(t,c.visits,c.allMetrics);m.set(status,(m.get(status)||0)+1)}return m},[targets,c.visits,c.allMetrics]);
- const total=targets.length,go=(key:string)=>key==="stale"?c.go("sites","stale"):key?c.go("requirements",key):c.go("sites");
- const segs=useMemo(()=>{let acc=-Math.PI/2;const zeroAt=new Map<number,number>();return statusOrder.map(([label,color,key])=>{const v=counts.get(label)||0,frac=total?v/total:0,start=acc,end=acc+frac*2*Math.PI;acc=end;const zi=v===0?(zeroAt.get(Math.round(start*1000))||0):0;if(v===0)zeroAt.set(Math.round(start*1000),zi+1);return{label,color,key,v,frac,start,end,mid:(start+end)/2,zi}})},[counts,total]);
- const pt=(ang:number,rad:number)=>[PIE.cx+rad*Math.cos(ang),PIE.cy+rad*Math.sin(ang)];
- // 원 바깥 레이블(작은 조각·0개 선): 같은 쪽 레이블끼리 세로 15px 이상 떨어지게 밀어 겹침을 막는다.
- const outs=useMemo(()=>{const list=segs.filter(g=>g.frac<.12).map(g=>{const ang=g.v?g.mid:g.start+(g.zi-1)*.07,[lx,ly]=pt(ang,PIE.r+(g.v?10:16));return{g,lx,ly,cos:Math.cos(ang)}});for(const side of [1,-1]){const grp=list.filter(o=>(o.cos>=0?1:-1)===side).sort((p,q)=>p.ly-q.ly);for(let i=1;i<grp.length;i++)if(grp[i].ly<grp[i-1].ly+15)grp[i].ly=grp[i-1].ly+15}return list},[segs]);
- const summary=segs.map(g=>`${g.label} ${g.v}개 ${pct(g.v,total)}%`).join(", ");
- return <ChartPanel title={`${typeName(c.type).replace(" 방문","")} 운영 상태`} sub={`운영 중 ${total.toLocaleString()}개 · 조회 기간 회차 기준 · 원그래프 조각은 대상 수 비율`}>
-  {total>0?<div className="status-pie">
-   <svg viewBox="0 0 260 256" className="status-pie-svg" role="img" aria-label={`운영 상태 비율: ${summary}`}>
-    {segs.map(g=>{if(!g.v)return null;if(g.frac>=.9999)return <circle key={g.label} cx={PIE.cx} cy={PIE.cy} r={PIE.r} fill={pieLook(g.key,g.color).fill} stroke={pieLook(g.key,g.color).edge} onClick={()=>go(g.key)}/>;const [x1,y1]=pt(g.start,PIE.r),[x2,y2]=pt(g.end,PIE.r);return <path key={g.label} d={`M${PIE.cx} ${PIE.cy} L${x1} ${y1} A${PIE.r} ${PIE.r} 0 ${g.frac>.5?1:0} 1 ${x2} ${y2} Z`} fill={pieLook(g.key,g.color).fill} stroke={pieLook(g.key,g.color).dark?pieLook(g.key,g.color).edge:"#fff"} strokeWidth={pieLook(g.key,g.color).dark?1.5:2} className="pie-slice" onClick={()=>go(g.key)}><title>{`${g.label} ${g.v}개 ${pct(g.v,total)}%`}</title></path>})}
-    {segs.map(g=>{if(g.v)return null;const ang=g.start+(g.zi-1)*.07,[x1,y1]=pt(ang,PIE.r*.45),[x2,y2]=pt(ang,PIE.r+9);return <line key={"z"+g.label} x1={x1} y1={y1} x2={x2} y2={y2} stroke={pieLook(g.key,g.color).edge} strokeWidth="2.5" strokeLinecap="round"><title>{`${g.label} 0개 0%`}</title></line>})}
-    {outs.map(o=><text key={"o"+o.g.label} x={o.lx} y={o.ly+4} textAnchor={o.cos>.3?"start":o.cos<-.3?"end":"middle"} className="pie-out" style={{fill:o.g.v?"#36443e":"#59645f"}}>{o.g.v.toLocaleString()}개 {pct(o.g.v,total)}%</text>)}
-    {segs.map(g=>{if(g.frac<.12)return null;const [tx,ty]=g.frac>=.9999?[PIE.cx,PIE.cy]:pt(g.mid,PIE.r*.6);return <text key={"t"+g.label} x={tx} y={ty-2} textAnchor="middle" className={"pie-label"+(pieLook(g.key,g.color).dark?" dk":"")}><tspan x={tx}>{g.v.toLocaleString()}개</tspan><tspan x={tx} dy="15">{pct(g.v,total)}%</tspan></text>})}
-   </svg>
-   <div className="status-pie-list">{segs.map(g=><button key={g.label} className="status-pie-row" aria-label={`${g.label} ${g.v.toLocaleString()}개, ${pct(g.v,total)}%`} onClick={()=>go(g.key)}><i className={"swatch"+(g.v?"":" line")} style={{background:g.v?pieLook(g.key,g.color).fill:pieLook(g.key,g.color).edge,borderColor:pieLook(g.key,g.color).edge}}/><span className="hbar-label">{g.label}</span><b className="status-hbar-count">{g.v.toLocaleString()}<span>개</span></b><span className="status-hbar-percent">{pct(g.v,total)}%</span></button>)}</div>
-  </div>:<p className="chart-empty">조회 범위에 운영 중인 {typeName(c.type).replace(" 방문","")}이 없습니다.</p>}
- </ChartPanel>
-}
 const issueTypes=ISSUE_TYPES;
 export function IssueTypeChart({c}:{c:Context}){
  const rows=useMemo(()=>[...new Set([...issueTypes,...c.actions.map(a=>a.type)])].map(t=>{const all=c.actions.filter(a=>a.type===t);return{t,overdue:all.filter(a=>a.state!=='완료'&&a.dueDate<c.now).length,open:all.filter(a=>a.state!=='완료'&&a.dueDate>=c.now).length,done:all.filter(a=>a.state==='완료').length}}).filter(r=>r.overdue+r.open+r.done>0).sort((a,b)=>b.overdue-a.overdue||b.open-a.open).slice(0,8),[c.actions,c.now]);
