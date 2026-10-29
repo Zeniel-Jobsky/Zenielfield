@@ -5,7 +5,8 @@ import type {AiField} from './model';
 import {collapseRepeats} from '../lib/dedupe-text';
 import {Plus,Mic,Square,ArrowUp,X,Loader2,Camera} from 'lucide-react';
 // ChatGPT-style composer: type, speak or attach photos, then send once; the draft fills the form directly. Nothing is saved here.
-export type AiDraft={detail:string;result:string;purpose:string;notes:string;extra:{summary:string};actions:{type:string;content:string;dueDate:string}[];confidence:string};
+export type AiUnclear={field:'purpose'|'detail'|'notes'|'result'|'actions';what:string;where:string;options:string[]};
+export type AiDraft={detail:string;result:string;purpose:string;notes:string;extra:{summary:string};actions:{type:string;content:string;dueDate:string}[];unclear?:AiUnclear[];confidence:string};
 const shrink=(file:File)=>new Promise<string>((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const k=Math.min(1,1280/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d')!.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',0.8))};img.onerror=()=>reject(Error('이미지를 읽지 못했습니다.'));img.src=url});
 // Browser speech recognition (Chrome, Edge, Android, iOS Safari 14.5+); audio goes to the browser vendor's service, not our server.
 type Recognition={lang:string;continuous:boolean;interimResults:boolean;start():void;stop():void;onresult:((e:{resultIndex:number;results:ArrayLike<{isFinal:boolean;0:{transcript:string}}>})=>void)|null;onend:(()=>void)|null;onerror:((e:{error:string})=>void)|null};

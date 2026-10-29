@@ -726,3 +726,13 @@
 .ai-brief-out .ai-brief-focus li span{display:grid;gap:2px}
 .ai-brief-do{font-style:normal;color:var(--zf-text)}
 .ai-brief-do b{font-weight:600;color:#003c33}
+/* AI 초안에서 판독 못 한 항목: 나열 → 후보 칩 고르기 또는 직접 입력 → 해당 칸에 반영 */
+.ai-unclear{grid-column:1/-1;padding:12px 14px;border-radius:8px;background:var(--zf-warning-soft)}
+.ai-unclear-title{margin:0 0 8px;font-size:13px;font-weight:600;color:#8a4b00}
+.ai-unclear ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.ai-unclear-what{font-size:13px;color:var(--zf-text)}.ai-unclear-what b{margin-right:4px}.ai-unclear-what small{color:var(--zf-text-secondary)}
+.ai-unclear-pick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
+.ai-unclear-pick .chip{min-height:36px;padding:0 12px;border:1px solid var(--zf-control-border);border-radius:18px;background:var(--zf-surface);font-size:13px;color:var(--zf-text)}
+.ai-unclear-pick .chip:hover{border-color:#003c33;color:#003c33}
+.ai-unclear-input{display:inline-flex;gap:4px}.ai-unclear-input input{min-height:36px;width:160px;padding:0 10px;border:1px solid var(--zf-control-border);border-radius:6px;font-size:13px}
+.ai-unclear-input .btn.small{min-height:36px}
