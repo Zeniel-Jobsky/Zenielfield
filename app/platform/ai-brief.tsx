@@ -121,30 +121,32 @@ export function ruleBrief(d:BriefDigest):AiBriefResult{
  const dir=k.rateWeek!==null&&k.rateWeekPrev!==null?k.rateWeek-k.rateWeekPrev:null,odir=k.overdue-k.overduePrev;
  const scopeTxt=`${d.period.label}${d.scope.filters.length?' · '+d.scope.filters.join(' · '):''}`;
  const judgedTxt=j.reports?rich` 보고 ${num(j.reports+'건')} 중 판정 ${num((j.reports-j.unjudged)+'건')}, 지금 바로 확인 ${num((j.latest['위험']||0)+'곳')}·조치 필요 ${num((j.latest['주의']||0)+'곳')}이에요.`:'';
- const what=(p:BriefDigest['problems'][number])=>[p.판단||'',...p.방문상태,p.기한넘긴조치[0]?'기한 넘긴 조치 '+p.기한넘긴조치[0]:''].filter(Boolean).join(', ');
+ // 상태값을 사람에게 말하는 해요체 문장으로 푼다(제니에리 말투). 판단 문장은 저장된 판정 그대로.
+ const say=(x:string)=>x==='필요 방문 기한 지남'?'필요 방문 기한이 지났어요.':x==='필요 방문 일정 없음'?'필요 방문 일정이 아직 없어요.':x.startsWith('일정 잡힘 ')?x.slice(6)+'에 방문 일정이 잡혀 있어요.':x;
+ const what=(p:BriefDigest['problems'][number])=>[p.판단?p.판단.replace(/[.。]?$/,'.'):'',...p.방문상태.map(say),p.기한넘긴조치[0]?`기한 넘긴 조치(${p.기한넘긴조치[0]})가 남아 있어요.`:''].filter(Boolean).join(' ');
  // 상황 판단(숫자 없이): 문제 지도 첫 대상과 그 문제, 이번 주 할 일
  const p0=d.problems[0],place=(p:BriefDigest['problems'][number])=>[p.부서,p.매니저&&p.매니저+' 담당',p.대상].filter(Boolean).join(' › ');
  const hasDelay=d.problems.some(p=>p.방문상태.some(x=>x.includes('기한 지남')||x.includes('일정 없음'))),hasLate=d.problems.some(p=>p.기한넘긴조치.length),hasJudged=d.problems.some(p=>p.판정==='위험'||p.판정==='주의');
  const steps:Rich[]=[hasDelay&&rich`기한 지났거나 일정 없는 필요 방문 대상부터 방문 날짜를 확정해요(이번 주 안 등록).`,hasLate&&rich`기한 넘긴 조치마다 담당자와 새 완료일을 정해 기록해요.`,hasJudged&&rich`바로 확인·조치 필요 대상은 다음 방문에서 이전 이슈가 해결됐는지 확인해 보고해요.`].filter(Boolean) as Rich[];
- const headline=p0?rich`${place(p0)}에서 ${what(p0)||'확인할 일'}이 있어요. ${steps[0]||''}`:rich`지금 바로 챙길 문제는 보이지 않아요. 이번 주 일정이 비어 있는 곳만 확인해요.`;
+ const headline=p0?rich`${place(p0)}부터 볼게요. ${what(p0)||'확인할 일이 있어요.'} ${steps[0]||''}`:rich`지금 바로 챙길 곳은 보이지 않아요. 이번 주 일정이 비어 있는 곳만 같이 확인해 봐요.`;
  // 지시 가이드: 관리자 화면은 담당자 개인별(첫 문제 대상), 잡매니저는 본인 할 일
  const byOwner=new Map<string,BriefDigest['problems'][number]>();for(const p of d.problems){const k=p.매니저||'담당 미지정';if(!byOwner.has(k))byOwner.set(k,p)}
- const directive=d.role==='manager'?d.problems.slice(0,3).map(p=>({to:'본인',say:rich`${p.대상}: ${what(p)} — 이번 주 안에 처리해요.`})):[...byOwner].slice(0,3).map(([who,p])=>({to:who,say:rich`${p.대상}: ${what(p)} — 이번 주 완료일을 정해 주세요.`}));
- const flow=join([rated.length>=2&&first&&last&&rich`최근 ${rated.length}주 이행률 ${num(first.rate+'%')} → ${num(last.rate+'%')}.`,
-  dir!==null&&rich`지난주 대비 이행률 ${num((dir>0?'+':'')+dir+'%p')}, 기한 초과 조치 ${num((odir>0?'+':'')+odir+'건')}.`,
+ const directive=d.role==='manager'?d.problems.slice(0,3).map(p=>({to:'본인',say:rich`${p.대상}${eun(p.대상)} ${what(p)} 이번 주 안에 챙겨 볼까요?`})):[...byOwner].slice(0,3).map(([who,p])=>({to:who,say:rich`${p.대상}${eun(p.대상)} ${what(p)} 이번 주 안에 완료일을 정해 주세요.`}));
+ const flow=join([rated.length>=2&&first&&last&&rich`최근 ${rated.length}주 동안 이행률이 ${num(first.rate+'%')}에서 ${num(last.rate+'%')}로 움직였어요.`,
+  dir!==null&&rich`지난주보다 이행률은 ${num((dir>0?'+':'')+dir+'%p')}, 기한 넘긴 조치는 ${num((odir>0?'+':'')+odir+'건')} 달라졌어요.`,
   k.required>0&&rich`필요 방문 ${num(k.required+'회차')} 중 ${num(k.gapShare+'%')}가 계획 없음·지연이에요.`]);
- const strengths=([k.completed>0&&rich`완료된 방문 ${num(k.completed+'회차')}${k.planned>0&&rich`, 일정이 잡힌 방문 ${num(k.planned+'회차')}`}.`,
-  k.resolved>0&&rich`완료 처리된 후속 조치 ${num(k.resolved+'건')}.`,
-  top&&rich`${unit} 중 이행률이 가장 높은 곳은 ${top.label}(${num(top.rate+'%')}).`,
-  (j.latest['정상']||0)>0&&rich`지금 판정이 정상인 곳 ${num(j.latest['정상']+'곳')}.`].filter(Boolean) as Rich[]).slice(0,4);
+ const strengths=([k.completed>0&&rich`방문을 ${num(k.completed+'회차')} 마쳤어요${k.planned>0&&rich`. 일정이 잡힌 방문도 ${num(k.planned+'회차')} 있어요`}.`,
+  k.resolved>0&&rich`후속 조치 ${num(k.resolved+'건')}을 완료했어요.`,
+  top&&rich`${unit} 중에서는 ${top.label}의 이행률이 ${num(top.rate+'%')}로 가장 높아요.`,
+  (j.latest['정상']||0)>0&&rich`지금 판정이 정상인 곳이 ${num(j.latest['정상']+'곳')}이에요.`].filter(Boolean) as Rich[]).slice(0,4);
  // 먼저 챙길 곳: 저장된 판정이 위험·주의인 대상만(코드가 순위를 매기지 않는다)
  // 직급별 초점: 잡매니저는 판정 위험·주의 대상, 그 위는 하위 단위(파트장=잡매니저, 팀장=파트, 사업부장=팀) 중 일정 잡을 회차가 있는 곳(많은 순)
  const focus=d.role==='manager'?j.attention.slice(0,4).map(a=>({name:a.target,reason:rich`${wk(a.date)} ${levelLabel(a.level)}${a.assessment?' — '+a.assessment:''}`})):
-  [...d.units].filter(u=>u.gap>0||u.overdue>0).sort((a,b)=>b.gap-a.gap||b.overdue-a.overdue).slice(0,3).map(u=>{const p=d.problems.find(x=>x.부서===u.label||x.파트===u.label||x.매니저.split('·').includes(u.label));return {name:u.label,reason:p?rich`${p.대상}: ${what(p)}${p.매니저&&!p.매니저.split('·').includes(u.label)?` (${p.매니저} 담당)`:''}`:rich`일정 잡을 필요 방문이나 기한 넘긴 조치가 있어요.`}});
+  [...d.units].filter(u=>u.gap>0||u.overdue>0).sort((a,b)=>b.gap-a.gap||b.overdue-a.overdue).slice(0,3).map(u=>{const p=d.problems.find(x=>x.부서===u.label||x.파트===u.label||x.매니저.split('·').includes(u.label));return {name:u.label,reason:p?rich`${p.대상}${p.매니저&&!p.매니저.split('·').includes(u.label)?`(${p.매니저} 담당)`:''}${eun(p.대상)} ${what(p)}`:rich`일정을 잡을 필요 방문이나 기한 넘긴 조치가 있어요.`}});
  // 무슨 일이 벌어지고 있나(규칙): 문제 지도에서 앞의 3곳을 '팀 › 담당 › 대상: 무엇' 문장으로(숫자 나열 없이 사실만)
- const story=join(d.problems.slice(0,3).map(p=>rich`${[p.부서,p.매니저&&p.매니저+' 담당',p.대상].filter(Boolean).join(' › ')}: ${what(p)}.`));
- const themes:BriefTheme[]=j.byType.slice(0,3).map(t=>({title:t.type,status:'',evidence:[],summary:rich`판정 이슈 ${num(t.n+'건')}, 대상 ${num(t.targets+'곳')}${t.worse>0&&rich`, 악화 ${num(t.worse+'건')}`}${t.ongoing>0&&rich`, 지속 ${num(t.ongoing+'건')}`}${t.resolved>0&&rich`, 해결 ${num(t.resolved+'건')}`}.`,targets:[]}));
- const watch=[rich`비어 있던 필요 방문이 일정으로 바뀌었는지`,hasLate&&rich`기한 넘긴 조치가 완료나 새 완료일로 정리됐는지`,hasJudged&&rich`바로 확인·조치 필요 대상의 다음 방문 판정`].filter(Boolean) as Rich[];
+ const story=join(d.problems.slice(0,3).map(p=>rich`${[p.부서,p.매니저&&p.매니저+' 담당',p.대상].filter(Boolean).join(' › ')}에서는 ${what(p)}`));
+ const themes:BriefTheme[]=j.byType.slice(0,3).map(t=>({title:t.type,status:'',evidence:[],summary:rich`판정된 이슈가 ${num(t.targets+'곳')}에서 ${num(t.n+'건')} 나왔어요${t.worse>0&&rich`. 악화 ${num(t.worse+'건')}`}${t.ongoing>0&&rich`, 지속 ${num(t.ongoing+'건')}`}${t.resolved>0&&rich`, 해결 ${num(t.resolved+'건')}`}${(t.worse>0||t.ongoing>0||t.resolved>0)?'이에요':''}.`,targets:[]}));
+ const watch=[rich`비어 있던 필요 방문이 일정으로 바뀌었는지 봐 주세요.`,hasLate&&rich`기한 넘긴 조치가 완료나 새 완료일로 정리됐는지 봐 주세요.`,hasJudged&&rich`바로 확인·조치 필요 대상의 다음 방문 판정을 함께 봐요.`].filter(Boolean) as Rich[];
  // 전할 말(규칙): 받는 사람 머리말·숫자 없이 할 일 하나
  const cheer=p0?rich`${p0.대상}처럼 일정이 비거나 기한이 지난 곳부터 이번 주 안에 정리해 주세요.`:rich`지금처럼 방문 일정을 미리 잡아 두면 돼요.`;
  return {directive,steps,headline,cheer,themes,flow,strengths,focus,story,judgment:[],watch,confidence:'rule'};
