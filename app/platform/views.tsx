@@ -52,6 +52,24 @@ export function ScheduleUnits({c,rows}:{c:Context;rows:FieldVisit[]}){
     <td className={x.gap?'su-gap':''}>{x.gap}회</td></tr>)}</tbody></table></div>
  </div>;
 }
+// 연락처: 조회 범위의 현장·매장 주소·연락처·키맨·담당 잡매니저. 연락처·키맨은 기준 정보에 있을 때만(없으면 —), AI에는 보내지 않는다(DC-AI).
+export function ContactDirectory({c}:{c:Context}){
+ const [q,setQ]=useState('');
+ const raw=useMemo(()=>new Map<string,any>([...c.data.sites,...c.data.stores].map(x=>[x.id,x])),[c.data.sites,c.data.stores]);
+ const rows=useMemo(()=>c.scope.filter(t=>t.status==='운영 중').map(t=>{const x=raw.get(t.id)||{};return {t,phone:String(x.phone||x.contact||''),keyman:[x.keyman,x.keymanTitle].filter(Boolean).join(' '),owners:t.managerIds.map(c.uname).filter(Boolean).join(', ')}}).filter(r=>!q||[r.t.name,r.t.siteName,r.t.address,r.keyman,r.owners].join(' ').includes(q)).sort((a,b)=>a.t.siteName.localeCompare(b.t.siteName,'ko')||(a.t.type===b.t.type?a.t.name.localeCompare(b.t.name,'ko'):a.t.type==='site'?-1:1)),[c.scope,raw,q,c.uname]);
+ return <section className="panel"><PanelTitle title="현장·매장 연락처" count={rows.length}><input className="contact-search" type="search" aria-label="연락처 검색" placeholder="이름·주소·키맨 검색" value={q} onChange={e=>setQ(e.target.value)}/></PanelTitle>
+  <div className="contact-list" role="table" aria-label="현장·매장 연락처">
+   <div className="contact-row contact-head" role="row"><span role="columnheader">현장·매장</span><span role="columnheader">주소</span><span role="columnheader">연락처</span><span role="columnheader">키맨</span><span role="columnheader">담당</span></div>
+   {rows.map(({t,phone,keyman,owners})=><div key={t.id} className="contact-row" role="row">
+    <span role="cell" className="contact-name"><b className={'zf-ent zf-ent-'+(t.type==='store'?'store':'site')}>{t.type==='store'?t.name:t.siteName}</b>{t.type==='store'&&<small>{t.siteName}</small>}</span>
+    <span role="cell">{t.address||'—'}</span>
+    <span role="cell">{phone?<a href={'tel:'+phone.replace(/[^0-9+]/g,'')}>{phone}</a>:'—'}</span>
+    <span role="cell">{keyman||'—'}</span>
+    <span role="cell">{owners||'—'}</span>
+   </div>)}
+   {!rows.length&&<Empty text="조건에 맞는 현장·매장이 없어요."/>}
+  </div></section>;
+}
 export function ManagerHome({c}:{c:Context}){const plans=c.visits.filter(v=>v.visitorId===c.me.id&&v.status==='planned'),today=plans.filter(v=>v.plannedDate===c.now),missing=plans.filter(v=>v.plannedDate&&v.plannedDate<=c.now),issues=c.actions.filter(a=>a.ownerId===c.me.id&&a.state!=='완료');return <><div className="manager-welcome"><span className="avatar">{c.me.name.slice(-2)}</span><div><h2>{c.me.name} 매니저님</h2><p>{c.me.team} · {c.me.part} · {nice(c.now)}</p></div>{c.editable&&<button className="btn primary here-btn" onClick={()=>c.open('visit',undefined,{result:true,ai:true,targetType:c.type})}><MapPin size={16}/>지금 여기서 방문 기록</button>}</div><div className="issue-kpis">{[{label:'오늘 방문',value:today.length,icon:MapPin,key:'today',page:'visits'},{label:'미작성 방문 결과',value:missing.length,icon:ClipboardList,key:'missing',page:'results'},{label:'내 미완료 조치',value:issues.length,icon:TriangleAlert,key:'미처리',page:'actions'},{label:'담당 현장·매장',value:c.targets.length,icon:Building2,key:'',page:'sites'}].map(x=><Metric key={x.label} label={x.label} value={x.value} unit={x.page==='sites'?'개':'건'} note="" icon={x.icon} onClick={()=>c.go(x.page,x.key)}/>)}</div><section className="panel"><PanelTitle title="오늘 방문할 현장·매장" count={today.length}><button className="textbtn" onClick={()=>c.go('visits','today')}>전체 보기<ChevronRight size={14}/></button></PanelTitle><VisitRecords c={c} rows={today}/></section><section className="panel"><PanelTitle title="이번 주 내 방문 일정"/><PrioritySchedule c={c} rows={plans.filter(v=>{const day=new Date(c.now+'T12:00:00Z').getUTCDay();const a=new Date(c.now+'T12:00:00Z');a.setUTCDate(a.getUTCDate()-((day+6)%7));const b=new Date(a);b.setUTCDate(b.getUTCDate()+6);return between(v.plannedDate,a.toISOString().slice(0,10),b.toISOString().slice(0,10))})}/></section><section className="panel"><PanelTitle title="내 미완료 후속 조치" count={issues.length}/><ActionRecords c={c} rows={issues}/></section></>}
 // AI 입력·정리 여부는 반짝이 아이콘 하나로만(문구·횟수 배지 없음, 화면 낭독은 이름으로)
 function AiLine({v}:{v:FieldVisit}){if(!(v.entry==='ai'&&v.ai)&&!v.aiEdits?.length)return null;return <span className="ai-dot" title="제니에리와 함께 작성" aria-label="제니에리와 함께 작성" role="img"><AiMark size={20}/></span>}
