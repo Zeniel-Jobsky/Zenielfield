@@ -1,4 +1,5 @@
 'use client';
+import {AiMark} from './ai-mark';
 import {daysBetween as days,mmdd as wk} from '../lib/date';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {Sparkles,Loader2,ChevronRight,RefreshCw,ChevronDown,ChevronUp} from 'lucide-react';
@@ -205,7 +206,7 @@ function BriefPresentation({out,digest,stale,jump,targetNames}:{out:Cached;diges
  const sites=useMemo(()=>{const groups=new Map<string,BriefTheme[]>();for(const t of r.themes)for(const name of new Set(t.targets.length?t.targets:['현장 미지정'])){const list=groups.get(name)||[];list.push(t);groups.set(name,list)}return [...groups]},[r.themes]);
  const peek=[sites.length&&'보고 주제',r.judgment.length&&'판단',r.cheer.length&&CHEER_TO[digest.role],r.watch.length&&'다음 주 볼 것'].filter(Boolean).join(' · ');
  return <div className={'ai-brief-out'+(stale?' stale':'')}>
-  <p className="ai-brief-head"><span className={'ai-brief-tone '+tone.cls}>{tone.label}</span><RichText r={r.headline}/></p>
+  <p className="ai-brief-head"><span className={'ai-brief-tone '+tone.cls}><AiMark size={12}/>{tone.label}</span><RichText r={r.headline}/></p>
   <section className="ai-brief-story"><h3>{ai&&<Sparkles size={14}/>}무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>
   <section className="ai-brief-focus"><h3>{ai&&<Sparkles size={14}/>}먼저 챙길 곳</h3><ol>{r.focus.map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}>{a.name}<ChevronRight size={14}/></button><span><RichText r={a.reason}/></span></li>)}{!r.focus.length&&<li><span>{digest.role==='manager'?'판정 위험·주의로 남은 곳이 없어요(저장된 판정 기준).':'일정 잡을 회차나 기한 넘긴 조치가 있는 곳이 없어요.'}</span></li>}</ol></section>
   {(r.directive?.length||0)>0&&<section className="ai-brief-guide"><h3>{ai&&<Sparkles size={14}/>}지시 가이드 <small>누구에게 무엇을</small></h3><ul>{r.directive!.map((x,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(x.to)}>{x.to}<ChevronRight size={14}/></button><span><RichText r={x.say}/></span></li>)}</ul></section>}

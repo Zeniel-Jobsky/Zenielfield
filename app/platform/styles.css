@@ -639,3 +639,5 @@
 .ai-brief-steps b{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#003c33;color:#fff;font-size:12px}
 .weekly-content .ai-brief .panel-heading h2>svg{display:inline-block}
 @media(max-width:760px){.ai-brief-guide ul li{grid-template-columns:1fr}}
+.zf-ai-mark{flex:none;margin-right:4px;color:#003c33;vertical-align:-2px}
+.ai-badge .zf-ai-mark,.ai-brief-tone .zf-ai-mark{margin-right:3px}

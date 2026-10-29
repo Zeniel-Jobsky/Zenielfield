@@ -1,4 +1,5 @@
 'use client';
+import {AiMark} from './ai-mark';
 import {useState,type FormEvent} from 'react';
 import {Check,MapPin,ClipboardCheck,Sparkles,PenLine} from 'lucide-react';
 import {Field} from '../ui';
@@ -37,7 +38,7 @@ export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;e
  <Field label={type==='site'?'방문 현장 *':'상위 현장 *'} wide><select required value={site} disabled={locked} onChange={e=>{setSite(e.target.value);setStore('')}}><option value="">현장 선택</option>{parents.map(s=><option key={s.id} value={s.id}>{s.name} · {s.client}</option>)}</select></Field>
  {type==='store'&&<Field label="방문 매장 *" wide><select required value={store} disabled={locked} onChange={e=>setStore(e.target.value)}><option value="">소속 매장 선택</option>{stores.map(s=><option key={s.id} value={s.id}>{s.name} · {s.code}</option>)}</select></Field>}
  {owners.length>1&&<Field label="방문자 *"><select value={owner} onChange={e=>setVisitor(e.target.value)}>{owners.map(id=><option key={id} value={id}>{c.uname(id)}</option>)}</select></Field>}
- {(plan||pickedDay)&&<><div className="form-section wide"><span>03</span>{plan?'AI 일정 초안 검토':'일정 검토'}</div>
+ {(plan||pickedDay)&&<><div className="form-section wide"><span>03</span>{plan&&<AiMark/>}{plan?'AI 일정 초안 검토':'일정 검토'}</div>
  <Field label="방문 예정일 *"><input type="date" required value={values.plannedDate} onChange={e=>setValues({...values,plannedDate:e.target.value})}/></Field><Field label="예정 시간"><input type="time" value={values.time} onChange={e=>setValues({...values,time:e.target.value})}/></Field>
  <Field label="방문 목적 *" wide><select value={values.purpose} onChange={e=>setValues({...values,purpose:e.target.value})}>{purposes.map(p=><option key={p}>{p}</option>)}</select></Field>
  <Field label="사전 확인사항" wide><textarea rows={2} maxLength={1500} value={values.precheck} onChange={e=>setValues({...values,precheck:e.target.value})}/></Field>

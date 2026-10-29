@@ -1,4 +1,5 @@
 'use client';
+import {AiMark} from './ai-mark';
 import {daysBetween} from '../lib/date';
 import {JudgeCheck,runJudge,judgeKey,confirmed,type JudgeState} from './judge-check';
 import {useState,type FormEvent} from 'react';
@@ -46,7 +47,7 @@ export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;
  <Field label={type==='site'?'방문 현장 *':'상위 현장 *'} wide><select required value={site} disabled={locked} onChange={e=>{setSite(e.target.value);setStore('')}}><option value="">현장 선택</option>{parents.map(s=><option key={s.id} value={s.id}>{s.name} · {s.client}</option>)}</select></Field>
  {type==='store'&&<Field label="방문 매장 *" wide><select required value={store} disabled={locked} onChange={e=>setStore(e.target.value)}><option value="">소속 매장 선택</option>{stores.map(s=><option key={s.id} value={s.id}>{s.name} · {s.code}</option>)}</select></Field>}
  {owners.length>1&&!r&&<Field label="방문자 *"><select value={owner} onChange={e=>setVisitor(e.target.value)}>{owners.map(id=><option key={id} value={id}>{c.uname(id)}</option>)}</select></Field>}
- {ai&&<><div className="form-section wide"><span>03</span>AI 초안 검토</div>
+ {ai&&<><div className="form-section wide"><span>03</span><AiMark/>AI 초안 검토</div>
  <div className="ai-result wide"><p><Sparkles size={14}/><b>AI 요약</b> {ai.summary||'요약 없음'}</p><p className="ai-tags">{ai.confidence==='low'&&<span className="warn">확신 낮음 · 꼭 확인</span>}</p>{ai.input.text&&<details><summary>입력 원문</summary><p className="ai-source">{ai.input.text}</p></details>}<p className="form-hint">AI 초안을 고친 칸은 &quot;수정됨&quot;으로 표시되고 그대로 기록됩니다.</p></div>
  <details className="optional-field wide"><summary>방문 일시 {actualDate===c.now?'오늘':actualDate} {actualTime} · 바꾸려면 펼치기</summary><div className="form-grid"><Field label="실제 방문일 *"><input type="date" value={actualDate} max={c.now} required onChange={e=>setActualDate(e.target.value)}/></Field><Field label="실제 방문 시간"><input type="time" value={actualTime} onChange={e=>setActualTime(e.target.value)}/></Field></div></details>
  {aiFields.map(k=><Field key={k} label={labels[k]+(k==='detail'?' *':'')+(edited(k)?' · 수정됨':' · AI')} wide={k!=='purpose'&&k!=='result'}>{k==='purpose'?<select data-ai={edited(k)?undefined:'1'} required value={values[k]} onChange={e=>setValues({...values,[k]:e.target.value})}><option value="" disabled>선택해 주세요</option>{purposes.map(p=><option key={p}>{p}</option>)}</select>:k==='result'?<select data-ai={edited(k)?undefined:'1'} required value={values[k]} onChange={e=>setValues({...values,[k]:e.target.value})}><option value="" disabled>선택해 주세요</option><option>특이사항 없음</option><option>후속 조치 필요</option></select>:<textarea data-ai={edited(k)?undefined:'1'} required={k==='detail'} rows={k==='detail'?4:2} maxLength={k==='detail'?3500:1000} value={values[k]} onChange={e=>setValues({...values,[k]:e.target.value})}/>}</Field>)}
