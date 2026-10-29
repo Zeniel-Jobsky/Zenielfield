@@ -67,4 +67,12 @@ equal(agingBuckets([{state:'미처리',dueDate:'2026-10-20'},{state:'처리 중'
  equal(updateDemo(demo,'visit',{...judged,judgment:undefined,time:'09:00'},judged,boss,now).item.judgment.level,'주의');
  equal('judgment' in updateDemo(demo,'visit',{...judged,judgment:undefined,notes:'바뀜'},judged,boss,now).item,false);
  equal('judgment' in updateDemo(demo,'visit',{...judged,judgment:null},judged,boss,now).item,false);}
+{// 회의록 구조: 서버가 정리해 저장(시각 HH:MM만, 인원 정수, 목록 문자열), 빈 구조는 버린다
+ const demo=platformDemo(now),boss={...demo.users[0],role:'admin'},t=targetsOf(demo).find(t=>t.type==='site'&&t.status==='운영 중')!;
+ const base={targetType:'site',siteId:t.siteId,storeId:null,visitorId:t.managerIds[0],plannedDate:null,time:'',purpose:'현장 정기점검',precheck:'',status:'completed',actualDate:now,actualTime:'10:00',detail:'현장  점검함 .  직원 1명 결원 ',notes:'',result:'특이사항 없음',cancelReason:'',requirementId:null};
+ const m=updateDemo(demo,'visit',{...base,meeting:{topic:' 정기 미팅 ',attendeeCount:3,start:'14:00',end:'25:00',items:['인력 추가',5,''],extra:['일지 공유'],names:['홍길동']}},null,boss,now).item.meeting;
+ equal(m,{topic:'정기 미팅',attendeeCount:3,start:'14:00',end:'',items:['인력 추가'],extra:['일지 공유']});
+ equal('meeting' in updateDemo(demo,'visit',{...base,meeting:{topic:'',items:[],extra:[]}},null,boss,now).item,false);
+ equal('meeting' in updateDemo(demo,'visit',{...base,meeting:'x'},null,boss,now).item,false);
+ equal(updateDemo(demo,'visit',{...base,meeting:{topic:'a',attendeeCount:-1,items:[],extra:[]}},null,boss,now).item.meeting.attendeeCount,0);}
 console.log(`${assertions} platform assertions passed: independent targets, occurrence math, cancellation, no auto-completion, joint assignments, immutable history and linked action flow.`);

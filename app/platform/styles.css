@@ -749,3 +749,6 @@
 .ai-meeting p{margin:0;display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px;color:#17171c}
 .ai-meeting b{font-weight:600;color:#003c33}
 .ai-meeting span{min-width:0;overflow-wrap:anywhere}
+
+/* 회의록으로 입력한 방문 표시: 중립 알약 */
+.meeting-tag{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:999px;background:var(--zf-info-soft);color:#516e8a;font-size:12px;white-space:nowrap}

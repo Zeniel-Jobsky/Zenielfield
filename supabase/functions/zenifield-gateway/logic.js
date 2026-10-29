@@ -85,6 +85,13 @@ function cleanJudgment(x) {
 
 // app/platform/mutations.ts
 var str2 = (v, max) => typeof v === "string" ? v.slice(0, max) : "";
+function cleanMeeting(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const hm = (v) => typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(v) ? v : "";
+  const list = (v) => Array.isArray(v) ? v.filter((x) => typeof x === "string" && !!x.trim()).slice(0, 10).map((x) => x.trim().slice(0, 200)) : [];
+  const n = Number(raw.attendeeCount), m = { topic: str2(raw.topic, 200).trim(), attendeeCount: Number.isInteger(n) && n >= 0 && n <= 200 ? n : 0, start: hm(raw.start), end: hm(raw.end), items: list(raw.items), extra: list(raw.extra) };
+  return m.topic || m.items.length || m.extra.length ? m : null;
+}
 function aiEntryOf(raw) {
   if (!raw || typeof raw !== "object") throw Error("AI \uC785\uB825 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4. AI \uAC04\uD3B8 \uB4F1\uB85D\uC5D0\uC11C \uB2E4\uC2DC \uC791\uC131\uD574 \uC8FC\uC138\uC694.");
   const text = str2(raw.input?.text, 3e3), imageCount = Number(raw.input?.imageCount);
@@ -221,6 +228,12 @@ function updateDemo(data, entity, values, record, actor, now) {
         if (applied.length) item.aiEdits = [...priorEdits.slice(-9), { model: str3(prop.model).slice(0, 80), generatedAt: str3(prop.generatedAt).slice(0, 40), appliedAt: (/* @__PURE__ */ new Date()).toISOString(), byId: actor.id, before, proposed, applied }];
       }
       if (!item.aiEdits.length) delete item.aiEdits;
+      if (item.status !== "completed" || item.meeting == null) delete item.meeting;
+      else {
+        const m = cleanMeeting(item.meeting);
+        if (m) item.meeting = m;
+        else delete item.meeting;
+      }
       if (item.status !== "completed") delete item.judgment;
       else if (item.judgment === void 0) {
         const same = !!record && ["purpose", "detail", "notes", "result", "actualDate"].every((k) => (record[k] || "") === (item[k] || ""));
@@ -268,6 +281,7 @@ function updateDemo(data, entity, values, record, actor, now) {
 }
 export {
   aiEntryOf,
+  cleanMeeting,
   newId,
   updateDemo
 };

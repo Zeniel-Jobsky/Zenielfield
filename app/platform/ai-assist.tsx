@@ -5,7 +5,7 @@ import type {AiField} from './model';
 import {collapseRepeats} from '../lib/dedupe-text';
 import {Plus,Mic,Square,ArrowUp,X,Loader2,Camera,FileText} from 'lucide-react';
 // ChatGPT-style composer: type, speak or attach photos, then send once; the draft fills the form directly. Nothing is saved here.
-export type AiUnclear={field:'purpose'|'detail'|'notes'|'result'|'actions';what:string;where:string;options:string[]};
+export type AiUnclear={field:'purpose'|'detail'|'notes'|'result'|'actions'|'date'|'time';what:string;where:string;options:string[]};
 export type AiDraft={detail:string;result:string;purpose:string;notes:string;extra:{summary:string};actions:{type:string;content:string;dueDate:string}[];unclear?:AiUnclear[];meeting?:AiMeeting;confidence:string};
 export type AiMeeting={isMeeting:boolean;topic:string;target:string;date:string;start:string;end:string;attendeeCount:number;items:string[];extra:string[]};
 // 회의록 양식: 입력칸에 넣어 채우거나, 종이에 같은 순서로 써서 사진으로 올린다
