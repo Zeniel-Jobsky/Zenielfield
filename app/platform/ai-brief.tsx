@@ -9,7 +9,7 @@ import {PanelTitle} from '../ui';
 import {type FieldVisit,aggregate,dayShift,targetOf,targetStatus,typeName,weeklyTrend} from './model';
 import {scopeUnits} from './decision';
 import {weekRanges,weekTitle} from '../briefing/model';
-import {rich,join,num,RichText,site,store,tagNames,type Rich,type Tone} from './rich';
+import {rich,join,num,eun,RichText,site,store,tagNames,type Rich,type Tone} from './rich';
 import {collapseRepeats} from '../lib/dedupe-text';
 import {isCurrentJudgment,maskText,levelLabel} from './judgment';
 import {callAssist,aiDownReason} from './ai-assist';
@@ -113,7 +113,6 @@ export function buildDigest(c:Context,f:BriefFactors=defaultFactors,range?:Brief
 }
 // 다이제스트 지문: 이 값이 같으면 "변경 없음"으로 보고 저장된 요약을 재사용한다.
 export const digestKey=(d:BriefDigest)=>{const s=JSON.stringify(d);let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return (h>>>0).toString(36)+':'+s.length};
-const eun=(w:string)=>{const c=w.charCodeAt(w.length-1);return c>=0xac00&&c<=0xd7a3?((c-0xac00)%28?'은':'는'):'은(는)'};
 // AI 없이 만드는 브리핑(데모·AI 연결 안 됨): 판정하지 않는다(DC-JUDGMENT). 숫자 사실과 저장된 종합 판정만 옮긴다.
 // 상태 평가(양호·위험·따라잡기 어려움)·우선순위·선택지 판단은 쓰지 않고, 판단은 AI 연결 시에만 표시한다.
 // 전할 말의 대상: 바로 아래 직급
@@ -149,7 +148,8 @@ export function ruleBrief(d:BriefDigest):AiBriefResult{
  const focus=d.role==='manager'?j.attention.slice(0,4).map(a=>({name:a.target,reason:rich`${wk(a.date)} ${levelLabel(a.level)}${a.assessment?' — '+a.assessment:''}`})):
   [...d.units].filter(u=>u.gap>0||u.overdue>0).sort((a,b)=>b.gap-a.gap||b.overdue-a.overdue).slice(0,3).map(u=>{const p=d.problems.find(x=>x.부서===u.label||x.파트===u.label||x.매니저.split('·').includes(u.label));return {name:u.label,reason:p?rich`${nm(p)}${p.매니저&&!p.매니저.split('·').includes(u.label)?`(${p.매니저} 담당)`:''}${eun(p.대상)} ${what(p)}`:rich`일정을 잡을 필요 방문이나 기한 넘긴 조치가 있어요.`}});
  // 무슨 일이 벌어지고 있나(규칙): 문제 지도에서 앞의 3곳을 '팀 › 담당 › 대상: 무엇' 문장으로(숫자 나열 없이 사실만)
- const story=join(d.problems.slice(0,3).map(p=>rich`${[p.부서,p.매니저&&p.매니저+' 담당'].filter(Boolean).map(x=>x+' › ').join('')}${nm(p)}에서는 ${what(p)}`));
+ // 실행자(잡매니저): 내 현장 이야기 / 판단·지시자: 바로 아래 단위별 상태(현장 이름은 근거 하나만)
+ const story=!leader?join(d.problems.slice(0,3).map(p=>rich`${nm(p)}에서는 ${what(p)}`)):join([...d.units].filter(u=>u.gap>0||u.overdue>0).slice(0,3).map(u=>{const p=d.problems.find(x=>x.부서===u.label||x.파트===u.label||x.매니저.split('·').includes(u.label));const who=d.role==='partlead'?u.label+' 매니저님 담당':u.label;return rich`${who}${eun(who)} ${u.gap>0?rich`일정을 잡아야 할 필요 방문이 ${num(u.gap+'회차')}`:''}${u.gap>0&&u.overdue>0?', ':''}${u.overdue>0?rich`기한 넘긴 조치가 ${num(u.overdue+'건')}`:''} 있어요${p?rich`(예: ${nm(p)})`:''}.`}))||rich`아래 단위 모두 일정과 조치가 제때 가고 있어요.`;
  const themes:BriefTheme[]=j.byType.slice(0,3).map(t=>({title:t.type,status:'',evidence:[],summary:rich`판정된 이슈가 ${num(t.targets+'곳')}에서 ${num(t.n+'건')} 나왔어요${t.worse>0&&rich`. 악화 ${num(t.worse+'건')}`}${t.ongoing>0&&rich`, 지속 ${num(t.ongoing+'건')}`}${t.resolved>0&&rich`, 해결 ${num(t.resolved+'건')}`}${(t.worse>0||t.ongoing>0||t.resolved>0)?'이에요':''}.`,targets:[]}));
  const watch=[rich`비어 있던 필요 방문이 일정으로 바뀌었는지 봐 주세요.`,hasLate&&rich`기한 넘긴 조치가 완료나 새 완료일로 정리됐는지 봐 주세요.`,hasJudged&&rich`바로 확인·조치 필요 대상의 다음 방문 판정을 함께 봐요.`].filter(Boolean) as Rich[];
  // 전할 말(규칙): 받는 사람 머리말·숫자 없이 할 일 하나

@@ -5,6 +5,8 @@ export type {Tone};
 export type Seg={v:string;tone?:Tone};
 export type Rich=Seg[];
 type Part=string|number|Seg|Rich|null|undefined|false;
+// 은/는 조사: 받침이 있으면 은, 없으면 는. 숫자로 끝나면 읽는 소리 기준(2·4·5·9 = 는), 그 밖은 은(는). 브리핑·제니에리 문장 공통
+export const eun=(w:string)=>{const c=w.charCodeAt(w.length-1),d=w.slice(-1);if(/[0-9]/.test(d))return '2459'.includes(d)?'는':'은';return c>=0xac00&&c<=0xd7a3?((c-0xac00)%28?'은':'는'):'은(는)'};
 export const num=(v:string|number):Seg=>({v:String(v),tone:'num'});
 export const bad=(v:string):Seg=>({v,tone:'bad'});
 export const good=(v:string):Seg=>({v,tone:'good'});

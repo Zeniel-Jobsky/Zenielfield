@@ -1,4 +1,5 @@
 'use client';
+import {eun} from './rich';
 import {AiMark} from './ai-mark';
 import {ActionOrderPicker,orderActions,type ActionOrder} from './action-order';
 import {SLOT_LABEL} from './model';
@@ -79,7 +80,8 @@ export function ContactDirectory({c}:{c:Context}){
   </div></section>;
 }
 // 운영 현황 맨 위 제니에리 인사(사실만, 자기 지난주와만 비교, 해요체, DC-FEEDBACK·DC-JUDGMENT). 말투는 직급별:
-// 잡매니저 = 본인 할 일 독려 · 파트장 = 담당 매니저 챙기기 제안 · 팀장·사업부장 = 보고만(할 일을 시키지 않는다, 자세한 곳은 브리핑으로).
+// 잡매니저 = 본인 할 일 독려(오늘 방문·이번 주 속도·밀린 결과) · 파트장 이상 = 방문 건수가 아니라 아래 단위(파트장→매니저, 팀장→파트, 사업부장→팀)의 흐름을
+// 자기 지난주와 비교해, 칭찬할 곳(지난주보다 나아진 곳)과 지원할 곳(기한 넘긴 조치가 남은 곳)을 말한다. 순위·지시 없음.
 export function ZeniCheer({c}:{c:Context}){
  // 보는 범위 기준(잡매니저 = 본인 담당, 그 위 = 맡은 조직). c.visits·c.actions는 이미 범위로 좁혀져 있음
  const role=c.me.role,self=role==='manager',coach=role==='partlead',report=role==='lead'||role==='director'||role==='admin',where=self?'':'맡은 범위에서 ',plans=c.visits.filter(v=>v.status==='planned'),today=plans.filter(v=>v.plannedDate===c.now).length,missing=plans.filter(v=>v.plannedDate&&v.plannedDate<=c.now).length,late=c.actions.filter(a=>a.state!=='완료'&&a.dueDate<c.now).length;
@@ -92,7 +94,23 @@ export function ZeniCheer({c}:{c:Context}){
  const p1=`${call}, ${hello} ${today?`${where}오늘은 방문이 ${today}건 잡혀 있어요.`:`${where}오늘 잡힌 방문은 없어요.`}`;
  const p2=done||before?`${where}이번 주에 방문을 ${done}건 마쳤어요. ${pace}`:'';
  const facts=[missing&&`결과가 아직 없는 방문이 ${missing}건`,late&&`기한 넘긴 조치가 ${late}건`].filter(Boolean).join(', ');
- const p3=!facts?(self?'오늘도 제가 옆에서 챙길게요!':''):self?`${facts} 있어요. 다녀온 뒤 결과를 남기시고, 밀린 조치는 새 완료일만 정해 둬도 충분해요. 오늘도 제가 옆에서 챙길게요!`:coach?`${facts} 있어요. 담당 매니저님들과 함께 보시면 좋아요. 곳별로는 아래에 정리해 두었어요.`:`${facts} 있어요. 어느 곳인지는 아래 브리핑에 정리해 두었어요.`;
+ if(!self){
+  // 판단·독려하는 사람(파트장 이상): 방문 건수가 아니라 아래 단위별 흐름(자기 지난주와만 비교)과 독려·지원할 곳
+  const tById=new Map(c.scope.map(t=>[t.id,t])),uName=new Map(c.data.users.map(u=>[u.id,u.name]));
+  const unitOf=(tid:string,who?:string)=>{const t=tById.get(tid);if(!t)return '';return role==='partlead'?(uName.get(who||t.managerIds[0]||'')||''):role==='lead'?t.part:t.team};
+  const word=role==='partlead'?'매니저':role==='lead'?'파트':'팀',cnt=role==='partlead'?'명':'곳',units=new Map<string,{done:number;before:number;late:number}>();
+  const u=(k:string)=>{if(!k)return null;if(!units.has(k))units.set(k,{done:0,before:0,late:0});return units.get(k)!};
+  for(const v of c.visits){if(v.status!=='completed')continue;const k=u(unitOf(v.storeId||v.siteId,v.visitorId));if(!k)continue;if(between(v.actualDate,wk,c.now))k.done++;else if(between(v.actualDate,prev,dayShift(prev,daysBetween(wk,c.now))))k.before++}
+  for(const x of c.actions){if(x.state==='완료'||!(x.dueDate<c.now))continue;const k=u(unitOf(x.storeId||x.siteId,x.ownerId));if(k)k.late++}
+  const nm=(k:string)=>role==='partlead'?k+' 매니저님 담당':k,list=(ks:string[])=>ks.map(nm).join('·');
+  const up=[...units].filter(([,x])=>x.done>x.before&&x.done>0).map(([k])=>k).slice(0,3),stuck=[...units].filter(([,x])=>x.late>0).map(([k])=>k).slice(0,3);
+  const q1=`${call}, ${hello} 맡으신 ${word} ${units.size}${cnt}의 이번 주 흐름을 정리했어요.`;
+  const q2=up.length?`${list(up)}${eun(nm(up[up.length-1]))} 지난주 이맘때보다 방문을 더 마쳤어요. 잘하고 있다고 한마디 건네 주시면 큰 힘이 돼요.`:`이번 주는 지난주 이맘때보다 방문 속도가 느린 편이에요(이번 주 ${done}건, 지난주 이맘때 ${before}건).`;
+  const q3=stuck.length?`${list(stuck)}에는 기한 넘긴 조치가 남아 있어요. 막힌 게 없는지, 도울 일이 있는지 먼저 물어봐 주세요.`:'기한 넘긴 조치는 없어요.';
+  const paras=[q1,q2,q3+' 곳별로는 아래 브리핑에 정리해 두었어요.'];
+  return <div className="zeni-working zeni-cheer-say" aria-label="제니에리 인사"><span className="zeni-working-character"><AiMark size={44}/><b>제니에리</b></span><div className="zeni-working-bubble" role="note">{paras.map((x,i)=><p key={i}>{x}</p>)}</div></div>;
+ }
+ const p3=!facts?'오늘도 제가 옆에서 챙길게요!':`${facts} 있어요. 다녀온 뒤 결과를 남기시고, 밀린 조치는 새 완료일만 정해 둬도 충분해요. 오늘도 제가 옆에서 챙길게요!`;
  const paras=[p1,p2,p3].filter(Boolean);
  return <div className="zeni-working zeni-cheer-say" aria-label="제니에리 인사"><span className="zeni-working-character"><AiMark size={44}/><b>제니에리</b></span><div className="zeni-working-bubble" role="note">{paras.map((x,i)=><p key={i}>{x}</p>)}</div></div>;
 }
