@@ -4,7 +4,7 @@
 
 <p align="center"><b>ZeniField</b>는 현장 방문 보고를 AI 비서 <b>제니에리</b>가 대신 읽고<br>"지금 어디에 무슨 일이 있고, 나는 무엇을 하면 되는지"를 먼저 말해 주는 현장·매장 운영 앱이에요.</p>
 
-<p align="center">📚 <a href="docs/evidence.md"><b>설계 근거 문서</b></a> — AI 도입·사용 방식, 문구, 화면·차트를 정한 논문 근거 · 💰 <a href="docs/cost-estimate.md"><b>개발비·운영비 산정</b></a> · 🚀 <a href="docs/go-live.md"><b>실서비스 오픈 가이드</b></a></p>
+<p align="center">📚 <a href="docs/evidence.md"><b>설계 근거 문서</b></a> — AI 도입·사용 방식, 문구, 화면·차트를 정한 논문 근거 · 💰 <a href="docs/cost-estimate.md"><b>내부 비용 산정</b></a> · 🚀 <a href="docs/go-live.md"><b>실서비스 오픈 가이드</b></a></p>
 
 <p align="center"><img src="docs/screenshots/dashboard-pc.jpg" width="620" alt="운영 현황 PC 화면"> <img src="docs/screenshots/dashboard-mobile.jpg" width="200" alt="운영 현황 모바일 화면"></p>
 
@@ -197,7 +197,7 @@ pnpm dev        # http://127.0.0.1:5173  (데모: /?mode=demo)
 | [사용 안내](docs/guide.md) | 사용자·관리자 화면 사용법 |
 | [업무·데이터 명세](docs/spec.md) | 방문 흐름, 데이터 계약, AI 간편 등록, 주간 브리핑, 방문·조치 설계 |
 | [설계 근거](docs/evidence.md) · [디자인 지침](docs/DESIGN-zenielfield.md) | 논문 근거(AI 도입·사용, 문구, 화면·차트)와 화면 기준 |
-| [개발비·운영비 산정](docs/cost-estimate.md) | 기능점수(FP) 기준 개발 대가 추정, 규모별 월 운영비, 산정 근거 |
+| [내부 비용 산정](docs/cost-estimate.md) | 기능점수(FP)로 잰 개발 규모·사내 인건비 환산, 월 운영비, 유지 인력, 연간 총비용 |
 | [인프라 구성](docs/infrastructure.md) · [로컬 개발](docs/local-development.md) · [테스트](docs/testing.md) | 개발·운영 구성 |
 | [기능 현황](docs/feature-status.md) · [남은 이슈](docs/next-issues-plan.md) | 진행 기록 |
 | [archive/](docs/archive/) | 끝난 계획·지난 보고·이전 README |
