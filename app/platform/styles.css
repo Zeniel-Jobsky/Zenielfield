@@ -933,7 +933,7 @@
 .list-tools select{min-height:40px}
 .list-tools .action-order-tools{margin:0;display:flex;align-items:center;gap:8px}
 /* 두 목록 표 같은 열 비율: 대상 | 내용 | 담당 | 날짜 | 상태 | › */
-.record-table{table-layout:fixed;width:100%}
+.record-table{table-layout:fixed;width:100%;min-width:960px}
 .record-table th:nth-child(1){width:22%}.record-table th:nth-child(2){width:28%}.record-table th:nth-child(3){width:12%}.record-table th:nth-child(4){width:13%}.record-table th:nth-child(5){width:11%}.record-table th:nth-child(6){width:14%}
 .record-table td small{display:block}
 .app-shell .list-tools select{min-height:40px;border:1px solid var(--zf-control-border);border-radius:6px;background-color:var(--zf-surface,#fff);padding:0 32px 0 12px;font-size:13px}
@@ -966,6 +966,7 @@
 .app-shell .btn.small svg,.app-shell .copy-btn.with-text svg{flex:0 0 14px;width:14px;height:14px}
 .app-shell .copy-btn.with-text{display:inline-flex;align-items:center;gap:4px}
 .app-shell .record-table .row-actions{flex-wrap:nowrap;gap:8px}
-.record-table th:nth-child(2){width:26%}.record-table th:nth-child(6){width:16%}
+.record-table th:nth-child(1){width:20%}.record-table th:nth-child(2){width:24%}.record-table th:nth-child(3){width:11%}.record-table th:nth-child(4){width:12%}.record-table th:nth-child(5){width:11%}.record-table th:nth-child(6){width:22%}
+.app-shell .record-table .row-actions .textbtn,.app-shell .record-table td>.action-edit-link{min-height:44px;white-space:nowrap}
 /* 모바일: 등록은 하단 가운데 + 버튼 하나(머리 버튼과 같은 동작) → 머리 등록 버튼 숨김 */
 @media(max-width:760px){.app-shell .page-actions>.btn.primary{display:none}}
