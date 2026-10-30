@@ -958,3 +958,12 @@
 .record-table .row-actions{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
 .record-table .row-actions .textbtn{min-height:36px;white-space:nowrap}
 .record-table th:nth-child(2){width:28%}.record-table th:nth-child(6){width:14%}
+/* 아이콘+글자 버튼 정렬: 아이콘 14px 고정 칸, 글자와 세로 가운데·4px 간격, 같은 높이 36px */
+.app-shell .record-table .row-actions .textbtn,.app-shell .record-table td>.textbtn{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 4px;line-height:1;vertical-align:middle}
+.app-shell .record-table .row-actions .textbtn svg{width:14px;height:14px;flex:0 0 14px}
+.app-shell .record-table .row-actions .textbtn:first-child:not(.action-edit-link){color:var(--zf-brand-green);font-weight:600}
+.app-shell .btn.small,.app-shell .brief-do-links .btn,.app-shell .action-late .btn.small{display:inline-flex;align-items:center;gap:4px}
+.app-shell .btn.small svg,.app-shell .copy-btn.with-text svg{flex:0 0 14px;width:14px;height:14px}
+.app-shell .copy-btn.with-text{display:inline-flex;align-items:center;gap:4px}
+.app-shell .record-table .row-actions{flex-wrap:nowrap;gap:8px}
+.record-table th:nth-child(2){width:26%}.record-table th:nth-child(6){width:16%}
