@@ -1098,3 +1098,4 @@ html.zf-calm .zf-ai-mark,html.zf-calm .zeni-working-dots i{animation:none!import
 .settings,.settings>[role=tabpanel],.settings .panel,.settings .table-scroll{min-width:0;max-width:100%}.settings .table-scroll{overflow-x:auto}
 .settings [role=tabpanel]>.panel,.settings [role=tabpanel]>.panel::before{border-top:0!important;box-shadow:none}
 .bulk-table th:nth-child(1){width:56px}.bulk-table th:nth-child(2){width:32%}.bulk-table th:nth-child(3){width:72px}
+.app-shell .ai-brief-cheer h3{display:flex;align-items:center;gap:6px}.app-shell .ai-brief-cheer h3 .copy-button{margin-left:auto}

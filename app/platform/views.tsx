@@ -78,18 +78,22 @@ export function ContactDirectory({c}:{c:Context}){
    {!rows.length&&<Empty text="조건에 맞는 현장·매장이 없어요."/>}
   </div></section>;
 }
-// 잡매니저에게 제니에리가 직접 건네는 독려(사실만, 자기 지난주와만 비교, 해요체). 판정·순위·임계값 칭찬 없음(DC-FEEDBACK·DC-JUDGMENT).
+// 운영 현황 맨 위 제니에리 인사(사실만, 자기 지난주와만 비교, 해요체, DC-FEEDBACK·DC-JUDGMENT). 말투는 직급별:
+// 잡매니저 = 본인 할 일 독려 · 파트장 = 담당 매니저 챙기기 제안 · 팀장·사업부장 = 보고만(할 일을 시키지 않는다, 자세한 곳은 브리핑으로).
 export function ZeniCheer({c}:{c:Context}){
  // 보는 범위 기준(잡매니저 = 본인 담당, 그 위 = 맡은 조직). c.visits·c.actions는 이미 범위로 좁혀져 있음
- const self=c.me.role==='manager',where=self?'':'맡은 범위에서 ',plans=c.visits.filter(v=>v.status==='planned'),today=plans.filter(v=>v.plannedDate===c.now).length,missing=plans.filter(v=>v.plannedDate&&v.plannedDate<=c.now).length,late=c.actions.filter(a=>a.state!=='완료'&&a.dueDate<c.now).length;
+ const role=c.me.role,self=role==='manager',coach=role==='partlead',report=role==='lead'||role==='director'||role==='admin',where=self?'':'맡은 범위에서 ',plans=c.visits.filter(v=>v.status==='planned'),today=plans.filter(v=>v.plannedDate===c.now).length,missing=plans.filter(v=>v.plannedDate&&v.plannedDate<=c.now).length,late=c.actions.filter(a=>a.state!=='완료'&&a.dueDate<c.now).length;
  const wk=weekOf(c.now),prev=dayShift(wk,-7),mine=(a:string,b:string)=>c.visits.filter(v=>v.status==='completed'&&between(v.actualDate,a,b)).length;
  const done=mine(wk,c.now),before=mine(prev,dayShift(prev,daysBetween(wk,c.now)));
  const h=Number(kstTime().slice(0,2)),hello=h<11?'좋은 아침이에요.':h<14?'점심은 챙기셨어요?':h<18?'오후도 힘내요.':'오늘 하루 고생 많으셨어요.';
- const lines=[`${c.me.name} ${({manager:'매니저님',partlead:'파트장님',lead:'팀장님',director:'사업부장님'} as Record<string,string>)[c.me.role]||'님'}, ${hello}`,today?`${where}오늘은 방문이 ${today}건 잡혀 있어요.`:`${where}오늘 잡힌 방문은 없어요.`,
-  done||before?`${where}이번 주에 방문을 ${done}건 마쳤어요${done>before?`.|지난주 이맘때(${before}건)보다 많아요, 잘하고 계세요!`:done===before?`.|지난주 이맘때와 같은 속도예요.`:`.|지난주 이맘때는 ${before}건이었어요, 오늘 한 곳만 더 가 볼까요?`}`:'',
-  missing?`결과를 아직 안 남긴 방문이 ${missing}건 있어요.${self?' 다녀온 뒤 바로 남겨 주시면 제가 정리해 드릴게요.':' 담당 매니저님들께 결과를 남겨 달라고 전해 주세요.'}`:'',
-  late?`기한 넘긴 조치 ${late}건은 ${self?'새 완료일만 정해 둬도 충분해요.':'담당자와 새 완료일을 정해 보세요.'}`:'','오늘도 제가 옆에서 챙길게요!'].filter(Boolean).map(x=>x.replace('|',' '));
- const paras=[lines.slice(0,2).join(' '),lines.filter(x=>x.includes('이번 주에')).join(' '),lines.slice(2).filter(x=>!x.includes('이번 주에')).join(' ')].filter(Boolean);
+ // 호칭: 이름에 이미 직함이 들어 있으면(예: 시험 사업부장) 직함을 겹쳐 붙이지 않는다
+ const title=({manager:'매니저',partlead:'파트장',lead:'팀장',director:'사업부장',admin:'관리자'} as Record<string,string>)[role]||'',call=title&&!c.me.name.includes(title)?`${c.me.name} ${title}님`:`${c.me.name}님`;
+ const pace=!(done||before)?'':done>before?`지난주 이맘때(${before}건)보다 많아요${self?', 잘하고 계세요!':'.'}`:done===before?'지난주 이맘때와 같은 속도예요.':`지난주 이맘때는 ${before}건이었어요${self?', 오늘 한 곳만 더 가 볼까요?':'.'}`;
+ const p1=`${call}, ${hello} ${today?`${where}오늘은 방문이 ${today}건 잡혀 있어요.`:`${where}오늘 잡힌 방문은 없어요.`}`;
+ const p2=done||before?`${where}이번 주에 방문을 ${done}건 마쳤어요. ${pace}`:'';
+ const facts=[missing&&`결과가 아직 없는 방문이 ${missing}건`,late&&`기한 넘긴 조치가 ${late}건`].filter(Boolean).join(', ');
+ const p3=!facts?(self?'오늘도 제가 옆에서 챙길게요!':''):self?`${facts} 있어요. 다녀온 뒤 결과를 남기시고, 밀린 조치는 새 완료일만 정해 둬도 충분해요. 오늘도 제가 옆에서 챙길게요!`:coach?`${facts} 있어요. 담당 매니저님들과 함께 보시면 좋아요. 곳별로는 아래에 정리해 두었어요.`:`${facts} 있어요. 어느 곳인지는 아래 브리핑에 정리해 두었어요.`;
+ const paras=[p1,p2,p3].filter(Boolean);
  return <div className="zeni-working zeni-cheer-say" aria-label="제니에리 인사"><span className="zeni-working-character"><AiMark size={44}/><b>제니에리</b></span><div className="zeni-working-bubble" role="note">{paras.map((x,i)=><p key={i}>{x}</p>)}</div></div>;
 }
 // 운영 현황 아래 오늘·이번 주 할 일 목록: 모든 직급 같은 구성, 범위만 직급별(c.visits·c.actions는 이미 보는 범위로 좁혀져 있음)

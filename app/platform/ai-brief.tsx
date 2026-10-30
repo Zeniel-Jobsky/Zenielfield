@@ -203,7 +203,7 @@ function BriefPresentation({out,digest,stale,busy=false,jump,act,targetNames,who
   {(out.model.includes('AI 연결 안 됨')||r.confidence==='low')&&<p className="ai-brief-source">{[out.model.includes('AI 연결 안 됨')&&out.model,r.confidence==='low'&&'확신 낮음'].filter(Boolean).join(' · ')}</p>}
   <div id={id+'-more'} className="ai-brief-more" hidden={!open}>
    {(r.steps?.length||0)>0&&<section className="ai-brief-guide"><h3><Route size={16} aria-hidden/>이행 가이드<CopyButton label='이행 가이드 복사' text={r.steps!.map((x,i)=>`${i+1}. ${txt(x)}`).join('\n')}/></h3><ol className="ai-brief-steps">{r.steps!.map((x,i)=><li key={i}><b>{i+1}</b><span><RichText r={x} onName={jump}/></span></li>)}</ol></section>}
-   {r.cheer.length>0&&<section className="ai-brief-cheer"><h3><MessageCircleHeart size={16} aria-hidden/>{CHEER_TO[digest.role]}</h3><p><RichText r={r.cheer}/></p></section>}
+   {r.cheer.length>0&&<section className="ai-brief-cheer"><h3><MessageCircleHeart size={16} aria-hidden/>{CHEER_TO[digest.role]}<CopyButton label={CHEER_TO[digest.role]+' 복사'} text={txt(r.cheer)} visible="복사"/></h3><p><RichText r={r.cheer}/></p></section>}
    <dl className="ai-brief-dl">
      {r.watch.length>0&&<div><dt>다음 주 볼 것</dt><dd><ul>{r.watch.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></dd></div>}
      <div><dt>근거</dt><dd className="ai-brief-meta">{digest.period.label} {wk(digest.period.start)}–{wk(digest.period.end)} · 보고 {digest.reportTotal}건(판정 {digest.judged.reports-digest.judged.unjudged}건) · {out.model} · {new Date(out.generatedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} · 연락처 미전송</dd></div>
