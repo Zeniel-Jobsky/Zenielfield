@@ -25,14 +25,14 @@ export function ActionBrief({c}:{c:Context}){
  const self=c.me.role==='manager';
  // 가이드: 할 일은 한 문장으로 한 번만, 아래는 오래 밀린 조치 3건(대상 · 유형·내용 · 기한 지난 날수)
  const advice=self?'오래 밀린 것부터 새 완료일을 정하거나, 끝난 건 완료로 기록해 보세요.':'오래 밀린 것부터 담당 매니저와 새 완료일을 함께 정해 보세요.';
- const guide=f.late.slice(0,3).map(a=>({a,head:c.label(a),what:`${a.type} · ${cut(a.content)}`,meta:`기한 ${daysBetween(a.dueDate,c.now)}일 지남${self?'':' · '+c.uname(a.ownerId)+' '+HONOR.manager}`}));
+ const guide=f.late.slice(0,3).map(a=>({a,head:c.label(a),what:`${a.type} · ${cut(a.content)}`,meta:`기한 ${daysBetween(a.dueDate,c.now)}일 지남${self?'':' · '+c.uname(a.ownerId)+' '+HONOR.manager}`,to:c.uname(a.ownerId)+' '+HONOR.manager,msg:`${c.uname(a.ownerId)} ${HONOR.manager}, ${c.label(a)} '${cut(a.content)}' 조치 기한이 ${daysBetween(a.dueDate,c.now)}일 지났어요. 새 완료일을 정해 주시거나, 끝났으면 완료로 기록해 주세요.`}));
  return <section className="panel ai-brief action-brief" aria-label="제니에리 후속 조치 정리">
   <div className="panel-heading"><div><h2><AiMark/>제니에리가 후속 조치를 정리했어요</h2></div></div>
   <div className="chart-body"><div className="ai-brief-out">
    <section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>무슨 일이 벌어지고 있나</h3>{story.map((x,i)=><p key={i}>{x}</p>)}</section>
    {guide.length>0&&<section className="ai-brief-focus"><h3><ListChecks size={16} aria-hidden/>이렇게 챙겨 보세요<CopyButton label="이렇게 챙겨 보세요 복사" text={[advice,...guide.map(g=>`- ${g.head}: ${g.what} (${g.meta})`)].join('\n')}/></h3>
     <p className="action-advice">{advice}</p>
-    <ul className="action-late">{guide.map(g=><li key={g.a.id}><button type="button" onClick={()=>c.open('action',g.a)}><b>{g.head}</b><span>{g.what}</span><small>{g.meta}</small><ChevronRight size={16} aria-hidden/></button></li>)}</ul>
+    <ul className="action-late">{guide.map(g=><li key={g.a.id}><button type="button" onClick={()=>c.open('action',g.a)}><b>{g.head}</b><span>{g.what}</span><small>{g.meta}</small><ChevronRight size={16} aria-hidden/></button><CopyButton label={g.to+'에게 보낼 말 복사'} text={g.msg}/></li>)}</ul>
     {f.late.length>3&&<button type="button" className="textbtn" onClick={()=>c.setKind('기한 초과')}>기한 넘긴 조치 {f.late.length}건 모두 보기<ChevronRight size={14}/></button>}</section>}
   </div></div>
  </section>;
