@@ -3,6 +3,7 @@ import {AiMark,AiWorking} from './ai-mark';
 import {daysBetween as days,mmdd as wk} from '../lib/date';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {Loader2,ChevronRight,RefreshCw,ChevronDown,ChevronUp,CheckCircle2,Newspaper,MapPin,ListChecks,Route,MessageCircleHeart} from 'lucide-react';
+import {CopyButton} from './copy-button';
 import type {Context} from './context';
 import {PanelTitle} from '../ui';
 import {type FieldVisit,aggregate,dayShift,lastTargetVisit,targetOf,targetStatus,typeName,weeklyTrend} from './model';
@@ -193,14 +194,15 @@ function BriefPresentation({out,digest,stale,busy=false,jump,targetNames,who}:{w
  const [open,setOpen]=useState(false),[where,setWhere]=useState(false),id=useId();
  const r=out.result,ai=!out.model.includes('규칙');
  const merged=useMemo(()=>{const txt=(x:Rich)=>x.map(v=>v.v).join('');const used=new Set<number>();const rows=r.focus.map(f=>{const i=(r.directive||[]).findIndex((d,k)=>!used.has(k)&&(d.to===f.name||txt(d.say).includes(f.name)||f.name.includes(d.to)));if(i>=0)used.add(i);const d=i>=0?r.directive![i]:null;return {name:f.name,reason:f.reason,to:d?.to||'',say:d?.say||[]}});(r.directive||[]).forEach((d,k)=>{if(!used.has(k))rows.push({name:d.to,reason:[],to:d.to,say:d.say})});return rows},[r.focus,r.directive]);
+ const txt=(x:Rich)=>x.map(v=>v.v).join('');
  const story=<section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>;
  return <div className={'ai-brief-out'+(stale?' stale':'')}>
   {story}
   <Where digest={digest} jump={jump}/>
-  {merged.some(a=>a.say.length)&&<section className="ai-brief-focus"><h3><ListChecks size={16} aria-hidden/>이렇게 챙겨 보세요</h3><ol>{merged.filter(a=>a.say.length).map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}><WhoName w={who(a.name)}/><ChevronRight size={14}/></button><span>{a.say.length===0&&a.reason.length>0&&<RichText r={a.reason}/>}{a.say.length>0&&<em className="ai-brief-do">{a.to&&a.to!==a.name&&<b>{who(a.to).label} · </b>}<RichText r={a.say}/></em>}</span></li>)}{!r.focus.length&&<li><span>{digest.role==='manager'?'바로 확인·조치 필요로 남은 곳이 없어요(저장된 판정 기준).':'일정 잡을 회차나 기한 넘긴 조치가 있는 곳이 없어요.'}</span></li>}</ol></section>}
+  {merged.some(a=>a.say.length)&&<section className="ai-brief-focus"><h3><ListChecks size={16} aria-hidden/>이렇게 챙겨 보세요<CopyButton label='이렇게 챙겨 보세요 복사' text={merged.filter(a=>a.say.length).map(a=>`- ${who(a.name).label}: ${txt(a.say)}`).join('\n')}/></h3><ol>{merged.filter(a=>a.say.length).map((a,i)=><li key={i}><button type="button" className="link" onClick={()=>jump(a.name)}><WhoName w={who(a.name)}/><ChevronRight size={14}/></button><span>{a.say.length===0&&a.reason.length>0&&<RichText r={a.reason}/>}{a.say.length>0&&<em className="ai-brief-do">{a.to&&a.to!==a.name&&<b>{who(a.to).label} · </b>}<RichText r={a.say}/></em>}</span></li>)}{!r.focus.length&&<li><span>{digest.role==='manager'?'바로 확인·조치 필요로 남은 곳이 없어요(저장된 판정 기준).':'일정 잡을 회차나 기한 넘긴 조치가 있는 곳이 없어요.'}</span></li>}</ol></section>}
   {(out.model.includes('AI 연결 안 됨')||r.confidence==='low')&&<p className="ai-brief-source">{[out.model.includes('AI 연결 안 됨')&&out.model,r.confidence==='low'&&'확신 낮음'].filter(Boolean).join(' · ')}</p>}
   <div id={id+'-more'} className="ai-brief-more" hidden={!open}>
-   {(r.steps?.length||0)>0&&<section className="ai-brief-guide"><h3><Route size={16} aria-hidden/>이행 가이드</h3><ol className="ai-brief-steps">{r.steps!.map((x,i)=><li key={i}><b>{i+1}</b><span><RichText r={x}/></span></li>)}</ol></section>}
+   {(r.steps?.length||0)>0&&<section className="ai-brief-guide"><h3><Route size={16} aria-hidden/>이행 가이드<CopyButton label='이행 가이드 복사' text={r.steps!.map((x,i)=>`${i+1}. ${txt(x)}`).join('\n')}/></h3><ol className="ai-brief-steps">{r.steps!.map((x,i)=><li key={i}><b>{i+1}</b><span><RichText r={x}/></span></li>)}</ol></section>}
    {r.cheer.length>0&&<section className="ai-brief-cheer"><h3><MessageCircleHeart size={16} aria-hidden/>{CHEER_TO[digest.role]}</h3><p><RichText r={r.cheer}/></p></section>}
    <dl className="ai-brief-dl">
      {r.watch.length>0&&<div><dt>다음 주 볼 것</dt><dd><ul>{r.watch.map((p,i)=><li key={i}><RichText r={p}/></li>)}</ul></dd></div>}

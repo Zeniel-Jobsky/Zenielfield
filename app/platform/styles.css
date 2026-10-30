@@ -46,8 +46,6 @@
 .heatmap{display:grid;gap:3px;font-size:11px;align-items:center}
 .heat-line{display:contents}
 .heat-cell{display:flex;align-items:center;justify-content:center;height:24px;border-radius:3px;color:white;font-weight:700}
-.pair-bars{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;align-items:end;height:150px}
-.pair-bars>div{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
 .pair{display:flex;align-items:flex-end;gap:2px;flex:1;width:100%;justify-content:center}
 .pair span{width:40%;border-radius:3px 3px 0 0;min-height:1px}
 @media(max-width:1023px){.chart-grid{grid-template-columns:1fr}}
@@ -198,7 +196,6 @@
 .trend .grid-line{stroke:#e3e9e6;stroke-width:1}
 .trend .rate-pill{fill:white;stroke:#59645f;stroke-width:1}
 /* 통계·보고서 차트에도 같은 표현: 격자선 + 막대 위 값, 조직별 이행 구성 값 옆 (완료/필요) */
-.pair-bars.grid-bg{background:repeating-linear-gradient(to top,#e3e9e6 0 1px,transparent 1px 25%);padding-top:16px}
 .pair span{position:relative}
 .pair span em{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-style:normal;font-size:11px;color:#59645f;white-space:nowrap}
 .bar-row{grid-template-columns:110px 1fr 96px}.bar-row>b small{font-weight:400;color:#65726b}
@@ -871,17 +868,12 @@
 .ai-brief-out .hi-bad{font-weight:600;color:var(--zf-text)}
 .load-panel .zeni-working{justify-content:flex-start;text-align:left}
 
-/* 후속 조치 주별 끝낸·새 조치: 한 칸 안에 막대 두 줄 */
-.pair-bars{display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0;flex:1}
-.pair-bars>.stack-bar{flex:none;height:10px;width:100%}
 /* 어디에 무엇이 요약 한 줄: 이름 · 상태 / 부서›담당·고려할 점(작게, 한 줄 말줄임) */
 .ai-brief-glance .g-line{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:8px;align-items:baseline;width:100%;min-height:44px;padding:8px 0;text-align:left}
 .ai-brief-glance .g-line>small{grid-column:1/-1;color:var(--zf-text-muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pair-bars{height:24px}
 .ai-brief-where-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
 .ai-brief-where-head .textbtn{min-height:44px}
 .ai-brief-where p small{color:var(--zf-text-muted);font-size:12px}
-.pair-bars>.stack-bar{justify-content:flex-start}.pair-bars>.stack-bar>span{flex:none;margin:0}
 /* 브리핑 칸 제목 한 크기(무슨 일·어디에 무엇이·이렇게 챙겨 보세요·더 보기 안 칸 모두) */
 .ai-brief .ai-brief-out h3{margin:0 0 8px;font-size:14px;font-weight:600;line-height:1.5;color:var(--zf-text-secondary)}
 .ai-brief .ai-brief-where-head h3{margin:0}
@@ -895,3 +887,12 @@
 .visit-suggest button>span,.visit-suggest button>small{grid-column:1;font-size:12px;color:var(--zf-text-secondary)}
 .visit-suggest button>svg{grid-column:2;grid-row:1/span 3;color:var(--zf-text-muted)}
 .visit-suggest button:hover b{text-decoration:underline}
+.ai-brief .ai-brief-out h3 .copy-btn,.ai-brief .ai-brief-out h3>button{margin-left:auto}
+/* 후속 조치 정리: 기한 기준 한 줄 막대(누르면 해당 탭) */
+.action-due-bar{display:flex;gap:2px;height:32px;border-radius:6px;overflow:hidden}
+.action-due-bar button{min-width:32px;color:#fff;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.action-due-bar button:focus-visible{outline-offset:-3px}
+.action-due-legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin:8px 0 0;font-size:12px;color:var(--zf-text-secondary)}
+.action-due-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
+.action-brief .ai-brief-out>section+section{margin-top:24px}
+.action-brief .textbtn{min-height:44px}

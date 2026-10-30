@@ -3,7 +3,6 @@ import {scopeUnits} from './decision';
 import {SLOT_SHORT} from './model';
 import type {ReactNode} from 'react';
 import {PanelTitle,nice,short} from '../ui';
-import {mmdd} from '../lib/date';
 import {type Context} from './context';
 import {aggregate,between,dayShift,typeName,weekOf,weeklyTrend,type Metrics,type Target,type WeekRow} from './model';
 const tone={completed:'#003c33',planned:'#516e8a',delayed:'#b42318',unplanned:'#8a4b00'};
@@ -19,6 +18,3 @@ function groupRows(c:Context){const s=scopeUnits(c);return s.units.map(u=>({name
 const HEAT=['#f4ddd8','#e8b5ab','#d98777','#c8533f','#b42318'];
 const heatLevel=(v:number,max:number)=>Math.min(5,Math.max(1,max<=5?v:Math.ceil(v/max*5)));
 const states=[{key:'미처리',color:tone.delayed},{key:'조치 예정',color:tone.planned},{key:'처리 중',color:'#516e8a'},{key:'보류',color:'#65726b'},{key:'완료',color:tone.completed}];
-// 후속 조치 흐름: 최근 8주 새로 생긴 조치와 끝낸 조치를 나란히(자기 과거와만 비교, 끝낸 일 먼저). 기한 넘긴 건수는 탭에 있으므로 여기서 빨강으로 반복하지 않는다.
-export function ActionCharts({c}:{c:Context}){const all=c.actions,last=weekOf(c.now),weeks=Array.from({length:8},(_,k)=>dayShift(last,(k-7)*7)),rows=weeks.map(w=>{const e=dayShift(w,6);return {w,done:all.filter(a=>a.state==='완료'&&between(a.completedDate,w,e)).length,added:all.filter(a=>between(a.createdDate,w,e)).length}}),max=Math.max(1,...rows.flatMap(r=>[r.done,r.added])),done=rows.reduce((n,r)=>n+r.done,0),added=rows.reduce((n,r)=>n+r.added,0);
- return <div className="chart-grid"><ChartPanel title={`최근 8주 조치 ${done}건 끝냄 · 새로 ${added}건`} legend={<div className="chart-legend"><span><i style={{background:tone.completed}}/>끝낸 조치</span><span><i style={{background:tone.planned}}/>새 조치</span></div>}><div className="bar-rows">{rows.map(r=><div className="bar-row" key={r.w}><button className="bar-name" onClick={()=>c.setKind('완료')}>{mmdd(r.w)} 주</button><div className="pair-bars"><div className="stack-bar"><span style={{width:pct(r.done,max)+'%',background:tone.completed}}/></div><div className="stack-bar"><span style={{width:pct(r.added,max)+'%',background:tone.planned}}/></div></div><b>{r.done} · {r.added}건</b></div>)}</div></ChartPanel></div>}
