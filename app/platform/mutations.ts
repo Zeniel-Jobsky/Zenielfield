@@ -49,6 +49,8 @@ export function updateDemo(data:PlatformData,entity:string,values:any,record:any
   const owner=entity==='visit'?item.visitorId:item.ownerId;if(!target.managerIds.includes(owner)&&owner!==(record?(entity==='visit'?record.visitorId:record.ownerId):null))throw Error('해당 현장·매장에 배정된 담당자를 선택해 주세요.');if(manager&&(owner!==actor.id||(record&&(entity==='visit'?record.visitorId:record.ownerId)!==actor.id)))throw Error('본인의 방문·조치만 등록하거나 수정할 수 있습니다.');
   if(entity==='visit'){
    if(!['planned','completed','cancelled'].includes(item.status)||!item.purpose)throw Error('방문 목적과 진행 상태를 확인해 주세요.');
+   // 처음 등록한 시각(서버가 정함, 클라이언트 값 무시): 달력에서 새로 추가된 일정을 하루 동안 표시하는 데 쓴다
+   if(record){if(record.createdAt)item.createdAt=record.createdAt;else delete item.createdAt}else item.createdAt=new Date().toISOString();
    if(record?.status==='completed'&&item.status!=='completed'||record?.status==='cancelled'&&item.status!=='cancelled')throw Error('완료·취소 기록의 상태는 되돌릴 수 없습니다. 새 방문을 등록해 주세요.');
    if(item.plannedDate&&!validDay(item.plannedDate))throw Error('유효한 예정일을 입력해 주세요.');if(item.status==='planned'&&!item.plannedDate)throw Error('방문 예정일을 입력해 주세요.');
    if(item.status==='completed'&&(!validDay(item.actualDate)||item.actualDate>now||!item.detail?.trim()))throw Error('오늘까지의 실제 방문일과 주요 활동 내용을 입력해 주세요.');

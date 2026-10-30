@@ -187,6 +187,10 @@ function updateDemo(data, entity, values, record, actor, now) {
     if (manager && (owner !== actor.id || record && (entity === "visit" ? record.visitorId : record.ownerId) !== actor.id)) throw Error("\uBCF8\uC778\uC758 \uBC29\uBB38\xB7\uC870\uCE58\uB9CC \uB4F1\uB85D\uD558\uAC70\uB098 \uC218\uC815\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.");
     if (entity === "visit") {
       if (!["planned", "completed", "cancelled"].includes(item.status) || !item.purpose) throw Error("\uBC29\uBB38 \uBAA9\uC801\uACFC \uC9C4\uD589 \uC0C1\uD0DC\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
+      if (record) {
+        if (record.createdAt) item.createdAt = record.createdAt;
+        else delete item.createdAt;
+      } else item.createdAt = (/* @__PURE__ */ new Date()).toISOString();
       if (record?.status === "completed" && item.status !== "completed" || record?.status === "cancelled" && item.status !== "cancelled") throw Error("\uC644\uB8CC\xB7\uCDE8\uC18C \uAE30\uB85D\uC758 \uC0C1\uD0DC\uB294 \uB418\uB3CC\uB9B4 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. \uC0C8 \uBC29\uBB38\uC744 \uB4F1\uB85D\uD574 \uC8FC\uC138\uC694.");
       if (item.plannedDate && !validDay(item.plannedDate)) throw Error("\uC720\uD6A8\uD55C \uC608\uC815\uC77C\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");
       if (item.status === "planned" && !item.plannedDate) throw Error("\uBC29\uBB38 \uC608\uC815\uC77C\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.");

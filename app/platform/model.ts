@@ -17,7 +17,7 @@ export const aiConfidences=['low','medium','high'];
 export type AiEntry={input:{text:string;imageCount:number};draft:Record<AiField,string>;summary:string;confidence:string;model:string;generatedAt:string;edited:AiField[]};
 // AI 정리 기록: 이미 입력된 결과를 AI가 다듬은 제안(proposed)과 사람이 실제로 반영한 칸(applied). 직접 입력·AI 등록 기록 모두 가질 수 있으며 entry는 바뀌지 않는다.
 export type AiEdit={model:string;generatedAt:string;appliedAt:string;byId:string;before:Record<AiField,string>;proposed:Record<AiField,string>;applied:AiField[]};
-export type FieldVisit=Visit&{targetType:TargetType;storeId:string|null;requirementId:string|null;actualTime:string;notes:string;entry?:'manual'|'ai';ai?:AiEntry;aiEdits?:AiEdit[];geo?:VisitGeo;judgment?:VisitJudgment|null;meeting?:VisitMeeting};
+export type FieldVisit=Visit&{createdAt?:string;targetType:TargetType;storeId:string|null;requirementId:string|null;actualTime:string;notes:string;entry?:'manual'|'ai';ai?:AiEntry;aiEdits?:AiEdit[];geo?:VisitGeo;judgment?:VisitJudgment|null;meeting?:VisitMeeting};
 // 회의록으로 입력한 방문의 구조: 주제·참석 인원·시작/끝 시각·논의·추가 사항. 방문일은 actualDate, 참석자 이름은 저장하지 않는다.
 export type VisitMeeting={topic:string;attendeeCount:number;start:string;end:string;items:string[];extra:string[]};
 // 방문 시점 GPS 기록: 측정 좌표·정확도와 대상 지점까지 거리(서버 재계산).
