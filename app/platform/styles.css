@@ -970,3 +970,16 @@
 .app-shell .record-table .row-actions .textbtn,.app-shell .record-table td>.action-edit-link{min-height:44px;white-space:nowrap}
 /* 모바일: 등록은 하단 가운데 + 버튼 하나(머리 버튼과 같은 동작) → 머리 등록 버튼 숨김 */
 @media(max-width:760px){.app-shell .page-actions>.btn.primary{display:none}}
+/* 추천 장소 정렬: 칩 한 줄(단일 선택, 44px 터치), 고른 칩은 딥그린 */
+.vs-order{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.vs-order button{min-height:36px;padding:0 12px;border:1px solid var(--zf-control-border);border-radius:999px;background:var(--zf-surface);font-size:13px;color:var(--zf-text-secondary)}
+.vs-order button.on{background:var(--zf-brand-green);border-color:var(--zf-brand-green);color:var(--zf-on-action);font-weight:600}
+@media(max-width:760px){.vs-order button{min-height:44px}}
+.visit-suggest .vs-order button{width:auto;display:inline-flex;align-items:center;justify-content:center;grid-template-columns:none;padding:0 12px;text-align:center}
+/* 이렇게 챙겨 보세요 한 줄: [받는 사람] [할 일 문장] [바로 하기·보낼 말] — 버튼은 줄 끝 오른쪽, 문장과 같은 높이 */
+.app-shell .ai-brief .ai-brief-focus ol>li{display:grid;grid-template-columns:minmax(120px,auto) minmax(0,1fr) auto;column-gap:16px;align-items:center;padding:8px 0}
+.app-shell .ai-brief .ai-brief-focus ol>li>span{display:block}
+.app-shell .ai-brief .brief-row-actions{display:flex;align-items:center;gap:6px;justify-self:end}
+.app-shell .ai-brief .brief-row-actions .brief-do-links{display:flex;gap:6px;margin:0}
+.app-shell .ai-brief .brief-row-actions .btn,.app-shell .ai-brief .brief-row-actions .copy-btn{min-height:32px;padding:0 10px;font-size:13px;white-space:nowrap}
+@media(max-width:1023px){.app-shell .ai-brief .ai-brief-focus ol>li{grid-template-columns:minmax(0,1fr)}.app-shell .ai-brief .brief-row-actions{justify-self:start}}
