@@ -898,8 +898,6 @@
 .zeni-cheer-say{flex:1 1 320px}
 .zeni-cheer-say .zeni-working-bubble{line-height:1.6}
 @media(max-width:760px){.app-shell .page-heading p.page-when{display:block;font-size:12px;margin-top:4px}}
-/* 여러 문장 = 한 줄에 한 문장(목록 표시 없이, 줄 사이 4px) */
-.brief-lines{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 /* 방문 기록 이슈 가이드 탭(후속 조치 탭과 같은 모양, 표 바로 위 한 줄) + 걸린 이유 한 줄 */
 .guide-tabs{margin:0 0 12px}
 .guide-why{display:block;margin-top:2px;font-size:12px;color:var(--zf-text-secondary)}
@@ -911,3 +909,7 @@
 .action-late button>span,.action-late button>small{grid-column:1;font-size:13px;color:var(--zf-text-secondary)}
 .action-late button>small{font-size:12px}
 .action-brief .action-late button>svg{grid-column:2;grid-row:1/span 3;color:var(--zf-text-muted)}
+/* 읽기 문단: 브리핑 칸(주제)마다 한 문단, 본문 15px·행간 1.7·한 줄 약 68자(모바일은 화면 폭) */
+:root{--zf-read-measure:68ch}
+.app-shell .ai-brief .ai-brief-out p,.app-shell .zeni-cheer-say .zeni-working-bubble p{max-width:var(--zf-read-measure);font-size:15px;line-height:1.7;margin:0}
+.app-shell .ai-brief .ai-brief-out p+p,.app-shell .zeni-cheer-say .zeni-working-bubble p+p{margin-top:8px}

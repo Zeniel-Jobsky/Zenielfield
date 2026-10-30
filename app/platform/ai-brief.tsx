@@ -9,7 +9,7 @@ import {PanelTitle} from '../ui';
 import {type FieldVisit,aggregate,dayShift,targetOf,targetStatus,typeName,weeklyTrend} from './model';
 import {scopeUnits} from './decision';
 import {weekRanges,weekTitle} from '../briefing/model';
-import {rich,join,num,RichText,sentences,site,store,tagNames,type Rich,type Tone} from './rich';
+import {rich,join,num,RichText,site,store,tagNames,type Rich,type Tone} from './rich';
 import {collapseRepeats} from '../lib/dedupe-text';
 import {isCurrentJudgment,maskText,levelLabel} from './judgment';
 import {callAssist,aiDownReason} from './ai-assist';
@@ -193,7 +193,7 @@ function BriefPresentation({out,digest,stale,busy=false,jump,targetNames,who}:{w
  const r=out.result,ai=!out.model.includes('규칙');
  const merged=useMemo(()=>{const txt=(x:Rich)=>x.map(v=>v.v).join('');const used=new Set<number>();const rows=r.focus.map(f=>{const i=(r.directive||[]).findIndex((d,k)=>!used.has(k)&&(d.to===f.name||txt(d.say).includes(f.name)||f.name.includes(d.to)));if(i>=0)used.add(i);const d=i>=0?r.directive![i]:null;return {name:f.name,reason:f.reason,to:d?.to||'',say:d?.say||[]}});(r.directive||[]).forEach((d,k)=>{if(!used.has(k))rows.push({name:d.to,reason:[],to:d.to,say:d.say})});return rows},[r.focus,r.directive]);
  const txt=(x:Rich)=>x.map(v=>v.v).join('');
- const story=<section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>무슨 일이 벌어지고 있나</h3>{r.story.length?<ul className="brief-lines">{sentences(r.story).map((x,i)=><li key={i}><RichText r={x}/></li>)}</ul>:<p>보고에서 새로 짚을 일이 없어요.</p>}</section>;
+ const story=<section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>;
  return <div className={'ai-brief-out'+(stale?' stale':'')}>
   {story}
   <Where digest={digest} jump={jump}/>
