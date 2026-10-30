@@ -1087,7 +1087,7 @@ html.zf-calm .zf-ai-mark,html.zf-calm .zeni-working-dots i{animation:none!import
 /* 설정 표(사용자·명단 미리 보기): 방문 목록 표(.record-table) 열 너비 규칙과 분리 */
 .user-table{width:100%;min-width:860px;border-collapse:collapse;font-size:13px}
 .user-table.bulk-table{min-width:640px}
-.user-table th{height:40px;padding:0 12px;text-align:left;font-size:12px;font-weight:600;color:var(--zf-text-secondary);background:var(--zf-surface-subtle,#f6f7f6);white-space:nowrap}
+.user-table th{height:40px;padding:0 12px;text-align:left;font-size:12px;font-weight:600;color:var(--zf-text-secondary);background:var(--zf-surface-muted);white-space:nowrap}
 .user-table td{height:52px;padding:6px 12px;border-bottom:1px solid var(--zf-border);vertical-align:middle;overflow-wrap:anywhere}
 .user-table td:last-child,.user-table th:last-child{text-align:right;white-space:nowrap}
 .user-table.bulk-table td:last-child,.user-table.bulk-table th:last-child{text-align:left;white-space:normal}
