@@ -967,3 +967,5 @@
 .app-shell .copy-btn.with-text{display:inline-flex;align-items:center;gap:4px}
 .app-shell .record-table .row-actions{flex-wrap:nowrap;gap:8px}
 .record-table th:nth-child(2){width:26%}.record-table th:nth-child(6){width:16%}
+/* 모바일: 등록은 하단 가운데 + 버튼 하나(머리 버튼과 같은 동작) → 머리 등록 버튼 숨김 */
+@media(max-width:760px){.app-shell .page-actions>.btn.primary{display:none}}

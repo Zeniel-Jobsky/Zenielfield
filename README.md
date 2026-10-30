@@ -44,7 +44,7 @@
 
 ## 화면으로 보기
 
-데모 데이터, PC 1280px와 모바일 390px 화면이에요.
+데모 데이터, PC 1280px와 모바일 390px 화면이에요. `npm run screenshots`로 다시 찍어요([캡처 방법](docs/local-development.md#매뉴얼-화면-캡처)).
 
 ### 운영 현황
 제니에리 말풍선(오늘·이번 주·챙길 것) → 브리핑(무슨 일 → 어디에 무엇이 → 이렇게 챙겨 보세요) → 지표·차트.
@@ -104,6 +104,7 @@ pnpm dev        # http://127.0.0.1:5173  (데모: /?mode=demo)
 
 - 백그라운드 서버: `npm start` · `npm stop` · `npm restart` · `npm run status`
 - 검사: `pnpm typecheck` · `pnpm test`
+- 매뉴얼 화면 캡처: `npm run screenshots -- --url <서버 주소>`
 - 자세한 설치·설정: [로컬 개발 가이드](docs/local-development.md)
 - **주의:** main 푸시는 운영 자동 배포를 실행해요([supabase-deploy](.github/workflows/supabase-deploy.yml)).
 
