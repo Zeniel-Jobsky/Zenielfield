@@ -1099,3 +1099,7 @@ html.zf-calm .zf-ai-mark,html.zf-calm .zeni-working-dots i{animation:none!import
 .settings [role=tabpanel]>.panel,.settings [role=tabpanel]>.panel::before{border-top:0!important;box-shadow:none}
 .bulk-table th:nth-child(1){width:56px}.bulk-table th:nth-child(2){width:32%}.bulk-table th:nth-child(3){width:72px}
 .app-shell .ai-brief-cheer h3{display:flex;align-items:center;gap:6px}.app-shell .ai-brief-cheer h3 .copy-button{margin-left:auto}
+/* 추천 동선 한 줄이 중간에 끊겨 보이지 않게: 줄바꿈 대신 가로로 이어 두고 넘치면 그 줄만 가로 스크롤 */
+.route-line{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px}
+.route-line>li{flex:none}
+.route-map>li{min-width:0}

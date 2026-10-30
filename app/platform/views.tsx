@@ -47,13 +47,13 @@ function PrioritySchedule({c,rows}:{c:Context;rows:FieldVisit[]}){
 }
 // 방문 일정 직급별 달력(파트장 이상): 행 = 바로 아래 단위(파트장 잡매니저·팀장 파트·사업부장/관리자 팀), 열 = 한 주 7일.
 // 칸 = 그날 일정 수(완료/예정, 지연 있으면 지연 수). 칸이나 이름을 누르면 그 단위로 좁힌다. 조직 순서, 순위 없음.
+// 보이는 주 = 위 조회 기간(시작일이 든 주). 주 이동은 조회 기간 [◀ ▶] 하나로만 한다.
 export function ScheduleUnits({c,rows}:{c:Context;rows:FieldVisit[]}){
- const s=scopeUnits(c),[wk,setWk]=useState(()=>weekOf(c.now)),days=Array.from({length:7},(_,i)=>dayShift(wk,i));
+ const s=scopeUnits(c),wk=weekOf(c.start),days=Array.from({length:7},(_,i)=>dayShift(wk,i));
  const list=useMemo(()=>s.units.map(u=>{const ids=new Set(u.targets.map(t=>t.id)),cells=days.map(d=>{const vs=rows.filter(v=>ids.has(targetOf(v))&&(v.status==='completed'?v.actualDate:v.plannedDate)===d);return {d,n:vs.length,done:vs.filter(v=>v.status==='completed').length,late:vs.filter(v=>v.status==='planned'&&(v.plannedDate||'')<c.now).length}});
   const m=aggregate(u.targets.filter(t=>t.type===c.type),c.visits,c.start,c.end,c.now);return {u,cells,gap:m.delayed+m.unplanned}}),[s.units,rows,wk,c.visits,c.type,c.start,c.end,c.now]);
  if(!list.length)return <Empty text="이 기간 일정이 없어요."/>;
  return <div className="unit-cal">
-  <div className="unit-cal-nav"><button type="button" className="iconbtn" aria-label="이전 주" onClick={()=>setWk(dayShift(wk,-7))}><ChevronLeft size={16}/></button><b>{short(days[0])} – {short(days[6])}</b><button type="button" className="iconbtn" aria-label="다음 주" onClick={()=>setWk(dayShift(wk,7))}><ChevronRight size={16}/></button>{wk!==weekOf(c.now)&&<button type="button" className="textbtn" onClick={()=>setWk(weekOf(c.now))}>이번 주</button>}</div>
   <div className="unit-cal-scroll"><table className="unit-cal-table"><caption className="sr-only">{s.title}별 주간 방문 일정</caption>
    <thead><tr><th scope="col">{s.title}</th>{days.map(d=><th key={d} scope="col" className={d===c.now?'today':''}>{['월','화','수','목','금','토','일'][days.indexOf(d)]}<small>{short(d)}</small></th>)}<th scope="col">일정 잡을 회차</th></tr></thead>
    <tbody>{list.map(x=><tr key={x.u.key}><th scope="row"><button type="button" className="link" onClick={()=>s.drill(x.u.key)}>{x.u.label}</button></th>
