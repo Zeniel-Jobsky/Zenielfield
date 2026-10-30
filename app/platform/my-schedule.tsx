@@ -8,7 +8,7 @@ import type {Target} from './model';
 import {scheduleFacts,scheduleCandidates} from './schedule';
 import {targetFacts,attentionOf,staleStores,LEVEL_ORDER,STALE_DAYS} from './status';
 import {levelLabel} from './judgment';
-import {ChevronRight,Route} from 'lucide-react';
+import {MapPin,Route} from 'lucide-react';
 import {AiMark} from './ai-mark';
 import {ruleName} from './model';
 
@@ -63,5 +63,5 @@ export function VisitSuggest({c,visitor,onPick}:{c:Context;visitor:string;onPick
   <small>{r.interval}</small>
   {r.check.length>0&&<small className="vs-check">확인할 것 · {r.check.join(' / ')}</small>}
   {r.near.length>0&&<small className="vs-near"><Route size={14} aria-hidden/>같은 날 함께: {r.near.join(', ')}</small>}
-  <ChevronRight size={16} aria-hidden/></button></li>)}</ol></section>;
+  <span className="vs-pick"><MapPin size={14} aria-hidden/>이곳 선택</span></button></li>)}</ol></section>;
 }

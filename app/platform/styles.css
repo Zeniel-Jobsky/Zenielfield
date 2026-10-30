@@ -952,3 +952,5 @@
 .va-tabs{flex-wrap:wrap}
 .va-tabs .va-sep{display:inline-block;width:1px;height:20px;background:var(--zf-border);margin:0 8px;align-self:center}
 @media(max-width:760px){.app-shell .action-brief .ai-brief-focus .action-late>li{flex-wrap:wrap;row-gap:6px;padding-bottom:8px}.app-shell .action-brief .ai-brief-focus .action-late>li>button:first-child{flex:1 1 100%}}
+.visit-suggest button>.vs-pick{grid-column:2;grid-row:1/span 5;display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--zf-brand-green);white-space:nowrap}
+.visit-suggest button{grid-template-columns:minmax(0,1fr) auto}

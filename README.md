@@ -2,7 +2,7 @@
 
 **현장 방문 보고를 AI 비서 '제니에리'가 읽고, 직급마다 "지금 어디에 무슨 일이 있고, 나는 무엇을 하면 되는지"를 말해 주는 현장 운영 앱입니다.**
 
-방문 일정 → 방문 기록 → 후속 조치 → 활동 요약이 한 흐름으로 이어지고, 각 화면 맨 위에서 제니에리가 그 화면의 할 일을 먼저 정리합니다.
+방문 일정 → 방문·조치(기록과 후속 조치 한 화면) → 활동 요약이 한 흐름으로 이어지고, 각 화면 맨 위에서 제니에리가 그 화면의 할 일을 먼저 정리합니다.
 
 ## 핵심 강점 한눈에
 
@@ -33,9 +33,24 @@
 
 2026-10-30 기준 main 소스로 정리했어요. 실제 운영 로그인·외부 AI 응답은 이 문서 작성 때 다시 확인하지 않았어요.
 
+## 화면 둘러보기 (데모, PC 1280px · 모바일 390px)
+
+모든 직급이 같은 메뉴·같은 구성을 보고, 내용 범위만 직급에 따라 달라요. 화면마다 맨 위에서 제니에리가 그 화면의 할 일을 먼저 정리해요.
+
+| 메뉴 | 무엇을 하나 | PC | 모바일 |
+| --- | --- | --- | --- |
+| **운영 현황** | 제니에리 말풍선(오늘·이번 주·챙길 것) → 브리핑(무슨 일 → 어디에 무엇이 → 이렇게 챙겨 보세요: 바로 하기·보낼 말) → 지표·차트 | <img src="docs/screenshots/dashboard-pc.jpg" width="360" alt="운영 현황 PC 화면"> | <img src="docs/screenshots/dashboard-mobile.jpg" width="130" alt="운영 현황 모바일 화면"> |
+| **방문 일정** | 제니에리 정리(이번 주 일정·일정 잡을 회차) → 먼저 일정 잡을 곳·`일정 잡기` | <img src="docs/screenshots/visits-pc.jpg" width="360" alt="방문 일정 PC 화면"> | <img src="docs/screenshots/visits-mobile.jpg" width="130" alt="방문 일정 모바일 화면"> |
+| **방문 일정 등록** | 제니에리가 먼저 가 볼 곳 5곳을 고름(왜·주기·확인할 것·같은 날 함께) → 날짜 후보 | <img src="docs/screenshots/plan-form-pc.jpg" width="360" alt="방문 일정 등록 PC 화면"> | <img src="docs/screenshots/plan-form-mobile.jpg" width="130" alt="방문 일정 등록 모바일 화면"> |
+| **방문·조치** | 방문 기록과 후속 조치를 한 화면에서: 결과 안 쓴 방문·기한 넘긴 조치 정리 → 탭(방문 │ 조치) → 방문 아래 그 방문의 조치 | <img src="docs/screenshots/visit-action-pc.jpg" width="360" alt="방문·조치 PC 화면"> | <img src="docs/screenshots/visit-action-mobile.jpg" width="130" alt="방문·조치 모바일 화면"> |
+| **활동 요약** | 기간 브리핑 + 날짜별 방문 타임라인 | <img src="docs/screenshots/activity-pc.jpg" width="360" alt="활동 요약 PC 화면"> | <img src="docs/screenshots/activity-mobile.jpg" width="130" alt="활동 요약 모바일 화면"> |
+| **담당·주기 관리** | 제니에리 정리(담당 없는 곳·60일+ 미방문) → 담당 정하기·일정 잡기 | <img src="docs/screenshots/sites-pc.jpg" width="360" alt="담당·주기 관리 PC 화면"> | <img src="docs/screenshots/sites-mobile.jpg" width="130" alt="담당·주기 관리 모바일 화면"> |
+| **현장 주소록** | 주소·담당 검색, 비어 있는 주소 안내 | <img src="docs/screenshots/contacts-pc.jpg" width="360" alt="현장 주소록 PC 화면"> | <img src="docs/screenshots/contacts-mobile.jpg" width="130" alt="현장 주소록 모바일 화면"> |
+
 ## 목차
 
 - [핵심 강점 한눈에](#핵심-강점-한눈에)
+- [화면 둘러보기](#화면-둘러보기-데모-pc-1280px--모바일-390px)
 - [초기 버전 대비 바뀐 것](#초기-버전-대비-바뀐-것-2026-10-27--2026-10-30)
 - [프로젝트 소개 및 현재 구현 현황](#프로젝트-소개-및-현재-구현-현황)
 - [개발 환경 및 필수 설치 프로그램](#개발-환경-및-필수-설치-프로그램)
@@ -90,10 +105,9 @@ setup은 Node 검사·고정 pnpm 설치·의존성 설치·공유 Git 훅 연�
 | 메뉴 | 업무와 사용법 |
 | --- | --- |
 | 로그인·공통 도구 | [시작하기](docs/user-guide.md#시작하기): 인증·데모·조회 범위·아바타 계정 메뉴 |
-| 운영 현황(잡매니저 `내 현장`) | [역할별 홈·제니에리 브리핑·지표·차트](docs/user-guide.md#운영-현황) |
+| 운영 현황 | [역할별 홈·제니에리 브리핑·지표·차트](docs/user-guide.md#운영-현황) |
 | 방문 일정 | [월/주 달력·먼저 가 볼 곳 추천·등록·필요 회차](docs/user-guide.md#방문-일정) |
-| 방문 기록 | [이슈 가이드 탭·결과·AI 초안·문장 정리·판정 검토](docs/user-guide.md#방문-기록) |
-| 후속 조치 | [제니에리 정리·담당·기한·상태·관련 방문](docs/user-guide.md#후속-조치) |
+| 방문·조치 | [방문 결과·후속 조치 한 화면: 제니에리 정리·탭·방문 아래 조치](docs/user-guide.md#방문-기록) |
 | 활동 요약 | [기간 브리핑·타임라인·원본 이동](docs/user-guide.md#주차별-활동-요약) |
 | 담당·주기 관리 | [현장·매장 계층·담당·방문 주기](docs/user-guide.md#현장매장-관리) |
 | 현장 주소록 | 주소·담당 검색 |
