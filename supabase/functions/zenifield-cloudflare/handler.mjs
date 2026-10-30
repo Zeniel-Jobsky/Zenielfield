@@ -1,9 +1,10 @@
 import {createHandler} from '../zenifield-gateway/handler.mjs';
 // 계정 전환 중 기존 링크도 유지한다. 정확한 콜백만 허용하고 와일드카드는 쓰지 않는다.
-const loginCallbacks=new Set([
- 'https://zenifield.jobsky.workers.dev/auth/callback',
- 'https://zenifield.ugen-kwon.workers.dev/auth/callback',
-]);
+const demoProject=(Deno.env.get('SUPABASE_URL') || '').includes('nhywssfwtnonytbkufyy.supabase.co');
+// Cross-environment OAuth callbacks are not allowed.
+const loginCallbacks=new Set(demoProject
+ ? ['https://zenifield.jobsky.workers.dev/auth/callback', 'https://zenifield.ugen-kwon.workers.dev/auth/callback']
+ : ['https://zenifield-live.jobsky.workers.dev/auth/callback']);
 
 // tokenHash: one hash or a list (Cloudflare Worker token, Sites server token). Both are server-only secrets.
 export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
