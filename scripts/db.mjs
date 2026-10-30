@@ -3,10 +3,12 @@
 //       node --env-file=.env scripts/db.mjs migrate <demo|real|all> [--dry-run] [--no-edge]   스키마 전환(이관 + Edge 함수 재배포)
 //       node --env-file=.env scripts/db.mjs bootstrap real --admin <메일> --name <이름> --approved-by <승인자>   빈 새 프로젝트 설치(최초 1회)
 //       node --env-file=.env scripts/db.mjs switch <demo|real> --approved-by <승인자>   운영 앱 연결 교체(ops/db-targets.json active 변경, 푸시하면 CI가 반영)
-//       node scripts/db.mjs ref | url                                     지금 연결된 DB의 ref·주소(CI가 쓴다)
+//       node --env-file=.env scripts/db.mjs backup [demo|real]           zf_ 테이블 JSON 백업(work/backup/)
+//       node --env-file=.env scripts/db.mjs reset demo --keep <관리자메일,…> --confirm <ref> --approved-by <승인자>   백업 후 업무 데이터·다른 사용자 삭제(스키마·이관 이력 유지)
+//       node scripts/db.mjs ref | url                                    지금 연결된 DB의 ref·주소(CI가 쓴다)
 //  - 한 Supabase 계정 토큰(SUPABASE_ACCESS_TOKEN)으로 두 프로젝트를 다룬다. 게이트웨이 토큰 검증값은 Edge 코드에 있어 두 DB가 같은 Worker 토큰을 쓴다.
 //  - 운영 DB를 바꾸는 명령(migrate 실제 실행·bootstrap·switch)은 사용자 승인 후 실행한다. 실패하면 멈춘다(DC-HALT).
-import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
+import {readFileSync,writeFileSync,readdirSync,mkdirSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {supabaseSql} from './lib/supabase-sql.mjs';
 
@@ -20,6 +22,31 @@ const token=()=>process.env.SUPABASE_ACCESS_TOKEN||stop('SUPABASE_ACCESS_TOKEN �
 const approve=()=>arg('approved-by')||stop('운영 DB를 바꾸는 명령입니다. 사용자 승인 후 --approved-by <이름>을 붙이세요. 에이전트는 스스로 승인하지 않습니다.');
 const edge=t=>{run('node scripts/bundle-supabase.mjs');for(const f of ['zenifield-gateway','zenifield-cloudflare'])run(`npx supabase functions deploy ${f} --project-ref ${t.ref} --use-api --no-verify-jwt`)};
 const includes=()=>readFileSync('supabase/migrations/SCHEMA_INCLUDES','utf8').split(/\r?\n/).map(s=>s.trim()).filter(s=>s&&!s.startsWith('#'));
+
+// 백업: zf_ 테이블을 work/backup/<대상>-<시각>/ 에 JSON으로 받는다(되돌릴 근거). reset 은 항상 먼저 백업한다.
+const TABLES=['zf_domains','zf_users','zf_sites','zf_stores','zf_assignments','zf_policy_versions','zf_visits','zf_actions','zf_audit'];
+const backup=async t=>{const q=supabaseSql({ref:t.ref,token:token()}),dir=`work/backup/${t.name}-${new Date().toISOString().replace(/[:.]/g,'-')}`;mkdirSync(dir,{recursive:true});
+ for(const tb of TABLES){const r=await q(`select coalesce(json_agg(x),'[]'::json) as rows from public.${tb} x`);const rows=r[0]?.rows||[];writeFileSync(`${dir}/${tb}.json`,JSON.stringify(rows));console.log(`${tb.padEnd(20)} ${rows.length}행`)}
+ console.log('백업 → '+dir);return dir};
+if(cmd==='backup'){await backup(target(which||cfg.active));process.exit(0)}
+
+// 초기화: 백업 뒤 한 트랜잭션으로 업무 데이터(도메인·현장·매장·배정·주기·방문·조치·감사)와 --keep 밖의 사용자를 지운다. 스키마·이관 이력은 남긴다.
+if(cmd==='reset'){const by=approve(),t=target(which||''),keep=arg('keep').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+ if(arg('confirm')!==t.ref)stop(`되돌릴 수 없는 삭제입니다. 대상 ref를 --confirm ${t.ref} 로 한 번 더 적으세요.`);
+ if(!keep.length)stop('--keep <남길 관리자 메일,…> 이 필요합니다(로그인한 적 있는 활성 관리자 1명 이상).');
+ const q=supabaseSql({ref:t.ref,token:token()}),lit=s=>"'"+String(s).replace(/'/g,"''")+"'",inKeep=`(${keep.map(lit).join(',')})`;
+ const kept=await q(`select email from public.zf_users where lower(email) in ${inKeep} and role='admin' and active=1 and subject is not null`);
+ if(kept.length!==keep.length)stop(`활성·로그인 이력 있는 admin이 아닌 메일: ${keep.filter(k=>!kept.some(x=>x.email.toLowerCase()===k)).join(', ')}`);
+ console.log(`== ${t.label} 초기화 (승인 ${by}, 남길 관리자 ${keep.join(', ')})`);await backup(t);
+ await q(`begin;
+delete from public.zf_actions; delete from public.zf_visits; delete from public.zf_assignments; delete from public.zf_policy_versions;
+delete from public.zf_stores; delete from public.zf_sites; delete from public.zf_audit;
+delete from public.zf_users where lower(email) not in ${inKeep};
+update public.zf_users set domains=array[]::text[] where lower(email) in ${inKeep};
+delete from public.zf_domains;
+commit;`);
+ console.log('✓ 초기화 완료. 남은 행:');for(const r of await q(TABLES.map(tb=>`select '${tb}' t,count(*)::int n from public.${tb}`).join(' union all ')))console.log(`${r.t.padEnd(20)} ${r.n}`);
+ process.exit(0)}
 
 if(cmd==='ref'||cmd==='url'){const t=target(cfg.active);console.log(cmd==='ref'?t.ref:t.url);process.exit(0)}
 

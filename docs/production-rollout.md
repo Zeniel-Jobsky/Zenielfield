@@ -6,12 +6,48 @@
 - **DB 대상 정본:** [`ops/db-targets.json`](../ops/db-targets.json). 이 문서는 두 파일을 사람이 읽게 풀어 쓴 것이다.
 - 이 문서와 두 정본이 다르면 정본을 기준으로 이 문서를 고친다.
 
-## 구조: DB 두 개, 연결은 하나
+## 결정 (2026-10-30): 지금 프로젝트를 초기화해 실사용으로 쓴다
+
+- **새 프로젝트는 보류:** 새 프로젝트 `ZenField-Live`(`cyrsdaqqnegrynhwurnb`)는 지금 배포 토큰의 계정으로 접근할 수 없어 보류했다.
+- **실사용 DB:** 지금 프로젝트 `nhywssfwtnonytbkufyy`를 백업한 뒤 초기화(`db.mjs reset`)해서 실사용 DB로 쓴다.
+- **시연:** DB 대신 브라우저 데모 모드(`?mode=demo`, 저장 안 함)로 한다.
+- **지우는 것:** 데모·시험 데이터, 출처 없는 방문 1만 건, zf.* 시험 계정과 그 밖의 사용자. `--keep`에 적은 관리자만 남긴다.
+- **남기는 것:** 스키마, 이관 이력, 남길 관리자의 로그인.
+- **Auth 쪽 기록:** 지운 사용자의 Supabase Auth 계정은 남는다. 다만 `zf_users` 등록이 없으면 로그인되지 않는다.
+- **나중에 DB를 둘로 나눌 때:** 시연과 실사용을 다시 나누게 되면 아래 '두 DB 구조'(`db.mjs bootstrap`·`switch`)를 그대로 쓴다.
+
+### 초기화 단계
+
+| 순서 | 단계 (`id`) | 누가 | 승인 | 하는 일 |
+| --- | --- | --- | --- | --- |
+| 1 | 사전 점검 (`preflight`) | 실행기 | – | 설정값·이관 대기·행 수 확인(읽기만) |
+| 2 | 백업 (`backup`) | 실행기 | 필요 | `work/backup/demo-<시각>/`에 zf_ 테이블 9개 JSON |
+| 3 | 초기화 (`reset`) | 실행기 | 필요 | 백업을 한 번 더 받고, 한 트랜잭션으로 업무 데이터와 남길 관리자 밖의 사용자를 삭제 |
+| 4 | 관리자 로그인·도메인 (`admin-login`) | 사람 | – | 관리 도메인 등록 |
+| 5 | 명단 미리 보기 (`users-dry`) | 실행기 | – | `work/users.csv` 형식 확인 |
+| 6 | 직원 등록 (`users`) | 실행기 | 필요 | 등록 + 무작위 비밀번호 |
+| 7 | 현장·매장 (`targets`) | 사람 | – | 현장·매장·담당·주기 |
+| 8 | 운영 확인 (`verify`) | 실행기+사람 | – | 커밋·인증 경계, 직급별 로그인 |
+
+```bash
+node scripts/rollout.mjs run backup --approved-by 홍길동
+node scripts/rollout.mjs run reset  --approved-by 홍길동 --admin jobsky@zeniel.co.kr
+# 직접: node --env-file=.env scripts/db.mjs reset demo --keep jobsky@zeniel.co.kr --confirm nhywssfwtnonytbkufyy --approved-by 홍길동
+```
+
+- **reset의 안전장치:**
+  - `--confirm`에 대상 ref를 한 번 더 적어야 실행된다.
+  - `--keep`의 메일은 로그인한 적 있는 활성 admin이어야 한다.
+  - 지우기 직전에 백업을 다시 받는다.
+- **PGlite 검증:** 시드 데이터(사용자 41, 방문 1,800, 조치 972 등)를 넣은 PGlite에서 같은 삭제를 돌려, 외래키 오류 없이 관리자 1명만 남는 것을 확인했다.
+- **되돌리기:** 백업 JSON으로 되살리는 스크립트는 아직 없다. 필요하면 백업 파일로 이관 파일을 만들어 승인 후 적용한다.
+
+## 두 DB 구조 (보류, 나중에 나눌 때)
 
 | DB | 용도 | Supabase 프로젝트 |
 | --- | --- | --- |
-| 시연 DB (`demo`) | 시연·교육·테스트. HR-biz 가상 데이터, zf.* 시험 계정 | `nhywssfwtnonytbkufyy` (지금 프로젝트, 그대로 둠) |
-| 실사용 DB (`real`) | 실제 직원·현장·방문 | 새로 만드는 빈 프로젝트 |
+| 시연 DB (`demo`) | 지금은 초기화 후 실사용 | `nhywssfwtnonytbkufyy` |
+| 실사용 DB (`real`) | 보류 | 새 프로젝트(접근 가능한 계정으로 만들 때) |
 
 - **연결은 하나:** 운영 앱(Cloudflare Worker `zenifield`)은 `ops/db-targets.json`의 `active`에 적힌 DB 하나에만 붙는다.
 - **연결 교체는 값 하나:** `active`만 바꿔 main에 푸시하면 CI가 그 DB에 이관과 Edge 함수를 맞추고, Worker의 `ZENIFIELD_SUPABASE_URL`을 바꿔 배포한다.
@@ -44,7 +80,9 @@ node scripts/rollout.mjs list                                           # 배치
 
 이관 이력은 DB마다 `zf_schema_migrations`에 남는다. 같은 파일은 다시 실행되지 않는다.
 
-## 배치 단계 한눈에
+## 두 DB로 나눌 때의 배치 단계 (보류)
+
+`ops/production-rollout.json`은 지금 위 '초기화 단계'로 되어 있다. 아래 순서는 두 DB 구조를 다시 쓸 때의 참고다.
 
 | 순서 | 단계 (`id`) | 누가 | 승인 | 하는 일 |
 | --- | --- | --- | --- | --- |

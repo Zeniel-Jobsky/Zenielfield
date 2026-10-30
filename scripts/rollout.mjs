@@ -33,9 +33,6 @@ const builtin={
   for(const r of rows)console.log(`${r.t.padEnd(20)} 전체 ${String(r.n).padStart(7)}  데모 시드 ${r.seed}`);
   const [x]=await q(`select count(*) filter (where id like '%-extra-0%')::int as extra,(select count(*)::int from public.zf_users where email like 'zf.%@zeniel.co.kr') as test from public.zf_visits`);
   console.log(`출처 없는 방문(…-extra-0n) ${x.extra}건 · zf.* 시험 계정 ${x.test}개 (자동 삭제 안 함)`)},
- async backup(){const q=sql(),dir=`work/backup/${new Date().toISOString().replace(/[:.]/g,'-')}`;mkdirSync(dir,{recursive:true});
-  for(const t of TABLES){const r=await q(`select coalesce(json_agg(x),'[]'::json) as rows from public.${t} x`);const rows=r[0]?.rows||[];writeFileSync(`${dir}/${t}.json`,JSON.stringify(rows));console.log(`${t.padEnd(20)} ${rows.length}행`)}
-  log(`백업 ${dir}`)},
 };
 
 const status=s=>state[s.id]?.skipped?'건너뜀':state[s.id]?.done?'완료':s.requires.every(r=>state[r]?.done)?'다음':'대기';
