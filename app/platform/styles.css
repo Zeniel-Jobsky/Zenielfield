@@ -987,3 +987,12 @@
 .vs-say{margin:0 0 12px;padding:0}
 .vs-say .zeni-working-bubble{font-size:14px;line-height:1.6}
 .visit-suggest .vs-brief{display:inline-block;margin-right:6px;padding:0 6px;border-radius:4px;background:var(--zf-info-soft);color:var(--zf-brand-green);font-style:normal;font-size:12px;font-weight:600}
+/* 방문 길라잡이: 날마다 한 줄 [요일 날짜] 장소 → 장소 → 장소(같은 지역끼리) */
+.route-days{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.route-days li{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:start;padding:8px 0;border-bottom:1px solid var(--zf-border)}
+.route-days li>b{font-size:14px;font-variant-numeric:tabular-nums}
+.route-days li>span{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px}
+.route-days em{font-style:normal}
+.route-days svg{color:var(--zf-text-muted)}
+.route-days small{color:var(--zf-text-secondary)}
+@media(max-width:760px){.route-days li{grid-template-columns:minmax(0,1fr);gap:4px}}
