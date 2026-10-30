@@ -82,6 +82,9 @@ jobs:
         run: |
           node_modules/.bin/tsc --noEmit -p .
           node tests/run-platform.mjs
+      - name: Supabase 배포 설정 진단
+        run: |
+          node -e 'const token=process.env.SUPABASE_ACCESS_TOKEN||"";const ref=process.env.SUPABASE_PROJECT_REF||"";console.log(`Access token length: ${token.length}`);console.log(`Project ref matches repository: ${ref==="nhywssfwtnonytbkufyy"}`);if(!token||!ref)process.exit(1)'
       - name: 이관 적용 (미적용 파일만, 파일마다 트랜잭션)
         run: node scripts/migrate.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
       - name: 검증 로직 번들
