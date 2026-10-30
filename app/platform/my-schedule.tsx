@@ -8,7 +8,9 @@ import type {Target} from './model';
 import {scheduleFacts,scheduleCandidates} from './schedule';
 import {targetFacts,attentionOf,staleStores,LEVEL_ORDER,STALE_DAYS} from './status';
 import {levelLabel} from './judgment';
-import {ChevronRight,MapPinned} from 'lucide-react';
+import {ChevronRight,Route} from 'lucide-react';
+import {AiMark} from './ai-mark';
+import {ruleName} from './model';
 
 const DOW=['일','월','화','수','목','금','토'];
 const dowOf=(d:string)=>DOW[new Date(d+'T12:00:00Z').getUTCDay()];
@@ -37,17 +39,29 @@ export function ScheduleHints({c,target,visitor,picked,onPick}:{c:Context;target
  </div>;
 }
 
-// 대상을 고르기 전: 방문자 담당 현장·매장 중 먼저 가 보면 좋은 곳(리마인더). 사실과 저장된 판정만(DC-JUDGMENT):
-// 저장 판정 바로 확인·조치 필요, 기한 지난·일정 없는 필요 회차, 기한 넘긴 조치(attentionOf 순서 그대로) + 60일 넘게 못 간 매장.
-// 이미 다가오는 일정이 잡힌 곳은 attentionOf가 뺀다. 누르면 그 대상을 고른다.
-export function VisitSuggest({c,visitor,onPick}:{c:Context;visitor:string;onPick:(t:Target)=>void}){
+// 대상을 고르기 전: 제니에리 방문 추천(리마인더). 사실과 저장된 판정만(DC-JUDGMENT), 점수·순위 없음.
+// 대상 = 방문자 담당 운영 중 현장·매장 중 attentionOf(판정 바로 확인·조치 필요 → 기한 지남·일정 없음·기한 넘긴 조치) + 60일+ 미방문, 다가온 일정 있는 곳 제외.
+// 줄마다: 왜(사실) · 방문 주기와 마지막 방문 경과 · 확인할 것(저장 판정 판단 + 안 끝난 조치 내용) · 같은 날 함께 가기 좋은 곳(같은 현장·같은 지역, 동선).
+// 누르면 대상을 고르고 확인할 것을 사전 확인사항에 채운다(사람이 쓴 값이 있으면 덮지 않음).
+export function VisitSuggest({c,visitor,onPick}:{c:Context;visitor:string;onPick:(t:Target,precheck:string)=>void}){
  const rows=useMemo(()=>{const own=c.targets.filter(t=>t.status==='운영 중'&&t.managerIds.includes(visitor)),pool=own.length?own:c.scope;
   const facts=targetFacts(pool,c.visits,c.actions,c.allMetrics.slots,c.now),att=attentionOf(facts.values()),seen=new Set(att.map(f=>f.target.id));
   const stale=staleStores(pool,c.visits,c.now).filter(x=>!seen.has(x.target.id)&&!facts.get(x.target.id)?.upcoming).map(x=>facts.get(x.target.id)!).filter(Boolean);
-  return [...att,...stale].slice(0,5).map(f=>{const j=f.judgment&&LEVEL_ORDER[f.judgment.level]?f.judgment:null,days=daysBetween(f.lastVisit,c.now);
-   const why=[j&&levelLabel(j.level),f.delayed.length&&`필요 방문 기한 지남 ${f.delayed.length}회`,f.unplanned.length&&`필요 방문 일정 없음 ${f.unplanned.length}회`,f.lateActions&&`기한 넘긴 조치 ${f.lateActions}건`,days===null?'방문 기록 없음':days>STALE_DAYS&&`마지막 방문 ${days}일 전`].filter(Boolean) as string[];
-   return {t:f.target,why,note:j?.assessment||''}})},[c.targets,c.scope,c.visits,c.actions,c.allMetrics.slots,c.now,visitor]);
+  const list=[...att,...stale];
+  const open=new Map<string,typeof c.actions>();for(const x of c.actions){if(x.state==='완료')continue;const id=x.storeId||x.siteId,arr=open.get(id)||[];arr.push(x);open.set(id,arr)}
+  return list.slice(0,5).map(f=>{const t=f.target,j=f.judgment&&LEVEL_ORDER[f.judgment.level]?f.judgment:null,days=daysBetween(f.lastVisit,c.now);
+   const why=[j&&levelLabel(j.level),f.delayed.length&&`필요 방문 기한 지남 ${f.delayed.length}회`,f.unplanned.length&&`필요 방문 일정 없음 ${f.unplanned.length}회`,f.lateActions&&`기한 넘긴 조치 ${f.lateActions}건`].filter(Boolean) as string[];
+   const interval=`주기 ${ruleName(t.rule)} · ${days===null?'방문 기록 없음':`마지막 방문 ${days}일 전`}`;
+   const acts=(open.get(t.id)||[]).sort((x,y)=>x.dueDate.localeCompare(y.dueDate)).slice(0,2);
+   const check=[j?.assessment||'',...acts.map(x=>`${x.type}: ${x.content.length>40?x.content.slice(0,40)+'…':x.content}(기한 ${mmdd(x.dueDate)}${x.dueDate<c.now?' 지남':''})`)].filter(Boolean);
+   const near=list.filter(o=>o.target.id!==t.id&&(o.target.siteId===t.siteId||(!!t.region&&o.target.region===t.region))).slice(0,2).map(o=>o.target.name);
+   return {t,why,interval,check,near}})},[c.targets,c.scope,c.visits,c.actions,c.allMetrics.slots,c.now,visitor]);
  if(!rows.length)return <p className="form-hint wide">지금 먼저 챙길 담당 현장·매장은 없어요. 빈 날을 골라 일정을 잡아 보세요.</p>;
- return <section className="visit-suggest wide" aria-label="먼저 가 보면 좋은 곳"><h3><MapPinned size={16} aria-hidden/>먼저 가 보면 좋은 곳</h3><ol>{rows.map(r=><li key={r.t.id}><button type="button" onClick={()=>onPick(r.t)}>
-  <b className={'zf-ent zf-ent-'+r.t.type}>{r.t.type==='store'?r.t.siteName+' › ':''}{r.t.name}</b><span>{r.why.join(' · ')}</span>{r.note&&<small>{r.note}</small>}<ChevronRight size={16} aria-hidden/></button></li>)}</ol></section>;
+ return <section className="visit-suggest wide" aria-label="제니에리 방문 추천"><h3><AiMark size={20}/>제니에리가 먼저 가 보면 좋은 곳을 골랐어요</h3><ol>{rows.map(r=><li key={r.t.id}><button type="button" onClick={()=>onPick(r.t,r.check.map(x=>'- '+x).join('\n'))}>
+  <b className={'zf-ent zf-ent-'+r.t.type}>{r.t.type==='store'?r.t.siteName+' › ':''}{r.t.name}</b>
+  {r.why.length>0&&<span className="vs-why">{r.why.join(' · ')}</span>}
+  <small>{r.interval}</small>
+  {r.check.length>0&&<small className="vs-check">확인할 것 · {r.check.join(' / ')}</small>}
+  {r.near.length>0&&<small className="vs-near"><Route size={14} aria-hidden/>같은 날 함께: {r.near.join(', ')}</small>}
+  <ChevronRight size={16} aria-hidden/></button></li>)}</ol></section>;
 }
