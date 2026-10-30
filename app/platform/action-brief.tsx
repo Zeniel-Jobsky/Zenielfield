@@ -1,5 +1,5 @@
 'use client';
-// 후속 조치 화면 맨 위 제니에리 정리: 무슨 일(주제마다 문단) → 이렇게 챙겨 보세요(할 일 한 문장 + 오래 밀린 조치 3건). 막대 차트 없음(숫자는 문장과 탭에).
+// 후속 조치 화면 맨 위 제니에리 정리: 무슨 일(주제마다 문단) → 어떻게 대응하면 되나(할 일 한 문장 + 오래 밀린 조치 3건). 막대 차트 없음(숫자는 문장과 탭에).
 // AI 없이 화면이 가진 사실로만 쓴다(DC-JUDGMENT). 비교는 자기 지난 2주와만(DC-FEEDBACK), 빨강은 기한 넘긴 조각에만.
 import {useMemo} from 'react';
 import {Newspaper,ListChecks,ChevronRight,ClipboardPen} from 'lucide-react';
@@ -29,8 +29,8 @@ export function ActionBrief({c}:{c:Context}){
  return <section className="panel ai-brief action-brief" aria-label="제니에리 후속 조치 정리">
   <div className="panel-heading"><div><h2><AiMark/>제니에리가 후속 조치를 정리했어요</h2></div></div>
   <div className="chart-body"><div className="ai-brief-out">
-   <section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>무슨 일이 벌어지고 있나</h3>{story.map((x,i)=><p key={i}>{x}</p>)}</section>
-   {guide.length>0&&<section className="ai-brief-focus"><h3><ListChecks size={16} aria-hidden/>이렇게 챙겨 보세요<CopyButton label="이렇게 챙겨 보세요 복사" text={[advice,...guide.map(g=>`- ${g.head}: ${g.what} (${g.meta})`)].join('\n')}/></h3>
+   <section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>조치가 어디까지 왔나</h3>{story.map((x,i)=><p key={i}>{x}</p>)}</section>
+   {guide.length>0&&<section className="ai-brief-focus"><h3><ListChecks size={16} aria-hidden/>무엇부터 풀면 되나<CopyButton label="무엇부터 풀면 되나 복사" text={[advice,...guide.map(g=>`- ${g.head}: ${g.what} (${g.meta})`)].join('\n')}/></h3>
     <p className="action-advice">{advice}</p>
     <ul className="action-late">{guide.map(g=><li key={g.a.id}><button type="button" onClick={()=>c.open('action',g.a)}><b>{g.head}</b><span>{g.what}</span><small>{g.meta}</small></button><button type="button" className="btn small" onClick={()=>c.open('action',g.a)}><ClipboardPen size={14} aria-hidden/>완료일 정하기</button><CopyButton label={g.to+'에게 보낼 말 복사'} text={g.msg} visible="보낼 말"/></li>)}</ul>
     {f.late.length>3&&<button type="button" className="textbtn" onClick={()=>c.setKind('기한 초과')}>기한 넘긴 조치 {f.late.length}건 모두 보기<ChevronRight size={14}/></button>}</section>}

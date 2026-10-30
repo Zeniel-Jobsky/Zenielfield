@@ -862,7 +862,7 @@
 .ai-brief-where-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
 .ai-brief-where-head .textbtn{min-height:44px}
 .ai-brief-where p small{color:var(--zf-text-muted);font-size:12px}
-/* 브리핑 칸 제목 한 크기(무슨 일·어디에 무엇이·이렇게 챙겨 보세요·더 보기 안 칸 모두) */
+/* 브리핑 칸 제목 한 크기(무슨 일·어디에 무엇이·어떻게 대응하면 되나·더 보기 안 칸 모두) */
 .ai-brief .ai-brief-out h3{margin:0 0 8px;font-size:14px;font-weight:600;line-height:1.5;color:var(--zf-text-secondary)}
 .ai-brief .ai-brief-where-head h3{margin:0}
 .ai-brief .ai-brief-out h3>svg{color:var(--zf-brand-green)}
@@ -908,7 +908,7 @@
 .ai-brief-focus li{position:relative}
 .ai-brief-focus li>.copy-btn{margin-left:auto}
 .action-late li{display:flex;align-items:center;gap:8px}.action-late li>button:first-child{flex:1;min-width:0}
-/* 이렇게 챙겨 보세요 줄: [받는 사람 ›] [할 일 문장] [보낼 말 복사] 한 줄, 복사는 줄 끝 */
+/* 어떻게 대응하면 되나 줄: [받는 사람 ›] [할 일 문장] [보낼 말 복사] 한 줄, 복사는 줄 끝 */
 .ai-brief-focus ol>li>span{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;align-items:start}
 .ai-brief-focus ol>li>span>.copy-btn{grid-column:2;grid-row:1;margin:0}
 .ai-brief-focus ol>li>span>.brief-do-links{grid-column:1}
@@ -976,7 +976,7 @@
 .vs-order button.on{background:var(--zf-brand-green);border-color:var(--zf-brand-green);color:var(--zf-on-action);font-weight:600}
 @media(max-width:760px){.vs-order button{min-height:44px}}
 .visit-suggest .vs-order button{width:auto;display:inline-flex;align-items:center;justify-content:center;grid-template-columns:none;padding:0 12px;text-align:center}
-/* 이렇게 챙겨 보세요 한 줄: [받는 사람] [할 일 문장] [바로 하기·보낼 말] — 버튼은 줄 끝 오른쪽, 문장과 같은 높이 */
+/* 어떻게 대응하면 되나 한 줄: [받는 사람] [할 일 문장] [바로 하기·보낼 말] — 버튼은 줄 끝 오른쪽, 문장과 같은 높이 */
 .app-shell .ai-brief .ai-brief-focus ol>li{display:grid;grid-template-columns:minmax(120px,auto) minmax(0,1fr) auto;column-gap:16px;align-items:center;padding:8px 0}
 .app-shell .ai-brief .ai-brief-focus ol>li>span{display:block}
 .app-shell .ai-brief .brief-row-actions{display:flex;align-items:center;gap:6px;justify-self:end}
@@ -1043,3 +1043,6 @@
 @keyframes zeni-hop{0%,86%,100%{transform:translateY(0) scale(1)}89%{transform:translateY(-5px) scale(1.04,.97)}92%{transform:translateY(0) scale(1.03,.96)}95%{transform:translateY(-2px)}98%{transform:translateY(0)}}
 .panel-heading h2 .zf-ai-mark,.zenieri-mark .zf-ai-mark{animation:zeni-hop 7s ease-in-out 1.2s infinite;transform-origin:50% 100%}
 @media(prefers-reduced-motion:reduce){.panel-heading h2 .zf-ai-mark,.zenieri-mark .zf-ai-mark{animation:none}}
+/* 아바타 메뉴 옵션: 제니에리 움직임 끄기(html.zf-calm) */
+html.zf-calm .zf-ai-mark,html.zf-calm .zeni-working-dots i{animation:none!important;transform:none!important}
+.account-panel .account-toggle{margin-left:auto;font-size:12px;color:var(--zf-text-secondary)}
