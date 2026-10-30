@@ -11,7 +11,7 @@
 - 프로젝트: `ZenField-Live`, ref `cyrsdaqqnegrynhwurnb`, 리전 `eu-central-1` (독일).
 - `supabase/schema.sql` 신규 빈 DB 전용 스키마로 업무 테이블 9개·RLS·RPC 설치.
 - `zf_schema_migrations` 이력 테이블 및 기존 7개 이관 적용/기준선 기록; 고객사·직원·방문 실제 레코드 0건.
-- `zenifield-gateway`, `zenifield-cloudflare` Edge Functions v1 배포 완료(`verify_jwt=false`, 함수 자체 x-zenifield-gateway 토큰 검사).
+- `zenifield-gateway`, `zenifield-cloudflare` Edge Functions 배포 완료(`verify_jwt=false`, 함수 자체 x-zenifield-gateway 토큰 검사).
 - **중요**: Live Edge는 테스트 환경에 하드코딩된 토큰 해시를 사용하지 않는다. `ZENIFIELD_LIVE_GATEWAY_TOKEN_HASH`와 `ZENIFIELD_LIVE_CLOUDFLARE_TOKEN_HASH`가 각자 설정되지 않으면 모든 업무 POST 요청에 401을 반환한다.
 - Live 로그인 링크 콜백 허용 목록: `https://zenifield-live.jobsky.workers.dev/auth/callback` 단일 주소. Supabase Authentication → URL Configuration에서도 이 정확한 Redirect URL을 등록해야 한다.
 - 2026-10-30 기준 Live DB는 비어 있으며 운영/직원 첫 로그인은 아직 불가능하다.
@@ -34,7 +34,7 @@
 - 회사가 실제 직원·고객 정보를 독일(`eu-central-1`)에 보관하도록 승인했는지 **확인 필수**. 개인정보 국외이전 해당 여부와 위탁·보관·권한 기준 검토 전 실제 정보 입력 금지. 원할 경우 데이터 입력 전에 서울 리전에 새 프로젝트를 별도 생성해야 한다(비용 확인과 승인 필요).
 - 현재 Supabase 조직 Free 요금제. 정식 상용 서비스 요금제·백업 정책·사용량/비용 한도 검토 필수.
 - 공식 Live Auth Redirect URL 및 SMTP는 이 저장소만 수정해서 활성화할 수 없음.
-- 기존 `scripts/db.mjs migrate real` 및 기본 `supabase/functions` 재배포는 테스트용 인증 해시를 포함하므로 **Live에서 실행 금지**. Live Edge v1은 별도 강화 배포본이므로, 이후 Edge 수정 시 Live 토큰 분리 및 단일 콜백 정책을 소스 코드로 이관한 후 별도 승인 배포할 것.
+- 이 PR에는 Supabase 프로젝트별 인증 해시·로그인 콜백을 분리하는 Edge 소스 변경도 포함되어 있다. **PR 병합 전** 기존 main의 `scripts/db.mjs migrate real` 및 기본 함수 재배포는 테스트용 인증 해시를 재사용하므로 실행 금지. **PR 병합 후**에도 `migrate real`은 명시적인 운영 승인과 백업·함수 테스트 뒤에만 실행할 것.
 - 새 Worker의 주소는 실제 배포 후 확인; 이전 URL은 정식 Live URL이 아니다.
 - 테스트 DB의 업무용 행 수를 Live로 복사하지 않는다.
 
