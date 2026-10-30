@@ -1038,3 +1038,4 @@
 .route-line>li.add::before{background:none;border-top:2px dashed var(--zf-border);height:0}
 .ai-brief-out p.route-legend{font-size:12px;line-height:1.5;max-width:none}
 .ai-brief-out p.route-why{margin:0 0 16px;font-size:15px;line-height:1.7;max-width:var(--zf-read-measure)}.route-why .zf-ent-link{white-space:normal;display:inline;font-weight:600}
+.route-why .copy-button{display:inline-flex;vertical-align:middle;margin-left:4px}
