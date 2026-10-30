@@ -11,10 +11,9 @@ const segSchema={type:'object',additionalProperties:false,required:['v','tone'],
 const rich={type:'array',items:segSchema};
 // 출력이 길수록 느리다(초당 약 110토큰): 화면에서 겹치는 칸(흐름·강점·근거 문장)은 받지 않고, 판단은 1개·안마다 {할 일, 좋아지는 점}만
 const option={type:'object',additionalProperties:false,required:['do','gain'],properties:{do:rich,gain:rich}};
-export const briefOutputSchema={type:'object',additionalProperties:false,required:['headline','story','focus','directive','steps','themes','cheer','watch','confidence'],properties:{
+export const briefOutputSchema={type:'object',additionalProperties:false,required:['headline','story','focus','directive','steps','cheer','watch','confidence'],properties:{
  headline:{type:'object',additionalProperties:false,required:['situation','action'],properties:{situation:rich,action:rich}},
  cheer:{type:'object',additionalProperties:false,required:['praise','ask'],properties:{praise:rich,ask:rich}},
- themes:{type:'array',items:{type:'object',additionalProperties:false,required:['title','status','summary','targets'],properties:{title:{type:'string'},status:{type:'string',enum:['새로 생김','커짐','계속됨','해결됨','확인 필요']},summary:rich,targets:{type:'array',items:{type:'string'}}}}},
  focus:{type:'array',items:{type:'object',additionalProperties:false,required:['name','reason'],properties:{name:{type:'string'},reason:rich}}},
  story:rich,
  // 지시 가이드: 누구에게(to: 팀·파트·매니저·현장 이름 또는 '본인') 무엇을 지시할지 / 이행 가이드: 순서대로 할 일(완료 기준 포함)

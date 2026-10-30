@@ -8,6 +8,7 @@ import type {User} from '../lib/model';
 import type {PlatformData} from './model';
 import EmailLogin from './email-login';
 import {DevLogin} from './dev-login';
+import {clearBriefStore} from './ai-brief';
 import {LoadingProgress,readJsonWithProgress,type LoadInfo} from './loading-progress';
 export type OperatingData=PlatformData&{me:User};
 // 조회 창: 선택 기간 + 추이용 앞 8주 + 다가올 일정 6주. 미완료 조치는 기간과 무관하게 서버가 포함한다.
@@ -26,7 +27,7 @@ export default function PlatformEntry(){
  function select(next:'demo'|'supabase'){setMode(next);setData(null);window.history.replaceState(null,'',next==='demo'?'?mode=demo':window.location.pathname);if(next==='supabase')refresh()}
  useEffect(()=>{const q=new URLSearchParams(window.location.search);if(q.get('mode')==='demo'){setMode('demo');return}refresh().then(()=>{if(q.has('auth_error'))setError('로그인 링크가 만료되었거나 요청한 브라우저와 다릅니다. 이 브라우저에서 새 링크를 요청해 주세요.');})},[]);
  async function save(entity:string,values:unknown,record?:{id:string;version:number}){const r=await fetch(`/api/platform?from=${rangeRef.current.from}&to=${rangeRef.current.to}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity,values,id:record?.id,version:record?.version})});const d=await r.json() as {data:OperatingData;item:any;error?:string};if(!r.ok)throw Error(d.error||'저장하지 못했습니다.');setData(d.data);return d}
- async function logout(){try{await fetch('/api/auth/logout',{method:'POST'})}finally{setData(null);setStatus(401);setError('로그아웃했습니다.')}}
+ async function logout(){clearBriefStore();try{await fetch('/api/auth/logout',{method:'POST'})}finally{setData(null);setStatus(401);setError('로그아웃했습니다.')}}
  if(mode==='demo')return <PlatformApp key="demo" onConnect={()=>select('supabase')}/>;
  // 첫 확인(인증 방식 + 세션)이 끝나기 전에는 로딩 화면 하나만 보여 준다.
  if(mode==='supabase'&&!data&&(!booted||authKind===null||(loading&&!error)))return <LoadingProgress info={load||{phase:'auth',received:0,total:null,startedAt:bootAt.current}}/>;

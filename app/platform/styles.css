@@ -870,3 +870,15 @@
 .ai-brief-glance .g-tags em.g-type{background:transparent;color:var(--zf-text-secondary);font-weight:500;padding:0 4px}
 .ai-brief-out .hi-bad{font-weight:600;color:var(--zf-text)}
 .load-panel .zeni-working{justify-content:flex-start;text-align:left}
+
+/* 후속 조치 주별 끝낸·새 조치: 한 칸 안에 막대 두 줄 */
+.pair-bars{display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0;flex:1}
+.pair-bars>.stack-bar{flex:none;height:10px;width:100%}
+/* 어디에 무엇이 요약 한 줄: 이름 · 상태 / 부서›담당·고려할 점(작게, 한 줄 말줄임) */
+.ai-brief-glance .g-line{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:8px;align-items:baseline;width:100%;min-height:44px;padding:8px 0;text-align:left}
+.ai-brief-glance .g-line>small{grid-column:1/-1;color:var(--zf-text-muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pair-bars{height:24px}
+.ai-brief-where-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.ai-brief-where-head .textbtn{min-height:44px}
+.ai-brief-where p small{color:var(--zf-text-muted);font-size:12px}
+.pair-bars>.stack-bar{justify-content:flex-start}.pair-bars>.stack-bar>span{flex:none;margin:0}
