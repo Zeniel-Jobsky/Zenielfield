@@ -101,6 +101,7 @@ small {font-size:13px}
 .iconbtn {min-width:36px;min-height:36px}
 .textbtn,.person.link {color:var(--zf-text)}
 .textbtn:hover,.person.link:hover {text-decoration:underline}
+.action-edit-link {min-height:44px;gap:5px}
 .panel,.metric,.capacity-card {border-radius:8px;box-shadow:none;border-color:var(--zf-border)}
 .panel-heading h2 {font-size:16px;font-weight:600;color:var(--zf-text)}
 .panel-heading p,.metric>p,.capacity-card div>span {font-size:13px;color:var(--zf-text-muted);white-space:normal}
