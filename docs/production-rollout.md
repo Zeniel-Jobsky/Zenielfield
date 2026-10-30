@@ -262,5 +262,6 @@ node scripts/rollout.mjs done admin-password
 - **에이전트 권한 검사:** Claude Code 자동 권한 검사가 운영 DB 대량 삭제 명령(`db.mjs reset`)을 막을 수 있다.
   - 막히면 우회하지 않는다.
   - 운영 담당이 터미널에서 직접 실행하거나, 설정에 이 명령의 허용 규칙을 추가한 뒤 다시 요청한다.
-- **SMTP가 먼저다.** Supabase 기본 메일은 시간당 몇 통이라, 회사 SMTP 없이 직원을 일괄 등록하면 첫 로그인 링크가 대부분 오지 않는다.
+- **지금은 비밀번호 배포 방식(2026-10-30 결정):** SMTP 연결 전까지 `provision-accounts --csv`(비밀번호 생성) → `work/accounts.local.csv` → 1:1 전달 → 직원이 설정 → 내 계정에서 변경. SMTP 연결 방법은 [smtp-setup.md](smtp-setup.md).
+- **SMTP가 먼저다(메일 링크 방식일 때).** Supabase 기본 메일은 시간당 몇 통이라, 회사 SMTP 없이 직원을 일괄 등록하면 첫 로그인 링크가 대부분 오지 않는다.
 - **현재 운영 DB (읽기 확인):** 활성 사용자 40명 중 첫 로그인 13명. 이관 7개 적용, 미적용 0.

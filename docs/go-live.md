@@ -17,7 +17,24 @@ ZeniField를 실제 직원이 쓰게 여는 순서다. 한 단계씩 따라 하�
   - 시연 데이터와 남길 관리자 외 사용자를 지우고, 스키마는 남긴다.
 - [ ] `node --env-file=.env scripts/db.mjs status`로 사용자는 남길 관리자만, 업무 데이터는 0인지 확인한다.
 
-## 2. 로그인 메일 준비 (운영 담당, Supabase 대시보드)
+## 지금 방식: SMTP 없이 비밀번호 나눠 주기 (2026-10-30 결정)
+
+회사 SMTP를 연결하기 전까지는 메일 링크 대신 무작위 비밀번호를 만들어 나눠 준다. 2단계는 건너뛰고 4·5단계를 아래처럼 한다.
+
+- [ ] 명단을 `work/users.csv`로 저장한다(관리자 화면 `명단 양식`과 같은 형식).
+- [ ] `node scripts/rollout.mjs run users-dry --admin <관리자>`를 실행한다.
+- [ ] 이어서 `node --env-file=.env scripts/provision-accounts.mjs --csv work/users.csv --admin <관리자>`를 실행한다. `--no-password`를 빼면 비밀번호를 만든다.
+  - 사람마다 무작위 비밀번호가 `work/accounts.local.csv`(git 제외)에 써진다.
+  - 다시 실행하면 비밀번호가 새로 만들어진다.
+- [ ] `accounts.local.csv`의 비밀번호를 한 사람씩 따로 전한다(대면·사내 메신저 1:1). 단체방·메일 일괄 발송은 하지 않는다.
+- [ ] 직원은 받은 비밀번호로 로그인한 뒤 **설정 → 내 계정 → 로그인 비밀번호**에서 바로 바꾼다.
+- [ ] 다 전했으면 `work/accounts.local.csv`를 지운다.
+- [ ] 그 뒤 한 명씩 추가하거나 재설정할 때는 관리자 화면 **설정 → 사용자·권한**의 비밀번호 발급을 쓴다.
+
+## 2. 로그인 메일 준비 (SMTP를 연결할 때, 운영 담당)
+
+자세한 방법(회사 메일 서버 또는 Amazon SES, IT 요청문, 메일 문구, 확인·문제 해결)은 [회사 SMTP 연결 가이드](smtp-setup.md)에 있다.
+
 
 - [ ] **SMTP:** Authentication → Emails → SMTP Settings에 회사 SMTP를 넣는다(보내는 주소 예: `no-reply@zeniel.co.kr`).
 - [ ] **발송 한도:** Authentication → Rate Limits에서 이메일 발송 한도를 직원 수에 맞게 올린다.
