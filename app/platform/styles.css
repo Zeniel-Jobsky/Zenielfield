@@ -501,9 +501,9 @@
 /* 역할별 필터(지침 7절): 기본은 본인 범위로 이미 선택된 상태라 선택 상자를 접어 두고, 현재 범위 버튼을 누르거나 터치할 때만 펼친다 */
 @media(min-width:761px){.app-shell .platform-filters .scope-toggle{display:inline-flex;align-items:center;gap:8px;grid-column:1;grid-row:1;justify-self:start;align-self:center;width:auto;min-height:44px;padding:0 14px;border:1px solid var(--zf-control-border);border-radius:8px;background:var(--zf-surface);color:var(--zf-text);font-size:14px;font-weight:600}.app-shell .platform-filters:not(.filterbar-open) #workspace-filters{display:none}.app-shell .platform-filters.filterbar-open #workspace-filters{display:grid;grid-column:1/-1;grid-row:2;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;padding:0;border:0;margin:0}}
 /* 운영 화면 조회 필터 배치(761px 이상)는 이 블록이 기준이다. 앞선 filterbar 규칙을 덮어쓰며, 다른 파일에 배치 규칙을 더 만들지 않는다.
-   태블릿·데스크톱: [범위 버튼] ··· [기간][초기화] 한 줄(모든 화면 같음) / 펼친 선택 상자는 맨 아래 줄 */
+   태블릿·데스크톱: [범위 버튼][기간] ··· [초기화] 한 줄(기간은 범위 버튼 바로 뒤, 모든 화면 같음) / 펼친 선택 상자는 맨 아래 줄 */
 @media(min-width:761px){
- .app-shell .platform-filters .filterbar-primary{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"scope . period reset" "selects selects selects selects";align-items:center;gap:8px 12px;flex-wrap:nowrap}
+ .app-shell .platform-filters .filterbar-primary{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"scope period . reset" "selects selects selects selects";align-items:center;gap:8px 12px;flex-wrap:nowrap}
  .app-shell .platform-filters .filterbar-label{display:none}
  .app-shell .platform-filters .scope-toggle{grid-area:scope}
  .app-shell .platform-filters .filterbar-period{grid-area:period;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;margin:0;max-width:none;flex:none}
@@ -531,9 +531,9 @@
 .period-custom .btn{grid-column:1/-1;min-height:44px}
 .period-custom p{grid-column:1/-1;font-size:11px;color:var(--zf-text-secondary)}
 @media(max-width:760px){.period-picker .period-step{width:40px;min-height:44px}.period-picker .period-label{min-width:0;flex:1;min-height:44px}.app-shell .platform-filters .filterbar-period{flex:1 1 auto;min-width:0}.period-picker{width:100%}.period-panel{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-radius:12px 12px 0 0}}
-/* 운영 화면 조회 필터 배치(760px 이하): [범위 버튼][초기화] / [◀ 기간 ▶] 전체 폭 / 펼친 선택 상자 */
+/* 운영 화면 조회 필터 배치(760px 이하): [범위 버튼][◀ 기간 ▶][초기화] 한 줄 / 펼친 선택 상자 */
 @media(max-width:760px){
- .app-shell .platform-filters .filterbar-primary{display:grid;grid-template-columns:minmax(0,1fr) 44px;grid-template-areas:"scope reset" "period period" "selects selects";align-items:center;gap:8px}
+ .app-shell .platform-filters .filterbar-primary{display:grid;grid-template-columns:auto minmax(0,1fr) 44px;grid-template-areas:"scope period reset" "selects selects selects";align-items:center;gap:8px}
  .app-shell .platform-filters .scope-toggle{grid-area:scope;min-height:44px}
  .app-shell .platform-filters .filterbar-period{grid-area:period;display:flex;width:100%;margin:0}
  .app-shell .platform-filters .reset-button{grid-area:reset;width:44px;min-width:44px;min-height:44px}
@@ -1103,3 +1103,7 @@ html.zf-calm .zf-ai-mark,html.zf-calm .zeni-working-dots i{animation:none!import
 .route-line{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:2px}
 .route-line>li{flex:none}
 .route-map>li{min-width:0}
+
+/* 기간 창은 기간 버튼 아래 왼쪽 정렬(범위 버튼 바로 뒤에 붙었으므로) */
+@media(min-width:761px){.period-panel{left:0;right:auto}}
+@media(max-width:760px){.app-shell .platform-filters .scope-toggle{padding:0 10px}.app-shell .platform-filters .period-picker .period-label{font-size:12px;padding:0 6px}}
