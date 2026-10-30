@@ -267,3 +267,8 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 브리핑 저장본 키 사용자·직급별, 로그아웃 시 삭제
 - AI 출력 축소(themes 제거·watch 1개), 잡매니저 요청 상대 지시 규칙
 - 검증: tsc·run-platform·run-briefing·logic·run-supabase 통과, 데모 390/820/1280 가로 넘침 없음. 운영 AI 응답·생성 시간 미검증
+
+## 2026-10-30 지침·룰 정리
+- AGENTS.md 41.6KB→19.6KB: 현재 디자인 결정을 주제별 현재 기준만으로
+- PROJECT_RULE.md 29KB→17KB: DC-DESIGN-* 23행 → 11행(SHELL·VISUAL·ZENIERI·BRIEF·DASHBOARD·SCHEDULE·RECORDS·ACTIONS·DETAIL·CHECK)
+- 디자인 지침 117KB→73KB: 옛 6.1·9-B 변경 기록·10-A·옛 차트 검수·날짜별 추가 블록 → `docs/design-history.md`(원문 보관), 6.1·9-B 현재 기준으로 다시 씀
