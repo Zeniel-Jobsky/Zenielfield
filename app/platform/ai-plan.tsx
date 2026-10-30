@@ -1,5 +1,5 @@
 'use client';
-import {AiMark} from './ai-mark';
+import {AiMark,AiWorking} from './ai-mark';
 import {useState,type FormEvent} from 'react';
 import {Check,MapPin,ClipboardCheck,Sparkles,PenLine} from 'lucide-react';
 import {Field} from '../ui';
@@ -23,11 +23,13 @@ export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;e
  // 초안(AI·데모)은 빈칸만 채운다. 사람이 고른 값이 항상 우선: 내 일정에서 고른 날짜, 일정 잡기로 정해진 대상(locked), 이미 고른 대상·목적.
  function draft(d:AiPlanDraft){setPlan(d);const valid=(x:string)=>/^\d{4}-\d{2}-\d{2}$/.test(x);setValues({plannedDate:pickedDay||(valid(d.plannedDate)?d.plannedDate:values.plannedDate),time:/^\d{2}:\d{2}$/.test(d.time)?d.time:values.time,purpose:values.purpose!==purposes[0]?values.purpose:purposes.includes(d.purpose)?d.purpose:purposes[0],precheck:values.precheck||d.precheck});setHint(d.target);const t=!locked&&!target&&matchTarget(c.targets,d.target);if(t)pick(t)}
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!ready)return;onSave('visit',{entry:'manual',...values,targetType:type,siteId:site,storeId:type==='store'?store:null,visitorId:owner,status:'planned',actualDate:null,actualTime:'',detail:'',notes:'',result:'',cancelReason:'',requirementId:modal.requirementId||pickedReq||null})}
- return <form className="record-form ai-form" onSubmit={submit}><div className="form-scroll"><div className="ai-switch"><button type="button" className="textbtn" onClick={()=>c.open('visit',undefined,{...modal,ai:false,manual:true})}><PenLine size={14}/>직접 입력</button></div>
+ return <form className="record-form ai-form" onSubmit={submit}>{c.saving&&<div className="save-overlay" role="status" aria-live="polite"><AiWorking message="제니에리가 일정을 저장하고 정리하는 중이에요"/></div>}<div className="form-scroll"><div className="ai-switch"><button type="button" className="textbtn" onClick={()=>c.open('visit',undefined,{...modal,ai:false,manual:true})}><PenLine size={14}/>직접 입력</button></div>
  <fieldset className="form-grid" disabled={!c.editable||c.saving}>
  <Permissions need={['microphone']}/>
 
- {!target&&!locked&&<div className="form-section first wide">방문할 곳</div>}
+ <div className="form-section first wide">방문할 곳</div>
+ {/* 고른 방문지를 맨 위에 보인다(어디로 가는지 먼저). 고르기 전에는 제니에리 추천 */}
+ {target&&<div className="picked-target wide" role="status"><MapPin size={20} aria-hidden/><span><b>{target.type==='store'?target.siteName+' › '+target.name:target.name}</b><small>{[target.region,target.managerIds.map(id=>c.uname(id)).join('·')].filter(Boolean).join(' · ')}</small></span>{!locked&&<button type="button" className="btn small" onClick={()=>{setSite('');setStore('')}}>다른 곳 고르기</button>}</div>}
  {!target&&!locked&&<VisitSuggest c={c} visitor={owner||c.me.id} onPick={(x,pre)=>{pick(x);if(pre)setValues(v=>({...v,precheck:v.precheck||pre}))}}/>}
  <div className="form-section wide">말·글로 일정 입력</div>
  <AiComposer mode="plan" seed={seed} demo={c.demo!==false} onDraft={d=>draft(d as unknown as AiPlanDraft)}/>

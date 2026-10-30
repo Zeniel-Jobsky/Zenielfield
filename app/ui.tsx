@@ -5,25 +5,20 @@ export function Badge({children}:{children:ReactNode}){const s=String(children);
 export function Avatar({name,index=0}:{name:string;index?:number}){return <span className={'avatar avatar-'+index%4}>{name.slice(0,1)}</span>}
 export function Empty({text='조회할 기록이 없습니다.',description='검색 조건을 변경하거나 새로운 기록을 등록해 주세요.',action}:{text?:string;description?:string;action?:ReactNode}){return <div className="empty"><span className="empty-icon"><Inbox size={24}/></span><b>{text}</b><p>{description}</p>{action}</div>}
 export function Drawer({title,sub,children,onClose,busy=false,mark}:{title:string;sub:string;children:ReactNode;onClose:()=>void;busy?:boolean;mark?:ReactNode}){
- const ref=useRef<HTMLDialogElement>(null),dirty=useRef(false);
+ // 저장하지 않은 변경 경고(확인 창·페이지 이탈 경고)는 쓰지 않는다(2026-10-30 사용자 결정). 대신 바깥 회색 영역을 눌러도 닫히지 않게 해 실수로 입력을 잃지 않는다
+ const ref=useRef<HTMLDialogElement>(null);
  const titleId=useId();
  useEffect(()=>{
   const d=ref.current,previous=document.activeElement as HTMLElement|null;
   d?.showModal();
-  function protect(e:BeforeUnloadEvent){if(dirty.current){e.preventDefault();e.returnValue=''}}
-  window.addEventListener('beforeunload',protect);
-  return()=>{window.removeEventListener('beforeunload',protect);d?.close();previous?.focus()};
+  return()=>{d?.close();previous?.focus()};
  },[]);
  function close(){
   if(busy)return;
-  if(dirty.current&&!window.confirm('저장하지 않은 변경 내용이 있습니다. 변경 내용을 버리고 나갈까요?'))return;
   onClose();
  }
  return <dialog className="drawer" ref={ref} aria-labelledby={titleId} aria-busy={busy}
-  onInputCapture={()=>{dirty.current=true}} onChangeCapture={()=>{dirty.current=true}}
   onCancel={e=>{e.preventDefault();close()}}
-  onClick={e=>{if(e.target===e.currentTarget)close()}}
-  onClickCapture={e=>{const el=e.target as HTMLElement;if(el.closest('form button[type="button"]')&&!el.closest('.form-footer'))dirty.current=true}}
  >
   <div className="drawer-head"><div>{sub&&<span>{sub}</span>}<h2 id={titleId}>{mark}{title}</h2></div><button type="button" className="iconbtn" disabled={busy} aria-label="닫기" onClick={close}><X size={20}/></button></div>
   <div className="drawer-body" onClickCapture={e=>{const el=e.target as HTMLElement;if(el.closest('.form-footer button[type="button"]')){e.preventDefault();e.stopPropagation();close()}}}>{children}</div>
