@@ -75,7 +75,7 @@ corepack pnpm run deploy:cloudflare
 
 Edge 변경 시 `supabase functions deploy zenifield-cloudflare --project-ref <ref> --use-api`로 별도 배포해야 합니다. 공용 업무 검증을 변경하면 기존 `scripts/bundle-supabase.mjs` 실행 후 두 Edge Function을 함께 배포합니다. `supabase/schema.sql` 재실행이나 기존 데이터 초기화는 하지 않습니다.
 
-[Supabase 설정·운영 인계](docs/supabase-setup.md)를 먼저 확인하세요.
+[Supabase 설정·운영 인계](docs/infrastructure.md)를 먼저 확인하세요.
 
 - 서버 환경변수: `ZENIFIELD_SUPABASE_URL`, `ZENIFIELD_GATEWAY_TOKEN`. `.env.example`에는 이름과 가짜 자리표시자만 있습니다.
 - 로그인은 기존 Sites/ChatGPT 방식입니다. Supabase Auth의 이메일/비밀번호 가입으로 바꾸지 않았습니다.
@@ -127,7 +127,7 @@ PR과 `main` 푸시마다 GitHub Actions(`.github/workflows/verify.yml`)가 같�
 
 ## 개발 절차
 
-[저장소 기반 개발 계획 v2](docs/repo-dev-plan-v2.md)를 따릅니다. 새 기획을 받으면 코드보다 먼저 `docs/plans/NNN-<기능>.md`에 요구사항 추적표와 확정 필요 결정을 쓰고, 원문은 `docs/specs/`에 보관합니다.
+[저장소 기반 개발 계획 v2](docs/archive/repo-dev-plan-v2.md)를 따릅니다. 새 기획을 받으면 코드보다 먼저 `docs/plans/NNN-<기능>.md`에 요구사항 추적표와 확정 필요 결정을 쓰고, 원문은 `docs/specs/`에 보관합니다.
 
 - `main`에는 `pnpm typecheck`와 `pnpm test`가 통과한 상태만 둡니다.
 - 작업은 `feat/NNN-<기능>`, `fix/…`, `chore/…` 브랜치에서 하고 작업 패키지 단위로 커밋합니다.
@@ -138,7 +138,7 @@ PR과 `main` 푸시마다 GitHub Actions(`.github/workflows/verify.yml`)가 같�
 
 - [플랫폼 업무 구조와 DB 계약](docs/platform-integration.md) — 초기 데모 단계의 설계 기록. 현재 저장 연결 상태는 Supabase 인계를 따릅니다.
 - [주간 브리핑](docs/weekly-briefing.md)
-- [Supabase 설정·현재 구현·권한·검증](docs/supabase-setup.md)
+- [Supabase 설정·현재 구현·권한·검증](docs/infrastructure.md)
 
 방문 이력이 있는 대상의 주기는 과거 통계 보존을 위해 잠깁니다. 향후 적용일 지정 주기 이관과 회차 스냅샷, 기존 D1 자료 이관, 첨부파일, 알림, 그룹웨어, XLSX 전용 양식은 후속 개발입니다. 운영 권한과 보관정책은 실제 사용에 맞게 확정해야 합니다.
 

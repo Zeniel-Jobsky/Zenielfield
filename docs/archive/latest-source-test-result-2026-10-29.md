@@ -1,6 +1,6 @@
 # 최신 소스 기반 테스트 결과 (자동 검사 회차)
 
-실행: 2026-10-29 · 계획: [latest-source-test-plan.md](latest-source-test-plan.md) 6절 A·B·C·F 단계
+실행: 2026-10-29 · 계획: [latest-source-test-plan.md](../testing.md) 6절 A·B·C·F 단계
 대상: 로컬 개발 서버(http://localhost:5173/) · 데모·격리 범위만. 운영 DB·Edge·계정에는 접근하지 않았다.
 
 ## 1. 기준 리비전 (A)

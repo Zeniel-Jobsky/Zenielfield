@@ -29,7 +29,8 @@ const accounts=[
 const managers=[['jm-001@example.test',`zf.jm001@${D}`],['jm-018@example.test',`zf.jm018@${D}`],['jm-021@example.test',`zf.jm021@${D}`]];
 // 실제 명단: 첫 줄 머리글, 빈 줄·#줄 무시. 역할·이메일 형식이 틀리면 아무것도 쓰지 않고 멈춘다.
 const ROLES=['admin','director','lead','partlead','manager'];
-const fromCsv=ci>=0?readFileSync(args[ci+1],'utf8').replace(/^﻿/,'').split(/\r?\n/).filter(l=>l.trim()&&!l.startsWith('#')).slice(1).map((l,i)=>{const [id,email,name,role,team,part,doms='']=l.split(',').map(v=>v.trim());
+// 양식의 예시 줄(id가 u-예시로 시작)은 건너뛴다
+const fromCsv=ci>=0?readFileSync(args[ci+1],'utf8').replace(/^﻿/,'').split(/\r?\n/).filter(l=>l.trim()&&!/^"?#/.test(l)).slice(1).filter(l=>!/^"?u-예시/.test(l)).map((l,i)=>{const [id,email,name,role,team,part,doms='']=l.split(',').map(v=>v.trim().replace(/^"(.*)"$/,'$1').replace(/""/g,'"').replace(/^'(?=[=+@-])/,''));
  if(!id||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email||'')||!name||!ROLES.includes(role)||!team||!part){console.error(`명단 ${i+2}번째 줄 형식 오류: ${l}`);process.exit(1)}
  return {id,email,name,role,team,part,domains:doms?doms.split(';').map(v=>v.trim()).filter(Boolean):[]}}):null;
 if(fromCsv){accounts.splice(0,accounts.length,...fromCsv);managers.length=0}

@@ -86,7 +86,7 @@ GitHub 원격(`Zeniel-Jobsky/Zenielfield`)으로 푸시할지, 공개 범위를 
 | 2-3 | "연결된 조치 보기"가 선택한 주차의 신규·다음 주 기한 이슈만 보이도록 필터 전달 (결정 D-4 후) | W-08 | `platform/app.tsx` |
 | 2-4 | 주간 진단의 조회 범위를 결정 D-5에 맞춤 (현재는 브리핑의 잡매니저·검색 조건까지 적용) | W-01 | `diagnosis/adapters.ts`, `platform/app.tsx` |
 | 2-5 | 계획 001의 화면 검수를 PC·모바일(390px)에서 수행하고 결과를 계획 문서에 기록 | A-01, C-04 | `docs/plans/001-*.md` |
-| 2-6 | `docs/site-problem-diagnosis.md`를 `docs/specs/`(원문)와 `docs/plans/001-site-problem-diagnosis.md`(계획·추적표)로 분리 | — | docs |
+| 2-6 | `docs/site-problem-diagnosis.md`를 `docs/specs/`(원문)와 `docs/archive/001-site-problem-diagnosis.md`(계획·추적표)로 분리 | — | docs |
 
 ### Phase 3. 데이터 계약 보강 (Supabase 마이그레이션 필요)
 
@@ -118,7 +118,7 @@ GitHub 원격(`Zeniel-Jobsky/Zenielfield`)으로 푸시할지, 공개 범위를 
 
 기능별 추적표는 기능마다 `docs/plans/NNN-*.md`에 두고 이 문서에는 복제하지 않는다 (두 곳이 어긋나는 것을 막기 위함).
 
-- 사업장 문제 진단: [계획 001](plans/001-site-problem-diagnosis.md) — 요구사항 32개 추적표(D·W·C·A), 구현 결정, 확정 필요 결정 D-1~D-7, 화면 검수 시나리오
+- 사업장 문제 진단: [계획 001](../archive/001-site-problem-diagnosis.md) — 요구사항 32개 추적표(D·W·C·A), 구현 결정, 확정 필요 결정 D-1~D-7, 화면 검수 시나리오
 
 Phase 2~4의 "관련 ID"는 계획 001의 ID를 가리킨다.
 

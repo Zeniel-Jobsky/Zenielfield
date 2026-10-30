@@ -1,4 +1,4 @@
-# ZeniField 실제 직원 명단. 이 파일을 복사해 work/users.csv(git 제외)에 채운다. 실제 명단은 커밋하지 않는다.
+# ZeniField 실제 직원 명단. 관리자 화면 설정 → 사용자·조직·권한 관리 → 명단 CSV 양식으로 받은 파일도 같은 형식이다. work/users.csv(git 제외)에 채운다. 실제 명단은 커밋하지 않는다.
 # role: admin(시스템 관리자)·director(사업부장)·lead(팀장)·partlead(파트장)·manager(잡매니저). domains는 관리 도메인 ID를 ;로 구분(관리자·사업부장은 비움).
 id,email,name,role,team,part,domains
 u-admin-01,admin@zeniel.co.kr,홍길동,admin,HR-biz 사업부,운영지원,

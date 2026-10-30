@@ -38,7 +38,7 @@
 - 출처: zeniel.com 지점 안내 7곳 → `data/zeniel-branches.csv`
 - 변환: Kakao 주소 검색 7/7 일치 → `data/zeniel-branches-geo.csv`
 - 본사: 서울 서초구 효령로 402 (제니엘빌딩) · 37.488131, 127.027840
-- 데모: [주입 파이프라인](seed-pipeline.md)으로 적재 (앱 데모 모드에는 미포함)
+- 데모: [주입 파이프라인](../infrastructure.md)으로 적재 (앱 데모 모드에는 미포함)
 - 운영 DB 미입력: 담당 팀·파트·담당자 결정 필요
 
 ## 운영 매장 후보 (2026-10-28)

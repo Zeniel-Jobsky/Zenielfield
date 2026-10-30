@@ -105,4 +105,4 @@
 | 2일 안에 브리핑 캐시 테이블 미완 | 캐시 없이 요청 시 생성으로 축소 |
 | 응답 형식 오류 | 서버 검증 후 잘못된 칸은 비움, 테스트로 고정 |
 
-관련 문서: [기능 현황](feature-status.md), [Supabase 설정](supabase-setup.md), [주간 브리핑](weekly-briefing.md).
+관련 문서: [기능 현황](feature-status.md), [Supabase 설정](../infrastructure.md), [주간 브리핑](weekly-briefing.md).

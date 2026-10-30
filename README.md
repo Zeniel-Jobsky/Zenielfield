@@ -156,12 +156,12 @@ pnpm dev        # http://127.0.0.1:5173  (데모: /?mode=demo)
 | `docs/` | 가이드·지침·계획·현황 |
 
 - **환경변수:** [.env.example](.env.example) — 운영 연결(`ZENIFIELD_SUPABASE_URL`·`ZENIFIELD_GATEWAY_TOKEN`), 인증(`ZENIFIELD_AUTH_PROVIDER`), AI(`OPENAI_API_KEY`·`OPENAI_MODEL`). 비밀값은 문서·커밋에 남기지 않아요.
-- **배포 순서:** DB 이관 → 서버 검증 로직 번들 → Edge 함수 → 화면. 운영 DB·Edge·계정은 승인 후에만([운영 인계](docs/supabase-setup.md)).
+- **배포 순서:** DB 이관 → 서버 검증 로직 번들 → Edge 함수 → 화면. 운영 DB·Edge·계정은 승인 후에만([운영 인계](docs/infrastructure.md)).
 
 ## 문서 모음
 
 - **현황:** [기능 현황](docs/feature-status.md) · [남은 이슈](docs/next-issues-plan.md) · [디자인 이력](docs/design-history.md)
-- **사용:** [사용자 가이드](docs/user-guide.md) · [관리자 가이드](docs/admin-guide.md) · [시연 안내](docs/demo-walkthrough.md)
-- **설계:** [방문·조치 한 화면](docs/visit-action-unify-plan.md) · [브리핑 근거](docs/briefing-research.md) · [방문 워크플로](docs/visit-workflow.md) · [AI 간편 등록](docs/ai-quick-entry-plan.md) · [개발 계획 v2](docs/repo-dev-plan-v2.md)
-- **운영:** [Supabase 인계](docs/supabase-setup.md) · [Cloudflare 이관](docs/cloudflare-account-migration-plan.md) · [데모 시드](docs/seed-pipeline.md)
-- **이전 기록:** [이전 README 원문](docs/readme-archive.md) · [문서 점검 보고서](docs/documentation-audit-2026-10-29.md) · 그 밖의 계획 문서는 `docs/` 폴더
+- **사용:** [사용자 가이드](docs/user-guide.md) · [관리자 가이드](docs/admin-guide.md) · [시연 안내](docs/archive/demo-walkthrough.md)
+- **설계:** [방문·조치 한 화면](docs/visit-action-unify-plan.md) · [브리핑 근거](docs/briefing-research.md) · [방문 워크플로](docs/visit-workflow.md) · [AI 간편 등록](docs/archive/ai-quick-entry-plan.md) · [개발 계획 v2](docs/archive/repo-dev-plan-v2.md)
+- **운영:** [Supabase 인계](docs/infrastructure.md) · [Cloudflare 이관](docs/infrastructure.md) · [데모 시드](docs/infrastructure.md)
+- **이전 기록:** [이전 README 원문](docs/archive/readme-archive.md) · [문서 점검 보고서](docs/archive/documentation-audit-2026-10-29.md) · 그 밖의 계획 문서는 `docs/` 폴더

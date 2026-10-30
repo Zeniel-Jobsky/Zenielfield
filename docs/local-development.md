@@ -1,6 +1,6 @@
 # 로컬 설치·실행·설정·검증 가이드
 
-2026-10-29 · main `475280d`의 실행 스크립트와 설정 예시를 정적으로 확인한 안내다. 새 PC 설치·서버 실행·실제 로그인·저장은 이번 문서 작업에서 시험하지 않았다. [문서 허브](../README.md) · [점검 보고서](documentation-audit-2026-10-29.md)
+2026-10-29 · main `475280d`의 실행 스크립트와 설정 예시를 정적으로 확인한 안내다. 새 PC 설치·서버 실행·실제 로그인·저장은 이번 문서 작업에서 시험하지 않았다. [문서 허브](../README.md) · [점검 보고서](archive/documentation-audit-2026-10-29.md)
 
 ## 개발 환경과 필수 프로그램
 
@@ -63,7 +63,7 @@ ChatGPT Sites 관리 환경은 체크아웃 전용 실행 프로필에 따라 �
 | `OPENAI_API_KEY` | 서버 AI 초안·정리·브리핑 생성 | 실제 AI 기능 |
 | `OPENAI_MODEL` | AI 호출 모델 이름 | 예시·서버 fallback은 `gpt-6-luna`. 실제 이용 가능 여부 미확인 |
 
-회사 계정은 사전 등록된 활성 사용자만 사용할 수 있다. 사용자 등록·비밀번호 발급·메일·Edge의 별도 비밀 설정은 [운영 인계](supabase-setup.md)를 따른다. 예시의 자리표시자는 실제 자격증명이 아니다. 비밀값을 `NEXT_PUBLIC_` 변수·문서·커밋에 넣지 않는다.
+회사 계정은 사전 등록된 활성 사용자만 사용할 수 있다. 사용자 등록·비밀번호 발급·메일·Edge의 별도 비밀 설정은 [운영 인계](infrastructure.md)를 따른다. 예시의 자리표시자는 실제 자격증명이 아니다. 비밀값을 `NEXT_PUBLIC_` 변수·문서·커밋에 넣지 않는다.
 
 개인 주소와 인증서는 git 제외 `vite.config.local.mjs`에 둔다. [예시 파일](../vite.config.local.example.mjs)은 주소 자리표시자가 있으므로 이 PC에 맞게 검토한 뒤 사용한다. 공유 `vite.config.ts`·`next.config.ts`에 개인 주소·인증서를 추가하지 않는다.
 
@@ -91,7 +91,7 @@ UI 변경 시 [AGENTS.md](../AGENTS.md)의 390px·820px·1280px 실화면 검수
 
 **main 푸시는 별도 [supabase-deploy 워크플로](../.github/workflows/supabase-deploy.yml)의 운영 배포를 유발한다.** 단순 원격 보관은 기능/문서 브랜치를 사용한다. `ci:deploy`와 `deploy:cloudflare`도 원격 배포 요청이므로 일반 설치 확인 명령이 아니다.
 
-`scripts/test-cloudflare-live.mjs`, `scripts/test-supabase-connection.mjs`, `tests/supabase.sql`은 별도 원격/DB 검증 범위다. 일반 설치 확인 명령으로 실행하지 않는다. 운영 DB·Edge·계정 변경은 별도 승인이 필요하며 [운영 인계](supabase-setup.md)를 먼저 읽는다.
+`scripts/test-cloudflare-live.mjs`, `scripts/test-supabase-connection.mjs`, `tests/supabase.sql`은 별도 원격/DB 검증 범위다. 일반 설치 확인 명령으로 실행하지 않는다. 운영 DB·Edge·계정 변경은 별도 승인이 필요하며 [운영 인계](infrastructure.md)를 먼저 읽는다.
 
 ## 문제 해결
 
@@ -109,7 +109,7 @@ UI 변경 시 [AGENTS.md](../AGENTS.md)의 390px·820px·1280px 실화면 검수
 | 위치·음성 입력 실패 | 브라우저 지원·보안 컨텍스트·기기 권한 확인. 직접 선택·텍스트 입력 사용 |
 | 빈 목록·저장 충돌 | 기간·대상·상태 필터와 역할 범위 확인. 최신 자료를 불러와 입력 내용 재검토 |
 
-근거: [실행 설정](../package.json), [setup](../scripts/setup.mjs), [진입 화면](../app/platform/entry.tsx), [사용자 매뉴얼](user-guide.md). 실제 서비스 설정과 재현이 남은 항목은 [점검 보고서](documentation-audit-2026-10-29.md)에 구분한다.
+근거: [실행 설정](../package.json), [setup](../scripts/setup.mjs), [진입 화면](../app/platform/entry.tsx), [사용자 매뉴얼](user-guide.md). 실제 서비스 설정과 재현이 남은 항목은 [점검 보고서](archive/documentation-audit-2026-10-29.md)에 구분한다.
 
 ## 매뉴얼 화면 캡처
 

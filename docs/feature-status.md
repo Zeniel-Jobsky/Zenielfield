@@ -2,7 +2,7 @@
 
 ## 2026-10-30 후속 조치 목록 이동 링크
 
-조치 목록 마지막 열의 단독 화살표를 `후속조치 수정 ›` 텍스트 링크형 버튼으로 바꾸고, 읽기 전용이면 `후속조치 보기 ›`로 표시한다. 제목·아이콘은 한 44px 조작 영역이다. 디자인 지침 4절·AGENTS 현재 결정·프로젝트 룰 DC-DESIGN-VISUAL/ACTIONS에 이동 화살표 규칙을 반영했다. 타입·전체 테스트·빌드 0.1.16 통과, 로컬 데모 390/820/1280px 화면과 수정 창 이동을 확인했다. [작업 기록](action-edit-link-plan.md).
+조치 목록 마지막 열의 단독 화살표를 `후속조치 수정 ›` 텍스트 링크형 버튼으로 바꾸고, 읽기 전용이면 `후속조치 보기 ›`로 표시한다. 제목·아이콘은 한 44px 조작 영역이다. 디자인 지침 4절·AGENTS 현재 결정·프로젝트 룰 DC-DESIGN-VISUAL/ACTIONS에 이동 화살표 규칙을 반영했다. 타입·전체 테스트·빌드 0.1.16 통과, 로컬 데모 390/820/1280px 화면과 수정 창 이동을 확인했다. [작업 기록](archive/action-edit-link-plan.md).
 
 ## 2026-10-30 제니에리 챗봇 아이콘·처리 중 안내
 
@@ -18,23 +18,23 @@
 
 ## 2026-10-29 문서 최신화 검토
 
-main `475280d`에서 새 문서 브랜치를 만들고 보존 README·설치·사용 가이드를 재사용했다. 관리자 가이드를 추가하고 테스트 8개 실행기·브리핑 접기·판정 표시·AI 저장 조건·날짜 정렬을 소스와 맞췄다. 기존 PROJECT_RULE 충돌은 해결하지 않았다. 코드·환경설정·DB·서버 변경과 push는 하지 않았다. [검증 기록](documentation-audit-2026-10-29.md).
+main `475280d`에서 새 문서 브랜치를 만들고 보존 README·설치·사용 가이드를 재사용했다. 관리자 가이드를 추가하고 테스트 8개 실행기·브리핑 접기·판정 표시·AI 저장 조건·날짜 정렬을 소스와 맞췄다. 기존 PROJECT_RULE 충돌은 해결하지 않았다. 코드·환경설정·DB·서버 변경과 push는 하지 않았다. [검증 기록](archive/documentation-audit-2026-10-29.md).
 
 ## 2026-10-29 운영 상태 차트 세로 간격 복원
 
-사용자 검토에 따라 운영 상태의 행을44px/상하8px에서24px/상하2px로 줄였다. 행간6px는 유지해 항목 시작점50→30px,6행 목록294→174px로 줄고 백분율·수치 열·원본 이동은 유지한다. 밀집 행 예외를 지침6.5·AGENTS·프로젝트 룰에 동기화했다. 390/820/1280px·640 CSS px에서24/30/174px와 넘침 없음·포커스·원본 이동을 확인했고 타입·렌더 회귀·디자인 검사·빌드0.1.13을 통과했다. 회사 Worker 자동 배포 대상으로 반영한다. [작업 기록](status-chart-ratio-plan.md).
+사용자 검토에 따라 운영 상태의 행을44px/상하8px에서24px/상하2px로 줄였다. 행간6px는 유지해 항목 시작점50→30px,6행 목록294→174px로 줄고 백분율·수치 열·원본 이동은 유지한다. 밀집 행 예외를 지침6.5·AGENTS·프로젝트 룰에 동기화했다. 390/820/1280px·640 CSS px에서24/30/174px와 넘침 없음·포커스·원본 이동을 확인했고 타입·렌더 회귀·디자인 검사·빌드0.1.13을 통과했다. 회사 Worker 자동 배포 대상으로 반영한다. [작업 기록](archive/status-chart-ratio-plan.md).
 
 ## 2026-10-29 운영 상태 차트 비율·수치 구분 수정
 
-현장·매장 운영 상태 막대가 최댓값 기준으로100%까지 차던 문제를 전체 운영 중 대상 수 기준의0–100%로 수정했다. 원비율로 길이를 계산하고 레이블만 정수 반올림하며, 대상 수(개)와 비율(%)을 별도 열로 나눴다. 공통 ChartPanel의 접기 기능을 제거하고 제목·범례·본문을 항상 표시한다. 390/820/1280px·640 CSS px에서 실제 막대 비율·합계·간격·넘침 없음·키보드·원본 이동을 확인했다. 40/100·51/107·0/100%·대상0·타입/비운영 대상 제외를 실제 컴포넌트 렌더 회귀 검사에 추가했다. 타입·전체 테스트·인증 경계·디자인 검사·빌드0.1.12 통과, 지침·AGENTS·프로젝트 룰 동기화. 사용자 요청으로 Zeniel-Jobsky 계정 main 푸시 대상에 포함하며 자동 배포 완료는 별도 확인 대상이다. [작업 기록](status-chart-ratio-plan.md).
+현장·매장 운영 상태 막대가 최댓값 기준으로100%까지 차던 문제를 전체 운영 중 대상 수 기준의0–100%로 수정했다. 원비율로 길이를 계산하고 레이블만 정수 반올림하며, 대상 수(개)와 비율(%)을 별도 열로 나눴다. 공통 ChartPanel의 접기 기능을 제거하고 제목·범례·본문을 항상 표시한다. 390/820/1280px·640 CSS px에서 실제 막대 비율·합계·간격·넘침 없음·키보드·원본 이동을 확인했다. 40/100·51/107·0/100%·대상0·타입/비운영 대상 제외를 실제 컴포넌트 렌더 회귀 검사에 추가했다. 타입·전체 테스트·인증 경계·디자인 검사·빌드0.1.12 통과, 지침·AGENTS·프로젝트 룰 동기화. 사용자 요청으로 Zeniel-Jobsky 계정 main 푸시 대상에 포함하며 자동 배포 완료는 별도 확인 대상이다. [작업 기록](archive/status-chart-ratio-plan.md).
 
 ## 2026-10-29 Git 작업 계정 전환
 
-이 저장소의 새 author/committer를 `Zeniel-Jobsky <jobsky@zeniel.co.kr>`로 고정하고 HTTPS 푸시도 OS keyring에 보관된 GitHub CLI 자격증명을 사용하도록 연결했다. 실제 Git 자격증명의 `/user` 결과 Zeniel-Jobsky와 기본 푸시 대상 origin을 확인했다. 기존 prodigk 커밋33개는 사용자 선택에 따라 유지하며 이력 재작성·강제 푸시는 하지 않는다. 다른 저장소의 전역 Git 작성자·helper 설정은 유지한다. AGENTS Git 작업 계정·프로젝트 룰 DC-GIT-IDENTITY에 기록했다. [설정 기록](git-account-plan.md).
+이 저장소의 새 author/committer를 `Zeniel-Jobsky <jobsky@zeniel.co.kr>`로 고정하고 HTTPS 푸시도 OS keyring에 보관된 GitHub CLI 자격증명을 사용하도록 연결했다. 실제 Git 자격증명의 `/user` 결과 Zeniel-Jobsky와 기본 푸시 대상 origin을 확인했다. 기존 prodigk 커밋33개는 사용자 선택에 따라 유지하며 이력 재작성·강제 푸시는 하지 않는다. 다른 저장소의 전역 Git 작성자·helper 설정은 유지한다. AGENTS Git 작업 계정·프로젝트 룰 DC-GIT-IDENTITY에 기록했다. [설정 기록](infrastructure.md).
 
 ## 2026-10-29 좌측 메뉴 상단 정리
 
-로고 설명과 중복되는 조직 안내 카드와 워크스페이스 소제목을 제거하고 로고→메뉴24px로 통일했다. 사용하지 않는 전용 CSS 선택자를 정리했으며 메뉴 순서·현재 메뉴·접기·모바일 포커스 처리는 유지한다. 390/820/1280px·640 CSS px에서 메뉴8개·아이콘/텍스트 정렬·항목46/48px·넘침 없음을 확인했고 메뉴 이동·접기/펼치기·모바일 포커스 유지/복귀를 검증했다. 타입·전체 테스트·디자인 검사·빌드0.1.11 성공. 디자인 지침5절·AGENTS·프로젝트 룰에 같은 기준을 반영했다. 사용자 요청(2026-10-29)에 따라 검증한 변경·빌드 버전0.1.11을 main 푸시 대상으로 반영한다. 자동 배포 완료는 별도 확인 대상이다. [작업 기록](sidebar-navigation-plan.md).
+로고 설명과 중복되는 조직 안내 카드와 워크스페이스 소제목을 제거하고 로고→메뉴24px로 통일했다. 사용하지 않는 전용 CSS 선택자를 정리했으며 메뉴 순서·현재 메뉴·접기·모바일 포커스 처리는 유지한다. 390/820/1280px·640 CSS px에서 메뉴8개·아이콘/텍스트 정렬·항목46/48px·넘침 없음을 확인했고 메뉴 이동·접기/펼치기·모바일 포커스 유지/복귀를 검증했다. 타입·전체 테스트·디자인 검사·빌드0.1.11 성공. 디자인 지침5절·AGENTS·프로젝트 룰에 같은 기준을 반영했다. 사용자 요청(2026-10-29)에 따라 검증한 변경·빌드 버전0.1.11을 main 푸시 대상으로 반영한다. 자동 배포 완료는 별도 확인 대상이다. [작업 기록](archive/sidebar-navigation-plan.md).
 
 ## 2026-10-29 업데이트 제품 로고 반영
 
@@ -42,23 +42,23 @@ main `475280d`에서 새 문서 브랜치를 만들고 보존 README·설치·�
 
 ## 2026-10-29 주차별 활동 타임라인 공간 개선
 
-활동 타임라인을 날짜·시각/세로 연결축/가변 본문 격자로 바꿨다. 데스크톱은 현장·방문자/방문 목적/활동 내용 버튼을 나란히 배치해 오른쪽 폭을 활용한다. 태블릿은 목적·버튼을 아래 한 줄로, 모바일은 날짜를 본문 위로 재배치한다. 기본3건·원문 접힘·시간순 정렬·원본 이동을 유지하고 마지막 지점 아래 연결선과 항목별 가로선은 두지 않았다. 지침9.1·AGENTS·프로젝트 룰을 동기화했다. 390/820/1280px·640 CSS px, 긴 글·44px 조작·키보드·전체 목록·빈 결과·접힘 초기화·원본 이동을 확인했다. 타입·전체 테스트·디자인 검사·Cloudflare 대상 최종 빌드 성공(`0.1.9`), 브라우저 오류·경고0. 추가 요청으로 버튼 열128px·표면36px/조작44px를 고정하고 펼침 전후 목적·버튼의 좌표/크기 일치를 확인했다. 원격 CSS·잡매니저 홈 정리d81ce8c까지 보존해 통합하고 전체 검사·빌드를 다시 통과했다. 소스`b7d4961`의 [자동 배포](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40818545393)가 성공했고 공개 버전0.1.9·커밋·인증 경계와 1280/390px 펼침 전후 좌표·버튼128px/표면36px·넘침 없음을 확인했다(2026-10-29). [개선 기록](weekly-timeline-plan.md).
+활동 타임라인을 날짜·시각/세로 연결축/가변 본문 격자로 바꿨다. 데스크톱은 현장·방문자/방문 목적/활동 내용 버튼을 나란히 배치해 오른쪽 폭을 활용한다. 태블릿은 목적·버튼을 아래 한 줄로, 모바일은 날짜를 본문 위로 재배치한다. 기본3건·원문 접힘·시간순 정렬·원본 이동을 유지하고 마지막 지점 아래 연결선과 항목별 가로선은 두지 않았다. 지침9.1·AGENTS·프로젝트 룰을 동기화했다. 390/820/1280px·640 CSS px, 긴 글·44px 조작·키보드·전체 목록·빈 결과·접힘 초기화·원본 이동을 확인했다. 타입·전체 테스트·디자인 검사·Cloudflare 대상 최종 빌드 성공(`0.1.9`), 브라우저 오류·경고0. 추가 요청으로 버튼 열128px·표면36px/조작44px를 고정하고 펼침 전후 목적·버튼의 좌표/크기 일치를 확인했다. 원격 CSS·잡매니저 홈 정리d81ce8c까지 보존해 통합하고 전체 검사·빌드를 다시 통과했다. 소스`b7d4961`의 [자동 배포](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40818545393)가 성공했고 공개 버전0.1.9·커밋·인증 경계와 1280/390px 펼침 전후 좌표·버튼128px/표면36px·넘침 없음을 확인했다(2026-10-29). [개선 기록](archive/weekly-timeline-plan.md).
 
 ## 2026-10-29 운영 현황 메시지 아이콘 개선
 
-독려 안내의 얼굴·손동작 캐릭터를 체크 문서·일정 달력·확인 필요 현장 아이콘으로 바꿨다. 첨부 SVG의 64px 캔버스·라운드 선·단순 도형을 참고하고 사이트의 중립·딥그린 토큰을 유지했다. 말풍선·캐릭터 모션·밖으로 튀는 장식을 제거했으며 메시지·상태 선택·숫자는 그대로다. 390/820/1280px 화면과 3상태×44/56px·reduced-motion·접근성을 확인하고 타입·전체 테스트·디자인 검사·빌드를 통과했다(`0.1.8`). 디자인 지침10-A·AGENTS 현재 디자인 결정·프로젝트 룰을 함께 갱신했다. [개선 기록](nudge-icon-design-plan.md). 2026-10-29 소스 `c37f04f`의 [자동 배포](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40816431041)가 성공했고 공개 버전 `0.1.8`·커밋·인증 보호와 데스크톱/모바일 데모의 아이콘을 확인했다.
+독려 안내의 얼굴·손동작 캐릭터를 체크 문서·일정 달력·확인 필요 현장 아이콘으로 바꿨다. 첨부 SVG의 64px 캔버스·라운드 선·단순 도형을 참고하고 사이트의 중립·딥그린 토큰을 유지했다. 말풍선·캐릭터 모션·밖으로 튀는 장식을 제거했으며 메시지·상태 선택·숫자는 그대로다. 390/820/1280px 화면과 3상태×44/56px·reduced-motion·접근성을 확인하고 타입·전체 테스트·디자인 검사·빌드를 통과했다(`0.1.8`). 디자인 지침10-A·AGENTS 현재 디자인 결정·프로젝트 룰을 함께 갱신했다. [개선 기록](archive/nudge-icon-design-plan.md). 2026-10-29 소스 `c37f04f`의 [자동 배포](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40816431041)가 성공했고 공개 버전 `0.1.8`·커밋·인증 보호와 데스크톱/모바일 데모의 아이콘을 확인했다.
 
 ## 2026-10-29 주차별 활동 요약 디자인 개선
 
-주차별 AI 요약·문제 진단·활동 흐름·조회·주차 기록을 그룹 시작의 1px 구분선·제목 크기·32/24px 여백으로 구분했다. 반복 목록·주차 목록 기본 노출은 3개, 방문 본문은 개별 펼침이다. 상세 콘텐츠 그룹에도 시작 구분선을 두되 항목별 반복선은 제거했다. 제목·본문·버튼의 좌측 기준선과 아이콘 격자를 정리했다. 디자인 지침9.1·AGENTS 현재 디자인 결정·프로젝트 룰 DC-DESIGN-DETAIL을 함께 갱신했다. 로컬 390/820/1280px 화면·640 CSS px 재배치, 펼침·검색·원본 이동·키보드·44px 조작 영역을 확인하고 타입·전체 테스트·디자인 검사·빌드를 통과했다(`0.1.6`). [개선 기록과 검증 범위](weekly-activity-design-plan.md). 소스 `4643bb9`를 회사 Worker에 배포했고 [자동 배포](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40807095916) 성공·공개 버전/커밋·주차별 데모 동작을 확인했다(2026-10-29).
+주차별 AI 요약·문제 진단·활동 흐름·조회·주차 기록을 그룹 시작의 1px 구분선·제목 크기·32/24px 여백으로 구분했다. 반복 목록·주차 목록 기본 노출은 3개, 방문 본문은 개별 펼침이다. 상세 콘텐츠 그룹에도 시작 구분선을 두되 항목별 반복선은 제거했다. 제목·본문·버튼의 좌측 기준선과 아이콘 격자를 정리했다. 디자인 지침9.1·AGENTS 현재 디자인 결정·프로젝트 룰 DC-DESIGN-DETAIL을 함께 갱신했다. 로컬 390/820/1280px 화면·640 CSS px 재배치, 펼침·검색·원본 이동·키보드·44px 조작 영역을 확인하고 타입·전체 테스트·디자인 검사·빌드를 통과했다(`0.1.6`). [개선 기록과 검증 범위](archive/weekly-activity-design-plan.md). 소스 `4643bb9`를 회사 Worker에 배포했고 [자동 배포](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40807095916) 성공·공개 버전/커밋·주차별 데모 동작을 확인했다(2026-10-29).
 
 ## 2026-10-29 Cloudflare 배포 자격증명 원격 관리
 
-Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN` Secret에서 관리한다. 로컬 `.env`·키체인에 의존하지 않는다. 기존 Secret 존재·환경 중복 없음·원격 배포 성공을 확인했다. `ci:deploy`·`deploy:cloudflare`는 로컬 Secret 등록·빌드·직접 배포 대신 원격 main 워크플로만 요청하도록 변경했다. CI는 배포 토큰 누락을 먼저 확인한다. 앱 실행용 비밀값은 기존 Cloudflare Worker Secrets를 유지한다. 상세: [원격 배포 자격증명](cloudflare-credentials-plan.md).
+Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN` Secret에서 관리한다. 로컬 `.env`·키체인에 의존하지 않는다. 기존 Secret 존재·환경 중복 없음·원격 배포 성공을 확인했다. `ci:deploy`·`deploy:cloudflare`는 로컬 Secret 등록·빌드·직접 배포 대신 원격 main 워크플로만 요청하도록 변경했다. CI는 배포 토큰 누락을 먼저 확인한다. 앱 실행용 비밀값은 기존 Cloudflare Worker Secrets를 유지한다. 상세: [원격 배포 자격증명](infrastructure.md).
 
 ## 2026-10-28 메뉴·레이블 검토안
 
-로컬 화면·현재 코드·첨부 개선안을 대조한 엑셀 제안서를 작성했다. 사이트 구조 43행, 레이블 376행, 검토 기준 33행이며 검토 상태와 최종 명칭 입력란을 제공한다. 구현은 미적용이다. 상세 계획은 [메뉴·레이블 개선 검토안](navigation-label-plan.md), 산출물은 `outputs/label-audit-20261028/ZeniField_사이트구조_레이블_개선안.xlsx`다. 60일 초과·기록 없음과 사업부·업무 영역의 의미 차이를 별도 보완했다. 엑셀 구조·렌더 검증을 수행했고 앱 코드·DB·배포는 변경하지 않았다.
+로컬 화면·현재 코드·첨부 개선안을 대조한 엑셀 제안서를 작성했다. 사이트 구조 43행, 레이블 376행, 검토 기준 33행이며 검토 상태와 최종 명칭 입력란을 제공한다. 구현은 미적용이다. 상세 계획은 [메뉴·레이블 개선 검토안](archive/navigation-label-plan.md), 산출물은 `outputs/label-audit-20261028/ZeniField_사이트구조_레이블_개선안.xlsx`다. 60일 초과·기록 없음과 사업부·업무 영역의 의미 차이를 별도 보완했다. 엑셀 구조·렌더 검증을 수행했고 앱 코드·DB·배포는 변경하지 않았다.
 
 기준: 2026-10-27. 핵심 업무 흐름(현장·매장 → 방문계획 → 결과 → 후속 조치 → 주간 브리핑)은 데모와 Supabase 운영 모드 모두 구현되어 있다. 운영 사이트는 Sites 비밀값 교체 후 실제 로그인 확인이 남아 있다.
 
@@ -114,18 +114,18 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 
 ### 중간
 - AI·직접 입력 분리: [스키마](ai-entry-schema.md) 구현, 원격 이관·Edge 재배포 완료(2026-10-28).
-- GPS 지점 자동 선택: [GPS](gps-plan.md) 구현, **2026-10-28 사용 중지**(`app/platform/geo.tsx` `GPS_ENABLED=false`, 방문 등록 GPS 자동 선택·위치 기록·마스터 현재 위치 좌표 입력 숨김, 주소 검색 좌표 입력은 유지). 매장 검색·주소 좌표 변환 구현, Kakao 키 설정 필요.
-- 데모 주입 파이프라인: [문서](seed-pipeline.md) 구현, 운영 적재 대기. HR-biz 가상 DB(xlsx) 운영 적재 완료(2026-10-28).
-- 방문 등록 기본 AI 입력·권한 요청: [문서](ai-input-default.md) 구현.
-- 관리 도메인: [문서](domain-plan.md) 구현. 원격 이관 적용 완료(2026-10-28).
+- GPS 지점 자동 선택: [GPS](archive/gps-plan.md) 구현, **2026-10-28 사용 중지**(`app/platform/geo.tsx` `GPS_ENABLED=false`, 방문 등록 GPS 자동 선택·위치 기록·마스터 현재 위치 좌표 입력 숨김, 주소 검색 좌표 입력은 유지). 매장 검색·주소 좌표 변환 구현, Kakao 키 설정 필요.
+- 데모 주입 파이프라인: [문서](infrastructure.md) 구현, 운영 적재 대기. HR-biz 가상 DB(xlsx) 운영 적재 완료(2026-10-28).
+- 방문 등록 기본 AI 입력·권한 요청: [문서](archive/ai-input-default.md) 구현.
+- 관리 도메인: [문서](infrastructure.md) 구현. 원격 이관 적용 완료(2026-10-28).
 - 방문·일지 워크플로 재설계: [문서](visit-workflow.md) 구현(계획 자동 연결·일시 기본 지금·제안 조치 일괄 등록·홈 "지금 여기서").
-- 대시보드·브리핑·필터 2차 개편: [대시보드 계획](dashboard-plan.md).
-- 기입력 결과 AI 정리(`aiEdits`)·AI 현황 요약·푸터 빌드 표기: 구현(2026-10-28). [워크플로](visit-workflow.md), [스키마](ai-entry-schema.md), [대시보드](dashboard-plan.md). 이관·Edge 운영 반영은 아래 Actions 실행에서 완료.
+- 대시보드·브리핑·필터 2차 개편: [대시보드 계획](archive/dashboard-plan.md).
+- 기입력 결과 AI 정리(`aiEdits`)·AI 현황 요약·푸터 빌드 표기: 구현(2026-10-28). [워크플로](visit-workflow.md), [스키마](ai-entry-schema.md), [대시보드](archive/dashboard-plan.md). 이관·Edge 운영 반영은 아래 Actions 실행에서 완료.
 - 권한별 시험 계정 발급(2026-10-28, 사용자 요청): `scripts/provision-accounts.mjs`로 zeniel.co.kr 11개 — zf.admin, zf.director, zf.lead1~3, zf.partlead1·3·5, 잡매니저 zf.jm001·jm018·jm021(가상 담당자 jm-001·018·021의 이메일만 변경해 배정 유지). 관리자 jobsky 이름으로 등록(감사 기록), 비밀번호는 무작위·`work/accounts.local.csv`(git 제외)에만 저장. 역할별 로그인·조회 범위 확인: 관리자·사업부장 107현장, 팀장 55, 파트장 32, 잡매니저 24. 주의: 시드 재적재 시 jm-001·018·021 이메일이 example.test로 되돌아갈 수 있음 → 재적재 후 이 스크립트 다시 실행.
 - 속도 개선(2026-10-28): 메뉴 전환 주 스레드 작업(개발 서버) 대시보드 498→61–121ms, 브리핑 506→247ms, 후속 조치 686→308ms. 원인 = 대상마다 전체 방문 재검색(`lastTargetVisit`·`targetStatus`), 브리핑 모델의 사이트별 방문 재중복제거, 매 렌더 브리핑 데이터 재생성. 운영 빌드에서는 대부분 메뉴 50ms 미만. 로그인 화면에서 개발용 계정 이름이 잠깐 보이던 문제 수정, 로그인·메뉴 로딩 게이지 추가.
 - 운영 반영(2026-10-28 14:35, Actions supabase-deploy #40638708419 성공): 이관 기준선 2개(visit_entry, domains) 기록 + 적용 2개(read_window, ai_edits), logic.js 번들, Edge zenifield-gateway·zenifield-cloudflare 재배포.
-- 운영 자동 파이프라인: `.github/workflows/supabase-deploy.yml` + `scripts/migrate.mjs`(활성). `main` 검증 → 필요한 이관·Edge → Cloudflare Worker 순서로 연결. 저장소 secret은 기존 Supabase 2개와 Worker 전용 `CLOUDFLARE_API_TOKEN`. [설치 문서](supabase-setup.md).
-- 대시보드 차트화: [대시보드 개선 계획](dashboard-plan.md) DB-1–DB-10·BR-1·BR-2 완료, BR-3 남음.
+- 운영 자동 파이프라인: `.github/workflows/supabase-deploy.yml` + `scripts/migrate.mjs`(활성). `main` 검증 → 필요한 이관·Edge → Cloudflare Worker 순서로 연결. 저장소 secret은 기존 Supabase 2개와 Worker 전용 `CLOUDFLARE_API_TOKEN`. [설치 문서](infrastructure.md).
+- 대시보드 차트화: [대시보드 개선 계획](archive/dashboard-plan.md) DB-1–DB-10·BR-1·BR-2 완료, BR-3 남음.
 
 - 주기 변경 적용일 지정과 필요 회차 스냅샷: 현재는 방문이 있으면 주기 변경 불가.
 - 사진·첨부파일: Storage, 파일 검증, 권한, 보관정책.
@@ -150,7 +150,7 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - [ ] 권한·보관정책 확정
 - [ ] Supabase access token(`sbp_`) 폐기 또는 보관 위치 결정
 
-관련 문서: [Supabase 설정·운영 인계](supabase-setup.md), [플랫폼 업무 구조](platform-integration.md), [주간 브리핑](weekly-briefing.md), [대시보드 개선 계획](dashboard-plan.md).
+관련 문서: [Supabase 설정·운영 인계](infrastructure.md), [플랫폼 업무 구조](platform-integration.md), [주간 브리핑](weekly-briefing.md), [대시보드 개선 계획](archive/dashboard-plan.md).
 
 ## 회사 계정 로그인 (2026-10-28)
 
@@ -185,14 +185,14 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 
 ## 로컬 프로그램 테스트 계획 (2026-10-28)
 
-- [테스트 계획](program-test-plan.md) 수립: 로그인·권한·방문·조치·AI·집계·반응형·자동 검사 및 완료 기준.
+- [테스트 계획](testing.md) 수립: 로그인·권한·방문·조치·AI·집계·반응형·자동 검사 및 완료 기준.
 - 상태: 계획 작성 완료. 이번 작업에서 브라우저 확인과 테스트 실행은 하지 않았으며 기존 통과 기록과 구분한다.
 - 기준 확인 사항: 잡매니저 홈 순서가 AGENTS.md와 PROJECT_RULE.md 요약에서 달라, 실행 시 AGENTS.md를 우선하고 문서 정합 이슈로 추적한다.
 
 
 ## 최신 소스 테스트 계획 개정 (2026-10-28)
 
-- [최신 소스 테스트 계획](latest-source-test-plan.md): 지정 프롬프트의 요구사항 추적·제품 평가·사용성 검증 방법을 적용했다.
+- [최신 소스 테스트 계획](testing.md): 지정 프롬프트의 요구사항 추적·제품 평가·사용성 검증 방법을 적용했다.
 - 실행 기준은 커밋+미커밋 변경으로 고정하며, 이전 기획 기반 계획 대신 본 문서를 우선한다.
 - 로컬 HEAD ec01a31 확인, 원격 최신 여부 미확인. 이번 회차는 계획 수립만 했으며 검사는 미실행이다.
 
@@ -210,7 +210,7 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - H2를 PC·태블릿 18px/모바일 17px·굵기 600으로 키웠다. 그룹 사이 32px/모바일 24px, 차트 열 사이 24px와 왼쪽 정렬로 정보 묶음을 구분했다.
 - 디자인 지침 4절·6.1-A, `AGENTS.md` 현재 디자인 결정, `PROJECT_RULE.md`의 `DC-DESIGN-DASHBOARD`를 함께 갱신했다.
 - 로컬 데모 390/820/1280px, 640 CSS px 재배치, 펼침·접기·키보드 포커스·빈 검색·잡매니저 홈·인접 화면 확인. 타입 검사·UI 지표 9개·플랫폼 87개·빌드(`NO_BUMP=1`)·디자인 점검 통과.
-- 실제 200% 브라우저 확대, 운영 데이터·오류 주입은 미확인. 상세: [제목·그룹 개선 기록](dashboard-hierarchy-plan.md).
+- 실제 200% 브라우저 확대, 운영 데이터·오류 주입은 미확인. 상세: [제목·그룹 개선 기록](archive/dashboard-hierarchy-plan.md).
 
 
 ### 대시보드 개선 GitHub 반영 준비 (2026-10-28)
@@ -220,8 +220,8 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 
 ### 방문 보고 종합 판정·위치 검색 중지 (2026-10-28)
 
-- 방문 보고 종합 판정(2026-10-28): 보고 본문의 빈도 필터를 없애고 입력·수정·백필 시 같은 기준의 AI 종합 판정을 방문 기록 `judgment`에 저장, 브리핑은 저장된 판정을 집계. 대상별 시간순 종합 판정(수준 정상/관찰/주의/위험·판단·이슈 흐름), 샘플 재판정·반영은 후속 커밋. 운영 DB 이관·백필은 승인 대기. 계획: [visit-nudge-plan](visit-nudge-plan.md) B-2·B-3
-- 판정 데이터 현재 형식 전환(2026-10-29): 옛 있음/없음 판정 1,800건을 종합 판정으로 재판정·재적재, 옛 형식은 이어받기·적재·집계에서 제외. [visit-nudge-plan](visit-nudge-plan.md) B-3
+- 방문 보고 종합 판정(2026-10-28): 보고 본문의 빈도 필터를 없애고 입력·수정·백필 시 같은 기준의 AI 종합 판정을 방문 기록 `judgment`에 저장, 브리핑은 저장된 판정을 집계. 대상별 시간순 종합 판정(수준 정상/관찰/주의/위험·판단·이슈 흐름), 샘플 재판정·반영은 후속 커밋. 운영 DB 이관·백필은 승인 대기. 계획: [visit-nudge-plan](archive/visit-nudge-plan.md) B-2·B-3
+- 판정 데이터 현재 형식 전환(2026-10-29): 옛 있음/없음 판정 1,800건을 종합 판정으로 재판정·재적재, 옛 형식은 이어받기·적재·집계에서 제외. [visit-nudge-plan](archive/visit-nudge-plan.md) B-3
 - 판정 기준 정리·스키마 확장·독려 안내(2026-10-29): DC-JUDGMENT(코드는 사실만, 판정은 저장된 AI 판정), 임의 판정 제거, 공통 현황 `status.ts`, 이관 `20261029100000_assignment_manual_basis.sql`(배정 이력 읽기·필요 시 근거·배정 열린 사용자 이동 차단), 독려 안내(지침 10-A). main 푸시로 CI 이관·번들·Edge·화면 배포.
 - 드리프트·스프롤 정리(2026-10-29): 공통 모듈(`lib/date`·`lib/collections`·`lib/csv`·`platform/status`·`platform/schedule`·`scripts/lib/supabase-sql`), 상태 이름표 단일화, 아이콘 4단계, LF 기준(.gitattributes·.editorconfig). 들어갈 수 없던 예전 화면(field-app·record-form·views·lib/demo·workspace-context)과 D1 경로(api/data·db·drizzle, 의존성 drizzle-orm·drizzle-kit)와 그 테스트(ui-metrics·api-flow) 삭제.
 - 위치 검색 중지(2026-10-28): 마스터 주소·매장 검색과 좌표 입력 숨김(`GEO_SEARCH_ENABLED=false`), `/api/geo` 410, Kakao 호출·키 사용 제거, `scripts/geocode-stores.mjs` 삭제. Kakao 키 폐기 가능
@@ -233,7 +233,7 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - `보고 내용에서 보이는 것 · 더 보기` → 현장명·주제 목록 → 현장별 `더 보기` 순서로 공개한다. 보고 목록 안의 선은 현장 사이에만 남겼고, 공통 근거·현장 미지정 주제를 보존한다.
 - `브리핑 자세히 보기`는 흐름·성과·챙길 곳·추가 판단·다음에 볼 것·격려·메타를 공개한다. 버튼은 중립 경계·44px, 키보드·포커스·조건 변경 초기화를 지원한다. 실패 이유·규칙 대체 안내는 기본 표시다.
 - 디자인 지침 4절·6.1-A, `AGENTS.md` 현재 결정, `PROJECT_RULE.md`의 AI 브리핑 규칙을 동기화했다.
-- 390/820/1280px·640 CSS px, 접힘/펼침·키보드·빈 결과·공통 근거·초기 로딩·주차별·잡매니저 화면 확인. 타입 검사·전체 테스트·빌드·디자인 검사 통과. 상세: [AI 브리핑 공개 방식 개선](ai-brief-disclosure-plan.md).
+- 390/820/1280px·640 CSS px, 접힘/펼침·키보드·빈 결과·공통 근거·초기 로딩·주차별·잡매니저 화면 확인. 타입 검사·전체 테스트·빌드·디자인 검사 통과. 상세: [AI 브리핑 공개 방식 개선](archive/ai-brief-disclosure-plan.md).
 
 
 ## 통합 대시보드 차트 그리드 정렬 (2026-10-28)
@@ -242,7 +242,7 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 태블릿·모바일은 1열·내용 높이로 표시하며 잡매니저 비교 차트에도 적용했다. 주별 추이의 축·수치 글자는 SVG 표시 배율에 맞춰 실제 12px로 유지한다.
 - 디자인 지침 6.1·6.1-A, `AGENTS.md` 현재 결정, `PROJECT_RULE.md` 그리드 규칙을 동기화했다.
 - 390/820/1024/1280/1440px·640 CSS px, 접기·조직 이동·빈 결과·잡매니저·통계 보고서 확인. 타입·전체 테스트·Cloudflare 인증 2종·Cloudflare 빌드·디자인 검사 통과, 버전 `0.1.3`.
-- AI 브리핑 커밋 `27b883f`와 함께 원격 main 반영. 사용자 요청에 따라 자동 배포와 공개 URL 확인은 생략. 상세: [차트 그리드 개선 기록](dashboard-grid-plan.md).
+- AI 브리핑 커밋 `27b883f`와 함께 원격 main 반영. 사용자 요청에 따라 자동 배포와 공개 URL 확인은 생략. 상세: [차트 그리드 개선 기록](archive/dashboard-grid-plan.md).
 
 
 ## Cloudflare 회사 계정 전환 완료 (2026-10-29)
@@ -251,7 +251,7 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 새 Worker 비밀값 등록, Supabase 콜백 추가(기존 목록·Site URL 보존) 완료. 배포 계정 고정·D1/R2 제거·Edge 콜백 허용과 CI 공개 커밋 검사를 준비했다.
 - 버전 `0.1.4`, 타입·전체 테스트·Cloudflare 경계 13개·Supabase 경계 61개·배포 검사 11개·회사 대상 빌드 통과.
 - GitHub secret 교체 완료(암호화 업로드), production 환경의 동명 덮어쓰기 없음 확인. 커밋 `ca57cea`의 [자동 배포 40799902115](https://github.com/Zeniel-Jobsky/Zenielfield/actions/runs/40799902115) 전체 성공.
-- 새 주소 `v0.1.4 · ca57cea`, Chrome 로그인·데모 진입, 비로그인 API 차단, 기존 Supabase Gateway 연결 확인. 사용자 비밀번호 로그인·유료 AI 호출은 미실행. 기존 개인 Worker·D1은 보존. [상세 이관 기록](cloudflare-account-migration-plan.md).
+- 새 주소 `v0.1.4 · ca57cea`, Chrome 로그인·데모 진입, 비로그인 API 차단, 기존 Supabase Gateway 연결 확인. 사용자 비밀번호 로그인·유료 AI 호출은 미실행. 기존 개인 Worker·D1은 보존. [상세 이관 기록](infrastructure.md).
 
 ## 2026-10-29 회의록 입력 · 읽지 못한 항목 · 제안 복사
 
@@ -284,3 +284,4 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 시연 DB·실사용 DB 분리(같은 날): `ops/db-targets.json`(active=demo), `scripts/db.mjs`(status·migrate demo|real|all·bootstrap·switch), CI는 active DB ref로 이관·Edge, active 변경 시 Worker `ZENIFIELD_SUPABASE_URL` 갱신. 새 DB 설치 경로(schema.sql + SCHEMA_INCLUDES 표시 + 나머지 이관) PGlite 검증(이관 두 번 실행 통과). 요금제 업그레이드 가이드 추가. 실사용 프로젝트 생성은 승인 대기.
 - 실사용 분리 보류·지금 프로젝트 초기화로 결정(같은 날): ZenField-Live(cyrsdaqqnegrynhwurnb)는 배포 토큰 계정 권한 없음(403). `db.mjs backup`·`reset`(백업 → 한 트랜잭션 삭제, --keep 관리자·--confirm ref) 추가, PGlite 시드 데이터로 삭제 순서 검증. 배치 절차를 초기화 경로로 교체. 실제 초기화는 승인 대기.
 - 초기화→직원 일괄 등록→첫 로그인 활성화 절차 정리(같은 날): 등록은 `provision-accounts --csv --no-password`, 활성화는 이메일 링크 첫 로그인(zf_read가 subject 연결), `db.mjs activation`(현재 40명 중 13명 활성, 읽기만). Supabase SMTP 설정 단계·직원 안내문·막힘 대응표 추가. 한계: 본인 비밀번호 변경 화면 없음.
+- 문서 정리(같은 날): 인프라 6개 → `infrastructure.md`, 테스트 계획 2개 → `testing.md`, 끝난 계획·지난 보고 26개 → `docs/archive/`, 문서 안내 `docs/README.md`. 관리자 화면 `명단 CSV 양식` 내려받기 + 명단 적재가 Excel 따옴표·BOM·예시 줄 처리(1280/390 확인).
