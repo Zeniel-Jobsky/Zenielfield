@@ -20,7 +20,7 @@ export async function handleCloudflareSupabase(request:Request,env:Bindings,fetc
  if(path==='/signout-with-chatgpt')return response({error:'화면의 로그아웃 버튼을 이용해 주세요.'},405);
  const callback=path==='/auth/callback',auth=path.startsWith('/api/auth/')||callback,platform=path==='/api/platform',assist=path==='/api/assist',geo=path==='/api/geo';
  if(!auth&&!platform&&!assist&&!geo){if(path.startsWith('/api/'))return response({error:'기존 D1 운영은 Sites 인증 환경에서 이용해 주세요.'},503);return null;}
- const operations:Record<string,string>={'/api/auth/request-link':'request-link','/api/auth/password':'password-login','/api/auth/set-password':'set-password','/auth/callback':'exchange-code','/api/auth/logout':'logout','/api/auth/session':'session'};
+ const operations:Record<string,string>={'/api/auth/request-link':'request-link','/api/auth/password':'password-login','/api/auth/set-password':'set-password','/api/auth/my-password':'change-own-password','/auth/callback':'exchange-code','/api/auth/logout':'logout','/api/auth/session':'session'};
  const operation=(assist||geo)?'session':platform?(request.method==='POST'?'save':'read'):operations[path];
  if(!operation)return response({error:'지원하지 않는 요청입니다.'},404);
  const expected=assist?'POST':['read','session','exchange-code'].includes(operation)?'GET':'POST';
@@ -37,7 +37,7 @@ export async function handleCloudflareSupabase(request:Request,env:Bindings,fetc
   let verifier='',codeChallenge='';
   if(operation==='request-link'){verifier=base64url(crypto.getRandomValues(new Uint8Array(32)));codeChallenge=base64url(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier))));}
   if(callback&&!cookie(request,VERIFIER))return Response.redirect(url.origin+'/?auth_error=browser',302);
-  const r=await fetcher(env.ZENIFIELD_SUPABASE_URL+'/functions/v1/zenifield-cloudflare',{method:'POST',headers:{'Content-Type':'application/json','x-zenifield-gateway':env.ZENIFIELD_GATEWAY_TOKEN},body:JSON.stringify({operation,email:body.email,password:['password-login','set-password'].includes(operation)?body.password:undefined,targetEmail:operation==='set-password'?body.targetEmail:undefined,codeChallenge,redirectTo:url.origin+'/auth/callback',authCode:callback?url.searchParams.get('code'):undefined,codeVerifier:callback?cookie(request,VERIFIER):undefined,entity:body.entity,id:body.id,version:body.version,values:body.values,from:url.searchParams.get('from')||undefined,to:url.searchParams.get('to')||undefined,accessToken,refreshToken}),signal:AbortSignal.timeout(25000)});
+  const r=await fetcher(env.ZENIFIELD_SUPABASE_URL+'/functions/v1/zenifield-cloudflare',{method:'POST',headers:{'Content-Type':'application/json','x-zenifield-gateway':env.ZENIFIELD_GATEWAY_TOKEN},body:JSON.stringify({operation,email:body.email,password:['password-login','set-password','change-own-password'].includes(operation)?body.password:undefined,targetEmail:operation==='set-password'?body.targetEmail:undefined,codeChallenge,redirectTo:url.origin+'/auth/callback',authCode:callback?url.searchParams.get('code'):undefined,codeVerifier:callback?cookie(request,VERIFIER):undefined,entity:body.entity,id:body.id,version:body.version,values:body.values,from:url.searchParams.get('from')||undefined,to:url.searchParams.get('to')||undefined,accessToken,refreshToken}),signal:AbortSignal.timeout(25000)});
   const data=await r.json() as any;
   const headers=new Headers({'Content-Type':'application/json','Cache-Control':'no-store'});
   if(r.ok)setSession(headers,data.session);

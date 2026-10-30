@@ -8,7 +8,8 @@
 | 다음 할 일 | [next-issues-plan.md](next-issues-plan.md) |
 | 화면 디자인 기준 (정본) | [DESIGN-zenielfield.md](DESIGN-zenielfield.md) · 지난 기준 [design-history.md](design-history.md) |
 | 문구·브리핑 근거 | [briefing-research.md](briefing-research.md) |
-| 실제 서비스 배치·DB 초기화·직원 일괄 등록·첫 로그인 활성화·비용 | [production-rollout.md](production-rollout.md) |
+| 실서비스 오픈 체크리스트 | [go-live.md](go-live.md) |
+| 배치 명령·DB 초기화·직원 일괄 등록·첫 로그인 활성화·비용 | [production-rollout.md](production-rollout.md) |
 | Supabase·Cloudflare·Git·시드·도메인 구성과 이력 | [infrastructure.md](infrastructure.md) |
 | 로컬 설치·실행·검증, 화면 캡처 | [local-development.md](local-development.md) |
 | 테스트 계획 | [testing.md](testing.md) |

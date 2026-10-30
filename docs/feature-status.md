@@ -286,3 +286,4 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 초기화→직원 일괄 등록→첫 로그인 활성화 절차 정리(같은 날): 등록은 `provision-accounts --csv --no-password`, 활성화는 이메일 링크 첫 로그인(zf_read가 subject 연결), `db.mjs activation`(현재 40명 중 13명 활성, 읽기만). Supabase SMTP 설정 단계·직원 안내문·막힘 대응표 추가. 한계: 본인 비밀번호 변경 화면 없음.
 - 문서 정리(같은 날): 인프라 6개 → `infrastructure.md`, 테스트 계획 2개 → `testing.md`, 끝난 계획·지난 보고 26개 → `docs/archive/`, 문서 안내 `docs/README.md`. 관리자 화면 `명단 CSV 양식` 내려받기 + 명단 적재가 Excel 따옴표·BOM·예시 줄 처리(1280/390 확인).
 - 실제 백업·초기화·직원 일괄 등록은 이번 작업에서 실행하지 않음(2026-10-30 사용자 결정). 담당 운영자가 `docs/production-rollout.md` 절차와 `node scripts/rollout.mjs`로 진행한다. 현재 운영 DB는 시연 데이터 그대로.
+- 설정 화면 다시 짜기·명단 일괄 반영·본인 비밀번호(같은 날): 설정 탭(내 계정·사용자·권한·관리 도메인·브리핑 내용), 사용자 표+찾기·필터, 명단 CSV 올리기 → 미리 보기(새로·바뀜·같음·오류) → n건 반영(saveMany, 한 건씩 서버 검증·감사), 본인 비밀번호(Edge change-own-password, Worker /api/auth/my-password). 1280/820/390 넘침 없음 확인(데모). 운영 Edge 반영은 main 푸시 CI. README에 [실서비스 오픈 절차](go-live.md) 추가.

@@ -1046,3 +1046,55 @@
 /* 아바타 메뉴 옵션: 제니에리 움직임 끄기(html.zf-calm) */
 html.zf-calm .zf-ai-mark,html.zf-calm .zeni-working-dots i{animation:none!important;transform:none!important}
 .account-panel .account-toggle{margin-left:auto;font-size:12px;color:var(--zf-text-secondary)}
+/* 명단 일괄 반영(설정 → 사용자): 올리기 → 요약 칩 → 바뀌는 줄 표 → 반영 */
+.bulk-users{display:grid;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--zf-border)}
+.bulk-users>b{font-size:14px}.bulk-users>p{margin:0;font-size:13px;color:var(--zf-text-secondary);max-width:var(--zf-read-measure)}
+.app-shell .bulk-pick{position:relative;justify-self:start;min-height:44px;cursor:pointer}.bulk-pick input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.bulk-sum{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0}.bulk-sum li{font-size:12px;padding:4px 10px;border:1px solid var(--zf-border);border-radius:999px;font-variant-numeric:tabular-nums}.bulk-sum li.bad{color:#8a4b00;border-color:#8a4b00}
+.bulk-table{min-width:640px}.bulk-table td:last-child{white-space:normal}
+.bulk-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.bulk-actions small{color:var(--zf-text-secondary)}
+.bulk-fails{font-size:13px}.bulk-fails ul{margin:4px 0 0;padding-left:18px}
+/* 본인 비밀번호 정하기(아바타 메뉴) */
+.my-password{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;background:rgb(0 0 0 / .32)}
+.my-password form{width:min(400px,100%);display:grid;gap:10px;padding:20px;background:var(--zf-surface,#fff);border-top:1px solid var(--zf-border)}
+.my-password b{font-size:16px}.my-password p{margin:0;font-size:13px;color:var(--zf-text-secondary)}
+.my-password label{display:grid;gap:4px;font-size:13px}.my-password input{min-height:44px}
+.my-password .form-ok{color:#003c33}.my-password-actions{display:flex;justify-content:flex-end;gap:8px}
+/* 설정: 탭 한 줄(밑줄형) → 탭마다 패널. 내 계정 = 프로필(정의 목록)·비밀번호·화면 옵션(스위치) */
+.settings{display:grid;gap:16px}
+.settings-tabs{display:flex;gap:4px;border-bottom:1px solid var(--zf-border);overflow-x:auto}
+.app-shell .settings-tabs button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:0;border-bottom:2px solid transparent;background:none;font-size:14px;font-weight:500;color:var(--zf-text-secondary);white-space:nowrap;cursor:pointer}
+.app-shell .settings-tabs button.on{color:#003c33;border-bottom-color:#003c33;font-weight:600}
+.app-shell .settings-tabs button:focus-visible{outline:2px solid #003c33;outline-offset:-2px}
+.settings-me{display:grid;gap:16px}
+@media(min-width:1024px){.settings-me{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.settings-me>section:first-child{grid-row:span 2}}
+.settings-block h2{display:flex;align-items:center;gap:8px}
+.settings-dl{display:grid;gap:0;margin:0}.settings-dl>div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px solid var(--zf-border)}
+.settings-dl dt{font-size:13px;color:var(--zf-text-secondary)}.settings-dl dd{margin:0;font-size:14px;overflow-wrap:anywhere}
+.settings-note{margin:8px 0 0;font-size:13px;color:var(--zf-text-secondary);max-width:var(--zf-read-measure)}
+.settings-form{display:grid;gap:12px;max-width:420px}.settings-form label{display:grid;gap:4px;font-size:13px}.settings-form input{min-height:44px}.settings-form .form-ok{color:#003c33;margin:0}.settings-form .form-error{margin:0}
+.settings-switch{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:44px;cursor:pointer}
+.settings-switch span{display:grid;gap:2px}.settings-switch b{font-size:14px;font-weight:600}.settings-switch small{font-size:13px;color:var(--zf-text-secondary)}
+.settings-switch input{appearance:none;flex:none;width:44px;height:24px;border-radius:999px;background:var(--zf-border);position:relative;cursor:pointer;transition:background .15s}
+.settings-switch input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s}
+.settings-switch input:checked{background:#003c33}.settings-switch input:checked::after{transform:translateX(20px)}
+.settings-switch input:focus-visible{outline:2px solid #003c33;outline-offset:2px}
+/* 사용자·권한 표 */
+.user-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}.user-tools input[type=search]{flex:1 1 220px;min-height:44px}.user-tools select{min-height:44px}.user-tools small{margin-left:auto;color:var(--zf-text-secondary);font-variant-numeric:tabular-nums}
+.user-table{min-width:880px}.user-name{display:inline-flex;align-items:center;gap:8px}.user-table td .btn{min-height:36px}
+.bulk-users{margin:0 0 16px;padding:16px;border:1px solid var(--zf-border);border-top-width:1px}.bulk-head{display:flex;align-items:baseline;gap:8px}.bulk-head small{color:var(--zf-text-secondary)}
+.password-setter{margin-top:16px}
+/* 설정 표(사용자·명단 미리 보기): 방문 목록 표(.record-table) 열 너비 규칙과 분리 */
+.user-table{width:100%;min-width:860px;border-collapse:collapse;font-size:13px}
+.user-table.bulk-table{min-width:640px}
+.user-table th{height:40px;padding:0 12px;text-align:left;font-size:12px;font-weight:600;color:var(--zf-text-secondary);background:var(--zf-surface-subtle,#f6f7f6);white-space:nowrap}
+.user-table td{height:52px;padding:6px 12px;border-bottom:1px solid var(--zf-border);vertical-align:middle;overflow-wrap:anywhere}
+.user-table td:last-child,.user-table th:last-child{text-align:right;white-space:nowrap}
+.user-table.bulk-table td:last-child,.user-table.bulk-table th:last-child{text-align:left;white-space:normal}
+.user-table .empty{text-align:center;color:var(--zf-text-secondary)}
+.user-tools input[type=search]{padding:0 12px;border:1px solid var(--zf-border);border-radius:6px;background:var(--zf-surface);font-size:14px}
+.settings .panel{border-top:0;padding-top:0}
+.settings-me .panel{border-top:1px solid var(--zf-border);padding-top:16px}
+.settings,.settings>[role=tabpanel],.settings .panel,.settings .table-scroll{min-width:0;max-width:100%}.settings .table-scroll{overflow-x:auto}
+.settings [role=tabpanel]>.panel,.settings [role=tabpanel]>.panel::before{border-top:0!important;box-shadow:none}
+.bulk-table th:nth-child(1){width:56px}.bulk-table th:nth-child(2){width:32%}.bulk-table th:nth-child(3){width:72px}

@@ -87,6 +87,11 @@ export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
     await call('/auth/v1/logout?scope=local',{method:'POST',headers:{Authorization:'Bearer '+accessToken}});
     return reply({ok:true});
    }
+   // 본인 비밀번호 정하기: 이메일 링크·비밀번호로 확인된 세션의 본인 메일에만 쓴다(다른 사람 메일은 받지 않는다).
+   if(body.operation==='change-own-password') {
+    if(!validPassword(body.password))return reply({error:'8자 이상 72자 이하로 정해 주세요.'},400);
+    return await setPassword(actor.email,body.password);
+   }
    if(body.operation==='set-password') {
     if(actor.role!=='admin')return reply({error:'시스템 관리자만 비밀번호를 설정할 수 있습니다.'},403);
     const email=typeof body.targetEmail==='string'?body.targetEmail.trim().toLowerCase():'';

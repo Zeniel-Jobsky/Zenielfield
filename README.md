@@ -12,13 +12,15 @@
 - 모든 화면 맨 위에서 제니에리가 그 화면의 할 일을 먼저 정리하고, 줄마다 바로 하기 버튼과 보낼 말 복사를 붙여요.
 - 모든 직급이 같은 메뉴를 보고, 보이는 범위만 직급(잡매니저·파트장·팀장·사업부장)에 따라 달라요.
 
+> **실서비스로 여는 방법 → [실서비스 오픈 절차](docs/go-live.md)** (데이터 비우기 → 로그인 메일 → 직원 명단 일괄 등록 → 첫 로그인 활성화 → 현장 등록 → 확인)
+
 ## 목차
 
 1. [핵심 철학](#핵심-철학)
 2. [핵심 기능](#핵심-기능)
 3. [화면으로 보기](#화면으로-보기)
 4. [처음 버전과 달라진 점](#처음-버전과-달라진-점)
-5. [시작하기](#시작하기)
+5. [시작하기](#시작하기) · [실서비스 오픈 절차](docs/go-live.md)
 6. [메뉴별 사용 안내](#메뉴별-사용-안내)
 7. [개발자 안내](#개발자-안내)
 8. [문서 모음](#문서-모음)
@@ -163,5 +165,5 @@ pnpm dev        # http://127.0.0.1:5173  (데모: /?mode=demo)
 - **현황:** [기능 현황](docs/feature-status.md) · [남은 이슈](docs/next-issues-plan.md) · [디자인 이력](docs/design-history.md)
 - **사용:** [사용자 가이드](docs/user-guide.md) · [관리자 가이드](docs/admin-guide.md) · [시연 안내](docs/archive/demo-walkthrough.md)
 - **설계:** [방문·조치 한 화면](docs/visit-action-unify-plan.md) · [브리핑 근거](docs/briefing-research.md) · [방문 워크플로](docs/visit-workflow.md) · [AI 간편 등록](docs/archive/ai-quick-entry-plan.md) · [개발 계획 v2](docs/archive/repo-dev-plan-v2.md)
-- **운영:** [Supabase 인계](docs/infrastructure.md) · [Cloudflare 이관](docs/infrastructure.md) · [데모 시드](docs/infrastructure.md)
-- **이전 기록:** [이전 README 원문](docs/archive/readme-archive.md) · [문서 점검 보고서](docs/archive/documentation-audit-2026-10-29.md) · 그 밖의 계획 문서는 `docs/` 폴더
+- **운영:** [실서비스 오픈 절차](docs/go-live.md) · [배치 매뉴얼(명령·비용·되돌리기)](docs/production-rollout.md) · [인프라 구성(Supabase·Cloudflare·시드)](docs/infrastructure.md)
+- **이전 기록:** [이전 README 원문](docs/archive/readme-archive.md) · [문서 점검 보고서](docs/archive/documentation-audit-2026-10-29.md) · 문서 안내 [docs/README.md](docs/README.md)
