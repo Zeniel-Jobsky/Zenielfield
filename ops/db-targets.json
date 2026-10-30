@@ -1,8 +1,14 @@
 {
-  "_설명": "운영 앱(zenifield Worker)이 붙는 DB는 active 하나다. 연결 교체 = active 값만 바꿔 main에 푸시(CI가 그 DB에 이관·Edge·Worker 연결값을 맞춘다). ref·주소는 비밀값이 아니다. 명령: node scripts/db.mjs",
+  "_설명": "demo는 기존 zenifield Worker + 테스트 DB 전용이며 절대 초기화하지 않는다. real은 별도 zenifield-live Worker에만 연결한다. active는 demo로 고정하고 분리 배포는 zenifield-live-deploy 워크플로를 사용한다.",
   "active": "demo",
   "targets": {
-    "demo": {"label": "운영 DB(초기화 후 실사용)", "ref": "nhywssfwtnonytbkufyy"},
-    "real": {"label": "실사용 DB(보류: ZenField-Live cyrsdaqqnegrynhwurnb 접근 권한 없음)", "ref": ""}
+    "demo": {
+      "label": "운영 DB(초기화 후 실사용)",
+      "ref": "nhywssfwtnonytbkufyy"
+    },
+    "real": {
+      "label": "독립 실서비스 DB(초기 스키마 구축됨·직원 미등록·별도 Worker 배포 전)",
+      "ref": "cyrsdaqqnegrynhwurnb"
+    }
   }
 }
