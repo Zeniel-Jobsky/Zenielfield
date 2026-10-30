@@ -938,3 +938,17 @@
 .record-table td small{display:block}
 .app-shell .list-tools select{min-height:40px;border:1px solid var(--zf-control-border);border-radius:6px;background-color:var(--zf-surface,#fff);padding:0 32px 0 12px;font-size:13px}
 .app-shell .list-tools label{font-size:13px;color:var(--zf-text-secondary)}
+/* 아이콘 + 글자 버튼(단독 +·› 금지): 아이콘 14px, 글자와 4px */
+.copy-btn.with-text{width:auto;min-width:0;padding:0 10px;gap:4px;font-size:13px}
+.app-shell .action-brief .ai-brief-focus .action-late>li>.copy-btn.with-text{width:auto;min-width:0;padding:0 10px}
+.textbtn svg+*, .btn.small svg{flex:none}
+.record-table .textbtn,.action-late .btn.small{gap:4px}
+/* 방문 줄 아래 그 방문의 조치: 들여 쓴 하위 줄(옅은 표면 없이 왼쪽 표식 + 작은 글자) */
+.record-table tr.sub-action td{padding-top:6px;padding-bottom:10px;font-size:13px;border-top:0}
+.record-table tr.sub-action td:first-child{padding-left:28px;color:var(--zf-text-secondary)}
+.record-table .sub-mark{margin-right:6px;color:var(--zf-text-muted)}
+.brief-do-links .btn{gap:4px}
+/* 방문·조치 탭 한 줄: 방문 탭 │ 조치 탭 (구분선만, 줄 하나) */
+.va-tabs{flex-wrap:wrap}
+.va-tabs .va-sep{display:inline-block;width:1px;height:20px;background:var(--zf-border);margin:0 8px;align-self:center}
+@media(max-width:760px){.app-shell .action-brief .ai-brief-focus .action-late>li{flex-wrap:wrap;row-gap:6px;padding-bottom:8px}.app-shell .action-brief .ai-brief-focus .action-late>li>button:first-child{flex:1 1 100%}}
