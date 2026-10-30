@@ -898,3 +898,9 @@
 .action-due-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
 .action-brief .ai-brief-out>section+section{margin-top:24px}
 .action-brief .textbtn{min-height:44px}
+/* 오늘 업무: 제목 아래 기준 시각, 제니에리 독려 말풍선 */
+.page-when{margin:4px 0 0;font-size:13px;color:var(--zf-text-secondary);font-variant-numeric:tabular-nums}
+.manager-welcome.zeni-cheer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.zeni-cheer-say{flex:1 1 320px}
+.zeni-cheer-say .zeni-working-bubble{line-height:1.6}
+@media(max-width:760px){.app-shell .page-heading p.page-when{display:block;font-size:12px;margin-top:4px}}
