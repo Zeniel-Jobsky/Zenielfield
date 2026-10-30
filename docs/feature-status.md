@@ -24,8 +24,8 @@
 | --- | --- |
 | 공개 주소 | https://zenifield.jobsky.workers.dev (main 최신 커밋 배포) |
 | 운영 DB | Supabase `nhywssfwtnonytbkufyy`, 이관 7개 적용·미적용 0. **아직 시연 데이터 그대로**(사용자 40, 현장 107, 매장 554, 방문 11,811) |
-| 남은 이슈 | [next-issues-plan.md](next-issues-plan.md) 상태 표(17개, 오픈 전 1·12·13·14·11 먼저) |
-| 판정 | 완료 보고 11,810건 중 9,013건 판정 반영, 나머지 판정 진행 중 |
+| 남은 이슈 | [next-issues-plan.md](next-issues-plan.md) 상태 표(17개 중 오픈 전 12·13·14·11 먼저) |
+| 판정 | 완료 보고 11,806건 전부 AI 판정 반영(2026-10-30), `미판정` 0 |
 | 실서비스 오픈 | 대기. 담당 운영자가 [go-live.md](go-live.md) 순서로 진행(백업 → 초기화 → 명단 → 비밀번호 1:1 배포) |
 | 로그인 메일 | 회사 SMTP 미연결. 당분간 `accounts.local.csv` 비밀번호 배포 방식 |
 | 배포 토큰 | `production` 환경 Secret `SUPABASE_ACCESS_TOKEN` 재발급(2026-10-30) 후 정상 |
@@ -42,6 +42,6 @@
 | 2026-10-29 | Cloudflare 회사 계정 `zenifield` Worker로 전환 |
 | 2026-10-29 | 판정 데이터 현재 형식 재판정·재적재(1,800건), 이관 visit_judgment·assignment_manual_basis·visit_meeting |
 | 2026-10-30 | 배포 토큰 재발급(production 환경), Edge `change-own-password` 추가 배포 |
-| 2026-10-30 | 방문 보고 AI 판정 백필 1차 반영: 판정 있는 방문 9,013건(사람 확정 2건 보호), 남은 약 2,800건 판정 중 |
+| 2026-10-30 | 방문 보고 AI 판정 백필 완료: 완료 보고 11,806건 전부 판정(gpt-6-luna, 사람 확정 판정 보호). 시험 입력 중 깨진 글자 방문 4건 삭제(백업 work/backup-junk-visits.json) |
 
 </details>
