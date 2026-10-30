@@ -14,5 +14,7 @@
 | 로컬 설치·실행·검증, 화면 캡처 | [local-development.md](local-development.md) |
 | 테스트 계획 | [testing.md](testing.md) |
 | 기능 현황·변경 기록 / 다음 할 일 | [feature-status.md](feature-status.md) · [next-issues-plan.md](next-issues-plan.md) |
+| 사업·기획 산출물(비즈니스 모델 캔버스·PRD·WBS, PDF·Word) | [deliverables/](deliverables/) |
+| 공개 사이트 사용자 테스트(2026-10-30) 수정 요청·보고서 | [user-test-2026-10-30/](user-test-2026-10-30/) · 이슈 18~26은 [next-issues-plan.md](next-issues-plan.md) |
 
 새 계획은 `docs/<주제>-plan.md`로 만들고, 끝나면 결과를 feature-status에 한 줄 남긴 뒤 archive로 옮긴다.
