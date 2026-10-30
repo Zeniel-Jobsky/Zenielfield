@@ -890,12 +890,6 @@
 .visit-suggest button>svg:last-child{grid-column:2;grid-row:1/span 5;color:var(--zf-text-muted)}
 .visit-suggest button:hover b{text-decoration:underline}
 .ai-brief .ai-brief-out h3 .copy-btn,.ai-brief .ai-brief-out h3>button{margin-left:auto}
-/* 후속 조치 정리: 기한 기준 한 줄 막대(누르면 해당 탭) */
-.action-due-bar{display:flex;gap:2px;height:32px;border-radius:6px;overflow:hidden}
-.action-due-bar button{min-width:32px;color:#fff;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
-.action-due-bar button:focus-visible{outline-offset:-3px}
-.action-due-legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin:8px 0 0;font-size:12px;color:var(--zf-text-secondary)}
-.action-due-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
 .action-brief .ai-brief-out>section+section{margin-top:24px}
 .action-brief .textbtn{min-height:44px}
 /* 오늘 업무: 제목 아래 기준 시각, 제니에리 독려 말풍선 */
@@ -906,3 +900,14 @@
 @media(max-width:760px){.app-shell .page-heading p.page-when{display:block;font-size:12px;margin-top:4px}}
 /* 여러 문장 = 한 줄에 한 문장(목록 표시 없이, 줄 사이 4px) */
 .brief-lines{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+/* 방문 기록 이슈 가이드 탭(후속 조치 탭과 같은 모양, 표 바로 위 한 줄) + 걸린 이유 한 줄 */
+.guide-tabs{margin:0 0 12px}
+.guide-why{display:block;margin-top:2px;font-size:12px;color:var(--zf-text-secondary)}
+/* 후속 조치 정리: 할 일 한 문장 + 밀린 조치 목록(대상 굵게 / 유형·내용 / 기한 지난 날수, 줄마다 44px) */
+.action-advice{margin:0 0 8px}
+.action-late{list-style:none;margin:0;padding:0;border-top:1px solid var(--zf-border)}
+.action-late li{border-bottom:1px solid var(--zf-border)}
+.action-late button{display:grid;grid-template-columns:minmax(0,1fr) 16px;column-gap:8px;align-items:center;width:100%;min-height:44px;padding:8px 0;text-align:left}
+.action-late button>span,.action-late button>small{grid-column:1;font-size:13px;color:var(--zf-text-secondary)}
+.action-late button>small{font-size:12px}
+.action-brief .action-late button>svg{grid-column:2;grid-row:1/span 3;color:var(--zf-text-muted)}

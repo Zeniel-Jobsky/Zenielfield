@@ -63,3 +63,14 @@ export function buildJudgeInput(targets:{visits:JudgeVisit[];actions:JudgeAction
   return {target:'대상'+(ti+1),timeline:[...t.visits].filter(v=>v.actualDate).sort((a,b)=>a.actualDate!.localeCompare(b.actualDate!)).map(v=>{const ref=String(++k);refs.set(ref,v.id);return {ref,date:v.actualDate,report:maskText(reportText(v,byVisit.get(v.id)||[])).slice(0,900)}})}})};
  return {payload,refs};
 }
+
+// 방문 기록 이슈 가이드(저장된 판정만, 코드는 판정하지 않음): 먼저 볼 보고 = 판정 바로 확인 또는 긴급 이슈,
+// 안 끝난 이슈 = 신규·지속·악화 이슈, 고객 요청 = 고객 요청 표시 이슈. why = 그 칩에 걸린 이슈 한 줄.
+export type IssueGuide='focus'|'open'|'customer';
+export const ISSUE_GUIDE:[IssueGuide,string][]=[['focus','먼저 볼 보고'],['open','안 끝난 이슈'],['customer','고객 요청']];
+export function issueGuide(j:unknown,g:IssueGuide):{hit:boolean;why:string}{
+ if(!isCurrentJudgment(j))return {hit:false,why:''};
+ const is=j.issues,pickIssue=g==='focus'?is.find(i=>i.severity==='긴급'):g==='open'?is.find(i=>i.flow!=='해결'):is.find(i=>i.customerRequest);
+ const hit=g==='focus'?j.level==='위험'||!!pickIssue:!!pickIssue;
+ return {hit,why:hit?(pickIssue?`${pickIssue.type} · ${pickIssue.summary}`:j.assessment):''};
+}
