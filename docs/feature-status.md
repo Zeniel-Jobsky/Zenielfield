@@ -285,3 +285,4 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 실사용 분리 보류·지금 프로젝트 초기화로 결정(같은 날): ZenField-Live(cyrsdaqqnegrynhwurnb)는 배포 토큰 계정 권한 없음(403). `db.mjs backup`·`reset`(백업 → 한 트랜잭션 삭제, --keep 관리자·--confirm ref) 추가, PGlite 시드 데이터로 삭제 순서 검증. 배치 절차를 초기화 경로로 교체. 실제 초기화는 승인 대기.
 - 초기화→직원 일괄 등록→첫 로그인 활성화 절차 정리(같은 날): 등록은 `provision-accounts --csv --no-password`, 활성화는 이메일 링크 첫 로그인(zf_read가 subject 연결), `db.mjs activation`(현재 40명 중 13명 활성, 읽기만). Supabase SMTP 설정 단계·직원 안내문·막힘 대응표 추가. 한계: 본인 비밀번호 변경 화면 없음.
 - 문서 정리(같은 날): 인프라 6개 → `infrastructure.md`, 테스트 계획 2개 → `testing.md`, 끝난 계획·지난 보고 26개 → `docs/archive/`, 문서 안내 `docs/README.md`. 관리자 화면 `명단 CSV 양식` 내려받기 + 명단 적재가 Excel 따옴표·BOM·예시 줄 처리(1280/390 확인).
+- 실제 백업·초기화·직원 일괄 등록은 이번 작업에서 실행하지 않음(2026-10-30 사용자 결정). 담당 운영자가 `docs/production-rollout.md` 절차와 `node scripts/rollout.mjs`로 진행한다. 현재 운영 DB는 시연 데이터 그대로.
