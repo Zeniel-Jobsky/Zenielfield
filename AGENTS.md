@@ -137,6 +137,27 @@
 - **실제 서비스 배치:** 실사용 DB 설치·연결 교체·직원 계정 등록·배포는 [배치 매뉴얼](docs/production-rollout.md)과 실행기 `node scripts/rollout.mjs`(정본 `ops/production-rollout.json`)로만 한다. 에이전트는 자동 단계만 실행하고, 승인 단계는 사람이 준 승인 이름(`--approved-by`)이 있을 때만, 수동 단계는 사람이 끝낸 뒤 `done`으로 기록한다.
 - **기록:** 운영에 반영한 이관·배포·적재는 날짜와 함께 `docs/feature-status.md`(또는 해당 `docs/*.md`)에 남긴다.
 
+## 운영 DB·배치 명령 (에이전트용)
+
+설명서 [docs/production-rollout.md](docs/production-rollout.md), 절차 정본 `ops/production-rollout.json`, DB 대상 `ops/db-targets.json`. 사용자 요청을 아래 표의 명령으로만 처리한다. 표에 없는 운영 DB 작업(SQL 직접 실행, 대시보드 조작 대행)은 하지 않는다.
+
+| 사용자 요청 | 에이전트가 실행 | 승인 |
+| --- | --- | --- |
+| 배치 진행 상황, 다음 할 일 | `node scripts/rollout.mjs list` → `show <단계>` | – |
+| DB 상태, 스키마 맞는지 | `node --env-file=.env scripts/db.mjs status` | – |
+| 스키마 변경 | 새 `supabase/migrations/*.sql` → PGlite 선적용 → main 푸시(CI가 연결 DB에 적용) → `db.mjs status`로 미적용 0 확인 | 푸시 = 운영 반영이라 승인 |
+| 다른 DB 스키마 맞추기 | `db.mjs migrate <demo\|real\|all> --dry-run` 보고 → 승인 후 같은 명령에 `--approved-by` | 필요 |
+| 백업 | `node scripts/rollout.mjs run backup --approved-by <이름>` | 필요 |
+| 초기화 | `node scripts/rollout.mjs run reset --approved-by <이름> --admin <남길 관리자>` | 필요 |
+| 직원 등록 | `work/users.csv` 확인 → `run users-dry --admin <관리자>` 결과 보고 → 승인 후 `run users --approved-by <이름> --admin <관리자>` | 필요 |
+| 사람이 하는 단계 끝남 | `node scripts/rollout.mjs done <단계>` | – |
+
+- **승인:** 승인은 사용자가 대화에서 승인자 이름과 대상을 직접 말한 경우만 인정한다. 예: "백업·초기화 승인, 승인자 홍길동, 남길 관리자 jobsky@zeniel.co.kr". 이름을 지어내거나 앞선 승인을 다른 단계로 넓히지 않는다.
+- **실행 전후:** 실행 전에는 무엇이 바뀌는지(대상 DB·지워지는 행 수)를 한 줄로 알린다. 실행 뒤에는 단계의 `check` 기준과 실제 출력을 비교해 보고한다.
+- **실패:** 실패하거나 권한 검사에 막히면 멈추고 출력 그대로 보고한다(DC-HALT). 다른 명령이나 SQL로 우회하지 않는다.
+- **비밀값:** 비밀번호·토큰·`work/accounts.local.csv`·`work/users.csv` 내용은 출력·대화·커밋에 옮기지 않는다. 비밀번호 직접 입력(`set-password.mjs`)은 사람이 한다.
+- **기록:** 끝난 단계는 `docs/feature-status.md`에 날짜와 함께 한 줄로 남긴다.
+
 ## 데이터·인증 기준
 
 - **로그인:** 첫 화면은 로그인이다. 회사 계정(등록 이메일 + 비밀번호, Supabase Auth)이 기본이고 `ZENIFIELD_AUTH_PROVIDER=supabase-email`로 켠다. 비우면 Sites(ChatGPT) 로그인이다. 등록(`zf_users`)에 없는 이메일은 로그인할 수 없다. 데모는 로그인 화면의 "로그인 없이 체험하기" 또는 `?mode=demo`로 들어가며 저장 내용이 DB에 남지 않는다.

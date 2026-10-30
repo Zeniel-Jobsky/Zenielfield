@@ -83,6 +83,7 @@
 | Dev server | `npm start` · `npm stop` · `npm restart` · `npm run status` (기존 포트 프로세스 종료 후 백그라운드 실행, Windows·macOS 공통, 로그 `.dev-server.log`). 직접 실행은 `npm run dev`. 빌드 결과 미리보기는 `npm run preview:dist`. PC별 설정은 git 제외 `vite.config.local.mjs` |
 | Accounts (prod) | `node --env-file=.env scripts/provision-accounts.mjs [--dry-run] [--csv work/users.csv] [--no-password]` 실제 명단(CSV) 또는 권한별 zf.*@zeniel.co.kr 11개, 비밀번호 → `work/accounts.local.csv`(git 제외). 사용자 승인 후 |
 | DB (demo/real) | `node --env-file=.env scripts/db.mjs status | backup | reset demo --keep <관리자> --confirm <ref> | migrate <demo|real|all> [--dry-run] | bootstrap real | switch <demo|real>` 대상 `ops/db-targets.json`(active = 운영 앱 연결). 쓰기 명령은 `--approved-by` 필수 |
+| Agent ops | 에이전트의 운영 DB·배치 작업은 AGENTS.md "운영 DB·배치 명령" 표의 명령으로만, 승인 단계는 사용자가 말한 승인자 이름으로만 |
 | Rollout (prod) | `node scripts/rollout.mjs list|show|run|done|skip <단계>` 정본 `ops/production-rollout.json`, 설명 `docs/production-rollout.md`. 승인 단계 `--approved-by` 필수, 실패 시 멈춤 |
 | Migrate (prod) | `node --env-file=.env scripts/migrate.mjs [--dry-run] [--mark-applied a.sql,b.sql]` · CI: Actions `supabase-deploy` |
 | Lint | `npx deuk-agent-flow lint:md` |

@@ -114,6 +114,8 @@ node scripts/rollout.mjs done admin-password
 
 ## 에이전트(GPT·Codex·Claude) 실행 규칙
 
+요청별 명령 표는 [AGENTS.md "운영 DB·배치 명령"](../AGENTS.md)이 정본이다. 아래는 요약이다.
+
 1. 시작하면 `node scripts/rollout.mjs list`와 `node --env-file=.env scripts/db.mjs status`로 현재 상태를 본다.
 2. 자동 단계만 `run`한다.
    - 승인 단계는 사람이 대화에서 준 승인 이름을 `--approved-by`에 넣는다.
