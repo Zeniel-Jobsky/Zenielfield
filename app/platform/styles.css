@@ -1018,7 +1018,7 @@
 .route-map>li>b{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;line-height:44px}
 .route-line{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;row-gap:0}
 .route-line>li{display:flex;align-items:center}
-.route-line>li+li::before{content:"";width:14px;height:2px;background:var(--zf-border-strong,#c9d1cf);margin:0 2px}
+.route-line>li+li::before{content:"";width:14px;height:2px;background:var(--zf-border);margin:0 2px}
 .app-shell .route-line button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 6px;border:0;background:none;color:inherit;font-size:13px;cursor:pointer;border-radius:4px}
 .app-shell .route-line button:hover span,.app-shell .route-line button:focus-visible span{text-decoration:underline}
 .route-line i{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#003c33;color:#fff;font-style:normal;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;flex:none}
