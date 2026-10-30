@@ -928,3 +928,13 @@
 .app-shell .action-brief .ai-brief-focus .action-late>li>.copy-btn{flex:none;margin:0}
 .app-shell .action-brief .ai-brief-focus .action-late>li>.copy-btn{width:44px;min-width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0}
 .app-shell .action-brief .ai-brief-focus .action-late>li>.btn.small{white-space:nowrap}
+/* 방문 기록·후속 조치 공통 목록 도구 줄(탭 아래): [대상 유형] [정렬] 왼쪽 정렬, 설명 꼬리 없음 */
+.list-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+.list-tools select{min-height:40px}
+.list-tools .action-order-tools{margin:0;display:flex;align-items:center;gap:8px}
+/* 두 목록 표 같은 열 비율: 대상 | 내용 | 담당 | 날짜 | 상태 | › */
+.record-table{table-layout:fixed;width:100%}
+.record-table th:nth-child(1){width:22%}.record-table th:nth-child(2){width:28%}.record-table th:nth-child(3){width:12%}.record-table th:nth-child(4){width:13%}.record-table th:nth-child(5){width:11%}.record-table th:nth-child(6){width:14%}
+.record-table td small{display:block}
+.app-shell .list-tools select{min-height:40px;border:1px solid var(--zf-control-border);border-radius:6px;background-color:var(--zf-surface,#fff);padding:0 32px 0 12px;font-size:13px}
+.app-shell .list-tools label{font-size:13px;color:var(--zf-text-secondary)}

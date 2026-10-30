@@ -16,5 +16,5 @@ export function orderActions(rows:FieldAction[],order:ActionOrder,names:Map<stri
 }
 
 export function ActionOrderPicker({value,onChange}:{value:ActionOrder;onChange:(value:ActionOrder)=>void}){
- return <div className="action-order-tools"><label htmlFor="overdue-action-order">목록 정렬</label><select id="overdue-action-order" value={value} onChange={e=>onChange(e.target.value as ActionOrder)}><option value="manager">잡매니저별</option><option value="overdue-desc">기한 초과-내림차순</option><option value="overdue-asc">기한 초과-오름차순</option></select><span>{value==='manager'?'현재 목록의 후속 조치 건수가 많은 담당자순':'초과 일수 기준 · 완료 건은 완료일 기준 · 기한 내는 0일'}</span></div>;
+ return <div className="action-order-tools"><label htmlFor="overdue-action-order">목록 정렬</label><select id="overdue-action-order" value={value} onChange={e=>onChange(e.target.value as ActionOrder)}><option value="manager">잡매니저별</option><option value="overdue-desc">기한 초과-내림차순</option><option value="overdue-asc">기한 초과-오름차순</option></select></div>;
 }
