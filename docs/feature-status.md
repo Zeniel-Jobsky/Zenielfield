@@ -24,6 +24,7 @@
 | --- | --- |
 | 공개 주소 | https://zenifield.jobsky.workers.dev (main 최신 커밋 배포) |
 | 운영 DB | Supabase `nhywssfwtnonytbkufyy`, 이관 7개 적용·미적용 0. **아직 시연 데이터 그대로**(사용자 40, 현장 107, 매장 554, 방문 11,811) |
+| 남은 이슈 | [next-issues-plan.md](next-issues-plan.md) 상태 표(15개, 오픈 전 12·13·14·11 먼저) |
 | 실서비스 오픈 | 대기. 담당 운영자가 [go-live.md](go-live.md) 순서로 진행(백업 → 초기화 → 명단 → 비밀번호 1:1 배포) |
 | 로그인 메일 | 회사 SMTP 미연결. 당분간 `accounts.local.csv` 비밀번호 배포 방식 |
 | 배포 토큰 | `production` 환경 Secret `SUPABASE_ACCESS_TOKEN` 재발급(2026-10-30) 후 정상 |
