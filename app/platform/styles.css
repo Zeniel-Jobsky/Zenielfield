@@ -996,3 +996,35 @@
 .route-days svg{color:var(--zf-text-muted)}
 .route-days small{color:var(--zf-text-secondary)}
 @media(max-width:760px){.route-days li{grid-template-columns:minmax(0,1fr);gap:4px}}
+/* 방문 길라잡이: 한눈에 — 넓은 화면 두 칸(동선 | 넣을 곳), 줄은 이름+사실 한 줄과 버튼 */
+.route-cols{display:grid;gap:16px}
+@media(min-width:1024px){.route-cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px}}
+.route-cols>section{margin:0}
+.route-days{gap:0}
+.route-days li{grid-template-columns:76px minmax(0,1fr);padding:6px 0}
+.route-add{list-style:none;margin:0;padding:0}
+.route-add li{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--zf-border)}
+.app-shell .route-add li>button:first-child{flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:0;border:0;background:none;text-align:left;cursor:pointer;color:inherit}
+.route-add li>button:first-child b{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.route-add li>button:first-child small{font-size:12px;color:var(--zf-text-secondary)}
+.route-add li>.btn,.route-add li>.copy-button{flex:none}
+.ai-brief-out.route-cols>section,.ai-brief-out.route-cols>section+section{margin:0;padding:0;border:0}
+.route-say{margin:0;font-size:15px;line-height:1.7;max-width:var(--zf-read-measure)}.route-say b{font-weight:600;font-variant-numeric:tabular-nums}
+.route-cols,.route-cols>section{min-width:0}.route-say{overflow-wrap:anywhere}.route-say .zf-ent-link{white-space:normal;display:inline}
+@media(max-width:760px){.route-add li{flex-wrap:wrap}.app-shell .route-add li>button:first-child{flex-basis:100%}}
+/* 이번 주 동선 그림: 날마다 번호 점을 선으로 잇고, 점(장소)을 누르면 그 방문 결과 등록 */
+.route-map{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.route-map>li{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px;align-items:start;padding:4px 0}
+.route-map>li>b{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;line-height:44px}
+.route-line{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;row-gap:0}
+.route-line>li{display:flex;align-items:center}
+.route-line>li+li::before{content:"";width:14px;height:2px;background:var(--zf-border-strong,#c9d1cf);margin:0 2px}
+.app-shell .route-line button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 6px;border:0;background:none;color:inherit;font-size:13px;cursor:pointer;border-radius:4px}
+.app-shell .route-line button:hover span,.app-shell .route-line button:focus-visible span{text-decoration:underline}
+.route-line i{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#003c33;color:#fff;font-style:normal;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;flex:none}
+.route-line .more span{font-size:12px;color:var(--zf-text-secondary);padding:0 6px}
+@media(max-width:760px){.route-map>li{grid-template-columns:minmax(0,1fr);gap:0}.route-map>li>b{line-height:1.6}}
+.route-line i{width:28px;height:28px}
+.route-line .start{color:#003c33;padding:0 2px}
+.app-shell .route-line button:hover i,.app-shell .route-line button:focus-visible i{outline:2px solid #003c33;outline-offset:2px}
+.route-map>li{grid-template-columns:104px minmax(0,1fr)}@media(max-width:760px){.route-map>li{grid-template-columns:minmax(0,1fr)}}

@@ -2,7 +2,7 @@
 // 방문 일정·방문 기록 맨 위 제니에리 정리(후속 조치 정리와 같은 틀): 무슨 일(현황 문단·진척 문단) → 이렇게 챙겨 보세요(할 일 한 문장 + 3건 + 바로 하기·보낼 말 복사).
 // AI 없이 보는 범위의 사실만(DC-JUDGMENT). 비교는 자기 지난주와만(DC-FEEDBACK).
 import {useMemo,Fragment,type ReactNode} from 'react';
-import {Newspaper,ListChecks,CalendarPlus,PenLine,ClipboardPen,UserRoundPen,Route,ArrowRight} from 'lucide-react';
+import {Newspaper,ListChecks,CalendarPlus,PenLine,ClipboardPen,UserRoundPen,Route,ArrowRight,Building2,Store,Flag} from 'lucide-react';
 import {AiMark} from './ai-mark';
 import {CopyButton} from './copy-button';
 import {dayShift,daysBetween,between,weekOf,mmdd} from '../lib/date';
@@ -33,21 +33,21 @@ export function ScheduleGuide({c}:{c:Context}){
   const label=(d:string)=>dow[new Date(d+'T12:00:00Z').getUTCDay()]+' '+mmdd(d)+(d===c.now?' 오늘':'');
   const days:string[]=[];for(let d=c.now;d<=we;d=dayShift(d,1))days.push(d);
   const plan=c.visits.filter(v=>v.status==='planned'&&!!v.plannedDate&&v.plannedDate>=c.now&&v.plannedDate<=we);
-  const byDay=days.map(d=>{const vs=plan.filter(v=>v.plannedDate===d),seen=new Set<string>(),stops:{name:string;region:string}[]=[];
-   for(const v of vs){const t=tById.get(targetOf(v));const name=c.label(v);if(seen.has(name))continue;seen.add(name);stops.push({name,region:t?.region||''})}
+  const byDay=days.map(d=>{const vs=plan.filter(v=>v.plannedDate===d),seen=new Set<string>(),stops:{name:string;id:string;region:string;store:boolean;v:typeof vs[number]}[]=[];
+   for(const v of vs){const t=tById.get(targetOf(v));const name=c.label(v);if(seen.has(name))continue;seen.add(name);stops.push({name,id:t?.id||'',region:t?.region||'',store:t?.type==='store',v})}
    stops.sort((x,y)=>x.region.localeCompare(y.region));return {d,label:label(d),stops,regions:new Set(stops.map(s=>s.region).filter(Boolean))}});
   const att=attentionOf(targetFacts(c.scope,c.visits,c.actions,c.allMetrics.slots,c.now).values()).filter(x=>!x.upcoming&&(x.delayed.length||x.unplanned.length)).slice(0,3);
   const add=att.map(x=>{const t=x.target,same=byDay.find(d=>t.region&&d.regions.has(t.region)),empty=byDay.find(d=>!d.stops.length),day=same||empty||byDay[0];
-   return {x,t,day,why:same?`${t.region} 방문이 잡힌 날이라 이어서 가기 좋아요`:empty?'비어 있는 날이에요':'가장 가까운 날이에요'}});
+   return {x,t,day,why:same?`${t.region} 방문과 함께`:empty?'빈 날':'가까운 날'}});
   return {byDay:byDay.filter(d=>d.stops.length),add}},[c.visits,c.actions,c.scope,c.allMetrics,c.now]);
  return <section className="panel ai-brief action-brief route-guide" aria-label="제니에리 방문 길라잡이">
   <div className="panel-heading"><div><h2><AiMark/>제니에리 방문 길라잡이</h2></div></div>
-  <div className="chart-body"><div className="ai-brief-out">
+  <div className="chart-body"><div className="ai-brief-out route-cols">
    <section><h3><Route size={16} aria-hidden/>이번 주 동선</h3>
-    {g.byDay.length?<ol className="route-days">{g.byDay.map(d=><li key={d.d}><b>{d.label}</b><span>{d.stops.slice(0,5).map((s,i)=><Fragment key={s.name}>{i>0&&<ArrowRight size={14} aria-hidden/>}<em>{s.name}</em></Fragment>)}{d.stops.length>5&&<small>외 {d.stops.length-5}곳</small>}</span></li>)}</ol>:<p>이번 주 달력에 남은 방문이 없어요. 아래 곳부터 넣어 보세요.</p>}</section>
-   {g.add.length>0&&<section className="ai-brief-focus"><h3><CalendarPlus size={16} aria-hidden/>여기도 넣어 보세요</h3>
-    <ul className="action-late">{g.add.map(({x,t,day,why})=>{const owner=t.managerIds[0]||'',need=[x.delayed.length&&`필요 방문 기한 지남 ${x.delayed.length}회`,x.unplanned.length&&`일정 없음 ${x.unplanned.length}회`].filter(Boolean).join(' · ');
-     return <li key={t.id}><button type="button" onClick={()=>c.showTarget(t.id)}><b>{(t.type==='store'?t.siteName+' › ':'')+t.name}</b><span>{need}</span><small>{day.label}에 넣기 좋아요 · {why}</small></button><button type="button" className="btn small" onClick={()=>c.open('visit',undefined,{targetType:t.type,siteId:t.siteId,storeId:t.storeId||undefined,date:day.d})}><CalendarPlus size={14} aria-hidden/>{day.label.replace(' 오늘','').split(' ')[1]}에 잡기</button>{!self&&owner&&<CopyButton label={honor(c,owner)+'에게 보낼 말 복사'} text={`${honor(c,owner)}, ${t.name} 필요 방문 일정이 아직 없어요. ${day.label.replace(' 오늘','')}에 넣어 주시면 좋아요.`} visible="보낼 말"/>}</li>})}</ul></section>}
+    {g.byDay.length?<ol className="route-map">{g.byDay.map(d=><li key={d.d}><b>{d.label}</b><ol className="route-line"><li className="start" aria-hidden><Flag size={14}/></li>{d.stops.slice(0,3).map((st,i)=><li key={st.name}><button type="button" title={st.name+' 방문 결과 등록'} aria-label={d.label+' '+(i+1)+'번째 '+st.name+' 방문 결과 등록'} onClick={()=>c.open('visit',st.v,{result:true})}><i aria-hidden>{st.store?<Store size={14}/>:<Building2 size={14}/>}</i><span>{st.name}</span></button></li>)}{d.stops.length>3&&<li className="more"><span>외 {d.stops.length-3}곳</span></li>}</ol></li>)}</ol>:<p>이번 주 달력에 남은 방문이 없어요. 아래 곳부터 넣어 보세요.</p>}</section>
+   {g.add.length>0&&<section><h3><CalendarPlus size={16} aria-hidden/>여기도 넣어 보세요</h3>
+    <ul className="route-add">{g.add.map(({x,t,day,why})=>{const owner=t.managerIds[0]||'',need=[x.delayed.length&&`필요 방문 기한 지남 ${x.delayed.length}회`,x.unplanned.length&&`일정 없음 ${x.unplanned.length}회`].filter(Boolean).join(' · ');
+     return <li key={t.id}><button type="button" onClick={()=>c.showTarget(t.id)}><b>{(t.type==='store'?t.siteName+' › ':'')+t.name}</b><small>{need} · {day.label} {why}</small></button><button type="button" className="btn small" onClick={()=>c.open('visit',undefined,{targetType:t.type,siteId:t.siteId,storeId:t.storeId||undefined,date:day.d})}><CalendarPlus size={14} aria-hidden/>{day.label.replace(' 오늘','').split(' ')[1]}에 잡기</button>{!self&&owner&&<CopyButton label={honor(c,owner)+'에게 보낼 말 복사'} text={`${honor(c,owner)}, ${t.name} 필요 방문 일정이 아직 없어요. ${day.label.replace(' 오늘','')}에 넣어 주시면 좋아요.`} visible="보낼 말"/>}</li>})}</ul></section>}
   </div></div>
  </section>;
 }
