@@ -56,7 +56,7 @@
 | DC-DESIGN-CHECK | 커밋 시 `.githooks/pre-commit` → `scripts/check-design.mjs` 경고(지침·룰 동반 갱신, 지침 밖 색). `npm run setup`으로 활성화, `DESIGN_STRICT=1`이면 차단 |
 | DC-GIT-IDENTITY | 이 저장소의 새 author/committer = `Zeniel-Jobsky <jobsky@zeniel.co.kr>`, 실제 푸시 인증도 Zeniel-Jobsky·대상 origin(회사 저장소) 확인. 전역 Git 사용자 설정은 유지, 토큰은 OS 자격증명 저장소·본문/.env/커밋에 금지. 사용자 결정2026-10-29: 기존 prodigk 이력 유지·정정 목적 강제 푸시 금지. |
 | DC-DOCS | 개선 계획·이슈·완료 내역은 `docs/`에 기록, 담당자 배정은 `work/`에만 |
-| DC-DEPLOY | `.github/workflows/supabase-deploy.yml`: main 푸시 → 타입·전체 테스트·Cloudflare 인증 검증 → 백엔드 변경 시 이관·번들·Edge 2개 → Cloudflare Worker. 선행 작업 실패 시 화면 배포 금지. 화면만 변경하면 DB·Edge 생략. 수동 dry_run은 이관 목록만 확인. CI는 `NO_BUMP=1`로 커밋된 버전 빌드, Worker 전용 `CLOUDFLARE_API_TOKEN` 사용, 환경 `production`. 이관 이력 `zf_schema_migrations`, 미적용만 파일별 트랜잭션. 기존 수동 적용분은 `--mark-applied`로 기준선. 적용된 이관 수정 금지, 재실행 안전하게 작성·옛 스키마에 로컬 선적용 검증. `schema.sql` 운영 재실행 금지. 운영 DB·Edge·계정 발급은 사용자 승인 후. 반영 내역 `docs/` 기록 |
+| DC-DEPLOY | 연결 DB = `ops/db-targets.json` active(시연 demo / 실사용 real), 스키마 변경은 두 DB 모두 `db.mjs migrate`로 맞춤. `.github/workflows/supabase-deploy.yml`: main 푸시 → 타입·전체 테스트·Cloudflare 인증 검증 → 백엔드 변경 시 이관·번들·Edge 2개 → Cloudflare Worker. 선행 작업 실패 시 화면 배포 금지. 화면만 변경하면 DB·Edge 생략. 수동 dry_run은 이관 목록만 확인. CI는 `NO_BUMP=1`로 커밋된 버전 빌드, Worker 전용 `CLOUDFLARE_API_TOKEN` 사용, 환경 `production`. 이관 이력 `zf_schema_migrations`, 미적용만 파일별 트랜잭션. 기존 수동 적용분은 `--mark-applied`로 기준선. 적용된 이관 수정 금지, 재실행 안전하게 작성·옛 스키마에 로컬 선적용 검증. `schema.sql` 운영 재실행 금지. 운영 DB·Edge·계정 발급은 사용자 승인 후. 반영 내역 `docs/` 기록 |
 | DC-PERF | 화면 파생 계산: 대상·사용자 조회는 Map 색인, 루프 안 전체 배열 재필터·재중복제거 금지, 무거운 파생 데이터 `useMemo`. 메뉴·필터 전환은 `useTransition`+상단 진행 막대. 속도 측정은 개발 서버가 아니라 `NO_BUMP=1 npm run build` 후 `npm run preview:dist`에서 |
 | DC-AI-FALLBACK | AI 실패(502·503: 크레딧·키·설정)는 오류로 막지 않고 규칙 결과로 대체 + 이유 표기, 탭당 10분 재호출 안 함(`aiDownReason`). 입력 텍스트는 `collapseRepeats` 후 전송. 테스트 `tests/run-dedupe.mjs` |
 | DC-AI-TEXT | AI·규칙 브리핑 문장 강조는 `app/platform/rich.tsx` 조각 트리(`Rich=[{v,tone:'num'|'bad'|'good'}]`, `rich` 태그 템플릿)로 생성 시점에 붙인다. 문장을 정규식으로 재해석해 색칠하지 않는다. AI 응답 스키마도 조각 배열, 화면은 `normalizeBrief`/`toRich`로 검사 후 렌더 |
@@ -82,6 +82,7 @@
 | Type check | `node_modules/.bin/tsc --noEmit -p .` |
 | Dev server | `npm start` · `npm stop` · `npm restart` · `npm run status` (기존 포트 프로세스 종료 후 백그라운드 실행, Windows·macOS 공통, 로그 `.dev-server.log`). 직접 실행은 `npm run dev`. 빌드 결과 미리보기는 `npm run preview:dist`. PC별 설정은 git 제외 `vite.config.local.mjs` |
 | Accounts (prod) | `node --env-file=.env scripts/provision-accounts.mjs [--dry-run] [--csv work/users.csv] [--no-password]` 실제 명단(CSV) 또는 권한별 zf.*@zeniel.co.kr 11개, 비밀번호 → `work/accounts.local.csv`(git 제외). 사용자 승인 후 |
+| DB (demo/real) | `node --env-file=.env scripts/db.mjs status | migrate <demo|real|all> [--dry-run] | bootstrap real | switch <demo|real>` 대상 `ops/db-targets.json`(active = 운영 앱 연결). 쓰기 명령은 `--approved-by` 필수 |
 | Rollout (prod) | `node scripts/rollout.mjs list|show|run|done|skip <단계>` 정본 `ops/production-rollout.json`, 설명 `docs/production-rollout.md`. 승인 단계 `--approved-by` 필수, 실패 시 멈춤 |
 | Migrate (prod) | `node --env-file=.env scripts/migrate.mjs [--dry-run] [--mark-applied a.sql,b.sql]` · CI: Actions `supabase-deploy` |
 | Lint | `npx deuk-agent-flow lint:md` |

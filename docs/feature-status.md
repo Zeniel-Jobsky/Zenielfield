@@ -281,3 +281,4 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 배치 매뉴얼 `docs/production-rollout.md` + 실행기 `scripts/rollout.mjs` + 정본 `ops/production-rollout.json` 추가. 직원 명단 CSV 등록(`provision-accounts.mjs --csv`, 양식 `ops/users.template.csv`).
 - 사전 점검(읽기만) 실행: 이관 미적용 0, 데모 시드 외 출처 없는 방문 10,013건이 데모 현장에 연결 → 데모 정리만으로는 초기화 불가. 초기화 방식(새 프로젝트 A 권장 / 비우기 B) 결정 대기.
 - 운영 배포 복구: production 환경 `SUPABASE_ACCESS_TOKEN` 재발급(03:56) 후 이관·Edge·Worker 성공.
+- 시연 DB·실사용 DB 분리(같은 날): `ops/db-targets.json`(active=demo), `scripts/db.mjs`(status·migrate demo|real|all·bootstrap·switch), CI는 active DB ref로 이관·Edge, active 변경 시 Worker `ZENIFIELD_SUPABASE_URL` 갱신. 새 DB 설치 경로(schema.sql + SCHEMA_INCLUDES 표시 + 나머지 이관) PGlite 검증(이관 두 번 실행 통과). 요금제 업그레이드 가이드 추가. 실사용 프로젝트 생성은 승인 대기.

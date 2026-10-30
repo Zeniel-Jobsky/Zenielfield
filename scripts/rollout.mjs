@@ -1,7 +1,7 @@
 // 실제 서비스 배치 실행기: ops/production-rollout.json 단계를 순서대로 실행·기록한다. 사람과 에이전트(GPT·Codex·Claude)가 같은 절차를 따른다.
 // 사용: node scripts/rollout.mjs list                       단계·상태 보기
 //       node scripts/rollout.mjs show <단계>                 이유·명령·확인 기준 보기
-//       node scripts/rollout.mjs run <단계> [--approved-by 이름] [--admin 관리자메일]   자동 단계 실행(승인 단계는 이름 필수)
+//       node scripts/rollout.mjs run <단계> [--approved-by 이름] [--admin 관리자메일] [--name 관리자이름]   자동 단계 실행(승인 단계는 이름 필수)
 //       node scripts/rollout.mjs done <단계> [--approved-by 이름]   사람이 한 수동 단계를 끝났다고 기록
 //       node scripts/rollout.mjs skip <단계> --approved-by 이름 --reason 이유   해당 없는 단계를 건너뜀으로 기록(예: 새 프로젝트면 purge-demo)
 //  - 상태·로그는 git 제외 work/rollout-state.json, work/rollout.log 에 남긴다(비밀값 없음).
@@ -48,12 +48,15 @@ if(cmd==='skip'){if(!by||!arg('reason'))stop('건너뛰기는 --approved-by 와 
 if(cmd==='done'){if(step.kind!=='manual')stop('자동 단계는 run 으로 실행합니다.');state[step.id]={done:true,at:new Date().toISOString(),by:by||'-'};save();log(`완료(수동) ${step.id} 승인 ${by||'-'}`);process.exit(0)}
 if(cmd!=='run')stop('list | show | run | done | skip');
 if(step.kind==='manual'){console.log(`사람이 하는 단계입니다. 아래를 마친 뒤 done ${step.id} 로 기록하세요.\n- `+step.manual.join('\n- '));process.exit(0)}
-const sha=execSync('git rev-parse HEAD').toString().trim(),admin=arg('admin');
+const sha=execSync('git rev-parse HEAD').toString().trim(),admin=arg('admin'),aname=arg('name');
+// db 가 정해진 단계는 그 DB(ops/db-targets.json)로 연결값을 바꿔 넘긴다
+const dbt=step.db&&JSON.parse(readFileSync('ops/db-targets.json','utf8')).targets[step.db];if(step.db&&!dbt?.ref)stop(`${step.db} DB ref가 ops/db-targets.json 에 없습니다.`);
+const stepEnv=dbt?{...process.env,SUPABASE_PROJECT_REF:dbt.ref,ZENIFIELD_SUPABASE_URL:`https://${dbt.ref}.supabase.co`}:process.env;if(dbt){env.SUPABASE_PROJECT_REF=dbt.ref;console.log(`대상 DB: ${dbt.label} (${dbt.ref})`)}
 log(`시작 ${step.id} 승인 ${by||'-'} 커밋 ${sha.slice(0,7)}`);
 for(const raw of step.run){
- if(raw.includes('{admin}')&&!admin)stop('--admin <관리자 이메일> 이 필요합니다(이미 로그인한 적 있는 활성 관리자).');
- const c=raw.replace('{admin}',admin).replace('{sha}',sha);console.log('\n$ '+c);
+ if(raw.includes('{admin}')&&!admin)stop('--admin <관리자 이메일> 이 필요합니다.');if(raw.includes('{name}')&&!aname)stop('--name <관리자 이름> 이 필요합니다.');
+ const c=raw.replace('{admin}',admin).replace('{name}',JSON.stringify(aname)).replace('{by}',JSON.stringify(by)).replace('{sha}',sha);console.log('\n$ '+c);
  if(c.startsWith('builtin:')){try{await builtin[c.slice(8)]()}catch(e){log(`실패 ${step.id}: ${e.message}`);stop(e.message)}continue}
- const r=spawnSync(c,{shell:true,stdio:'inherit'});if(r.status!==0){log(`실패 ${step.id}: ${c} (종료 ${r.status})`);stop(`명령 실패: ${c}`)}
+ const r=spawnSync(c,{shell:true,stdio:'inherit',env:stepEnv});if(r.status!==0){log(`실패 ${step.id}: ${c} (종료 ${r.status})`);stop(`명령 실패: ${c}`)}
 }
 state[step.id]={done:true,at:new Date().toISOString(),by:by||'-',commit:sha.slice(0,7)};save();log(`완료 ${step.id}\n확인 기준: ${step.check}`);

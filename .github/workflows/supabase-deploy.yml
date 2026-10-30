@@ -1,5 +1,5 @@
 # main 검증 → 필요한 경우 이관·Edge → Cloudflare 화면 배포.
-# 필요한 secret: SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, CLOUDFLARE_API_TOKEN.
+# 필요한 secret: SUPABASE_ACCESS_TOKEN, CLOUDFLARE_API_TOKEN. 연결 DB(ref)는 ops/db-targets.json active 가 정한다(scripts/db.mjs).
 name: supabase-deploy
 on:
   push:
@@ -22,6 +22,7 @@ jobs:
     timeout-minutes: 15
     outputs:
       backend_changed: ${{ steps.changes.outputs.backend_changed }}
+      target_changed: ${{ steps.changes.outputs.target_changed }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,11 +42,13 @@ jobs:
             echo "Last successful production revision: ${BASE_SHA:-none}"
             if ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
               echo 'backend_changed=true' >> "$GITHUB_OUTPUT"
-            elif git diff --quiet "$BASE_SHA" HEAD -- supabase/ app/platform/mutations.ts app/platform/model.ts scripts/migrate.mjs scripts/bundle-supabase.mjs; then
+            elif git diff --quiet "$BASE_SHA" HEAD -- supabase/ app/platform/mutations.ts app/platform/model.ts scripts/migrate.mjs scripts/bundle-supabase.mjs ops/db-targets.json; then
               echo 'backend_changed=false' >> "$GITHUB_OUTPUT"
             else
               echo 'backend_changed=true' >> "$GITHUB_OUTPUT"
             fi
+            # 연결 DB 교체(ops/db-targets.json active)일 때만 Worker 연결값을 다시 쓴다.
+            if git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null && ! git diff --quiet "$BASE_SHA" HEAD -- ops/db-targets.json; then echo 'target_changed=true' >> "$GITHUB_OUTPUT"; fi
           fi
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -69,9 +72,10 @@ jobs:
     environment: production
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v4
+      - name: 연결 DB 확인 (ops/db-targets.json active)
+        run: echo "SUPABASE_PROJECT_REF=$(node scripts/db.mjs ref)" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@v4 # 버전은 package.json packageManager 를 따른다
       - uses: actions/setup-node@v4
         with:
@@ -135,6 +139,11 @@ jobs:
         run: pnpm build
       - name: 배포 CLI 호환 설정 생성
         run: node scripts/prepare-cloudflare-deploy.mjs
+      - name: Worker DB 연결값 맞추기 (ops/db-targets.json active)
+        if: needs.verify.outputs.target_changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node scripts/db.mjs url | pnpm dlx wrangler@4.151.0 secret put ZENIFIELD_SUPABASE_URL --name zenifield
       - name: zenifield Worker 배포
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

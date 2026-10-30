@@ -1,0 +1,8 @@
+{
+  "_설명": "운영 앱(zenifield Worker)이 붙는 DB는 active 하나다. 연결 교체 = active 값만 바꿔 main에 푸시(CI가 그 DB에 이관·Edge·Worker 연결값을 맞춘다). ref·주소는 비밀값이 아니다. 명령: node scripts/db.mjs",
+  "active": "demo",
+  "targets": {
+    "demo": {"label": "시연 DB", "ref": "nhywssfwtnonytbkufyy"},
+    "real": {"label": "실사용 DB", "ref": ""}
+  }
+}

@@ -1,0 +1,6 @@
+# schema.sql(빈 프로젝트 설치본)에 이미 들어 있는 이관. 새 DB 설치(db.mjs bootstrap) 때 실행하지 않고 "적용됨"으로만 기록한다.
+# 확인: 2026-10-30 PGlite에서 schema.sql 위에 각 이관을 실행해 이미 있음으로 실패하는 것만 적음. 나머지는 두 번 실행해도 통과.
+# schema.sql에 새 이관 내용을 합칠 때만 이 목록에 더한다.
+20261028000000_visit_entry.sql
+20261028100000_domains.sql
+20261028120000_read_window.sql
