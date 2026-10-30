@@ -9,7 +9,7 @@ import type {Context} from './context';
 import {AiComposer,type AiPlanDraft} from './ai-assist';
 import {GeoPick} from './geo';
 import {Permissions} from './permissions';
-import {MySchedule,ScheduleHints} from './my-schedule';
+import {MySchedule,ScheduleHints,VisitSuggest} from './my-schedule';
 // AI 방문 일정 등록: 말·글로 "언제·어디·무엇"을 받아 계획 초안을 만든다. 저장은 일반 방문계획(planned)과 같다.
 export function matchTarget(targets:Target[],hint:string){const q=hint.replace(/\s+/g,'').toLowerCase();if(q.length<2)return undefined;const score=(t:Target)=>{const n=t.name.replace(/\s+/g,'').toLowerCase(),s=t.siteName.replace(/\s+/g,'').toLowerCase();return n===q?100:n.includes(q)||q.includes(n)?60+n.length:s.includes(q)?20:0};return targets.filter(t=>t.status==='운영 중').map(t=>({t,s:score(t)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s)[0]?.t}
 export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;error:string;onSave:(entity:string,values:any,record?:any)=>void;onClose:()=>void}){
@@ -27,6 +27,7 @@ export function AiPlanForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;e
  <fieldset className="form-grid" disabled={!c.editable||c.saving}>
  <Permissions need={['microphone']}/>
  <div className="form-section first wide"><span>00</span>방문할 날 고르기</div>
+ {!target&&!locked&&<VisitSuggest c={c} visitor={owner||c.me.id} onPick={pick}/>}
  {target?<ScheduleHints c={c} target={target} visitor={owner||c.me.id} picked={pickedDay} onPick={(d,tm,rid)=>{setPickedDay(d);setPickedReq(rid);setValues(v=>({...v,plannedDate:d,time:tm||v.time}))}}/>
   :<MySchedule c={c} visitor={owner||c.me.id} window={modal.requirementId&&modal.dueDate?{start:c.now,end:modal.dueDate}:null} picked={pickedDay} onPick={d=>{setPickedDay(d);setSeed(`${Number(d.slice(5,7))}월 ${Number(d.slice(8))}일`)}}/>}
  <div className="form-section wide"><span>01</span>말·글로 일정 입력</div>

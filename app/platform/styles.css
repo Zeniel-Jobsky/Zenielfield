@@ -886,3 +886,12 @@
 .ai-brief .ai-brief-out h3{margin:0 0 8px;font-size:14px;font-weight:600;line-height:1.5;color:var(--zf-text-secondary)}
 .ai-brief .ai-brief-where-head h3{margin:0}
 .ai-brief .ai-brief-out h3>svg{color:var(--zf-brand-green)}
+/* 일정 등록: 먼저 가 보면 좋은 곳(담당 대상 리마인더) */
+.visit-suggest h3{display:flex;align-items:center;gap:4px;margin:0 0 8px;font-size:14px;font-weight:600;color:var(--zf-text-secondary)}
+.visit-suggest h3>svg{color:var(--zf-brand-green)}
+.visit-suggest ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--zf-border)}
+.visit-suggest li{border-bottom:1px solid var(--zf-border)}
+.visit-suggest button{display:grid;grid-template-columns:minmax(0,1fr) 16px;column-gap:8px;align-items:center;width:100%;min-height:44px;padding:8px 0;text-align:left}
+.visit-suggest button>span,.visit-suggest button>small{grid-column:1;font-size:12px;color:var(--zf-text-secondary)}
+.visit-suggest button>svg{grid-column:2;grid-row:1/span 3;color:var(--zf-text-muted)}
+.visit-suggest button:hover b{text-decoration:underline}

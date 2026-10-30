@@ -6,6 +6,9 @@ import type {Context} from './context';
 import {dayShift,mmdd,between,daysBetween,kstToday,kstTime} from '../lib/date';
 import type {Target} from './model';
 import {scheduleFacts,scheduleCandidates} from './schedule';
+import {targetFacts,attentionOf,staleStores,LEVEL_ORDER,STALE_DAYS} from './status';
+import {levelLabel} from './judgment';
+import {ChevronRight,MapPinned} from 'lucide-react';
 
 const DOW=['일','월','화','수','목','금','토'];
 const dowOf=(d:string)=>DOW[new Date(d+'T12:00:00Z').getUTCDay()];
@@ -32,4 +35,19 @@ export function ScheduleHints({c,target,visitor,picked,onPick}:{c:Context;target
    <b>{x.date===c.now?'오늘':dowOf(x.date)} {mmdd(x.date)}{x.time&&<span> {x.time}</span>}</b><small>{x.tags.join(' · ')}</small></button>)}</div>
    :<p className="form-hint">기간 안에 빈 날이 없어요. 아래에서 날짜를 말하거나 직접 입력해 주세요.</p>}
  </div>;
+}
+
+// 대상을 고르기 전: 방문자 담당 현장·매장 중 먼저 가 보면 좋은 곳(리마인더). 사실과 저장된 판정만(DC-JUDGMENT):
+// 저장 판정 바로 확인·조치 필요, 기한 지난·일정 없는 필요 회차, 기한 넘긴 조치(attentionOf 순서 그대로) + 60일 넘게 못 간 매장.
+// 이미 다가오는 일정이 잡힌 곳은 attentionOf가 뺀다. 누르면 그 대상을 고른다.
+export function VisitSuggest({c,visitor,onPick}:{c:Context;visitor:string;onPick:(t:Target)=>void}){
+ const rows=useMemo(()=>{const own=c.targets.filter(t=>t.status==='운영 중'&&t.managerIds.includes(visitor)),pool=own.length?own:c.scope;
+  const facts=targetFacts(pool,c.visits,c.actions,c.allMetrics.slots,c.now),att=attentionOf(facts.values()),seen=new Set(att.map(f=>f.target.id));
+  const stale=staleStores(pool,c.visits,c.now).filter(x=>!seen.has(x.target.id)&&!facts.get(x.target.id)?.upcoming).map(x=>facts.get(x.target.id)!).filter(Boolean);
+  return [...att,...stale].slice(0,5).map(f=>{const j=f.judgment&&LEVEL_ORDER[f.judgment.level]?f.judgment:null,days=daysBetween(f.lastVisit,c.now);
+   const why=[j&&levelLabel(j.level),f.delayed.length&&`필요 방문 기한 지남 ${f.delayed.length}회`,f.unplanned.length&&`필요 방문 일정 없음 ${f.unplanned.length}회`,f.lateActions&&`기한 넘긴 조치 ${f.lateActions}건`,days===null?'방문 기록 없음':days>STALE_DAYS&&`마지막 방문 ${days}일 전`].filter(Boolean) as string[];
+   return {t:f.target,why,note:j?.assessment||''}})},[c.targets,c.scope,c.visits,c.actions,c.allMetrics.slots,c.now,visitor]);
+ if(!rows.length)return <p className="form-hint wide">지금 먼저 챙길 담당 현장·매장은 없어요. 빈 날을 골라 일정을 잡아 보세요.</p>;
+ return <section className="visit-suggest wide" aria-label="먼저 가 보면 좋은 곳"><h3><MapPinned size={16} aria-hidden/>먼저 가 보면 좋은 곳</h3><ol>{rows.map(r=><li key={r.t.id}><button type="button" onClick={()=>onPick(r.t)}>
+  <b className={'zf-ent zf-ent-'+r.t.type}>{r.t.type==='store'?r.t.siteName+' › ':''}{r.t.name}</b><span>{r.why.join(' · ')}</span>{r.note&&<small>{r.note}</small>}<ChevronRight size={16} aria-hidden/></button></li>)}</ol></section>;
 }
