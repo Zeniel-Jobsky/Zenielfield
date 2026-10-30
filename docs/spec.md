@@ -1,6 +1,6 @@
 # 업무·데이터 명세
 
-방문 흐름, 플랫폼 데이터 계약, AI 간편 등록 스키마, 주간 브리핑, 방문·조치 한 화면 설계를 한 문서에 둔다. 화면 디자인 기준은 [DESIGN-zenielfield.md](DESIGN-zenielfield.md), 문구 근거는 [briefing-research.md](briefing-research.md).
+방문 흐름, 플랫폼 데이터 계약, AI 간편 등록 스키마, 주간 브리핑, 방문·조치 한 화면 설계를 한 문서에 둔다. 화면 디자인 기준은 [DESIGN-zenielfield.md](DESIGN-zenielfield.md), 문구 근거는 [evidence.md](evidence.md).
 
 ## 차례
 

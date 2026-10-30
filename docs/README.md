@@ -8,7 +8,7 @@
 | 사용자·관리자 사용법 | [guide.md](guide.md) |
 | 업무 흐름·데이터 명세·방문·조치 설계 | [spec.md](spec.md) |
 | 화면 디자인 기준 (정본) | [DESIGN-zenielfield.md](DESIGN-zenielfield.md) · 지난 기준 [design-history.md](design-history.md) |
-| 문구·브리핑 근거 | [briefing-research.md](briefing-research.md) |
+| 설계 근거(AI 도입·사용, 문구, 화면·차트 논문) | [evidence.md](evidence.md) |
 | Supabase·Cloudflare·Git·시드·도메인 구성과 이력 | [infrastructure.md](infrastructure.md) |
 | 로컬 설치·실행·검증, 화면 캡처 | [local-development.md](local-development.md) |
 | 테스트 계획 | [testing.md](testing.md) |
