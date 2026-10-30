@@ -1107,3 +1107,8 @@ html.zf-calm .zf-ai-mark,html.zf-calm .zeni-working-dots i{animation:none!import
 /* 기간 창은 기간 버튼 아래 왼쪽 정렬(범위 버튼 바로 뒤에 붙었으므로) */
 @media(min-width:761px){.period-panel{left:0;right:auto}}
 @media(max-width:760px){.app-shell .platform-filters .scope-toggle{padding:0 10px}.app-shell .platform-filters .period-picker .period-label{font-size:12px;padding:0 6px}}
+/* 조회 필터 높이 맞춤: 범위 버튼·기간·초기화를 같은 44px 높이로(터치 기준) */
+.app-shell .platform-filters .scope-toggle,.app-shell .platform-filters .period-picker,.app-shell .platform-filters .reset-button{height:44px;min-height:44px;box-sizing:border-box}
+.app-shell .platform-filters .period-picker .period-step,.app-shell .platform-filters .period-picker .period-label{min-height:42px;height:42px}
+.app-shell .platform-filters .reset-button{width:44px;min-width:44px}
+@media(max-width:760px){.app-shell .platform-filters .scope-toggle{border:1px solid var(--zf-control-border);border-radius:8px;background:var(--zf-surface)}}
