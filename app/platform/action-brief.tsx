@@ -29,7 +29,7 @@ export function ActionBrief({c}:{c:Context}){
  return <section className="panel ai-brief action-brief" aria-label="제니에리 후속 조치 정리">
   <div className="panel-heading"><div><h2><AiMark/>제니에리가 후속 조치를 정리했어요</h2></div></div>
   <div className="chart-body"><div className="ai-brief-out">
-   <section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>무슨 일이 벌어지고 있나</h3><p>{story}</p></section>
+   <section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>무슨 일이 벌어지고 있나</h3><ul className="brief-lines">{story.split(/(?<=[.?!)])s+/).filter(Boolean).map((x,i)=><li key={i}>{x}</li>)}</ul></section>
    {f.open>0&&<section className="action-due"><h3><CalendarClock size={16} aria-hidden/>안 끝난 조치 {f.open}건 — 기한 기준</h3>
     <div className="action-due-bar" role="group" aria-label="안 끝난 조치 기한 기준">{segs.map(s=><button type="button" key={s.k} style={{flexGrow:s.n,background:s.color}} onClick={()=>c.setKind(s.tab)} aria-label={`${s.label} ${s.n}건 목록 보기`}>{s.n}</button>)}</div>
     <p className="action-due-legend">{segs.map(s=><span key={s.k}><i style={{background:s.color}}/>{s.label} <b>{s.n}건</b></span>)}</p></section>}

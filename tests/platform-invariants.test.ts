@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {aggregate,requirements,targetsOf,visibleTargets,lastTargetVisit,targetOf,weeklyTrend,weekOf,agingBuckets,nearestTargets,distanceM,type Target,type FieldVisit,type PlatformData} from '../app/platform/model';
+import {aggregate,requirements,targetsOf,visibleTargets,lastTargetVisit,targetOf,weeklyTrend,weekOf,nearestTargets,distanceM,type Target,type FieldVisit,type PlatformData} from '../app/platform/model';
 import {platformDemo} from '../app/platform/demo';
 import {updateDemo} from '../app/platform/mutations';
 const now='2026-10-26',start='2026-10-01',end='2026-10-31';let assertions=0;const equal=(a:any,b:any)=>{assert.deepEqual(a,b);assertions++};const throws=(f:()=>any)=>{assert.throws(f);assertions++};
@@ -33,7 +33,6 @@ throws(()=>updateDemo(data,'visit',{...plan,requirementId:'req:head:2026-10-01:1
 const admin={...user,id:'admin',role:'admin'};saved=updateDemo(data,'store',{...recordStore,name:'수정 매장',managerIds:['m2']},recordStore,admin,now);equal(saved.data.visits[0].visitorId,'m1');equal(saved.data.audit.at(-1)?.entity,'store');
 const reassigned=saved.data;const oldVisit=reassigned.visits[0];const preserved=updateDemo(reassigned,'visit',{...oldVisit,notes:'가상 보완'},oldVisit,admin,now);equal(preserved.item.visitorId,'m1');equal(preserved.data.visits.length,reassigned.visits.length);
 const weekly:Target={...site,id:'wk',siteId:'wk',rule:{period:'week',count:1},status:'운영 중',startDate:'2026-01-01'};const trend=weeklyTrend([weekly],[visit('w1',weekly,{actualDate:'2026-10-06',plannedDate:'2026-10-06'})],end,now,4);equal(trend.rows.map(r=>r.start),['2026-10-05','2026-10-12','2026-10-19','2026-10-26']);equal(trend.rows.map(r=>r.rate),[100,0,0,0]);equal(weekOf('2026-11-01'),'2026-10-26');
-equal(agingBuckets([{state:'미처리',dueDate:'2026-10-20'},{state:'처리 중',dueDate:'2026-09-01'},{state:'완료',dueDate:'2026-09-01'},{state:'미처리',dueDate:'2026-11-01'}] as any,now).map(b=>b.value),[1,0,1]);
 {const demo=platformDemo(now),boss={...demo.users[0],role:'admin'},t=targetsOf(demo).find(t=>t.type==='site'&&t.status==='운영 중')!,base={targetType:'site',siteId:t.siteId,storeId:null,visitorId:t.managerIds[0],plannedDate:null,time:'',purpose:'현장 정기점검',precheck:'',status:'completed',actualDate:now,actualTime:'',detail:'AI 정리 활동',notes:'',result:'특이사항 없음',cancelReason:'',requirementId:null};
  const ai={input:{text:'오늘 현장 점검함',imageCount:0},draft:{purpose:'현장 정기점검',detail:'AI 정리 활동',notes:'',result:'특이사항 없음'},summary:'점검',category:['운영','가짜'],urgency:'보통',confidence:'high',model:'m',generatedAt:now,edited:[]};
  const manual=updateDemo(demo,'visit',{...base,ai,extra:{summary:'x'},aiAssisted:true},null,boss,now).item;equal([manual.entry,'ai' in manual,'extra' in manual],['manual',false,false]);

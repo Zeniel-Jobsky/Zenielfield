@@ -6,10 +6,10 @@ import {Loader2,ChevronRight,RefreshCw,ChevronDown,ChevronUp,CheckCircle2,Newspa
 import {CopyButton} from './copy-button';
 import type {Context} from './context';
 import {PanelTitle} from '../ui';
-import {type FieldVisit,aggregate,dayShift,lastTargetVisit,targetOf,targetStatus,typeName,weeklyTrend} from './model';
+import {type FieldVisit,aggregate,dayShift,targetOf,targetStatus,typeName,weeklyTrend} from './model';
 import {scopeUnits} from './decision';
 import {weekRanges,weekTitle} from '../briefing/model';
-import {rich,join,num,bad,good,toRich,RichText,site,store,tagNames,type Rich,type Tone} from './rich';
+import {rich,join,num,RichText,sentences,site,store,tagNames,type Rich,type Tone} from './rich';
 import {collapseRepeats} from '../lib/dedupe-text';
 import {isCurrentJudgment,maskText,levelLabel} from './judgment';
 import {callAssist,aiDownReason} from './ai-assist';
@@ -119,11 +119,9 @@ const eun=(w:string)=>{const c=w.charCodeAt(w.length-1);return c>=0xac00&&c<=0xd
 // 전할 말의 대상: 바로 아래 직급
 const CHEER_TO:Record<NudgeRole,string>={manager:'함께 챙길 한마디',partlead:'잡매니저에게 전할 말',lead:'파트장에게 전할 말',director:'팀장에게 전할 말'};
 export function ruleBrief(d:BriefDigest):AiBriefResult{
- const k=d.kpi,j=d.judged,unit=d.scope.unit,kind=d.scope.type.replace(' 방문',''),top=d.units.length>1?[...d.units].filter(u=>u.rate!==null).sort((a,b)=>b.rate!-a.rate!)[0]:undefined;
+ const k=d.kpi,j=d.judged,unit=d.scope.unit,top=d.units.length>1?[...d.units].filter(u=>u.rate!==null).sort((a,b)=>b.rate!-a.rate!)[0]:undefined;
  const rated=d.trend.filter(t=>t.rate!==null),first=rated[0],last=rated.at(-1);
  const dir=k.rateWeek!==null&&k.rateWeekPrev!==null?k.rateWeek-k.rateWeekPrev:null,odir=k.overdue-k.overduePrev;
- const scopeTxt=`${d.period.label}${d.scope.filters.length?' · '+d.scope.filters.join(' · '):''}`;
- const judgedTxt=j.reports?rich` 보고 ${num(j.reports+'건')} 중 판정 ${num((j.reports-j.unjudged)+'건')}, 지금 바로 확인 ${num((j.latest['위험']||0)+'곳')}·조치 필요 ${num((j.latest['주의']||0)+'곳')}이에요.`:'';
  // 상태값을 사람에게 말하는 해요체 문장으로 푼다(제니에리 말투). 판단 문장은 저장된 판정 그대로.
  const say=(x:string)=>x==='필요 방문 기한 지남'?'필요 방문 기한이 지났어요.':x==='필요 방문 일정 없음'?'필요 방문 일정이 아직 없어요.':x.startsWith('일정 잡힘 ')?x.slice(6)+'에 방문 일정이 잡혀 있어요.':x;
  const what=(p:BriefDigest['problems'][number])=>[p.판단?p.판단.replace(/[.。]?$/,'.'):'',...p.방문상태.map(say),p.기한넘긴조치[0]?`기한 넘긴 조치(${p.기한넘긴조치[0]})가 남아 있어요.`:''].filter(Boolean).join(' ');
@@ -191,11 +189,11 @@ const readCache=(id:string):Cached|null=>{try{const v=JSON.parse(localStorage.ge
 const writeCache=(id:string,v:Cached)=>{try{localStorage.setItem(CACHE_KEY+':'+id,JSON.stringify(v))}catch{}};
 // 브리핑 펼침은 하나: 늘 보임 = 무슨 일이 벌어지고 있나 + 할 일. 요약 옆 `어디에 무엇이 더 보기` = 대상별 정형 표. `더 보기` = 이행 가이드·전할 말·다음 주 볼 것·근거·AI 작성 고지, 펼치면 같은 버튼이 `접기`
 function BriefPresentation({out,digest,stale,busy=false,jump,targetNames,who}:{who:(name:string)=>Who;out:Cached;digest:BriefDigest;stale:boolean;busy?:boolean;jump:(name:string)=>void;targetNames:Set<string>}){
- const [open,setOpen]=useState(false),[where,setWhere]=useState(false),id=useId();
+ const [open,setOpen]=useState(false),id=useId();
  const r=out.result,ai=!out.model.includes('규칙');
  const merged=useMemo(()=>{const txt=(x:Rich)=>x.map(v=>v.v).join('');const used=new Set<number>();const rows=r.focus.map(f=>{const i=(r.directive||[]).findIndex((d,k)=>!used.has(k)&&(d.to===f.name||txt(d.say).includes(f.name)||f.name.includes(d.to)));if(i>=0)used.add(i);const d=i>=0?r.directive![i]:null;return {name:f.name,reason:f.reason,to:d?.to||'',say:d?.say||[]}});(r.directive||[]).forEach((d,k)=>{if(!used.has(k))rows.push({name:d.to,reason:[],to:d.to,say:d.say})});return rows},[r.focus,r.directive]);
  const txt=(x:Rich)=>x.map(v=>v.v).join('');
- const story=<section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>무슨 일이 벌어지고 있나</h3><p>{r.story.length?<RichText r={r.story}/>:'보고에서 새로 짚을 일이 없어요.'}</p></section>;
+ const story=<section className="ai-brief-story"><h3><Newspaper size={16} aria-hidden/>무슨 일이 벌어지고 있나</h3>{r.story.length?<ul className="brief-lines">{sentences(r.story).map((x,i)=><li key={i}><RichText r={x}/></li>)}</ul>:<p>보고에서 새로 짚을 일이 없어요.</p>}</section>;
  return <div className={'ai-brief-out'+(stale?' stale':'')}>
   {story}
   <Where digest={digest} jump={jump}/>

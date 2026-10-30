@@ -16,6 +16,8 @@ const push=(out:Rich,p:Part)=>{if(p===null||p===undefined||p===false||p==='')ret
 // 태그 템플릿: rich`이행률 ${num('39%')}로 ${bad('낮습니다')}` → 조각 배열
 export function rich(strings:TemplateStringsArray,...vals:Part[]):Rich{const out:Rich=[];strings.forEach((s,i)=>{push(out,s);if(i<vals.length)push(out,vals[i])});return out}
 // 여러 문장을 이어 붙인다(빈 문장은 건너뜀)
+// 문장 나누기(표시 단계): 조각 글자 안의 문장 끝(. ? ! 뒤 공백)에서 끊어 한 줄에 한 문장. 강조(tone)는 그대로.
+export function sentences(r:Rich):Rich[]{const out:Rich[]=[[]];for(const p of r){const bits=p.v.split(/(?<=[.?!])s+/);bits.forEach((b,i)=>{if(i>0)out.push([]);if(b)out[out.length-1].push({...p,v:b})})}return out.filter(x=>x.some(p=>p.v.trim()))}
 export function join(parts:(Rich|false|null|undefined)[],sep=' '):Rich{const out:Rich=[];for(const p of parts){if(!p||!p.length)continue;if(out.length)out.push({v:sep});out.push(...p)}return out}
 // 이름 조각 붙이기(생성 단계): tone 없는 조각만, 조회 범위의 실제 이름과 정확히 같은 글자를 site·store·region 조각으로 나눈다.
 // 화면에서 문장을 다시 읽지 않도록 브리핑을 받은 직후 한 번만 쓰고 저장본에 남긴다(DC-AI-TEXT).
