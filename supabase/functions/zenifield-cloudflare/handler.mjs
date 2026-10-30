@@ -1,12 +1,11 @@
 import {createHandler} from '../zenifield-gateway/handler.mjs';
 // 계정 전환 중 기존 링크도 유지한다. 정확한 콜백만 허용하고 와일드카드는 쓰지 않는다.
-const loginCallbacks=new Set([
- 'https://zenifield.jobsky.workers.dev/auth/callback',
- 'https://zenifield.ugen-kwon.workers.dev/auth/callback',
-]);
+const demoLoginCallbacks=['https://zenifield.jobsky.workers.dev/auth/callback','https://zenifield.ugen-kwon.workers.dev/auth/callback'];
+const liveLoginCallbacks=['https://zenifield-live.jobsky.workers.dev/auth/callback'];
 
 // tokenHash: one hash or a list (Cloudflare Worker token, Sites server token). Both are server-only secrets.
 export function createCloudflareHandler({url,key,tokenHash,fetcher=fetch}) {
+ const loginCallbacks=new Set(url.includes('cyrsdaqqnegrynhwurnb.supabase.co')?liveLoginCallbacks:demoLoginCallbacks);
  const hashes=(Array.isArray(tokenHash)?tokenHash:[tokenHash]).filter(Boolean);
  const reply=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
  const serviceHeaders={apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'};
