@@ -501,7 +501,7 @@
 /* 역할별 필터(지침 7절): 기본은 본인 범위로 이미 선택된 상태라 선택 상자를 접어 두고, 현재 범위 버튼을 누르거나 터치할 때만 펼친다 */
 @media(min-width:761px){.app-shell .platform-filters .scope-toggle{display:inline-flex;align-items:center;gap:8px;grid-column:1;grid-row:1;justify-self:start;align-self:center;width:auto;min-height:44px;padding:0 14px;border:1px solid var(--zf-control-border);border-radius:8px;background:var(--zf-surface);color:var(--zf-text);font-size:14px;font-weight:600}.app-shell .platform-filters:not(.filterbar-open) #workspace-filters{display:none}.app-shell .platform-filters.filterbar-open #workspace-filters{display:grid;grid-column:1/-1;grid-row:2;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;padding:0;border:0;margin:0}}
 /* 운영 화면 조회 필터 배치(761px 이상)는 이 블록이 기준이다. 앞선 filterbar 규칙을 덮어쓰며, 다른 파일에 배치 규칙을 더 만들지 않는다.
-   데스크톱: [범위 버튼] ··· [기간][시작일 – 종료일][초기화] 한 줄 / 태블릿: [범위][초기화] + [기간·날짜] / 펼친 선택 상자는 맨 아래 줄 */
+   태블릿·데스크톱: [범위 버튼] ··· [기간][초기화] 한 줄(모든 화면 같음) / 펼친 선택 상자는 맨 아래 줄 */
 @media(min-width:761px){
  .app-shell .platform-filters .filterbar-primary{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"scope . period reset" "selects selects selects selects";align-items:center;gap:8px 12px;flex-wrap:nowrap}
  .app-shell .platform-filters .filterbar-label{display:none}
@@ -512,11 +512,6 @@
  
  .app-shell .platform-filters .reset-button{grid-area:reset;display:inline-flex;align-items:center;justify-content:center;width:36px;min-width:36px;min-height:36px;padding:0;margin:0}
  .app-shell .platform-filters.filterbar-open #workspace-filters{grid-area:selects}
-}
-@media(min-width:761px) and (max-width:1023px){
- .app-shell .platform-filters .filterbar-primary{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"scope . reset" "period period period" "selects selects selects"}
- .app-shell .platform-filters .filterbar-period{justify-content:flex-start}
- 
 }
 /* 조회 기간 선택(지침 7절): [◀ 기간 이름 ▶] + 누르면 빠른 선택 창. 날짜 칸은 '직접 선택'에서만 */
 .period-picker{position:relative;display:inline-flex;align-items:stretch;border:1px solid var(--zf-control-border);border-radius:8px;background:var(--zf-surface)}
@@ -610,14 +605,7 @@
 .action-order-tools select:hover{border-color:var(--zf-control-border-hover)}
 .action-order-tools select:focus-visible{outline:2px solid var(--zf-focus);outline-offset:2px}
 @media(max-width:760px){.action-order-tools select{font-size:16px;flex:1;min-width:0}.action-order-tools>span{flex-basis:100%}}
-/* Dashboard and visit records retain the requested left-aligned second row. */
-@media(min-width:761px){
- .app-shell .platform-filters.stacked-period-filters .filterbar-primary{grid-template-columns:max-content minmax(0,1fr);grid-template-areas:"selects selects" "period reset";justify-content:start}
- .app-shell .platform-filters.stacked-period-filters .scope-toggle{display:none}
- .app-shell .platform-filters.stacked-period-filters #workspace-filters{display:grid;grid-area:selects;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
- .app-shell .platform-filters.stacked-period-filters .filterbar-period{justify-self:start;width:auto;justify-content:flex-start}
- .app-shell .platform-filters.stacked-period-filters .reset-button{justify-self:start}
-}
+
 /* 지시 가이드(누구에게 무엇을)·이행 가이드(순서대로): 브리핑에서 바로 움직일 내용. AI가 쓴 칸 제목엔 반짝이 */
 .ai-brief-out h3>svg{margin-right:4px;color:#003c33;vertical-align:-2px}
 .ai-brief-guide{margin:0 0 12px}
