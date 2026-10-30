@@ -1112,3 +1112,7 @@ html.zf-calm .zf-ai-mark,html.zf-calm .zeni-working-dots i{animation:none!import
 .app-shell .platform-filters .period-picker .period-step,.app-shell .platform-filters .period-picker .period-label{min-height:42px;height:42px}
 .app-shell .platform-filters .reset-button{width:44px;min-width:44px}
 @media(max-width:760px){.app-shell .platform-filters .scope-toggle{border:1px solid var(--zf-control-border);border-radius:8px;background:var(--zf-surface)}}
+/* 저장·판정 중 가림막: 폼 위에 제니에리가 무엇을 하는지 말한다(버튼만 바뀌고 멈춘 것처럼 보이지 않게) */
+.record-form{position:relative}
+.save-overlay{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:24px;background:rgb(255 255 255 / .86);backdrop-filter:blur(1px)}
+.save-overlay .zeni-working{max-width:420px}

@@ -1,5 +1,5 @@
 'use client';
-import {AiMark} from './ai-mark';
+import {AiMark,AiWorking} from './ai-mark';
 import {daysBetween,validDay} from '../lib/date';
 import {JudgeCheck,runJudge,judgeKey,confirmed,type JudgeState} from './judge-check';
 import {useState,type FormEvent} from 'react';
@@ -53,7 +53,7 @@ export function AiVisitForm({c,modal,error,onSave,onClose}:{c:Context;modal:any;
   if(judge?.key!==judgeKey(rep)){if(!judging){setJudging(true);runJudge(c,target.id,r?.id||null,rep,pending).then(setJudge).finally(()=>setJudging(false))}return}
  onSave('visit',{...(base||{}),entry:'ai',ai,...values,targetType:type,siteId:site,storeId:type==='store'?store:null,visitorId:base?.visitorId||owner,status:'completed',plannedDate:base?.plannedDate||null,time:base?.time||'',precheck:base?.precheck||'',actualDate,actualTime,geo:geo||r?.geo||null,cancelReason:'',requirementId:base?.requirementId||modal.requirementId||null,aiActions:pending,judgment:confirmed(judge),meeting:meeting?{topic:meeting.m.topic,attendeeCount:meeting.m.attendeeCount,start:meeting.m.start,end:meeting.m.end,items:meeting.m.items,extra:meeting.m.extra}:(r?.meeting??null)},base||undefined)}
  const edited=(k:AiField)=>!!ai&&values[k]!==ai.draft[k];
- return <form className="record-form ai-form" onSubmit={submit}><div className="form-scroll"><div className="ai-switch">{!saved&&<button type="button" className="textbtn" onClick={()=>c.open('visit',r,{...modal,ai:false,manual:true,result:true})}><PenLine size={14}/>직접 입력</button>}</div>
+ return <form className="record-form ai-form" onSubmit={submit}>{(judging||c.saving)&&<div className="save-overlay" role="status" aria-live="polite"><AiWorking message={judging?'제니에리가 이전 보고와 조치를 함께 살펴보며 정리를 돕고 있어요':'제니에리가 저장하고 정리하는 중이에요'}/></div>}<div className="form-scroll"><div className="ai-switch">{!saved&&<button type="button" className="textbtn" onClick={()=>c.open('visit',r,{...modal,ai:false,manual:true,result:true})}><PenLine size={14}/>직접 입력</button>}</div>
  <fieldset className="form-grid" disabled={!canEdit||c.saving}>
  {!saved&&<Permissions/>}
  <div className="form-section first wide">말·글·사진으로 입력</div>
