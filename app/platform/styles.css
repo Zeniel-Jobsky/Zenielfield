@@ -913,3 +913,4 @@
 :root{--zf-read-measure:68ch}
 .app-shell .ai-brief .ai-brief-out p,.app-shell .zeni-cheer-say .zeni-working-bubble p{max-width:var(--zf-read-measure);font-size:15px;line-height:1.7;margin:0}
 .app-shell .ai-brief .ai-brief-out p+p,.app-shell .zeni-cheer-say .zeni-working-bubble p+p{margin-top:8px}
+.my-days{flex-wrap:wrap;overflow:visible}
