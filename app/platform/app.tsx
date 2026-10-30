@@ -38,11 +38,11 @@ import {DiagnosisDetail} from '../diagnosis/components';
 import {SavedNudge} from './nudge-view';
 // 업무 흐름 순서: 판단(운영 현황) → 계획(방문 일정) → 실행(방문 기록) → 후속(후속 조치) → 돌아보기(주간 기록) → 기준 정보(현장·매장) → 설정. 페이지 키는 저장값이라 그대로
 // 잡매니저의 첫 화면은 개인 업무 화면이라 이름만 다르게(페이지 키 같음)
-// 오늘 업무 제목 아래: 날짜·요일·지금 시각(1분마다)·이번 주 범위 — 무엇을 언제까지 할지 기준을 보이게
+// 내 현장 제목 아래: 날짜·요일·지금 시각(1분마다)·이번 주 범위 — 무엇을 언제까지 할지 기준을 보이게
 function TodayWhen({now}:{now:string}){const [t,setT]=useState(kstTime());useEffect(()=>{const h=setInterval(()=>setT(kstTime()),60000);return()=>clearInterval(h)},[]);
  const d=new Date(now+'T12:00:00Z'),w=weekOf(now),dow='일월화수목금토'[d.getUTCDay()],hh=Number(t.slice(0,2));
  return <p className="page-when">{d.getUTCMonth()+1}월 {d.getUTCDate()}일({dow}) · {hh<12?'오전':'오후'} {((hh+11)%12)+1}:{t.slice(3)} 기준 · 이번 주 {mmdd(w)}–{mmdd(dayShift(w,6))}</p>}
-const navLabel=(id:string,label:string,role:string)=>id==='dashboard'&&role==='manager'?'오늘 업무':label;
+const navLabel=(id:string,label:string,role:string)=>id==='dashboard'&&role==='manager'?'내 현장':label;
 const nav=[['dashboard','운영 현황',LayoutDashboard],['visits','방문 일정',CalendarDays],['results','방문 기록',History],['actions','후속 조치',ListChecks],['briefings','활동 요약',NotebookPen],['sites','담당·주기 관리',Building2],['contacts','현장 주소록',Contact]] as const;
 const admin:User={id:'demo-admin',name:'데모 관리자',email:'admin@example.test',role:'admin',team:'리테일운영팀',part:'1파트',active:1};
 export default function PlatformApp({initialData,liveMode=false,onSaveLive,onDemo,onConnect,onLogout,onRefresh,onRange,connectionError='',connectionStatus=0,refreshing=false}:{initialData?:OperatingData;liveMode?:boolean;onSaveLive?:(entity:string,values:any,record?:any)=>Promise<{data:OperatingData;item:any}>;onDemo?:()=>void;onConnect?:()=>void;onLogout?:()=>void;onRefresh?:()=>void;onRange?:(start:string,end:string)=>void;connectionError?:string;connectionStatus?:number;refreshing?:boolean}={}){

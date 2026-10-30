@@ -339,7 +339,7 @@
 .link-hint>span{color:#65726b}
 .link-hint .textbtn,.notice .textbtn{display:inline-flex;align-items:center;gap:4px;margin-left:auto}
 
-/* 잡매니저 홈: 모바일에서 오늘 업무 머리글을 세로로 쌓고 기록 버튼을 전체 폭으로 둔다. */
+/* 잡매니저 홈: 모바일에서 내 현장 머리글을 세로로 쌓고 기록 버튼을 전체 폭으로 둔다. */
 @media(max-width:760px){.platform-app .manager-welcome{flex-wrap:wrap;gap:12px}.platform-app .manager-welcome>div{flex:1 1 0;min-width:0}.platform-app .manager-welcome .here-btn{flex:1 1 100%;justify-content:center;min-height:48px;margin-left:0}}
 /* 태블릿·모바일 세로 막대 레이블: 낱말 단위로만 줄바꿈 */
 .vbar small{word-break:keep-all}
@@ -892,7 +892,7 @@
 .ai-brief .ai-brief-out h3 .copy-btn,.ai-brief .ai-brief-out h3>button{margin-left:auto}
 .action-brief .ai-brief-out>section+section{margin-top:24px}
 .action-brief .textbtn{min-height:44px}
-/* 오늘 업무: 제목 아래 기준 시각, 제니에리 독려 말풍선 */
+/* 내 현장: 제목 아래 기준 시각, 제니에리 독려 말풍선 */
 .page-when{margin:4px 0 0;font-size:13px;color:var(--zf-text-secondary);font-variant-numeric:tabular-nums}
 .manager-welcome.zeni-cheer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
 .zeni-cheer-say{flex:1 1 320px}
