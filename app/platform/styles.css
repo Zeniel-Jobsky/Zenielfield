@@ -882,3 +882,7 @@
 .ai-brief-where-head .textbtn{min-height:44px}
 .ai-brief-where p small{color:var(--zf-text-muted);font-size:12px}
 .pair-bars>.stack-bar{justify-content:flex-start}.pair-bars>.stack-bar>span{flex:none;margin:0}
+/* 브리핑 칸 제목 한 크기(무슨 일·어디에 무엇이·이렇게 챙겨 보세요·더 보기 안 칸 모두) */
+.ai-brief .ai-brief-out h3{margin:0 0 8px;font-size:14px;font-weight:600;line-height:1.5;color:var(--zf-text-secondary)}
+.ai-brief .ai-brief-where-head h3{margin:0}
+.ai-brief .ai-brief-out h3>svg{color:var(--zf-brand-green)}
