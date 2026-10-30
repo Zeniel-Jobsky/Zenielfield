@@ -954,3 +954,7 @@
 @media(max-width:760px){.app-shell .action-brief .ai-brief-focus .action-late>li{flex-wrap:wrap;row-gap:6px;padding-bottom:8px}.app-shell .action-brief .ai-brief-focus .action-late>li>button:first-child{flex:1 1 100%}}
 .visit-suggest button>.vs-pick{grid-column:2;grid-row:1/span 5;display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--zf-brand-green);white-space:nowrap}
 .visit-suggest button{grid-template-columns:minmax(0,1fr) auto}
+/* 관리 열: 다음 행동(조치 추가·결과 쓰기)과 결과 수정·보기를 한 줄에 */
+.record-table .row-actions{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.record-table .row-actions .textbtn{min-height:36px;white-space:nowrap}
+.record-table th:nth-child(2){width:28%}.record-table th:nth-child(6){width:14%}
