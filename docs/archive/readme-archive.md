@@ -136,8 +136,8 @@ PR과 `main` 푸시마다 GitHub Actions(`.github/workflows/verify.yml`)가 같�
 
 ## 업무 및 후속 개발 명세
 
-- [플랫폼 업무 구조와 DB 계약](docs/platform-integration.md) — 초기 데모 단계의 설계 기록. 현재 저장 연결 상태는 Supabase 인계를 따릅니다.
-- [주간 브리핑](docs/weekly-briefing.md)
+- [플랫폼 업무 구조와 DB 계약](docs/spec.md) — 초기 데모 단계의 설계 기록. 현재 저장 연결 상태는 Supabase 인계를 따릅니다.
+- [주간 브리핑](docs/spec.md)
 - [Supabase 설정·현재 구현·권한·검증](docs/infrastructure.md)
 
 방문 이력이 있는 대상의 주기는 과거 통계 보존을 위해 잠깁니다. 향후 적용일 지정 주기 이관과 회차 스냅샷, 기존 D1 자료 이관, 첨부파일, 알림, 그룹웨어, XLSX 전용 양식은 후속 개발입니다. 운영 권한과 보관정책은 실제 사용에 맞게 확정해야 합니다.

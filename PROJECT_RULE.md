@@ -49,7 +49,7 @@
 | DC-DESIGN-RECORDS | 방문 기록 = 표 위 탭 한 줄 단일 선택(전체·먼저 볼 보고·안 끝난 이슈·고객 요청·결과 안 쓴 방문), 기준 `judgment.ts` issueGuide(저장 판정만), 0건 숨김, 줄마다 걸린 이슈. 이슈 종류 묶음·판정 수준 묶음·다단계 필터 금지 |
 | DC-DESIGN-FORM | 설정 = 탭(내 계정·사용자·권한·관리 도메인·브리핑 내용), 사용자·권한 = 표+찾기·역할·상태, 명단 올리기는 미리 보기 후 반영(오류 있으면 막음, 감사 기록). 입력 폼 = 한 열 기본(짧은 짝 칸만 2열), 라벨 위, 선택 칸 `(선택)` 표시. 금지: 안내 박스·준비 중 기능 안내·구역 번호·같은 안내 중복·선택 칸 접기. 새로 만들 때 진행 상태 칸 숨김, 수시 방문은 예정 시간·사전 확인사항 숨김. 혼자 남는 칸은 한 줄 전체. 갱신 2026-10-30 |
 | DC-DESIGN-PAGE-GUIDE | 방문 일정·방문 기록·후속 조치 맨 위 제니에리 정리(같은 틀: 무슨 일 문단 → 할 일 한 문장 + 3건). 줄 = [대상·내용(열기)] [바로 하기 작은 버튼: 일정 잡기·결과 쓰기] [받는 사람에게 보낼 말 복사 44px] 한 줄. 브리핑 `어떻게 대응하면 되나`도 같은 바로 하기·복사, 문장 속 현장·매장 이름 링크. `page-guide.tsx`·`action-brief.tsx`. 갱신 2026-10-30 |
-| DC-DESIGN-VISIT-ACTION | 방문 기록·후속 조치 = 메뉴 하나 `방문·조치`(페이지 키 results·actions 유지, activePage results). 정리 `VisitActionGuide` 하나 → 메뉴 진입 = 안 끝난 조치 탭, 탭 한 줄(조치 탭 │ 방문 GuideTabs bare) → 방문 줄 아래 그 방문 조치 하위 줄. 머리 버튼 하나(탭에 맞춰 조치 등록·결과 등록). 목록 글 속 AiMark 금지. 단독 `+`·`›` 아이콘 금지. 관리 열은 한 줄·일반 동작은 아이콘+두 글자(전체 이름 title·aria-label), 조치 수정·보기는 전체 문구 뒤 ChevronRight. 모든 메뉴에 제니에리 정리(`page-guide.tsx`). 설계 `docs/visit-action-unify-plan.md`. 갱신 2026-10-30 |
+| DC-DESIGN-VISIT-ACTION | 방문 기록·후속 조치 = 메뉴 하나 `방문·조치`(페이지 키 results·actions 유지, activePage results). 정리 `VisitActionGuide` 하나 → 메뉴 진입 = 안 끝난 조치 탭, 탭 한 줄(조치 탭 │ 방문 GuideTabs bare) → 방문 줄 아래 그 방문 조치 하위 줄. 머리 버튼 하나(탭에 맞춰 조치 등록·결과 등록). 목록 글 속 AiMark 금지. 단독 `+`·`›` 아이콘 금지. 관리 열은 한 줄·일반 동작은 아이콘+두 글자(전체 이름 title·aria-label), 조치 수정·보기는 전체 문구 뒤 ChevronRight. 모든 메뉴에 제니에리 정리(`page-guide.tsx`). 설계 `docs/spec.md`. 갱신 2026-10-30 |
 | DC-DESIGN-LIST | 방문 기록·후속 조치 목록 같은 틀: 탭 → `.list-tools`(대상 유형·정렬, 같은 select 모양) → `.record-table` 열 대상(이름+유형·상위 현장) | 내용 | 담당 | 날짜 | 상태 칩 | 관리 링크, 모바일 카드 같은 틀. 표 최소 너비 960px·좁으면 표 영역 가로 스크롤. 마지막 관리 열은 한 줄: 일반 동작은 아이콘+두 글자, 조치는 `후속조치 수정`·`후속조치 보기` 텍스트+옆 화살표. 구분 칩 열·등록일 열 금지. 갱신 2026-10-30 |
 | DC-DESIGN-ACTIONS | 후속 조치 맨 위 `action-brief.tsx` = 무슨 일(현황·진척 문단, 지난 2주 비교) → 어떻게 대응하면 되나(할 일 한 문장+밀린 조치 3건+모두 보기). 차트 금지. 상태 탭 건수·공통 정렬(잡매니저별·초과 일수). 조치 목록 마지막 열 = `후속조치 수정` 텍스트+옆 화살표, 읽기 전용은 `후속조치 보기` |
 | DC-DESIGN-DETAIL | 상세·활동 요약: H2 20/18px, 반복 목록 기본 3개+44px 더 보기(aria-expanded/controls), 1px 중립 구분선은 그룹 시작에만, 타임라인 날짜 64px/축 16px/본문, `--zf-detail-*` 토큰. 지침 9.1 |
@@ -84,7 +84,7 @@
 | Accounts (prod) | `node --env-file=.env scripts/provision-accounts.mjs [--dry-run] [--csv work/users.csv] [--no-password]` 실제 명단(CSV) 또는 권한별 zf.*@zeniel.co.kr 11개, 비밀번호 → `work/accounts.local.csv`(git 제외). 사용자 승인 후 |
 | DB (demo/real) | `node --env-file=.env scripts/db.mjs status | backup | reset demo --keep <관리자> --confirm <ref> | migrate <demo|real|all> [--dry-run] | bootstrap real | switch <demo|real>` 대상 `ops/db-targets.json`(active = 운영 앱 연결). 쓰기 명령은 `--approved-by` 필수 |
 | Agent ops | 에이전트의 운영 DB·배치 작업은 AGENTS.md "운영 DB·배치 명령" 표의 명령으로만, 승인 단계는 사용자가 말한 승인자 이름으로만 |
-| Rollout (prod) | `node scripts/rollout.mjs list|show|run|done|skip <단계>` 정본 `ops/production-rollout.json`, 설명 `docs/production-rollout.md`. 승인 단계 `--approved-by` 필수, 실패 시 멈춤 |
+| Rollout (prod) | `node scripts/rollout.mjs list|show|run|done|skip <단계>` 정본 `ops/production-rollout.json`, 설명 `docs/go-live.md`. 승인 단계 `--approved-by` 필수, 실패 시 멈춤 |
 | Migrate (prod) | `node --env-file=.env scripts/migrate.mjs [--dry-run] [--mark-applied a.sql,b.sql]` · CI: Actions `supabase-deploy` |
 | Lint | `npx deuk-agent-flow lint:md` |
 

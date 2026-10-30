@@ -109,7 +109,7 @@ UI 변경 시 [AGENTS.md](../AGENTS.md)의 390px·820px·1280px 실화면 검수
 | 위치·음성 입력 실패 | 브라우저 지원·보안 컨텍스트·기기 권한 확인. 직접 선택·텍스트 입력 사용 |
 | 빈 목록·저장 충돌 | 기간·대상·상태 필터와 역할 범위 확인. 최신 자료를 불러와 입력 내용 재검토 |
 
-근거: [실행 설정](../package.json), [setup](../scripts/setup.mjs), [진입 화면](../app/platform/entry.tsx), [사용자 매뉴얼](user-guide.md). 실제 서비스 설정과 재현이 남은 항목은 [점검 보고서](archive/documentation-audit-2026-10-29.md)에 구분한다.
+근거: [실행 설정](../package.json), [setup](../scripts/setup.mjs), [진입 화면](../app/platform/entry.tsx), [사용자 매뉴얼](guide.md). 실제 서비스 설정과 재현이 남은 항목은 [점검 보고서](archive/documentation-audit-2026-10-29.md)에 구분한다.
 
 ## 매뉴얼 화면 캡처
 

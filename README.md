@@ -12,15 +12,31 @@
 - 모든 화면 맨 위에서 제니에리가 그 화면의 할 일을 먼저 정리하고, 줄마다 바로 하기 버튼과 보낼 말 복사를 붙여요.
 - 모든 직급이 같은 메뉴를 보고, 보이는 범위만 직급(잡매니저·파트장·팀장·사업부장)에 따라 달라요.
 
-> **실서비스로 여는 방법 → [실서비스 오픈 절차](docs/go-live.md)** (데이터 비우기 → 로그인 메일 → 직원 명단 일괄 등록 → 첫 로그인 활성화 → 현장 등록 → 확인)
+## 🚀 실서비스(라이브) 세팅
+
+실제 직원이 쓰게 여는 절차는 **[실서비스 오픈 가이드](docs/go-live.md)** 하나에 모았어요. 순서만 보면 이래요.
+
+| 순서 | 할 일 | 누가 · 어디서 |
+| --- | --- | --- |
+| 1 | 준비: `.env` 값, 사전 점검(`node scripts/rollout.mjs run preflight`), 요금제 | 운영 담당 · 터미널 |
+| 2 | 데이터 비우기: 백업 → 초기화(승인 필요) | 운영 담당 · 터미널 |
+| 3 | 관리자 준비: 관리 도메인 등록, 본인 비밀번호 | 시스템 관리자 · 설정 |
+| 4 | 직원 일괄 등록: `명단 양식` 받기 → 채우기 → `명단 올리기` → 미리 보기 → 반영 | 시스템 관리자 · 설정 → 사용자·권한 |
+| 5 | 첫 로그인: 비밀번호 1:1 전달(`work/accounts.local.csv`) → 직원이 설정 → 내 계정에서 변경. 회사 SMTP를 붙이면 메일 링크 로그인 | 관리자 · 직원 |
+| 6 | 현장·매장·담당·주기 등록 → 직급별 로그인 확인 | 관리자·팀장·파트장 · 담당·주기 관리 |
+
+- 에이전트(GPT·Codex·Claude)에게 맡길 때는 [AGENTS.md "운영 DB·배치 명령"](AGENTS.md) 표의 명령과 승인 문장만 써요.
+- 운영 DB를 바꾸는 단계(백업·초기화·직원 등록)는 승인자 이름(`--approved-by`)이 있어야 실행돼요.
+
 
 ## 목차
 
+0. [실서비스(라이브) 세팅](#-실서비스라이브-세팅)
 1. [핵심 철학](#핵심-철학)
 2. [핵심 기능](#핵심-기능)
 3. [화면으로 보기](#화면으로-보기)
 4. [처음 버전과 달라진 점](#처음-버전과-달라진-점)
-5. [시작하기](#시작하기) · [실서비스 오픈 절차](docs/go-live.md)
+5. [시작하기](#시작하기)
 6. [메뉴별 사용 안내](#메뉴별-사용-안내)
 7. [개발자 안내](#개발자-안내)
 8. [문서 모음](#문서-모음)
@@ -133,15 +149,15 @@ pnpm dev        # http://127.0.0.1:5173  (데모: /?mode=demo)
 
 | 메뉴 | 하는 일 |
 | --- | --- |
-| [운영 현황](docs/user-guide.md#운영-현황) | 제니에리 말풍선·브리핑·지표·차트 |
-| [방문 일정](docs/user-guide.md#방문-일정) | 달력·먼저 가 볼 곳 추천·일정 등록 |
-| [방문·조치](docs/user-guide.md#방문-기록) | 방문 결과·후속 조치 한 화면 |
-| [활동 요약](docs/user-guide.md#주차별-활동-요약) | 기간 브리핑·날짜별 타임라인 |
-| [담당·주기 관리](docs/user-guide.md#현장매장-관리) | 현장·매장·담당·방문 주기 |
+| [운영 현황](docs/guide.md#운영-현황) | 제니에리 말풍선·브리핑·지표·차트 |
+| [방문 일정](docs/guide.md#방문-일정) | 달력·먼저 가 볼 곳 추천·일정 등록 |
+| [방문·조치](docs/guide.md#방문-기록) | 방문 결과·후속 조치 한 화면 |
+| [활동 요약](docs/guide.md#주차별-활동-요약) | 기간 브리핑·날짜별 타임라인 |
+| [담당·주기 관리](docs/guide.md#현장매장-관리) | 현장·매장·담당·방문 주기 |
 | 현장 주소록 | 주소·담당 검색 |
-| [설정](docs/user-guide.md#설정) (사이드바 아래 아이콘) | 사용자·도메인·권한·브리핑 요소 |
+| [설정](docs/guide.md#설정) (프로필 메뉴 → 설정) | 내 계정(비밀번호·화면 옵션) · 사용자·권한(명단 일괄 반영) · 관리 도메인 · 브리핑 내용 |
 
-관리자 업무는 [관리자 가이드](docs/admin-guide.md)를 봐 주세요.
+관리자 업무는 [사용 안내 2절](docs/guide.md#2-관리자-안내)을 봐 주세요.
 
 ## 개발자 안내
 
@@ -162,8 +178,14 @@ pnpm dev        # http://127.0.0.1:5173  (데모: /?mode=demo)
 
 ## 문서 모음
 
-- **현황:** [기능 현황](docs/feature-status.md) · [남은 이슈](docs/next-issues-plan.md) · [디자인 이력](docs/design-history.md)
-- **사용:** [사용자 가이드](docs/user-guide.md) · [관리자 가이드](docs/admin-guide.md) · [시연 안내](docs/archive/demo-walkthrough.md)
-- **설계:** [방문·조치 한 화면](docs/visit-action-unify-plan.md) · [브리핑 근거](docs/briefing-research.md) · [방문 워크플로](docs/visit-workflow.md) · [AI 간편 등록](docs/archive/ai-quick-entry-plan.md) · [개발 계획 v2](docs/archive/repo-dev-plan-v2.md)
-- **운영:** [실서비스 오픈 절차](docs/go-live.md) · [회사 SMTP 연결](docs/smtp-setup.md) · [배치 매뉴얼(명령·비용·되돌리기)](docs/production-rollout.md) · [인프라 구성(Supabase·Cloudflare·시드)](docs/infrastructure.md)
-- **이전 기록:** [이전 README 원문](docs/archive/readme-archive.md) · [문서 점검 보고서](docs/archive/documentation-audit-2026-10-29.md) · 문서 안내 [docs/README.md](docs/README.md)
+문서 전체 안내는 [docs/README.md](docs/README.md)에 있어요.
+
+| 문서 | 내용 |
+| --- | --- |
+| [실서비스 오픈 가이드](docs/go-live.md) | 오픈 체크리스트, DB 초기화, 직원 일괄 등록, 비밀번호·메일 로그인, 회사 SMTP, 비용, 되돌리기 |
+| [사용 안내](docs/guide.md) | 사용자·관리자 화면 사용법 |
+| [업무·데이터 명세](docs/spec.md) | 방문 흐름, 데이터 계약, AI 간편 등록, 주간 브리핑, 방문·조치 설계 |
+| [디자인 지침](docs/DESIGN-zenielfield.md) · [브리핑 근거](docs/briefing-research.md) | 화면 기준과 문구 근거 |
+| [인프라 구성](docs/infrastructure.md) · [로컬 개발](docs/local-development.md) · [테스트](docs/testing.md) | 개발·운영 구성 |
+| [기능 현황](docs/feature-status.md) · [남은 이슈](docs/next-issues-plan.md) | 진행 기록 |
+| [archive/](docs/archive/) | 끝난 계획·지난 보고·이전 README |

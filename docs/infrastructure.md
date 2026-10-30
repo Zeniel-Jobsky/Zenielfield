@@ -1,6 +1,6 @@
 # 인프라·운영 구성
 
-Supabase·Cloudflare·Git 계정·데모 시드·관리 도메인의 구성과 이력이다. 실제 서비스 배치·DB 초기화·계정 등록 절차는 [production-rollout.md](production-rollout.md)가 정본이고, 이 문서는 구성의 배경과 이력을 담는다.
+Supabase·Cloudflare·Git 계정·데모 시드·관리 도메인의 구성과 이력이다. 실제 서비스 배치·DB 초기화·계정 등록 절차는 [go-live.md](go-live.md)가 정본이고, 이 문서는 구성의 배경과 이력을 담는다.
 
 | 절 | 원래 문서 |
 | --- | --- |
@@ -106,14 +106,14 @@ _원래 문서: `docs/supabase-setup.md` (2026-10-30 통합)_
 현재 배포 대상은 `jobsky@zeniel.co.kr` 계정의 `zenifield` Worker다. 주소는 https://zenifield.jobsky.workers.dev 이며 계정 ID는 `d50191f54ac6859d1ecedddf26094351`이다. 위의 개인 계정 호스팅 항목은 이전 이력이다.
 
 - GitHub `production` 환경과 `main` 자동 배포 순서를 유지한다. 저장소 `CLOUDFLARE_API_TOKEN`은 사용자가 발급한 회사 계정의 단일 `zenifield` Worker `Individual Workers Editor` 토큰으로 교체한다. 계정 전체 관리 권한·D1 권한은 필요 없다.
-- 배포 토큰 관리 위치는 GitHub 저장소 **Settings → Secrets and variables → Actions → Repository secrets → `CLOUDFLARE_API_TOKEN`**이다. 로컬 `.env`·키체인은 필요 없다. main 푸시 시 자동 배포하며 수동 실행도 GitHub **Actions → supabase-deploy → Run workflow → main**에서 한다. `npm run deploy:cloudflare`·`ci:deploy` 역시 GitHub에 같은 수동 실행을 요청한다(GitHub CLI 로그인만 필요). [원격 자격증명 관리](cloudflare-credentials-plan.md).
+- 배포 토큰 관리 위치는 GitHub 저장소 **Settings → Secrets and variables → Actions → Repository secrets → `CLOUDFLARE_API_TOKEN`**이다. 로컬 `.env`·키체인은 필요 없다. main 푸시 시 자동 배포하며 수동 실행도 GitHub **Actions → supabase-deploy → Run workflow → main**에서 한다. `npm run deploy:cloudflare`·`ci:deploy` 역시 GitHub에 같은 수동 실행을 요청한다(GitHub CLI 로그인만 필요). [원격 자격증명 관리](#cloudflare-원격-배포-자격증명).
 - 배포 설정과 CI 계정 ID를 함께 고정하고 `prepare-cloudflare-deploy.mjs`가 다른 계정·D1/R2 바인딩을 거부한다. 새 Worker는 Supabase 전용이며 기존 개인 계정의 D1 데이터는 삭제·초기화하지 않는다.
 - Worker 비밀값은 승인된 기존 `ZENIFIELD_GATEWAY_TOKEN`, `OPENAI_API_KEY`와 기존 Supabase URL·AI 모델을 등록한다. CI는 런타임 secret을 소스에 넣거나 덮어쓰지 않는다.
 - Supabase 인증 허용 목록에 정확한 `https://zenifield.jobsky.workers.dev/auth/callback`을 추가했다. 기존 허용 목록·기본 Site URL은 유지한다. Edge 함수도 새/기존 정확한 두 콜백만 허용한다. DB 스키마 변경·사용자 생성·비밀번호 변경은 없다.
 - 새 도메인에서는 기존 회사 계정으로 다시 로그인한다. 기존 도메인의 호스트 전용 로그인 쿠키는 새 도메인에 전달되지 않는다.
 - 배포 후 `check-cloudflare-deployment.mjs`가 새 공개 주소의 커밋·Supabase 로그인 설정·비로그인 차단·기존 D1 API 차단을 확인한다.
 
-세부 기록: [Cloudflare 회사 계정 이관](cloudflare-account-migration-plan.md).
+세부 기록: [Cloudflare 회사 계정 이관](#cloudflare-회사-계정-이관).
 
 ## Cloudflare 회사 계정 이관
 
@@ -140,7 +140,7 @@ _원래 문서: `docs/cloudflare-account-migration-plan.md` (2026-10-30 통합)_
 | 토큰 | 계정 소유 zenifield-github-actions, 단일 Worker의 Individual Workers Editor |
 | 데이터 | 기존 Supabase 유지, 회사 Worker에는 D1/R2 바인딩 없음 |
 
-사용자가 이번 계정 전환을 요청했으며 이메일 인증과 배포 토큰 발급을 직접 완료했다. 기존 Gateway/OpenAI 비밀값의 새 Worker 등록도 승인했다. 이 문서는 `DC-INFRA`의 별도 인프라 작업 기록이다. 배포 토큰은 GitHub Actions 암호화 Secret에 보관하며 로컬 `.env`·키체인에 의존하지 않는다. [원격 자격증명 관리](cloudflare-credentials-plan.md).
+사용자가 이번 계정 전환을 요청했으며 이메일 인증과 배포 토큰 발급을 직접 완료했다. 기존 Gateway/OpenAI 비밀값의 새 Worker 등록도 승인했다. 이 문서는 `DC-INFRA`의 별도 인프라 작업 기록이다. 배포 토큰은 GitHub Actions 암호화 Secret에 보관하며 로컬 `.env`·키체인에 의존하지 않는다. [원격 자격증명 관리](#cloudflare-원격-배포-자격증명).
 
 ### 준비·변경
 

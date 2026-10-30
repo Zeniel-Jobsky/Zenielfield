@@ -113,14 +113,14 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 마이그레이션 관리: `supabase/schema.sql` 단일 파일, `supabase/migrations/` 없음. 원격 이력과 맞춘 migration 정리 필요.
 
 ### 중간
-- AI·직접 입력 분리: [스키마](ai-entry-schema.md) 구현, 원격 이관·Edge 재배포 완료(2026-10-28).
+- AI·직접 입력 분리: [스키마](spec.md) 구현, 원격 이관·Edge 재배포 완료(2026-10-28).
 - GPS 지점 자동 선택: [GPS](archive/gps-plan.md) 구현, **2026-10-28 사용 중지**(`app/platform/geo.tsx` `GPS_ENABLED=false`, 방문 등록 GPS 자동 선택·위치 기록·마스터 현재 위치 좌표 입력 숨김, 주소 검색 좌표 입력은 유지). 매장 검색·주소 좌표 변환 구현, Kakao 키 설정 필요.
 - 데모 주입 파이프라인: [문서](infrastructure.md) 구현, 운영 적재 대기. HR-biz 가상 DB(xlsx) 운영 적재 완료(2026-10-28).
 - 방문 등록 기본 AI 입력·권한 요청: [문서](archive/ai-input-default.md) 구현.
 - 관리 도메인: [문서](infrastructure.md) 구현. 원격 이관 적용 완료(2026-10-28).
-- 방문·일지 워크플로 재설계: [문서](visit-workflow.md) 구현(계획 자동 연결·일시 기본 지금·제안 조치 일괄 등록·홈 "지금 여기서").
+- 방문·일지 워크플로 재설계: [문서](spec.md) 구현(계획 자동 연결·일시 기본 지금·제안 조치 일괄 등록·홈 "지금 여기서").
 - 대시보드·브리핑·필터 2차 개편: [대시보드 계획](archive/dashboard-plan.md).
-- 기입력 결과 AI 정리(`aiEdits`)·AI 현황 요약·푸터 빌드 표기: 구현(2026-10-28). [워크플로](visit-workflow.md), [스키마](ai-entry-schema.md), [대시보드](archive/dashboard-plan.md). 이관·Edge 운영 반영은 아래 Actions 실행에서 완료.
+- 기입력 결과 AI 정리(`aiEdits`)·AI 현황 요약·푸터 빌드 표기: 구현(2026-10-28). [워크플로](spec.md), [스키마](spec.md), [대시보드](archive/dashboard-plan.md). 이관·Edge 운영 반영은 아래 Actions 실행에서 완료.
 - 권한별 시험 계정 발급(2026-10-28, 사용자 요청): `scripts/provision-accounts.mjs`로 zeniel.co.kr 11개 — zf.admin, zf.director, zf.lead1~3, zf.partlead1·3·5, 잡매니저 zf.jm001·jm018·jm021(가상 담당자 jm-001·018·021의 이메일만 변경해 배정 유지). 관리자 jobsky 이름으로 등록(감사 기록), 비밀번호는 무작위·`work/accounts.local.csv`(git 제외)에만 저장. 역할별 로그인·조회 범위 확인: 관리자·사업부장 107현장, 팀장 55, 파트장 32, 잡매니저 24. 주의: 시드 재적재 시 jm-001·018·021 이메일이 example.test로 되돌아갈 수 있음 → 재적재 후 이 스크립트 다시 실행.
 - 속도 개선(2026-10-28): 메뉴 전환 주 스레드 작업(개발 서버) 대시보드 498→61–121ms, 브리핑 506→247ms, 후속 조치 686→308ms. 원인 = 대상마다 전체 방문 재검색(`lastTargetVisit`·`targetStatus`), 브리핑 모델의 사이트별 방문 재중복제거, 매 렌더 브리핑 데이터 재생성. 운영 빌드에서는 대부분 메뉴 50ms 미만. 로그인 화면에서 개발용 계정 이름이 잠깐 보이던 문제 수정, 로그인·메뉴 로딩 게이지 추가.
 - 운영 반영(2026-10-28 14:35, Actions supabase-deploy #40638708419 성공): 이관 기준선 2개(visit_entry, domains) 기록 + 적용 2개(read_window, ai_edits), logic.js 번들, Edge zenifield-gateway·zenifield-cloudflare 재배포.
@@ -150,7 +150,7 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - [ ] 권한·보관정책 확정
 - [ ] Supabase access token(`sbp_`) 폐기 또는 보관 위치 결정
 
-관련 문서: [Supabase 설정·운영 인계](infrastructure.md), [플랫폼 업무 구조](platform-integration.md), [주간 브리핑](weekly-briefing.md), [대시보드 개선 계획](archive/dashboard-plan.md).
+관련 문서: [Supabase 설정·운영 인계](infrastructure.md), [플랫폼 업무 구조](spec.md), [주간 브리핑](spec.md), [대시보드 개선 계획](archive/dashboard-plan.md).
 
 ## 회사 계정 로그인 (2026-10-28)
 
@@ -278,13 +278,14 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 디자인 지침 117KB→73KB: 옛 6.1·9-B 변경 기록·10-A·옛 차트 검수·날짜별 추가 블록 → `docs/design-history.md`(원문 보관), 6.1·9-B 현재 기준으로 다시 씀
 
 ## 실제 서비스 배치 준비 (2026-10-30)
-- 배치 매뉴얼 `docs/production-rollout.md` + 실행기 `scripts/rollout.mjs` + 정본 `ops/production-rollout.json` 추가. 직원 명단 CSV 등록(`provision-accounts.mjs --csv`, 양식 `ops/users.template.csv`).
+- 배치 매뉴얼 `docs/go-live.md` + 실행기 `scripts/rollout.mjs` + 정본 `ops/production-rollout.json` 추가. 직원 명단 CSV 등록(`provision-accounts.mjs --csv`, 양식 `ops/users.template.csv`).
 - 사전 점검(읽기만) 실행: 이관 미적용 0, 데모 시드 외 출처 없는 방문 10,013건이 데모 현장에 연결 → 데모 정리만으로는 초기화 불가. 초기화 방식(새 프로젝트 A 권장 / 비우기 B) 결정 대기.
 - 운영 배포 복구: production 환경 `SUPABASE_ACCESS_TOKEN` 재발급(03:56) 후 이관·Edge·Worker 성공.
 - 시연 DB·실사용 DB 분리(같은 날): `ops/db-targets.json`(active=demo), `scripts/db.mjs`(status·migrate demo|real|all·bootstrap·switch), CI는 active DB ref로 이관·Edge, active 변경 시 Worker `ZENIFIELD_SUPABASE_URL` 갱신. 새 DB 설치 경로(schema.sql + SCHEMA_INCLUDES 표시 + 나머지 이관) PGlite 검증(이관 두 번 실행 통과). 요금제 업그레이드 가이드 추가. 실사용 프로젝트 생성은 승인 대기.
 - 실사용 분리 보류·지금 프로젝트 초기화로 결정(같은 날): ZenField-Live(cyrsdaqqnegrynhwurnb)는 배포 토큰 계정 권한 없음(403). `db.mjs backup`·`reset`(백업 → 한 트랜잭션 삭제, --keep 관리자·--confirm ref) 추가, PGlite 시드 데이터로 삭제 순서 검증. 배치 절차를 초기화 경로로 교체. 실제 초기화는 승인 대기.
 - 초기화→직원 일괄 등록→첫 로그인 활성화 절차 정리(같은 날): 등록은 `provision-accounts --csv --no-password`, 활성화는 이메일 링크 첫 로그인(zf_read가 subject 연결), `db.mjs activation`(현재 40명 중 13명 활성, 읽기만). Supabase SMTP 설정 단계·직원 안내문·막힘 대응표 추가. 한계: 본인 비밀번호 변경 화면 없음.
 - 문서 정리(같은 날): 인프라 6개 → `infrastructure.md`, 테스트 계획 2개 → `testing.md`, 끝난 계획·지난 보고 26개 → `docs/archive/`, 문서 안내 `docs/README.md`. 관리자 화면 `명단 CSV 양식` 내려받기 + 명단 적재가 Excel 따옴표·BOM·예시 줄 처리(1280/390 확인).
-- 실제 백업·초기화·직원 일괄 등록은 이번 작업에서 실행하지 않음(2026-10-30 사용자 결정). 담당 운영자가 `docs/production-rollout.md` 절차와 `node scripts/rollout.mjs`로 진행한다. 현재 운영 DB는 시연 데이터 그대로.
+- 실제 백업·초기화·직원 일괄 등록은 이번 작업에서 실행하지 않음(2026-10-30 사용자 결정). 담당 운영자가 `docs/go-live.md` 절차와 `node scripts/rollout.mjs`로 진행한다. 현재 운영 DB는 시연 데이터 그대로.
 - 설정 화면 다시 짜기·명단 일괄 반영·본인 비밀번호(같은 날): 설정 탭(내 계정·사용자·권한·관리 도메인·브리핑 내용), 사용자 표+찾기·필터, 명단 CSV 올리기 → 미리 보기(새로·바뀜·같음·오류) → n건 반영(saveMany, 한 건씩 서버 검증·감사), 본인 비밀번호(Edge change-own-password, Worker /api/auth/my-password). 1280/820/390 넘침 없음 확인(데모). 운영 Edge 반영은 main 푸시 CI. README에 [실서비스 오픈 절차](go-live.md) 추가.
-- 회사 SMTP 연결 가이드 `docs/smtp-setup.md`(회사 메일 서버/Amazon SES 서울 두 경로, IT 요청문, Supabase 설정·메일 문구·확인·문제 해결). zeniel.co.kr DNS: MX sniper.zeniel.co.kr, SPF -all(IP 11개), DMARC 없음. 당분간 SMTP 없이 accounts.local.csv 비밀번호 1:1 배포 → 직원이 내 계정에서 변경으로 결정.
+- 회사 SMTP 연결 가이드 `docs/go-live.md`(회사 메일 서버/Amazon SES 서울 두 경로, IT 요청문, Supabase 설정·메일 문구·확인·문제 해결). zeniel.co.kr DNS: MX sniper.zeniel.co.kr, SPF -all(IP 11개), DMARC 없음. 당분간 SMTP 없이 accounts.local.csv 비밀번호 1:1 배포 → 직원이 내 계정에서 변경으로 결정.
+- 문서 2차 통합(같은 날): 오픈 체크리스트·배치 매뉴얼·SMTP → `go-live.md`, 사용자·관리자 가이드 → `guide.md`(설정 화면 새 구조 반영), 업무 흐름·데이터 명세·AI 스키마·주간 브리핑·방문·조치 설계 → `spec.md`. 접은 두 DB 분리 절 삭제. README 맨 앞에 실서비스(라이브) 세팅 절과 문서 모음 표. 깨진 상대 링크 0.

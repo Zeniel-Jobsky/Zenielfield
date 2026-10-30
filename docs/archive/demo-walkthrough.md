@@ -52,4 +52,4 @@ ZeniField는 잡매니저의 현장·매장 방문을 기록하고, 관리자가
 
 ---
 
-부록(개발팀용): 변경 근거는 저장소 변경 이력과 `docs/feature-status.md`, `docs/archive/dashboard-plan.md`, `docs/visit-workflow.md`에 있습니다.
+부록(개발팀용): 변경 근거는 저장소 변경 이력과 `docs/feature-status.md`, `docs/archive/dashboard-plan.md`, `docs/spec.md`에 있습니다.

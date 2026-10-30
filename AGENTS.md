@@ -136,12 +136,12 @@
 - **자동 배포 비교 기준:** 직전 푸시가 아니라 마지막으로 성공한 `main` 푸시 워크플로 커밋부터 백엔드 변경을 비교한다. 수동 `dry_run`은 비교 기준에서 제외한다. 실패·취소된 중간 푸시의 이관·Edge 변경이 다음 화면 배포에서 빠지지 않게 한다.
 - **승인:** 운영 DB 변경, Edge 배포, 로그인 계정·비밀번호 발급은 사용자 승인 후에만 한다. 에이전트는 계정 접근 권한을 스스로 만들지 않는다. 발급은 시스템 관리자 화면 또는 `scripts/set-password.mjs`(서버 토큰 보유자)로 한다.
 - **DB (2026-10-30 결정):** 지금 프로젝트(`demo`, nhywssfwtnonytbkufyy)를 백업 후 `node scripts/db.mjs reset`으로 초기화해 실사용으로 쓰고, 시연은 브라우저 데모 모드로 한다. 실사용 DB 분리(`real`)는 보류. 운영 앱이 붙는 DB는 `ops/db-targets.json` `active` 하나이고, 연결 교체는 `node scripts/db.mjs switch <demo|real>` 후 푸시(CI가 이관·Edge·Worker 연결값 반영). 스키마 변경 시 CI는 active DB에만 적용하므로 다른 DB는 `node scripts/db.mjs migrate <demo|real|all>`로 맞추고 `db.mjs status`로 두 DB 모두 미적용 0을 확인한다.
-- **실제 서비스 배치:** 실사용 DB 설치·연결 교체·직원 계정 등록·배포는 [배치 매뉴얼](docs/production-rollout.md)과 실행기 `node scripts/rollout.mjs`(정본 `ops/production-rollout.json`)로만 한다. 에이전트는 자동 단계만 실행하고, 승인 단계는 사람이 준 승인 이름(`--approved-by`)이 있을 때만, 수동 단계는 사람이 끝낸 뒤 `done`으로 기록한다.
+- **실제 서비스 배치:** 실사용 DB 설치·연결 교체·직원 계정 등록·배포는 [배치 매뉴얼](docs/go-live.md)과 실행기 `node scripts/rollout.mjs`(정본 `ops/production-rollout.json`)로만 한다. 에이전트는 자동 단계만 실행하고, 승인 단계는 사람이 준 승인 이름(`--approved-by`)이 있을 때만, 수동 단계는 사람이 끝낸 뒤 `done`으로 기록한다.
 - **기록:** 운영에 반영한 이관·배포·적재는 날짜와 함께 `docs/feature-status.md`(또는 해당 `docs/*.md`)에 남긴다.
 
 ## 운영 DB·배치 명령 (에이전트용)
 
-설명서 [docs/production-rollout.md](docs/production-rollout.md), 절차 정본 `ops/production-rollout.json`, DB 대상 `ops/db-targets.json`. 사용자 요청을 아래 표의 명령으로만 처리한다. 표에 없는 운영 DB 작업(SQL 직접 실행, 대시보드 조작 대행)은 하지 않는다.
+설명서 [docs/go-live.md](docs/go-live.md), 절차 정본 `ops/production-rollout.json`, DB 대상 `ops/db-targets.json`. 사용자 요청을 아래 표의 명령으로만 처리한다. 표에 없는 운영 DB 작업(SQL 직접 실행, 대시보드 조작 대행)은 하지 않는다.
 
 | 사용자 요청 | 에이전트가 실행 | 승인 |
 | --- | --- | --- |

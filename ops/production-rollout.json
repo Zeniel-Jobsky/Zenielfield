@@ -1,6 +1,6 @@
 {
   "name": "ZeniField 실제 서비스 배치 (지금 프로젝트 초기화)",
-  "doc": "docs/production-rollout.md",
+  "doc": "docs/go-live.md",
   "rules": [
     "단계는 순서대로만 실행한다. requires 단계가 끝나지 않았으면 실행하지 않는다.",
     "approval=true 단계는 사람(운영 책임자)의 승인 이름을 --approved-by로 받은 뒤에만 실행한다. 에이전트는 스스로 승인하지 않는다.",
@@ -122,7 +122,7 @@
         "users"
       ],
       "manual": [
-        "안내문(docs/production-rollout.md '직원 안내문')을 사내 메일·메신저로 보낸다.",
+        "안내문(docs/go-live.md '직원 안내문')을 사내 메일·메신저로 보낸다.",
         "직원은 로그인 화면 → 비밀번호가 없거나 잊었어요 → 회사 메일 입력 → 받은 링크를 같은 브라우저에서 연다."
       ]
     },
