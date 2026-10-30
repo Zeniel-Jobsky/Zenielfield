@@ -983,3 +983,7 @@
 .app-shell .ai-brief .brief-row-actions .brief-do-links{display:flex;gap:6px;margin:0}
 .app-shell .ai-brief .brief-row-actions .btn,.app-shell .ai-brief .brief-row-actions .copy-btn{min-height:32px;padding:0 10px;font-size:13px;white-space:nowrap}
 @media(max-width:1023px){.app-shell .ai-brief .ai-brief-focus ol>li{grid-template-columns:minmax(0,1fr)}.app-shell .ai-brief .brief-row-actions{justify-self:start}}
+/* 일정 등록 추천: 제니에리 말풍선(왜 먼저 보면 좋은지, 브리핑과 연결) + 브리핑에서 짚은 곳 꼬리표 */
+.vs-say{margin:0 0 12px;padding:0}
+.vs-say .zeni-working-bubble{font-size:14px;line-height:1.6}
+.visit-suggest .vs-brief{display:inline-block;margin-right:6px;padding:0 6px;border-radius:4px;background:var(--zf-info-soft);color:var(--zf-brand-green);font-style:normal;font-size:12px;font-weight:600}

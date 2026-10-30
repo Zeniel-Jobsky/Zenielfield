@@ -314,3 +314,12 @@ export function AiBriefSettings({c}:{c:Context}){
  const set=(k:keyof BriefFactors,v:boolean)=>{const n={...f,[k]:v};setF(n);try{localStorage.setItem(FACTORS_KEY+':'+c.me.id,JSON.stringify(n))}catch{}};
  return <section className="panel"><PanelTitle title="브리핑에 넣을 내용"/><div className="settings-blocks">{items.map(([k,t,p])=><label key={k} className="checkbox ai-brief-factor"><input type="checkbox" checked={f[k]} onChange={e=>set(k,e.target.checked)}/><div><h3>{t}</h3><p>{p}</p></div></label>)}</div></section>;
 }
+
+// 다른 화면(일정 등록 추천 등)이 운영 현황 브리핑과 이어지게: 이 사용자·직급의 저장된 브리핑에서 짚은 현장·매장 이름(순서 유지)
+export function briefPlaces(userId:string,role:string):string[]{
+ const v=readCache(userId+':'+role);if(!v)return [];const out:string[]=[],add=(n:string)=>{if(n&&!out.includes(n))out.push(n)};
+ for(const d of v.result.directive||[])for(const p of d.say)if(p.tone==='site'||p.tone==='store')add(p.v);
+ for(const f of v.result.focus)for(const p of f.reason)if(p.tone==='site'||p.tone==='store')add(p.v);
+ for(const p of v.result.story)if(p.tone==='site'||p.tone==='store')add(p.v);
+ return out;
+}

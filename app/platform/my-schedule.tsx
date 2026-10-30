@@ -10,6 +10,7 @@ import {targetFacts,attentionOf,staleStores,LEVEL_ORDER,STALE_DAYS} from './stat
 import {levelLabel} from './judgment';
 import {MapPin,Route} from 'lucide-react';
 import {AiMark} from './ai-mark';
+import {briefPlaces} from './ai-brief';
 import {ruleName} from './model';
 
 const DOW=['일','월','화','수','목','금','토'];
@@ -51,7 +52,8 @@ export function VisitSuggest({c,visitor,onPick}:{c:Context;visitor:string;onPick
  const rows=useMemo(()=>{const own=c.targets.filter(t=>t.status==='운영 중'&&t.managerIds.includes(visitor)),pool=own.length?own:c.scope;
   const facts=targetFacts(pool,c.visits,c.actions,c.allMetrics.slots,c.now),att=attentionOf(facts.values()),seen=new Set(att.map(f=>f.target.id));
   const stale=staleStores(pool,c.visits,c.now).filter(x=>!seen.has(x.target.id)&&!facts.get(x.target.id)?.upcoming).map(x=>facts.get(x.target.id)!).filter(Boolean);
-  const base=[...att,...stale],last=(f:typeof base[number])=>f.lastVisit||'';
+  const named=new Set(briefPlaces(c.me.id,c.me.role)),inBrief=(f:typeof att[number])=>named.has(f.target.name);
+  const base0=[...att,...stale],base=[...base0.filter(inBrief),...base0.filter(f=>!inBrief(f))],last=(f:typeof base[number])=>f.lastVisit||'';
   const list=order==='urgent'?base:[...base].sort(order==='stale'?(a,b)=>last(a).localeCompare(last(b)):order==='region'?(a,b)=>(a.target.region||'').localeCompare(b.target.region||'')||a.target.siteName.localeCompare(b.target.siteName):(a,b)=>b.lateActions-a.lateActions);
   const open=new Map<string,typeof c.actions>();for(const x of c.actions){if(x.state==='완료')continue;const id=x.storeId||x.siteId,arr=open.get(id)||[];arr.push(x);open.set(id,arr)}
   return list.slice(0,5).map(f=>{const t=f.target,j=f.judgment&&LEVEL_ORDER[f.judgment.level]?f.judgment:null,days=daysBetween(f.lastVisit,c.now);
@@ -60,11 +62,12 @@ export function VisitSuggest({c,visitor,onPick}:{c:Context;visitor:string;onPick
    const acts=(open.get(t.id)||[]).sort((x,y)=>x.dueDate.localeCompare(y.dueDate)).slice(0,2);
    const check=[j?.assessment||'',...acts.map(x=>`${x.type}: ${x.content.length>40?x.content.slice(0,40)+'…':x.content}(기한 ${mmdd(x.dueDate)}${x.dueDate<c.now?' 지남':''})`)].filter(Boolean);
    const near=list.filter(o=>o.target.id!==t.id&&(o.target.siteId===t.siteId||(!!t.region&&o.target.region===t.region))).slice(0,2).map(o=>o.target.name);
-   return {t,why,interval,check,near}})},[c.targets,c.scope,c.visits,c.actions,c.allMetrics.slots,c.now,visitor,order]);
+   const because=j?`지난 판정이 ${levelLabel(j.level)}이라서요.`:f.delayed.length?'필요 방문 기한이 지나서요.':f.unplanned.length?'필요 방문 일정이 아직 없어서요.':f.lateActions?'기한 넘긴 조치가 남아 있어서요.':days===null?'아직 방문 기록이 없어서요.':`${days}일째 방문하지 않아서요.`;
+   return {t,why,interval,check,near,brief:named.has(t.name),because}})},[c.targets,c.scope,c.visits,c.actions,c.allMetrics.slots,c.now,visitor,order]);
  if(!rows.length)return <p className="form-hint wide">지금 먼저 챙길 담당 현장·매장은 없어요. 빈 날을 골라 일정을 잡아 보세요.</p>;
- return <section className="visit-suggest wide" aria-label="제니에리 방문 추천"><h3><AiMark size={20}/>제니에리가 먼저 가 보면 좋은 곳을 골랐어요</h3><div className="vs-order" role="radiogroup" aria-label="추천 장소 정렬">{SUGGEST_ORDER.map(([k,l])=><button key={k} type="button" role="radio" aria-checked={order===k} className={order===k?'on':''} onClick={()=>setOrder(k)}>{l}</button>)}</div>{order==='region'&&<p className="form-hint">같은 지역끼리 묶었어요. 한 번에 이어서 가 보세요.</p>}<ol>{rows.map(r=><li key={r.t.id}><button type="button" onClick={()=>onPick(r.t,r.check.map(x=>'- '+x).join('\n'))}>
+ return <section className="visit-suggest wide" aria-label="제니에리 방문 추천"><div className="zeni-working vs-say"><span className="zeni-working-character"><AiMark size={44}/><b>제니에리</b></span><p className="zeni-working-bubble" role="note">{(()=>{const top=rows[0],b=rows.filter(r=>r.brief);return b.length?<>브리핑에서 말씀드린 <b>{b[0].t.name}</b>{b.length>1?` 외 ${b.length-1}곳`:''}부터 봐 주시면 더 좋아요. {b[0].because}</>:<><b>{top.t.name}</b>부터 가 보시면 좋아요. {top.because}</>})()} 같은 날 함께 갈 곳도 같이 적어 두었어요.</p></div><h3><AiMark size={20}/>먼저 가 보면 좋은 곳</h3><div className="vs-order" role="radiogroup" aria-label="추천 장소 정렬">{SUGGEST_ORDER.map(([k,l])=><button key={k} type="button" role="radio" aria-checked={order===k} className={order===k?'on':''} onClick={()=>setOrder(k)}>{l}</button>)}</div>{order==='region'&&<p className="form-hint">같은 지역끼리 묶었어요. 한 번에 이어서 가 보세요.</p>}<ol>{rows.map(r=><li key={r.t.id}><button type="button" onClick={()=>onPick(r.t,r.check.map(x=>'- '+x).join('\n'))}>
   <b className={'zf-ent zf-ent-'+r.t.type}>{r.t.type==='store'?r.t.siteName+' › ':''}{r.t.name}</b>
-  {r.why.length>0&&<span className="vs-why">{r.why.join(' · ')}</span>}
+  {(r.brief||r.why.length>0)&&<span className="vs-why">{r.brief&&<em className="vs-brief">브리핑에서 짚은 곳</em>}{r.why.length>0&&<>먼저 볼 이유 · {r.why.join(' · ')}</>}</span>}
   <small>{r.interval}</small>
   {r.check.length>0&&<small className="vs-check">확인할 것 · {r.check.join(' / ')}</small>}
   {r.near.length>0&&<small className="vs-near"><Route size={14} aria-hidden/>같은 날 함께: {r.near.join(', ')}</small>}
