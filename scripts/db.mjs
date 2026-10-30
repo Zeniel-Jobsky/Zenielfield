@@ -5,7 +5,8 @@
 //       node --env-file=.env scripts/db.mjs switch <demo|real> --approved-by <승인자>   운영 앱 연결 교체(ops/db-targets.json active 변경, 푸시하면 CI가 반영)
 //       node --env-file=.env scripts/db.mjs backup [demo|real]           zf_ 테이블 JSON 백업(work/backup/)
 //       node --env-file=.env scripts/db.mjs reset demo --keep <관리자메일,…> --confirm <ref> --approved-by <승인자>   백업 후 업무 데이터·다른 사용자 삭제(스키마·이관 이력 유지)
-//       node scripts/db.mjs ref | url                                    지금 연결된 DB의 ref·주소(CI가 쓴다)
+//       node --env-file=.env scripts/db.mjs activation [demo|real]       첫 로그인(계정 활성화) 현황, 대기 명단 work/activation-pending.csv
+//       node scripts/db.mjs ref | url                                   지금 연결된 DB의 ref·주소(CI가 쓴다)
 //  - 한 Supabase 계정 토큰(SUPABASE_ACCESS_TOKEN)으로 두 프로젝트를 다룬다. 게이트웨이 토큰 검증값은 Edge 코드에 있어 두 DB가 같은 Worker 토큰을 쓴다.
 //  - 운영 DB를 바꾸는 명령(migrate 실제 실행·bootstrap·switch)은 사용자 승인 후 실행한다. 실패하면 멈춘다(DC-HALT).
 import {readFileSync,writeFileSync,readdirSync,mkdirSync} from 'node:fs';
@@ -47,6 +48,14 @@ delete from public.zf_domains;
 commit;`);
  console.log('✓ 초기화 완료. 남은 행:');for(const r of await q(TABLES.map(tb=>`select '${tb}' t,count(*)::int n from public.${tb}`).join(' union all ')))console.log(`${r.t.padEnd(20)} ${r.n}`);
  process.exit(0)}
+
+// 계정 활성화 현황: 첫 로그인(이메일 링크·비밀번호)으로 계정 주체(subject)가 연결된 사용자 수. 미활성 명단은 git 제외 work/activation-pending.csv 에만 쓴다.
+if(cmd==='activation'){const t=target(which||cfg.active),q=supabaseSql({ref:t.ref,token:token()});
+ const rows=await q(`select email,name,role,team,part,(subject is not null) done from public.zf_users where active=1 order by done,team,part,name`);
+ const wait=rows.filter(r=>!r.done);console.log(`${t.label}: 활성 사용자 ${rows.length}명 중 첫 로그인 완료 ${rows.length-wait.length}명 · 대기 ${wait.length}명`);
+ for(const role of ['admin','director','lead','partlead','manager']){const all=rows.filter(r=>r.role===role);if(all.length)console.log(`  ${role.padEnd(9)} ${all.length-all.filter(r=>!r.done).length}/${all.length}`)}
+ mkdirSync('work',{recursive:true});writeFileSync('work/activation-pending.csv','﻿email,name,role,team,part\n'+wait.map(r=>[r.email,r.name,r.role,r.team,r.part].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')+'\n');
+ console.log('대기 명단 → work/activation-pending.csv (git 제외)');process.exit(0)}
 
 if(cmd==='ref'||cmd==='url'){const t=target(cfg.active);console.log(cmd==='ref'?t.ref:t.url);process.exit(0)}
 

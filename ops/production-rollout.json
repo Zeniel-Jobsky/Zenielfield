@@ -53,13 +53,30 @@
       "check": "zf_users = 남길 관리자 수, 나머지 업무 테이블 0"
     },
     {
+      "id": "smtp",
+      "title": "로그인 메일 발송 설정",
+      "why": "첫 로그인은 이메일 링크로 한다. Supabase 기본 메일은 시간당 몇 통으로 막혀 있어 직원 수십 명이 같은 날 활성화하면 메일이 오지 않는다. 회사 SMTP를 연결한다.",
+      "kind": "manual",
+      "approval": true,
+      "requires": [
+        "reset"
+      ],
+      "manual": [
+        "Supabase 대시보드 → Authentication → Emails → SMTP Settings에 회사 메일 서버(또는 SES·SendGrid 등)를 넣는다. 보내는 주소 예: no-reply@zeniel.co.kr",
+        "Authentication → Rate Limits에서 이메일 발송 한도를 직원 수에 맞게 올린다(예: 시간당 100).",
+        "Authentication → Emails → Templates의 Magic Link 메일 제목·본문을 한국어로 바꾼다(제목 예: ZeniField 로그인 링크).",
+        "Authentication → URL Configuration의 Redirect URLs에 https://zenifield.jobsky.workers.dev/auth/callback 이 있는지 본다.",
+        "관리자 본인 메일로 로그인 링크를 한 번 받아 본다."
+      ]
+    },
+    {
       "id": "admin-login",
       "title": "관리자 로그인·관리 도메인 등록",
       "why": "남긴 관리자로 로그인해 현장 등록에 쓸 관리 도메인을 만든다.",
       "kind": "manual",
       "approval": false,
       "requires": [
-        "reset"
+        "smtp"
       ],
       "manual": [
         "https://zenifield.jobsky.workers.dev 에 첫 관리자로 로그인한다.",
@@ -82,18 +99,46 @@
     },
     {
       "id": "users",
-      "title": "직원 등록·비밀번호 발급",
-      "why": "명단을 zf_users에 등록하고(감사 기록) 로그인 비밀번호를 무작위로 만든다. 비밀번호는 work/accounts.local.csv에만 쓴다.",
+      "title": "직원 일괄 등록",
+      "why": "명단을 zf_users에 한 번에 등록한다(감사 기록). 비밀번호는 만들지 않는다. 직원은 첫 로그인 때 이메일 링크로 본인 확인을 하며, 이때 계정이 활성화(로그인 주체 연결)된다.",
       "kind": "auto",
       "approval": true,
       "requires": [
         "users-dry"
       ],
       "run": [
-        "node --env-file=.env scripts/provision-accounts.mjs --csv work/users.csv --admin {admin}",
-        "node --env-file=.env scripts/db.mjs status"
+        "node --env-file=.env scripts/provision-accounts.mjs --csv work/users.csv --no-password --admin {admin}",
+        "node --env-file=.env scripts/db.mjs activation"
       ],
-      "check": "'n개 계정 완료', 실패 줄 없음. accounts.local.csv는 직원에게 따로 전달한 뒤 지운다"
+      "check": "n개 계정 등록, 실패 줄 없음. activation에 대기 n명으로 보임"
+    },
+    {
+      "id": "notify",
+      "title": "첫 로그인 안내",
+      "why": "직원에게 접속 주소와 첫 로그인 방법을 알린다. 비밀번호를 나눠 주지 않는다.",
+      "kind": "manual",
+      "approval": false,
+      "requires": [
+        "users"
+      ],
+      "manual": [
+        "안내문(docs/production-rollout.md '직원 안내문')을 사내 메일·메신저로 보낸다.",
+        "직원은 로그인 화면 → 비밀번호가 없거나 잊었어요 → 회사 메일 입력 → 받은 링크를 같은 브라우저에서 연다."
+      ]
+    },
+    {
+      "id": "activation",
+      "title": "계정 활성화 확인",
+      "why": "첫 로그인을 마친 직원 수와 대기 명단을 본다. 여러 번 실행해도 된다.",
+      "kind": "auto",
+      "approval": false,
+      "requires": [
+        "notify"
+      ],
+      "run": [
+        "node --env-file=.env scripts/db.mjs activation"
+      ],
+      "check": "직급별 완료/전체. 대기 명단 work/activation-pending.csv로 개별 안내"
     },
     {
       "id": "targets",
@@ -102,7 +147,7 @@
       "kind": "manual",
       "approval": false,
       "requires": [
-        "users"
+        "activation"
       ],
       "manual": [
         "관리자·팀장·파트장 계정으로 담당·주기 관리 → 현장 등록 → 산하 매장 등록 → 담당자·주기 지정."

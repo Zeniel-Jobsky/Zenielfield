@@ -23,11 +23,28 @@
 | 1 | 사전 점검 (`preflight`) | 실행기 | – | 설정값·이관 대기·행 수 확인(읽기만) |
 | 2 | 백업 (`backup`) | 실행기 | 필요 | `work/backup/demo-<시각>/`에 zf_ 테이블 9개 JSON |
 | 3 | 초기화 (`reset`) | 실행기 | 필요 | 백업을 한 번 더 받고, 한 트랜잭션으로 업무 데이터와 남길 관리자 밖의 사용자를 삭제 |
-| 4 | 관리자 로그인·도메인 (`admin-login`) | 사람 | – | 관리 도메인 등록 |
-| 5 | 명단 미리 보기 (`users-dry`) | 실행기 | – | `work/users.csv` 형식 확인 |
-| 6 | 직원 등록 (`users`) | 실행기 | 필요 | 등록 + 무작위 비밀번호 |
-| 7 | 현장·매장 (`targets`) | 사람 | – | 현장·매장·담당·주기 |
-| 8 | 운영 확인 (`verify`) | 실행기+사람 | – | 커밋·인증 경계, 직급별 로그인 |
+| 4 | 메일 발송 설정 (`smtp`) | 사람 | 필요 | Supabase Auth에 회사 SMTP, 발송 한도, 한국어 메일, 콜백 주소 |
+| 5 | 관리자 로그인·도메인 (`admin-login`) | 사람 | – | 관리 도메인 등록 |
+| 6 | 명단 미리 보기 (`users-dry`) | 실행기 | – | `work/users.csv` 형식 확인 |
+| 7 | 직원 일괄 등록 (`users`) | 실행기 | 필요 | 명단 전체를 `zf_users`에 등록(비밀번호 없음) |
+| 8 | 첫 로그인 안내 (`notify`) | 사람 | – | 아래 직원 안내문 발송 |
+| 9 | 활성화 확인 (`activation`) | 실행기 | – | 직급별 첫 로그인 완료 수, 대기 명단 |
+| 10 | 현장·매장 (`targets`) | 사람 | – | 현장·매장·담당·주기 |
+| 11 | 운영 확인 (`verify`) | 실행기+사람 | – | 커밋·인증 경계, 직급별 로그인 |
+
+### 한 번에 보기: 초기화 → 일괄 등록 → 첫 로그인 활성화
+
+```bash
+node scripts/rollout.mjs run preflight
+node scripts/rollout.mjs run backup     --approved-by 홍길동
+node scripts/rollout.mjs run reset      --approved-by 홍길동 --admin jobsky@zeniel.co.kr
+node scripts/rollout.mjs done smtp      --approved-by 홍길동          # 대시보드에서 SMTP 설정 후
+node scripts/rollout.mjs done admin-login                             # 로그인·관리 도메인 등록 후
+node scripts/rollout.mjs run users-dry  --admin jobsky@zeniel.co.kr
+node scripts/rollout.mjs run users      --approved-by 홍길동 --admin jobsky@zeniel.co.kr
+node scripts/rollout.mjs done notify                                  # 안내문 발송 후
+node scripts/rollout.mjs run activation                               # 몇 번이든 다시 실행
+```
 
 ```bash
 node scripts/rollout.mjs run backup --approved-by 홍길동
@@ -133,12 +150,40 @@ node scripts/rollout.mjs done admin-password
    - **domains:** 관리 도메인 ID를 `;`로 구분해 쓴다. 관리자·사업부장은 비운다.
    - **id:** 바꾸지 않는 사번 기반 값을 쓴다(예: `u-20231234`). 담당·방문 기록이 id에 붙는다.
 2. `users-dry`로 미리 본다. 형식이 틀린 줄이 하나라도 있으면 아무것도 쓰지 않고 멈춘다.
-3. `users`를 실행한다(`--admin`은 실사용 DB에 한 번 이상 로그인한 관리자).
-   - 등록은 그 관리자 이름으로 감사 기록에 남는다.
-   - 비밀번호는 무작위 14자로 만들어 `work/accounts.local.csv`에만 쓴다.
-4. 비밀번호는 직원에게 따로(대면 또는 사내 메신저 1:1) 전한다. 첫 로그인 뒤 바꾸게 안내하고, 전달이 끝나면 파일을 지운다.
-5. 이후 한 명씩 추가하거나 재설정할 때는 관리자 화면 `설정 → 사용자·비밀번호`를 쓴다.
-6. 퇴사·이동은 담당을 넘긴 뒤 비활성화한다. 삭제하지 않는다.
+3. `users`를 실행해 일괄 등록한다(`--admin`은 로그인한 적 있는 관리자).
+   - 명단 전체를 `zf_users`에 넣는다. 등록은 그 관리자 이름으로 감사 기록에 남는다.
+   - 기본은 `--no-password`다. 비밀번호를 만들지 않고 나눠 주지도 않는다.
+   - 같은 명단으로 다시 실행하면 이미 있는 사람은 수정만 한다.
+4. **첫 로그인 = 계정 활성화**
+   - 직원이 로그인 화면에서 `비밀번호가 없거나 잊었어요`를 눌러 회사 메일을 넣고, 받은 링크를 같은 브라우저에서 연다.
+   - 서버는 등록된 활성 메일에만 링크를 보낸다. 등록 여부는 화면에 드러내지 않는다.
+   - 링크로 들어오면 그 계정에 로그인 주체(`subject`)가 연결되고, 그때부터 활성 사용자가 된다(첫 조회 `zf_read`가 subject 없는 같은 메일 행에 한 번 연결).
+5. `node --env-file=.env scripts/db.mjs activation`으로 직급별 완료/전체 수를 본다. 대기 명단은 `work/activation-pending.csv`(git 제외)에 써서 개별 안내에 쓴다.
+6. **비밀번호를 원하면**
+   - 관리자 화면 `설정 → 로그인 비밀번호 발급·재설정`에서 사람마다 정한다.
+   - 비밀번호를 한 번에 만들려면 `users`를 `--no-password` 없이 실행한다. 그러면 무작위 비밀번호가 `work/accounts.local.csv`에 써지고, 직원에게 따로 전한 뒤 파일을 지운다.
+7. 퇴사·이동은 담당을 넘긴 뒤 비활성화한다. 삭제하지 않는다.
+
+### 직원 안내문 (복사해서 보내기)
+
+> ZeniField 현장 운영 앱을 오늘부터 씁니다.
+> 접속: https://zenifield.jobsky.workers.dev
+> 처음 로그인: 로그인 화면에서 `비밀번호가 없거나 잊었어요` → 회사 메일 입력 → 메일로 온 로그인 링크를 같은 브라우저에서 열어 주세요. 링크는 한 번만 쓸 수 있고 잠시 뒤 만료됩니다.
+> 메일이 안 오면 스팸함을 보고, 그래도 없으면 관리자에게 알려 주세요.
+
+### 첫 로그인에서 막히는 경우
+
+| 증상 | 원인 | 조치 |
+| --- | --- | --- |
+| 메일이 안 옴 | 미등록·비활성 메일, SMTP 미설정, 발송 한도 초과 | `activation` 대기 명단에 있는지 확인 → `smtp` 단계 설정·Rate Limits 확인 |
+| 링크를 열었는데 로그인 화면으로 돌아옴 | 다른 브라우저(메일 앱 내장 브라우저)에서 열었음 | 링크 요청한 브라우저에 주소를 붙여 넣어 열기 |
+| "잠시 후 다시 요청" | 같은 메일로 짧은 시간에 여러 번 요청 | 1분 뒤 다시 |
+| 로그인됐는데 화면이 비어 있음 | 담당 현장·매장 배정 전 | `targets` 단계에서 담당 지정 |
+
+### 알려진 한계
+
+- **본인 비밀번호 변경 화면이 없다.** 링크로만 로그인하는 직원은 매번 링크를 받는다. 비밀번호를 원하면 관리자가 정해 준다. 본인 변경 화면은 다음 이슈로 둔다.
+- **현장·매장 일괄 등록 도구가 없다.** 지금은 화면에서 한 건씩 등록한다.
 
 ## 요금제 업그레이드
 

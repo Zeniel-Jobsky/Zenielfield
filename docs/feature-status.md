@@ -283,3 +283,4 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - 운영 배포 복구: production 환경 `SUPABASE_ACCESS_TOKEN` 재발급(03:56) 후 이관·Edge·Worker 성공.
 - 시연 DB·실사용 DB 분리(같은 날): `ops/db-targets.json`(active=demo), `scripts/db.mjs`(status·migrate demo|real|all·bootstrap·switch), CI는 active DB ref로 이관·Edge, active 변경 시 Worker `ZENIFIELD_SUPABASE_URL` 갱신. 새 DB 설치 경로(schema.sql + SCHEMA_INCLUDES 표시 + 나머지 이관) PGlite 검증(이관 두 번 실행 통과). 요금제 업그레이드 가이드 추가. 실사용 프로젝트 생성은 승인 대기.
 - 실사용 분리 보류·지금 프로젝트 초기화로 결정(같은 날): ZenField-Live(cyrsdaqqnegrynhwurnb)는 배포 토큰 계정 권한 없음(403). `db.mjs backup`·`reset`(백업 → 한 트랜잭션 삭제, --keep 관리자·--confirm ref) 추가, PGlite 시드 데이터로 삭제 순서 검증. 배치 절차를 초기화 경로로 교체. 실제 초기화는 승인 대기.
+- 초기화→직원 일괄 등록→첫 로그인 활성화 절차 정리(같은 날): 등록은 `provision-accounts --csv --no-password`, 활성화는 이메일 링크 첫 로그인(zf_read가 subject 연결), `db.mjs activation`(현재 40명 중 13명 활성, 읽기만). Supabase SMTP 설정 단계·직원 안내문·막힘 대응표 추가. 한계: 본인 비밀번호 변경 화면 없음.

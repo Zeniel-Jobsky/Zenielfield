@@ -150,7 +150,8 @@
 | 다른 DB 스키마 맞추기 | `db.mjs migrate <demo\|real\|all> --dry-run` 보고 → 승인 후 같은 명령에 `--approved-by` | 필요 |
 | 백업 | `node scripts/rollout.mjs run backup --approved-by <이름>` | 필요 |
 | 초기화 | `node scripts/rollout.mjs run reset --approved-by <이름> --admin <남길 관리자>` | 필요 |
-| 직원 등록 | `work/users.csv` 확인 → `run users-dry --admin <관리자>` 결과 보고 → 승인 후 `run users --approved-by <이름> --admin <관리자>` | 필요 |
+| 직원 일괄 등록 | `work/users.csv` 확인 → `run users-dry --admin <관리자>` 결과 보고 → 승인 후 `run users --approved-by <이름> --admin <관리자>`(비밀번호 없음, 첫 로그인 링크로 활성화) | 필요 |
+| 계정 활성화 현황 | `node --env-file=.env scripts/db.mjs activation`(직급별 완료/전체, 대기 명단은 work/만) | – |
 | 사람이 하는 단계 끝남 | `node scripts/rollout.mjs done <단계>` | – |
 
 - **승인:** 승인은 사용자가 대화에서 승인자 이름과 대상을 직접 말한 경우만 인정한다. 예: "백업·초기화 승인, 승인자 홍길동, 남길 관리자 jobsky@zeniel.co.kr". 이름을 지어내거나 앞선 승인을 다른 단계로 넓히지 않는다.
