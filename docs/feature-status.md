@@ -276,3 +276,8 @@ Cloudflare 배포 토큰은 GitHub Actions의 암호화된 `CLOUDFLARE_API_TOKEN
 - AGENTS.md 41.6KB→19.6KB: 현재 디자인 결정을 주제별 현재 기준만으로
 - PROJECT_RULE.md 29KB→17KB: DC-DESIGN-* 23행 → 11행(SHELL·VISUAL·ZENIERI·BRIEF·DASHBOARD·SCHEDULE·RECORDS·ACTIONS·DETAIL·CHECK)
 - 디자인 지침 117KB→73KB: 옛 6.1·9-B 변경 기록·10-A·옛 차트 검수·날짜별 추가 블록 → `docs/design-history.md`(원문 보관), 6.1·9-B 현재 기준으로 다시 씀
+
+## 실제 서비스 배치 준비 (2026-10-30)
+- 배치 매뉴얼 `docs/production-rollout.md` + 실행기 `scripts/rollout.mjs` + 정본 `ops/production-rollout.json` 추가. 직원 명단 CSV 등록(`provision-accounts.mjs --csv`, 양식 `ops/users.template.csv`).
+- 사전 점검(읽기만) 실행: 이관 미적용 0, 데모 시드 외 출처 없는 방문 10,013건이 데모 현장에 연결 → 데모 정리만으로는 초기화 불가. 초기화 방식(새 프로젝트 A 권장 / 비우기 B) 결정 대기.
+- 운영 배포 복구: production 환경 `SUPABASE_ACCESS_TOKEN` 재발급(03:56) 후 이관·Edge·Worker 성공.

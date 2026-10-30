@@ -1,12 +1,15 @@
 // 권한별 시험 계정 발급: zeniel.co.kr 주소로 관리자·사업부장·팀장·파트장·잡매니저 계정을 등록하고 비밀번호를 정한다.
-// 사용: node --env-file=.env scripts/provision-accounts.mjs [--admin jobsky@zeniel.co.kr] [--dry-run]
+// 사용: node --env-file=.env scripts/provision-accounts.mjs [--admin jobsky@zeniel.co.kr] [--dry-run] [--csv 명단.csv] [--no-password]
+//  - --csv: 실제 직원 명단(ops/users.template.csv 형식: id,email,name,role,team,part,domains[;구분])으로 등록한다. 시험 계정·잡매니저 이메일 바꾸기는 하지 않는다.
+//  - --no-password: 사용자 등록만 하고 비밀번호는 만들지 않는다(관리자 화면에서 따로 발급).
 //  - 사용자 등록은 기존 관리자 이름으로 zf_write(감사 기록 남음), 비밀번호는 Edge operator-set-password 로 한다.
 //  - 잡매니저는 가상 담당자(jm-001 등)의 이메일만 바꿔 배정된 현장·방문을 그대로 쓴다.
 //  - 비밀번호는 무작위로 만들고 git 제외 파일 work/accounts.local.csv 에만 쓴다(화면·커밋에 남기지 않음). 다시 실행하면 비밀번호를 새로 만든다.
 import {supabaseSql} from './lib/supabase-sql.mjs';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {randomInt} from 'node:crypto';
-const args=process.argv.slice(2),dry=args.includes('--dry-run'),ai=args.indexOf('--admin');
+import {readFileSync} from 'node:fs';
+const args=process.argv.slice(2),dry=args.includes('--dry-run'),ai=args.indexOf('--admin'),ci=args.indexOf('--csv'),noPw=args.includes('--no-password');
 const adminEmail=(ai>=0?args[ai+1]:'')||'jobsky@zeniel.co.kr';
 const project=process.env.SUPABASE_PROJECT_REF||'nhywssfwtnonytbkufyy',access=process.env.SUPABASE_ACCESS_TOKEN,url=process.env.ZENIFIELD_SUPABASE_URL,gate=process.env.ZENIFIELD_GATEWAY_TOKEN;
 if(!access||!url||!gate){console.error('.env 에 SUPABASE_ACCESS_TOKEN, ZENIFIELD_SUPABASE_URL, ZENIFIELD_GATEWAY_TOKEN 이 필요합니다.');process.exit(1)}
@@ -24,6 +27,12 @@ const accounts=[
 ];
 // 잡매니저: 기존 가상 담당자 이메일을 바꿔 배정을 이어받는다
 const managers=[['jm-001@example.test',`zf.jm001@${D}`],['jm-018@example.test',`zf.jm018@${D}`],['jm-021@example.test',`zf.jm021@${D}`]];
+// 실제 명단: 첫 줄 머리글, 빈 줄·#줄 무시. 역할·이메일 형식이 틀리면 아무것도 쓰지 않고 멈춘다.
+const ROLES=['admin','director','lead','partlead','manager'];
+const fromCsv=ci>=0?readFileSync(args[ci+1],'utf8').replace(/^﻿/,'').split(/\r?\n/).filter(l=>l.trim()&&!l.startsWith('#')).slice(1).map((l,i)=>{const [id,email,name,role,team,part,doms='']=l.split(',').map(v=>v.trim());
+ if(!id||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email||'')||!name||!ROLES.includes(role)||!team||!part){console.error(`명단 ${i+2}번째 줄 형식 오류: ${l}`);process.exit(1)}
+ return {id,email,name,role,team,part,domains:doms?doms.split(';').map(v=>v.trim()).filter(Boolean):[]}}):null;
+if(fromCsv){accounts.splice(0,accounts.length,...fromCsv);managers.length=0}
 const sqlq=supabaseSql({ref:project,token:access});
 const lit=(s)=>"'"+String(s).replace(/'/g,"''")+"'";
 const pw=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';let s='';for(let i=0;i<14;i++)s+=a[randomInt(a.length)];return s.slice(0,4)+'-'+s.slice(4,9)+'-'+s.slice(9)+randomInt(10)};
@@ -37,7 +46,7 @@ for(const a of accounts){await write(a);rows.push(a)}
 for(const [from,to] of managers){const [u]=await sqlq(`select id,name,role,team,part,domains from public.zf_users where email in (${lit(from)},${lit(to)}) limit 1`);
  if(!u){console.warn(`건너뜀: ${from} 사용자가 운영 DB에 없습니다.`);continue}
  const item={id:u.id,email:to,name:u.name,role:u.role,team:u.team,part:u.part,domains:u.domains||[]};await write(item);rows.push(item)}
-if(dry){console.log(`[dry-run] ${rows.length}개 계정, 비밀번호는 만들지 않음`);process.exit(0)}
+if(dry||noPw){console.log(`${dry?'[dry-run] ':''}${rows.length}개 계정${dry?'':' 등록'}, 비밀번호는 만들지 않음`);process.exit(0)}
 const out=[];
 for(const r of rows){const password=pw();const res=await fetch(url+'/functions/v1/zenifield-cloudflare',{method:'POST',headers:{'Content-Type':'application/json','x-zenifield-gateway':gate},body:JSON.stringify({operation:'operator-set-password',email:r.email,password})});const d=await res.json().catch(()=>({}));
  if(!res.ok){console.error(`${r.email}: 비밀번호 설정 실패 ${res.status} ${d.error||''}`);continue}

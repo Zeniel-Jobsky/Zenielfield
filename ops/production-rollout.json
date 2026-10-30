@@ -1,0 +1,185 @@
+{
+  "name": "ZeniField 실제 서비스 배치",
+  "doc": "docs/production-rollout.md",
+  "rules": [
+    "단계는 순서대로만 실행한다. requires 단계가 끝나지 않았으면 실행하지 않는다.",
+    "approval=true 단계는 사람(운영 책임자)의 승인 이름을 --approved-by로 받은 뒤에만 실행한다. 에이전트는 스스로 승인하지 않는다.",
+    "kind=manual 단계는 사람이 화면에서 하고 결과를 확인한 뒤 done으로 기록한다. 에이전트는 대신 하지 않는다.",
+    "오류가 나면 멈추고 출력 그대로 보고한다(DC-HALT). 우회하거나 다음 단계로 넘어가지 않는다.",
+    "비밀번호·토큰 값은 출력·로그·커밋·대화에 남기지 않는다."
+  ],
+  "steps": [
+    {
+      "id": "preflight",
+      "title": "사전 점검",
+      "why": "필요한 설정값이 있는지, 이관 대기 목록이 무엇인지 바꾸지 않고 확인한다.",
+      "kind": "auto",
+      "approval": false,
+      "requires": [],
+      "run": [
+        "builtin:env",
+        "node --env-file=.env scripts/migrate.mjs --dry-run",
+        "builtin:counts"
+      ],
+      "check": "env 모두 있음, 이관 대기 목록 확인, 테이블별 행 수 출력"
+    },
+    {
+      "id": "backup",
+      "title": "운영 DB 백업",
+      "why": "정리·등록 전에 모든 zf_ 테이블을 JSON으로 받아 둔다. 되돌릴 근거다.",
+      "kind": "auto",
+      "approval": true,
+      "requires": [
+        "preflight"
+      ],
+      "run": [
+        "builtin:backup"
+      ],
+      "check": "work/backup/<시각>/ 에 테이블마다 파일, 행 수가 preflight와 같음"
+    },
+    {
+      "id": "migrate",
+      "title": "스키마 이관 최신화",
+      "why": "운영 DB를 저장소의 이관과 같게 맞춘다. 이미 적용된 파일은 다시 실행하지 않는다.",
+      "kind": "auto",
+      "approval": true,
+      "requires": [
+        "backup"
+      ],
+      "run": [
+        "node --env-file=.env scripts/migrate.mjs"
+      ],
+      "check": "'미적용 0' 또는 적용 목록 출력, 오류 없음"
+    },
+    {
+      "id": "leftover-decision",
+      "title": "초기화 방식 결정",
+      "why": "운영 DB에는 데모 시드 말고도 출처 없는 방문 1만여 건이 데모 현장에 붙어 있어(2026-10-30 확인 10,013건) 데모 시드만 지우면 외래키로 실패한다. 규칙상 자동 삭제하지 않으므로(DC-DATA) 운영 책임자가 방식을 정한다.",
+      "kind": "manual",
+      "approval": true,
+      "requires": [
+        "migrate"
+      ],
+      "manual": [
+        "선택 A(권장): 새 Supabase 프로젝트를 만들어 빈 상태로 시작한다. 지금 프로젝트는 데모·시연용으로 그대로 둔다. docs/production-rollout.md 선택 A 절차를 따른 뒤 preflight부터 다시 실행한다.",
+        "선택 B: 지금 프로젝트를 비운다. 출처 없는 방문·조치와 zf.* 시험 계정을 지우는 이관 파일(supabase/migrations/<날짜>_reset_test_data.sql)을 PR로 검토·승인받아 migrate 단계로 적용한 뒤 purge-demo를 실행한다. SQL 편집기에서 손으로 지우지 않는다.",
+        "결정과 이유를 docs/feature-status.md에 날짜와 함께 기록한다."
+      ]
+    },
+    {
+      "id": "purge-demo",
+      "title": "데모 시드 정리",
+      "why": "data.seed=demo-seed 데모 행을 지운다(선택 B에서만, 출처 없는 방문을 먼저 정리한 뒤). 선택 A면 건너뛰고 done으로 기록하지 않는다 — 새 프로젝트에는 데모가 없다.",
+      "kind": "auto",
+      "approval": true,
+      "requires": [
+        "leftover-decision"
+      ],
+      "run": [
+        "node scripts/seed.mjs build",
+        "node --env-file=.env scripts/seed.mjs purge",
+        "builtin:counts"
+      ],
+      "check": "남은 행 수 출력. 남은 행이 무엇인지 다음 단계에서 결정"
+    },
+    {
+      "id": "domains",
+      "title": "관리 도메인 등록",
+      "why": "현장 등록에 활성 도메인이 필요하다.",
+      "kind": "manual",
+      "approval": false,
+      "requires": [
+        "purge-demo"
+      ],
+      "manual": [
+        "시스템 관리자로 로그인 → 설정 → 관리 도메인에서 사업 도메인을 등록한다.",
+        "도메인 ID를 users.csv domains 칸에 쓴다."
+      ]
+    },
+    {
+      "id": "users-dry",
+      "title": "직원 명단 미리 보기",
+      "why": "work/users.csv(ops/users.template.csv 형식)의 형식·대상만 확인하고 쓰지 않는다.",
+      "kind": "auto",
+      "approval": false,
+      "requires": [
+        "domains"
+      ],
+      "run": [
+        "node --env-file=.env scripts/provision-accounts.mjs --csv work/users.csv --dry-run --admin {admin}"
+      ],
+      "check": "줄마다 '[dry-run] 등록/수정 이메일 (역할)', 형식 오류 0"
+    },
+    {
+      "id": "users",
+      "title": "직원 등록·비밀번호 발급",
+      "why": "명단을 zf_users에 등록하고(감사 기록) 로그인 비밀번호를 무작위로 만든다. 비밀번호는 work/accounts.local.csv에만 쓴다.",
+      "kind": "auto",
+      "approval": true,
+      "requires": [
+        "users-dry"
+      ],
+      "run": [
+        "node --env-file=.env scripts/provision-accounts.mjs --csv work/users.csv --admin {admin}",
+        "builtin:counts"
+      ],
+      "check": "'n개 계정 완료', 실패 줄 없음. accounts.local.csv는 직원에게 따로 전달 후 지운다"
+    },
+    {
+      "id": "targets",
+      "title": "현장·매장·담당·주기 등록",
+      "why": "방문 대상과 담당자·관리 주기를 정한다. 일괄 적재 도구는 아직 없다.",
+      "kind": "manual",
+      "approval": false,
+      "requires": [
+        "users"
+      ],
+      "manual": [
+        "팀장·파트장 또는 관리자 계정으로 담당·주기 관리 → 현장 등록 → 산하 매장 등록 → 담당자·주기 지정.",
+        "수가 많으면 일괄 적재 도구 개발을 별도 이슈로 요청한다(docs/next-issues-plan.md)."
+      ]
+    },
+    {
+      "id": "secrets",
+      "title": "운영 비밀값 확인",
+      "why": "AI·인증이 운영 값으로 설정됐는지 확인한다. 값은 보지 않고 있는지만 본다.",
+      "kind": "manual",
+      "approval": false,
+      "requires": [
+        "targets"
+      ],
+      "manual": [
+        "Cloudflare 대시보드 → Workers → zenifield → Settings → Variables and Secrets에 ZENIFIELD_SUPABASE_URL, ZENIFIELD_GATEWAY_TOKEN, OPENAI_API_KEY, OPENAI_MODEL, ZENIFIELD_AUTH_PROVIDER=supabase-email 이 있는지 본다.",
+        "OpenAI 결제 한도(월 사용 한도)를 정한다. 비용은 docs/production-rollout.md '비용' 절 참고."
+      ]
+    },
+    {
+      "id": "deploy",
+      "title": "화면 배포",
+      "why": "main의 검증된 커밋을 GitHub Actions로 다시 배포한다.",
+      "kind": "auto",
+      "approval": true,
+      "requires": [
+        "secrets"
+      ],
+      "run": [
+        "npm run ci:deploy"
+      ],
+      "check": "Actions supabase-deploy 성공"
+    },
+    {
+      "id": "verify",
+      "title": "운영 확인",
+      "why": "공개 주소의 커밋·인증 경계를 확인하고, 직급별로 로그인해 범위를 본다.",
+      "kind": "auto",
+      "approval": false,
+      "requires": [
+        "deploy"
+      ],
+      "run": [
+        "node scripts/check-cloudflare-deployment.mjs https://zenifield.jobsky.workers.dev {sha}"
+      ],
+      "check": "커밋 일치·인증 경계 통과. 이어서 직급별 계정으로 로그인해 운영 현황·방문 일정이 보는 범위만 보이는지 사람이 확인"
+    }
+  ]
+}
