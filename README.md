@@ -56,7 +56,7 @@
 ## 목차
 
 - [화면으로 보기](#화면으로-보기) · [핵심 기능](#핵심-기능) · [시작하기](#시작하기) · [메뉴별 사용 안내](#메뉴별-사용-안내) · [개발자 안내](#개발자-안내) · [문서 모음](#문서-모음)
-- [🚀 실서비스(라이브) 세팅](#-실서비스라이브-세팅) · [참고: 지난 기록](#참고-지난-기록)
+- [개발자 안내 › 🚀 실서비스(라이브) 세팅](#-실서비스라이브-세팅) · [참고: 지난 기록](#참고-지난-기록)
 
 ## 화면으로 보기
 
@@ -169,21 +169,9 @@ pnpm dev        # http://127.0.0.1:5173  (데모: /?mode=demo)
 - **환경변수:** [.env.example](.env.example) — 운영 연결(`ZENIFIELD_SUPABASE_URL`·`ZENIFIELD_GATEWAY_TOKEN`), 인증(`ZENIFIELD_AUTH_PROVIDER`), AI(`OPENAI_API_KEY`·`OPENAI_MODEL`). 비밀값은 문서·커밋에 남기지 않아요.
 - **배포 순서:** DB 이관 → 서버 검증 로직 번들 → Edge 함수 → 화면. 운영 DB·Edge·계정은 승인 후에만([운영 인계](docs/infrastructure.md)).
 
-## 문서 모음
+### 🚀 실서비스(라이브) 세팅
 
-문서 전체 안내는 [docs/README.md](docs/README.md)에 있어요.
-
-| 문서 | 내용 |
-| --- | --- |
-| [실서비스 오픈 가이드](docs/go-live.md) | 오픈 체크리스트, DB 초기화, 직원 일괄 등록, 비밀번호·메일 로그인, 회사 SMTP, 비용, 되돌리기 |
-| [사용 안내](docs/guide.md) | 사용자·관리자 화면 사용법 |
-| [업무·데이터 명세](docs/spec.md) | 방문 흐름, 데이터 계약, AI 간편 등록, 주간 브리핑, 방문·조치 설계 |
-| [설계 근거](docs/evidence.md) · [디자인 지침](docs/DESIGN-zenielfield.md) | 논문 근거(AI 도입·사용, 문구, 화면·차트)와 화면 기준 |
-| [인프라 구성](docs/infrastructure.md) · [로컬 개발](docs/local-development.md) · [테스트](docs/testing.md) | 개발·운영 구성 |
-| [기능 현황](docs/feature-status.md) · [남은 이슈](docs/next-issues-plan.md) | 진행 기록 |
-| [archive/](docs/archive/) | 끝난 계획·지난 보고·이전 README |
-
-## 🚀 실서비스(라이브) 세팅
+개발자(운영 담당)가 실제 서비스를 여는 일까지 맡아요. 코드를 고친 뒤 배포만으로 끝나지 않고, 아래 순서로 운영 DB와 계정을 준비해야 직원이 쓸 수 있어요.
 
 실제 직원이 쓰게 여는 절차는 **[실서비스 오픈 가이드](docs/go-live.md)** 하나에 모았어요. 순서만 보면 이래요.
 
@@ -198,6 +186,20 @@ pnpm dev        # http://127.0.0.1:5173  (데모: /?mode=demo)
 
 - 에이전트(GPT·Codex·Claude)에게 맡길 때는 [AGENTS.md "운영 DB·배치 명령"](AGENTS.md) 표의 명령과 승인 문장만 써요.
 - 운영 DB를 바꾸는 단계(백업·초기화·직원 등록)는 승인자 이름(`--approved-by`)이 있어야 실행돼요.
+
+## 문서 모음
+
+문서 전체 안내는 [docs/README.md](docs/README.md)에 있어요.
+
+| 문서 | 내용 |
+| --- | --- |
+| [실서비스 오픈 가이드](docs/go-live.md) | 오픈 체크리스트, DB 초기화, 직원 일괄 등록, 비밀번호·메일 로그인, 회사 SMTP, 비용, 되돌리기 |
+| [사용 안내](docs/guide.md) | 사용자·관리자 화면 사용법 |
+| [업무·데이터 명세](docs/spec.md) | 방문 흐름, 데이터 계약, AI 간편 등록, 주간 브리핑, 방문·조치 설계 |
+| [설계 근거](docs/evidence.md) · [디자인 지침](docs/DESIGN-zenielfield.md) | 논문 근거(AI 도입·사용, 문구, 화면·차트)와 화면 기준 |
+| [인프라 구성](docs/infrastructure.md) · [로컬 개발](docs/local-development.md) · [테스트](docs/testing.md) | 개발·운영 구성 |
+| [기능 현황](docs/feature-status.md) · [남은 이슈](docs/next-issues-plan.md) | 진행 기록 |
+| [archive/](docs/archive/) | 끝난 계획·지난 보고·이전 README |
 
 ## 참고: 지난 기록
 
