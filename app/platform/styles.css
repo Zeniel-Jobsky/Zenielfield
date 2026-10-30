@@ -1039,3 +1039,7 @@
 .ai-brief-out p.route-legend{font-size:12px;line-height:1.5;max-width:none}
 .ai-brief-out p.route-why{margin:0 0 16px;font-size:15px;line-height:1.7;max-width:var(--zf-read-measure)}.route-why .zf-ent-link{white-space:normal;display:inline;font-weight:600}
 .route-why .copy-button{display:inline-flex;vertical-align:middle;margin-left:4px}
+/* 제니에리 통통: 페이지 정리·브리핑 머리와 말풍선의 제니에리가 가끔(약 7초마다) 두 번 튀어 오른다. 움직임 줄이기 설정이면 멈춤 */
+@keyframes zeni-hop{0%,86%,100%{transform:translateY(0) scale(1)}89%{transform:translateY(-5px) scale(1.04,.97)}92%{transform:translateY(0) scale(1.03,.96)}95%{transform:translateY(-2px)}98%{transform:translateY(0)}}
+.panel-heading h2 .zf-ai-mark,.zenieri-mark .zf-ai-mark{animation:zeni-hop 7s ease-in-out 1.2s infinite;transform-origin:50% 100%}
+@media(prefers-reduced-motion:reduce){.panel-heading h2 .zf-ai-mark,.zenieri-mark .zf-ai-mark{animation:none}}
